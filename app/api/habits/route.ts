@@ -1,34 +1,63 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+
+import { prisma } from "@/lib/prisma"
+
 import type { Habit } from "@/lib/types"
 
 export async function GET() {
   try {
-    const habits = await sql<Habit[]>`
-      SELECT * FROM habits ORDER BY created_at DESC
-    `
+    const habits =
+      await prisma.habit.findMany({
+        orderBy: {
+          createdAt: 'asc'
+        }
+      });
 
     return NextResponse.json(habits)
   } catch (error) {
-    console.error("Error fetching habits:", error)
-    return NextResponse.json({ error: "Failed to fetch habits" }, { status: 500 })
+    if (error instanceof Error) {
+      console.error("Error fetching habits:", error)
+      return NextResponse.json({
+        error: "Failed to fetch habits"
+      }, { status: 500 })
+    }
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, emoji, goal, motivation, start_date, reminder, frequency, color } = body
+    const {
+      name,
+      emoji,
+      goal,
+      motivation,
+      start_date,
+      reminder, 
+      frequency,
+      color
+    } = body
 
-    const [habit] = await sql<Habit[]>`
-      INSERT INTO habits (name, emoji, goal, motivation, start_date, reminder, frequency, color)
-      VALUES (${name}, ${emoji}, ${goal}, ${motivation}, ${start_date}, ${reminder}, ${JSON.stringify(frequency)}, ${color})
-      RETURNING *
-    `
+    const newhHabit = await prisma.habit.create({
+      data: {
+        name,
+        emoji,
+        goal,
+        motivation,
+        startDate: new Date(start_date),
+        reminder,
+        frequency, // Json
+        color,
+      },
+    })
 
-    return NextResponse.json(habit)
+    return NextResponse.json(newhHabit)
   } catch (error) {
-    console.error("Error creating habit:", error)
-    return NextResponse.json({ error: "Failed to create habit" }, { status: 500 })
+    if (error instanceof Error) {
+      console.error("Error create habits:", error)
+      return NextResponse.json({
+        error: "Failed to create new habit"
+      }, { status: 500 })
+    }
   }
 }

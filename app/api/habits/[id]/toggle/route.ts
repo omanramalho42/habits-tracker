@@ -1,38 +1,57 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { getTodayString } from "@/lib/habit-utils"
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
   try {
     const { id } = await params
+
     const body = await request.json()
     const date = body.date || getTodayString()
+    
+    const normalizedDate = new Date(date)
+    normalizedDate.setHours(0, 0, 0, 0)
 
-    // Check if already completed
-    const existing = await sql`
-      SELECT id FROM habit_completions 
-      WHERE habit_id = ${id} AND completed_date = ${date}
-      LIMIT 1
-    `
+    const existing = await prisma.habitCompletion.findFirst({
+      where: {
+        habitId: Number(id),
+        completedDate: new Date(date)
+      }, select: {
+        id: true
+      }
+    })
 
-    if (existing.length > 0) {
-      // Remove completion
-      await sql`
-        DELETE FROM habit_completions 
-        WHERE habit_id = ${id} AND completed_date = ${date}
-      `
-      return NextResponse.json({ completed: false })
-    } else {
-      // Add completion - use ON CONFLICT to handle duplicate key errors
-      await sql`
-        INSERT INTO habit_completions (habit_id, completed_date)
-        VALUES (${id}, ${date})
-        ON CONFLICT (habit_id, completed_date) DO NOTHING
-      `
-      return NextResponse.json({ completed: true })
+    console.log(existing, "existing")
+
+    if (existing) {
+      // 2️⃣ Remove completion
+      await prisma.habitCompletion.delete({
+        where: {
+          id: Number(existing.id),
+          habitId: Number(id),
+          completedDate: new Date(date)
+        },
+      })
+
+      return NextResponse.json({
+        completed: false
+      })
     }
+
+    // 3️⃣ Cria completion
+    const newHabit = await prisma.habitCompletion.create({
+      data: {
+        habitId: Number(id),
+        completedDate: new Date(date),
+      },
+    })
+
+    console.log("created completion", newHabit)
+    return NextResponse.json(newHabit)
   } catch (error) {
-    console.error("[v0] Error toggling habit completion:", error)
-    return NextResponse.json({ error: "Failed to toggle habit" }, { status: 500 })
+    if(error instanceof Error) {
+      console.error("[v0] Error toggling habit completion:", error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
   }
 }

@@ -49,15 +49,17 @@ model HabitSchedule {
 }
 
 model HabitCompletion {
-  id            Int       @id @default(autoincrement())
-  habitId       Int       @map("habit_id")
-  completedDate DateTime  @map("completed_date")
-  createdAt     DateTime  @default(now()) @map("created_at")
+  id             Int      @id @default(autoincrement())
+  habit_id       Int
+  completed_date DateTime
+  created_at     DateTime @default(now())
 
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habit_id], references: [id], onDelete: Cascade)
 
+  @@unique([habit_id, completed_date])
   @@map("habit_completions")
 }
+
 
 model MoodEntry {
   id        Int      @id @default(autoincrement())
