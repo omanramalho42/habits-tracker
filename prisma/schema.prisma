@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Habit {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  emoji       String    @db.VarChar(10)
+  goal        String    @db.VarChar(255)
+  motivation  String    @db.VarChar(255)
+  startDate   DateTime  @default(now()) @map("start_date")
+  reminder    Boolean   @default(false)
+  frequency   Json      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  color       String    @default("#3B82F6") @db.VarChar(7)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  endDate     DateTime? @map("end_date")
+
+  schedules   HabitSchedule[]
+  completions HabitCompletion[]
+
+  @@map("habits")
+}
+
+model HabitSchedule {
+  id            Int       @id @default(autoincrement())
+  habitId       Int       @map("habit_id")
+  scheduledDate DateTime  @map("scheduled_date")
+  isCompleted   Boolean   @default(false) @map("is_completed")
+  completedAt   DateTime? @map("completed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, scheduledDate])
+  @@index([scheduledDate])
+  @@index([habitId, scheduledDate])
+  @@map("habit_schedules")
+}
+
+model HabitCompletion {
+  id            Int       @id @default(autoincrement())
+  habitId       Int       @map("habit_id")
+  completedDate DateTime  @map("completed_date")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@map("habit_completions")
+}
+
+model MoodEntry {
+  id        Int      @id @default(autoincrement())
+  moodType  String   @db.VarChar(50) @map("mood_type")
+  moodLevel String   @db.VarChar(50) @map("mood_level")
+  entryDate DateTime @unique @default(now()) @map("entry_date")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entryDate])
+  @@map("mood_entries")
+}
