@@ -1,0 +1,264 @@
+"use client"
+
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Card } from "@/components/ui/card"
+import { Check, TrendingUp, Calendar, Target, Flame, X } from "lucide-react"
+import type { HabitWithStats } from "@/lib/types"
+import { WEEKDAYS } from "@/lib/habit-utils"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+interface HabitDetailDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  habit: HabitWithStats | null
+}
+
+export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDialogProps) {
+  const [displayMonth, setDisplayMonth] = useState(new Date().getMonth())
+  const [displayYear, setDisplayYear] = useState(new Date().getFullYear())
+
+  if (!habit) return null
+
+  const getMonthCalendar = () => {
+    const firstDay = new Date(displayYear, displayMonth, 1)
+    const lastDay = new Date(displayYear, displayMonth + 1, 0)
+
+    const days = []
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d))
+    }
+    return days
+  }
+
+  const isDateCompleted = (date: Date) => {
+    const dateStr = date.toISOString().split("T")[0]
+    const completed =
+      habit.completions?.some((c) => {
+        const completionDate = new Date(c.completed_date).toISOString().split("T")[0]
+        return completionDate === dateStr
+      }) || false
+    return completed
+  }
+
+  const isDateInFrequency = (date: Date) => {
+    const dayOfWeek = date.getDay()
+    const weekdayKey = WEEKDAYS[dayOfWeek].key
+    const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
+    return frequency.includes(weekdayKey)
+  }
+
+  const monthDays = getMonthCalendar()
+  const monthName = new Date(displayYear, displayMonth).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
+
+  const months = [
+    { value: 0, label: "January" },
+    { value: 1, label: "February" },
+    { value: 2, label: "March" },
+    { value: 3, label: "April" },
+    { value: 4, label: "May" },
+    { value: 5, label: "June" },
+    { value: 6, label: "July" },
+    { value: 7, label: "August" },
+    { value: 8, label: "September" },
+    { value: 9, label: "October" },
+    { value: 10, label: "November" },
+    { value: 11, label: "December" },
+  ]
+
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-full sm:max-w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-custom p-0">
+        <div className="p-4 sm:p-6">
+          <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 mb-4 sm:mb-6">
+            <div className="flex flex-col gap-4 mb-4 sm:mb-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                  <div
+                    className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl text-3xl sm:text-4xl shadow-lg flex-shrink-0"
+                    style={{ backgroundColor: `${habit.color}30` }}
+                  >
+                    {habit.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2 truncate">
+                      {habit.name}
+                    </h2>
+                    <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">{habit.goal}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onOpenChange(false)}
+                  className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {WEEKDAYS.map((day) => {
+                  const isActive = frequency.includes(day.key)
+                  return (
+                    <div
+                      key={day.key}
+                      className={`px-2.5 py-1 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                        isActive ? "text-white shadow-sm" : "bg-muted/50 text-muted-foreground"
+                      }`}
+                      style={isActive ? { backgroundColor: habit.color } : {}}
+                    >
+                      {day.name}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+              <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
+                    <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-primary" />
+                  </div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Current</div>
+                </div>
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: habit.color }}>
+                  {habit.current_streak}
+                </div>
+              </Card>
+              <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
+                    <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-primary" />
+                  </div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Longest</div>
+                </div>
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: habit.color }}>
+                  {habit.longest_streak}
+                </div>
+              </Card>
+              <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
+                    <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-primary" />
+                  </div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Success</div>
+                </div>
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: habit.color }}>
+                  {habit.completion_rate}%
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          <Card className="p-4 sm:p-6 bg-card border-border">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-foreground">Activity Calendar</h3>
+              </div>
+              <div className="flex gap-2">
+                <Select
+                  value={displayMonth.toString()}
+                  onValueChange={(value) => setDisplayMonth(Number.parseInt(value))}
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Select month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map((month) => (
+                      <SelectItem key={month.value} value={month.value.toString()}>
+                        {month.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={displayYear.toString()}
+                  onValueChange={(value) => setDisplayYear(Number.parseInt(value))}
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto pb-2">
+              <div className="min-w-[600px]">
+                <div className="grid grid-cols-7 gap-2 mb-2">
+                  {WEEKDAYS.map((day) => (
+                    <div key={day.key} className="text-center text-xs font-semibold text-muted-foreground py-1">
+                      {day.label}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-2">
+                  {/* Add empty cells for days before month starts */}
+                  {Array.from({ length: monthDays[0].getDay() }).map((_, i) => (
+                    <div key={`empty-${i}`} className="aspect-square" />
+                  ))}
+
+                  {monthDays.map((date) => {
+                    const dateStr = date.toISOString().split("T")[0]
+                    const completed = isDateCompleted(date)
+                    const inFrequency = isDateInFrequency(date)
+                    const isToday = date.toDateString() === new Date().toDateString()
+                    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
+
+                    return (
+                      <div
+                        key={date.toISOString()}
+                        className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs sm:text-sm font-medium transition-all relative ${
+                          isToday ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
+                        }`}
+                        style={{
+                          backgroundColor: completed ? "#10B981" : inFrequency ? habit.color : "hsl(var(--muted))",
+                          opacity: !inFrequency ? 0.2 : completed ? 1 : isPast ? 0.3 : 0.6,
+                        }}
+                        title={`${date.toLocaleDateString()} - ${completed ? "Completed" : inFrequency ? "Scheduled" : "Not scheduled"}`}
+                      >
+                        <span className="text-white font-bold">{date.getDate()}</span>
+                        {completed && <Check className="h-3 w-3 sm:h-4 sm:w-4 text-white absolute" />}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: habit.color, opacity: 0.6 }} />
+                <span>Scheduled</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-green-500" />
+                <span>Completed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-muted opacity-20" />
+                <span>Not scheduled</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
