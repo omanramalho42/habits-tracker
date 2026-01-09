@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const existing = await prisma.habitCompletion.findFirst({
       where: {
         habitId: Number(id),
-        completedDate: new Date(date)
+        completed_date: new Date(date)
       }, select: {
         id: true
       }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         where: {
           id: Number(existing.id),
           habitId: Number(id),
-          completedDate: new Date(date)
+          completed_date: new Date(date)
         },
       })
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const newHabit = await prisma.habitCompletion.create({
       data: {
         habitId: Number(id),
-        completedDate: new Date(date),
+        completed_date: new Date(date),
       },
     })
 

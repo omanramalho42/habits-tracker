@@ -25,13 +25,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         habitId: habit_id
       },
       orderBy: {
-        completedDate: 'desc'
+        completed_date: 'desc'
       }
     })
 
     const normalizedCompletions = completions.map((c) => ({
       ...c,
-      completed_date: new Date(c.completedDate)
+      completed_date: new Date(c.completed_date)
         .toISOString()
         .split("T")[0],
     }))
