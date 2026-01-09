@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import type { Habit, HabitCompletion } from "@/lib/types"
 import { calculateStreak, getTodayString } from "@/lib/habit-utils"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const completions = await prisma.habitCompletion.findMany({
       where: {
-        habitId: Number(id),
+        habitId: Number(id)
       },
       orderBy: {
         completedDate: 'desc'
