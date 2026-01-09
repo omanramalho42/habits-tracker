@@ -18,9 +18,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }, { status: 404 })
     }
 
+    const habit_id = Number(id)
+
     const completions = await prisma.habitCompletion.findMany({
       where: {
-        habitId: Number(id)
+        habitId: habit_id
       },
       orderBy: {
         completedDate: 'desc'
