@@ -121,6 +121,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
           {onEdit && (
             <Button
               variant="ghost"
+              disabled
               size="icon"
               className="h-9 w-9 hover:bg-muted"
               onClick={(e) => {
@@ -134,6 +135,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
           {onDelete && (
             <Button
               variant="ghost"
+              disabled
               size="icon"
               className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={(e) => {

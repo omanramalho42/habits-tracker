@@ -2,13 +2,13 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { calculateStreak, getTodayString } from "@/lib/habit-utils"
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 
     const habit = await prisma.habit.findUnique({
       where: {
-        id: Number(id),
+        id,
       }
     })
 
@@ -18,11 +18,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }, { status: 404 })
     }
 
-    const habit_id = Number(id)
-
     const completions = await prisma.habitCompletion.findMany({
       where: {
-        habitId: habit_id
+        habitId: id
       },
       orderBy: {
         completed_date: 'desc'

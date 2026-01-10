@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getTodayString } from "@/lib/habit-utils"
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const existing = await prisma.habitCompletion.findFirst({
       where: {
-        habitId: Number(id),
+        habitId: id,
         completed_date: new Date(date)
       }, select: {
         id: true
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       await prisma.habitCompletion.delete({
         where: {
           id: Number(existing.id),
-          habitId: Number(id),
+          habitId: id,
           completed_date: new Date(date)
         },
       })
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // 3️⃣ Cria completion
     const newHabit = await prisma.habitCompletion.create({
       data: {
-        habitId: Number(id),
+        habitId: id,
         completed_date: new Date(date),
       },
     })

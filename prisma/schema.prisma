@@ -13,28 +13,75 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id          String   @id @default(uuid())
+  email       String
+  
+  firstName   String?
+  lastName    String?
+  imageUrl    String?
+  
+  clerkUserId String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  settings     UserSettings?
+  habits       Habit[]
+  moodEntry   MoodEntry[]
+
+  @@unique([id, email, clerkUserId])
+}
+
+model UserSettings {
+  userId String @id @map("user_id")
+
+  notificationsEnabled Boolean @default(true)  @map("notifications_enabled")
+  emailNotifications   Boolean @default(true)  @map("email_notifications")
+  smsNotifications     Boolean @default(false) @map("sms_notifications")
+
+  email     String? @map("email")
+  phone     String? @map("phone")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+
 model Habit {
-  id          Int       @id @default(autoincrement())
+  id          String @id @default(uuid())
+  userId      String @map("user_id")
+
   name        String    @db.VarChar(255)
   emoji       String    @db.VarChar(10)
   goal        String    @db.VarChar(255)
   motivation  String    @db.VarChar(255)
+
   startDate   DateTime  @default(now()) @map("start_date")
+  endDate     DateTime? @map("end_date")
+
   reminder    Boolean   @default(false)
   frequency   Json      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
   color       String    @default("#3B82F6") @db.VarChar(7)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  endDate     DateTime? @map("end_date")
 
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
   schedules   HabitSchedule[]
   completions HabitCompletion[]
 
+  @@index([userId])
   @@map("habits")
 }
 
 model HabitSchedule {
-  id            Int       @id @default(autoincrement())
-  habitId       Int       @map("habit_id")
+  id            String @id @default(uuid())
+  habitId       String @map("habit_id")
+
   scheduledDate DateTime  @map("scheduled_date")
   isCompleted   Boolean   @default(false) @map("is_completed")
   completedAt   DateTime? @map("completed_at")
@@ -49,8 +96,9 @@ model HabitSchedule {
 }
 
 model HabitCompletion {
-  id             Int      @id @default(autoincrement())
-  habitId       Int       @map("habit_id")
+  id String @id @default(uuid())
+  habitId String @map("habit_id")
+
   completed_date DateTime
   created_at     DateTime @default(now())
 
@@ -61,12 +109,19 @@ model HabitCompletion {
 }
 
 model MoodEntry {
-  id        Int      @id @default(autoincrement())
+  id      String @id @default(uuid())
+  userId  String @map("user_id")
+
   moodType  String   @db.VarChar(50) @map("mood_type")
   moodLevel String   @db.VarChar(50) @map("mood_level")
   entryDate DateTime @unique @default(now()) @map("entry_date")
   createdAt DateTime @default(now()) @map("created_at")
 
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, entryDate])
   @@index([entryDate])
+  @@index([userId])
   @@map("mood_entries")
 }

@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import type { Habit } from "@/lib/types"
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 
@@ -20,7 +19,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 

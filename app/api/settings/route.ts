@@ -1,47 +1,74 @@
 import { auth } from "@clerk/nextjs/server"
-import { neon } from "@neondatabase/serverless"
+import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-const sql = neon(process.env.DATABASE_URL!)
-
 export async function GET() {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  try {
+    const { userId } = await auth()
 
-  const settings = await sql`
-    SELECT * FROM user_settings WHERE user_id = ${userId}
-  `
-
-  if (settings.length === 0) {
-    const newSettings = await sql`
-      INSERT INTO user_settings (user_id)
-      VALUES (${userId})
-      RETURNING *
-    `
-    return NextResponse.json(newSettings[0])
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+  
+    const userSettings = await prisma.userSettings.upsert({
+      where: {
+        userId: userId
+      },
+      update: {},
+      create: {
+        userId: userId
+      }
+    })
+  
+    return NextResponse.json(userSettings)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log("error", error.message);
+      NextResponse.json({ error: error.message}, { status: 500 })
+    }
   }
-
-  return NextResponse.json(settings[0])
 }
 
 export async function PATCH(request: Request) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  try {
+    const { userId } = await auth()
 
-  const body = await request.json()
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-  const updated = await sql`
-    UPDATE user_settings
-    SET 
-      notifications_enabled = COALESCE(${body.notifications_enabled}, notifications_enabled),
-      email_notifications = COALESCE(${body.email_notifications}, email_notifications),
-      sms_notifications = COALESCE(${body.sms_notifications}, sms_notifications),
-      email = COALESCE(${body.email}, email),
-      phone = COALESCE(${body.phone}, phone),
-      updated_at = CURRENT_TIMESTAMP
-    WHERE user_id = ${userId}
-    RETURNING *
-  `
+    const {
+      notifications_enabled,
+      email_notifications,
+      sms_notifications,
+      email,
+      phone
+    } = await request.json()
 
-  return NextResponse.json(updated[0])
+    const updated = await prisma.userSettings.upsert({
+      where: { userId },
+      update: {
+        notificationsEnabled: notifications_enabled,
+        emailNotifications: email_notifications,
+        smsNotifications: sms_notifications,
+        email,
+        phone,
+      },
+      create: {
+        userId,
+        notificationsEnabled: notifications_enabled ?? true,
+        emailNotifications: email_notifications ?? true,
+        smsNotifications: sms_notifications ?? false,
+        email,
+        phone,
+      },
+    })
+
+    return NextResponse.json(updated)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log("error", error.message);
+      NextResponse.json({ error: error.message}, { status: 500 })
+    }   
+  }
 }

@@ -75,7 +75,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full sm:max-w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-custom p-0">
         <div className="p-4 sm:p-6">
-          <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 mb-4 sm:mb-6">
+          <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-linear-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 mb-4 sm:mb-6">
             <div className="flex flex-col gap-4 mb-4 sm:mb-6">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
@@ -89,20 +89,14 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2 truncate">
                       {habit.name}
                     </h2>
-                    <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">{habit.goal}</p>
+                    <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
+                      {habit.goal}
+                    </p>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onOpenChange(false)}
-                  className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
 
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {WEEKDAYS.map((day) => {
                   const isActive = frequency.includes(day.key)
                   return (

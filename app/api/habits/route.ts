@@ -2,8 +2,6 @@ import { type NextRequest, NextResponse } from "next/server"
 
 import { prisma } from "@/lib/prisma"
 
-import type { Habit } from "@/lib/types"
-
 export async function GET() {
   try {
     const habits =
