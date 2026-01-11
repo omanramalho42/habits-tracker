@@ -1,11 +1,31 @@
 import { type NextRequest, NextResponse } from "next/server"
 
 import { prisma } from "@/lib/prisma"
+import { auth } from "@clerk/nextjs/server"
 
 export async function GET() {
   try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+  
+    const userDb = await prisma.user.findFirst({
+      where: {
+        clerkUserId: userId
+      }
+    })
+
+    if (!userDb) {
+      return NextResponse.json({ error: "user not find on db" }, { status: 401 })
+    }
+
     const habits =
       await prisma.habit.findMany({
+        where: {
+          userId: userDb.id
+        },
         orderBy: {
           createdAt: 'asc'
         }
@@ -14,9 +34,9 @@ export async function GET() {
     return NextResponse.json(habits)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error fetching habits:", error)
+      console.error("Error fetching habits:", error.message)
       return NextResponse.json({
-        error: "Failed to fetch habits"
+        error: error.message
       }, { status: 500 })
     }
   }
@@ -24,6 +44,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const userDb = await prisma.user.findFirst({
+      where: {
+        clerkUserId: userId
+      }
+    })
+
+    if (!userDb) {
+      return NextResponse.json({ error: "user not find on db" }, { status: 401 })
+    }
+
     const body = await request.json()
     const {
       name,
@@ -38,6 +74,7 @@ export async function POST(request: NextRequest) {
 
     const newhHabit = await prisma.habit.create({
       data: {
+        userId: userDb.id,
         name,
         emoji,
         goal,

@@ -2,6 +2,7 @@ import { Webhook } from "svix"
 import { headers } from "next/headers"
 import type { WebhookEvent } from "@clerk/nextjs/server"
 import { inngest } from "@/inngest/client"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
@@ -41,16 +42,37 @@ export async function POST(req: Request) {
     })
   }
 
-  if (evt.type === "user.created") {
-    await inngest.send({
-      name: "user/created",
-      data: {
-        userId: evt.data.id,
-        email: evt.data.email_addresses[0]?.email_address,
-        firstName: evt.data.first_name,
-      },
-    })
+  if(evt.type === 'user.created') {
+    const { id, email_addresses, first_name, image_url } = evt.data
+    try {
+      const newUser = await prisma.user.create({
+        data: {
+          clerkUserId: id,
+          email: email_addresses[0].email_address,
+          firstName: first_name,
+          // lastName: last_name,
+          imageUrl: image_url,
+        }
+      });
+        await inngest.send({
+        name: 'app/user.created',
+        data: {
+          email: email_addresses[0].email_address,
+          name: first_name,
+          // country,
+          // investmentGoals,
+          // riskTolerance,
+          // preferredIndustry
+        }
+      })
+      return new Response(JSON.stringify(newUser), {
+        status: 201,
+      })
+    } catch(error) {
+      console.error('Error: Failed to store event in the database:', error)
+      return new Response('Error: Failed to store event in the database', {
+        status: 500,
+      });
+    }
   }
-
-  return new Response("", { status: 200 })
 }

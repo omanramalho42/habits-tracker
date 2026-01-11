@@ -96,15 +96,15 @@ model HabitSchedule {
 }
 
 model HabitCompletion {
-  id String @id @default(uuid())
+  id      String @id @default(uuid())
   habitId String @map("habit_id")
 
-  completed_date DateTime
-  created_at     DateTime @default(now())
+  completedDate DateTime
+  createdAt     DateTime @default(now())
 
   habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
-  @@unique([habitId, completed_date])
+  @@unique([habitId, completedDate])
   @@map("habit_completions")
 }
 

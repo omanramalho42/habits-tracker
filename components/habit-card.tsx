@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, X, Pencil, Trash2, TrendingUp } from "lucide-react"
 import { WEEKDAYS, WEEKDAY_MAP } from "@/lib/habit-utils"
+import { cn } from "@/lib/utils"
 
 interface HabitCardProps {
   habit: HabitWithStats
@@ -20,13 +21,17 @@ interface HabitCardProps {
 }
 
 export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selectedDate, onError }: HabitCardProps) {
-  const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
+  console.log(habit, "habit card")
+  const frequency =
+    Array.isArray(habit.frequency) ? habit.frequency : []
 
-  const currentDate = selectedDate || new Date()
-  const todayStr = currentDate.toISOString().split("T")[0]
+  const currentDate =
+    selectedDate || new Date()
+  const todayStr =
+    currentDate.toISOString().split("T")[0]
 
   const isCompletedToday = habit.completions?.some((c) => {
-    const completionDate = new Date(c.completed_date).toISOString().split("T")[0]
+    const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
     return completionDate === todayStr
   })
 
@@ -117,8 +122,13 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          {onEdit && (
+        <div
+          className={cn(
+            "flex items-center gap-1.5 transition-opacity",
+            "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+          )}
+        >
+          {/* {onEdit && (
             <Button
               variant="ghost"
               disabled
@@ -147,34 +157,28 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
             >
               <Trash2 className="h-4 w-4" />
             </Button>
-          )}
+          )} */}
           <Button
             variant={isCompletedToday ? "default" : "outline"}
             size="icon"
-            className={`h-11 w-11 rounded-xl transition-all ${
-              isCompletedToday
-                ? "shadow-md hover:shadow-lg bg-green-500 hover:bg-green-600 border-green-500"
-                : !canToggle
-                  ? "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500"
-                  : "hover:border-primary/50 hover:bg-primary/5"
-            }`}
+            className={cn(
+              "h-11 w-11 rounded-xl transition-all",
+              isCompletedToday && "shadow-md bg-green-500 hover:bg-red-500 border-green-500",
+              !isCompletedToday &&
+                !canToggle &&
+                "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500",
+              !isCompletedToday &&
+                canToggle &&
+                "hover:border-primary/50 hover:bg-primary/5",
+            )}
             onClick={handleToggleClick}
-            title={
-              isFutureDate
-                ? "Cannot complete future habits"
-                : !isActiveToday
-                  ? "This habit is not scheduled for this day"
-                  : isCompletedToday
-                    ? "Click to mark as incomplete"
-                    : "Click to mark as complete"
-            }
           >
             {isCompletedToday ? (
-              <Check className="h-5 w-5 scale-110" />
+              <X className="h-5 w-5" />   // 👉 DESMARCAR
             ) : !canToggle ? (
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" />   // 👉 BLOQUEADO
             ) : (
-              <div className="h-5 w-5 rounded border-2 border-current" />
+              <div className="h-5 w-5 rounded border-2 border-current" /> // 👉 MARCAR
             )}
           </Button>
         </div>

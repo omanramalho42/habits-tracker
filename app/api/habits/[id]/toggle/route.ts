@@ -15,21 +15,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const existing = await prisma.habitCompletion.findFirst({
       where: {
         habitId: id,
-        completed_date: new Date(date)
+        completedDate: new Date(date)
       }, select: {
         id: true
       }
     })
 
-    console.log(existing, "existing")
-
     if (existing) {
       // 2️⃣ Remove completion
       await prisma.habitCompletion.delete({
         where: {
-          id: Number(existing.id),
+          id: existing.id,
           habitId: id,
-          completed_date: new Date(date)
+          completedDate: new Date(date)
         },
       })
 
@@ -42,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const newHabit = await prisma.habitCompletion.create({
       data: {
         habitId: id,
-        completed_date: new Date(date),
+        completedDate: new Date(date),
       },
     })
 

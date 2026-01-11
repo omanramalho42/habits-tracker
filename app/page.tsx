@@ -1,5 +1,7 @@
 "use client"
 
+import axios from "axios"
+
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus, ChevronLeft, ChevronRight, Settings } from "lucide-react"
@@ -9,7 +11,7 @@ import { EditHabitDialog } from "@/components/edit-habit-dialog"
 import { HabitDetailDialog } from "@/components/habit-detail-dialog"
 import { MoodWizard } from "@/components/mood-wizard"
 import { SettingsDialog } from "@/components/settings-dialog"
-import type { HabitWithStats } from "@/lib/types"
+import type { Habit, HabitWithStats } from "@/lib/types"
 import type { HabitFormData } from "@/components/habit-form"
 import { isHabitActiveOnDate } from "@/lib/habit-utils"
 import { useToast } from "@/hooks/use-toast"
@@ -59,18 +61,17 @@ export default function Home() {
     setShowMoodWizard(false)
   }
 
-  const fetchHabits = async () => {
+  const fetchHabits: () => Promise<void> = async () => {
     try {
-      const response = await fetch("/api/habits")
-      const habitsData = await response.json()
+      const response = await axios.get("/api/habits")
 
-      const habitsWithStats = await Promise.all(
-        habitsData.map(async (habit: any) => {
-          const statsResponse = await fetch(`/api/habits/${habit.id}/stats`)
-          return await statsResponse.json()
+      const habitsWithStats: HabitWithStats[] = await Promise.all(
+        response.data.map(async (habit: any) => {
+          const statsResponse = await axios.get(`/api/habits/${habit.id}/stats`)
+          return await statsResponse.data
         }),
       )
-
+      console.log(habitsWithStats, "habits with stats")
       setHabits(habitsWithStats)
     } catch (error) {
       console.error("Error fetching habits:", error)
@@ -305,7 +306,7 @@ export default function Home() {
               <div className="rounded-full h-16 w-16 bg-primary/10 mx-auto blur-xl"></div>
             </div>
           </div>
-          <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Wisey
           </h2>
           <p className="text-muted-foreground">Loading your habits...</p>

@@ -8,6 +8,7 @@ import { WEEKDAYS } from "@/lib/habit-utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import HeatMapHabit from "./heat-map"
 
 interface HabitDetailDialogProps {
   open: boolean
@@ -32,25 +33,6 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
     return days
   }
 
-  const isDateCompleted = (date: Date) => {
-    const dateStr = date.toISOString().split("T")[0]
-    const completed =
-      habit.completions?.some((c) => {
-        const completionDate = new Date(c.completed_date).toISOString().split("T")[0]
-        return completionDate === dateStr
-      }) || false
-    return completed
-  }
-
-  const isDateInFrequency = (date: Date) => {
-    const dayOfWeek = date.getDay()
-    const weekdayKey = WEEKDAYS[dayOfWeek].key
-    const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
-    return frequency.includes(weekdayKey)
-  }
-
-  const monthDays = getMonthCalendar()
-  const monthName = new Date(displayYear, displayMonth).toLocaleDateString("en-US", { month: "long", year: "numeric" })
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
 
   const months = [
@@ -68,17 +50,29 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
     { value: 11, label: "December" },
   ]
 
+  console.log(habit, 'habit')
+// Cria um Set de datas concluídas para busca rápida (formato YYYY/MM/DD)
+
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full sm:max-w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-custom p-0">
-        <div className="p-4 sm:p-6">
+      <DialogContent
+        className="
+          w-full h-dvh
+          sm:h-auto
+          sm:max-w-[95vw] md:max-w-3xl lg:max-w-4xl
+          rounded-none sm:rounded-xl
+          p-0
+          overflow-hidden
+        "
+      >
+        <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-custom">
           <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-linear-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 mb-4 sm:mb-6">
             <div className="flex flex-col gap-4 mb-4 sm:mb-6">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                   <div
                     className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl text-3xl sm:text-4xl shadow-lg flex-shrink-0"
                     style={{ backgroundColor: `${habit.color}30` }}
@@ -114,7 +108,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
@@ -155,14 +149,16 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
             <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                <h3 className="text-sm sm:text-base md:text-lg font-bold text-foreground">Activity Calendar</h3>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-foreground">
+                  Activity Calendar
+                </h3>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Select
                   value={displayMonth.toString()}
                   onValueChange={(value) => setDisplayMonth(Number.parseInt(value))}
                 >
-                  <SelectTrigger className="w-[130px]">
+                  <SelectTrigger className="w-full sm:w-25">
                     <SelectValue placeholder="Select month" />
                   </SelectTrigger>
                   <SelectContent>
@@ -177,7 +173,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   value={displayYear.toString()}
                   onValueChange={(value) => setDisplayYear(Number.parseInt(value))}
                 >
-                  <SelectTrigger className="w-[100px]">
+                  <SelectTrigger className="w-auto">
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -190,48 +186,15 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                 </Select>
               </div>
             </div>
-
             <div className="overflow-x-auto pb-2">
-              <div className="min-w-[600px]">
-                <div className="grid grid-cols-7 gap-2 mb-2">
-                  {WEEKDAYS.map((day) => (
-                    <div key={day.key} className="text-center text-xs font-semibold text-muted-foreground py-1">
-                      {day.label}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-7 gap-2">
-                  {/* Add empty cells for days before month starts */}
-                  {Array.from({ length: monthDays[0].getDay() }).map((_, i) => (
-                    <div key={`empty-${i}`} className="aspect-square" />
-                  ))}
-
-                  {monthDays.map((date) => {
-                    const dateStr = date.toISOString().split("T")[0]
-                    const completed = isDateCompleted(date)
-                    const inFrequency = isDateInFrequency(date)
-                    const isToday = date.toDateString() === new Date().toDateString()
-                    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
-
-                    return (
-                      <div
-                        key={date.toISOString()}
-                        className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs sm:text-sm font-medium transition-all relative ${
-                          isToday ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
-                        }`}
-                        style={{
-                          backgroundColor: completed ? "#10B981" : inFrequency ? habit.color : "hsl(var(--muted))",
-                          opacity: !inFrequency ? 0.2 : completed ? 1 : isPast ? 0.3 : 0.6,
-                        }}
-                        title={`${date.toLocaleDateString()} - ${completed ? "Completed" : inFrequency ? "Scheduled" : "Not scheduled"}`}
-                      >
-                        <span className="text-white font-bold">{date.getDate()}</span>
-                        {completed && <Check className="h-3 w-3 sm:h-4 sm:w-4 text-white absolute" />}
-                      </div>
-                    )
-                  })}
-                </div>
+              <div className="w-full">
+                <HeatMapHabit
+                  habitColor={habit.color}
+                  startDate={new Date(habit.startDate)}
+                  endDate={habit.endDate ? new Date(habit.endDate) : null}
+                  values={habit.completions}
+                  habitFrequency={habit.frequency}
+                />
               </div>
             </div>
 

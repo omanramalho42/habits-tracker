@@ -4,19 +4,19 @@ export interface Habit {
   emoji: string
   goal: string
   motivation: string
-  start_date: string
-  end_date: string | null
+  startDate: string
+  endDate: string | null
   reminder: boolean
   frequency: string[]
   color: string
-  created_at: string
+  createdAt: string
 }
 
 export interface HabitCompletion {
   id: number
-  habit_id: number
-  completed_date: string
-  created_at: string
+  habitId: number
+  completedDate: string
+  createdAt: string
 }
 
 export interface HabitWithStats extends Habit {

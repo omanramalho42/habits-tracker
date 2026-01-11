@@ -8,6 +8,8 @@ import { Analytics } from "@vercel/analytics/next"
 
 
 import "./globals.css"
+import { redirect } from "next/navigation"
+import { currentUser } from "@clerk/nextjs/server"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -40,6 +42,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const user = await currentUser()
+  
+  if (!user) {
+    redirect('/sign-in')
+  }
   return (
     <ClerkProvider
       appearance={{
