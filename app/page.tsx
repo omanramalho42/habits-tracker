@@ -96,6 +96,7 @@ export default function Home() {
   }
 
   const handleCreateHabit = async (data: HabitFormData) => {
+    console.log(data, "data");
     const response = await fetch("/api/habits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

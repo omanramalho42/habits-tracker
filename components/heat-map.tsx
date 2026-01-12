@@ -52,7 +52,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
 
   const valuesSchdules: HeatMapValue[] = []
   // se não existir endDate → 1 ano
-  const endDateYear = new Date(
+  const endDateYear = endDate || new Date(
     startDate.getFullYear() + 1,
     startDate.getMonth(),
     startDate.getDate()

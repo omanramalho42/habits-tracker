@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
       emoji,
       goal,
       motivation,
+      endDate,
       startDate,
       reminder, 
       frequency,
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
         goal,
         motivation,
         startDate: new Date(startDate),
+        endDate: new Date(endDate),
         reminder,
         frequency, // Json
         color,
