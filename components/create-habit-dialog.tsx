@@ -1,9 +1,10 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { HabitForm, type HabitFormData } from "@/components/habit-form"
+import { HabitForm } from "@/components/habit-form"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { HabitFormData } from "@/lib/types"
 
 interface CreateHabitDialogProps {
   open: boolean
@@ -44,9 +45,15 @@ export function CreateHabitDialog({ open, onOpenChange, onSubmit }: CreateHabitD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Create a New Habit</DialogTitle>
+          <DialogTitle className="text-2xl">
+            Criar novo hábito
+          </DialogTitle>
         </DialogHeader>
-        <HabitForm onSubmit={handleSubmit} onCancel={() => onOpenChange(false)} isSubmitting={isSubmitting} />
+        <HabitForm
+          onSubmit={handleSubmit}
+          onCancel={() => onOpenChange(false)}
+          isSubmitting={isSubmitting}
+        />
       </DialogContent>
     </Dialog>
   )

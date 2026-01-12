@@ -1,21 +1,30 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import React, { useState } from "react"
+
+import Picker from "@emoji-mart/react"
+import data from "@emoji-mart/data"
+
+import { format } from "date-fns"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from "@/components/ui/popover"
+import { Switch } from "@/components/ui/switch"
+
 import { cn } from "@/lib/utils"
 import { WEEKDAYS } from "@/lib/habit-utils"
+
 import type { HabitFormData, HabitWithStats } from "@/lib/types"
-import { Switch } from "@/components/ui/switch"
-import data from "@emoji-mart/data"
-import Picker from "@emoji-mart/react"
+
+import { CalendarIcon } from "lucide-react"
 
 interface HabitFormProps {
   onSubmit: (data: HabitFormData) => void
@@ -76,7 +85,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
     <Card className="p-6 bg-card border-border">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <Label className="text-sm font-semibold mb-3 block">Select Emoji</Label>
+          <Label className="text-sm font-semibold mb-3 block">Selecione o emoji</Label>
           <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
             <PopoverTrigger asChild>
               <Button
@@ -103,8 +112,11 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
         </div>
 
         <div>
-          <Label htmlFor="name" className="text-sm font-semibold">
-            Habit Name
+          <Label
+            htmlFor="name"
+            className="text-sm font-semibold"
+          >
+            Nome do hábito
           </Label>
           <Input
             id="name"
@@ -117,8 +129,11 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
         </div>
 
         <div>
-          <Label htmlFor="goal" className="text-sm font-semibold">
-            Goal
+          <Label
+            htmlFor="goal"
+            className="text-sm font-semibold"
+          >
+            Objetivo
           </Label>
           <Input
             id="goal"
@@ -131,8 +146,11 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
         </div>
 
         <div>
-          <Label htmlFor="motivation" className="text-sm font-semibold">
-            Motivation
+          <Label
+            htmlFor="motivation"
+            className="text-sm font-semibold"
+          >
+            Motivação
           </Label>
           <Input
             id="motivation"
@@ -145,7 +163,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
         </div>
 
         <div>
-          <Label className="text-sm font-semibold mb-1.5 block">Start Date</Label>
+          <Label className="text-sm font-semibold mb-1.5 block">Data inicial</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -153,7 +171,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
                 className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
+                {date ? format(date, "PPP") : <span>Escolha a data</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -169,7 +187,6 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
                     }))
                   }
                 }}
-                initialFocus
               />
             </PopoverContent>
           </Popover>
@@ -177,7 +194,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <Label className="text-sm font-semibold">End Date</Label>
+            <Label className="text-sm font-semibold">Data final</Label>
             <div className="flex items-center gap-2">
               <Label htmlFor="never-ends" className="text-sm text-muted-foreground cursor-pointer">
                 Never
@@ -203,7 +220,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
                   className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : <span>Pick an end date</span>}
+                  {endDate ? format(endDate, "PPP") : <span>Escolhe data final</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
