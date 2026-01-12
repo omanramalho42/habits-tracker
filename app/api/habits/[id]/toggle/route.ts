@@ -43,8 +43,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         completedDate: new Date(date),
       },
     })
-
-    console.log("created completion", newHabit)
     return NextResponse.json(newHabit)
   } catch (error) {
     if(error instanceof Error) {

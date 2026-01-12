@@ -5,7 +5,6 @@ import { prisma } from '@/lib/prisma'
 import { inngest } from '@/lib/inngest/client'
 
 export async function POST(req: Request) {
-  console.log("passei aqui")
   const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET
 
   if (!SIGNING_SECRET) {

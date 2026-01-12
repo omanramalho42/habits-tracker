@@ -26,9 +26,10 @@ import type { Habit, HabitWithStats, HabitFormData } from "@/lib/types"
 
 import { Plus, ChevronLeft, ChevronRight, Settings, LogOut } from "lucide-react"
 import { SignOutButton } from "@clerk/nextjs"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 
 export default function Home() {
-  // const user = currentUser()
+  // const user = await currentUser()
   
   // if(!user) {
   //   redirect("/sign-in/redirect='home'")
@@ -86,7 +87,6 @@ export default function Home() {
           return await statsResponse.data
         }),
       )
-      console.log(habitsWithStats, "habits with stats")
       setHabits(habitsWithStats)
     } catch (error) {
       console.error("Error fetching habits:", error)
@@ -306,7 +306,7 @@ export default function Home() {
     day: "numeric",
   })
 
-  const currentMonthYear = new Date(selectedYear, selectedMonth).toLocaleDateString("en-US", {
+  const currentMonthYear = new Date(selectedYear, selectedMonth).toLocaleDateString("pt-BR", {
     month: "long",
     year: "numeric",
   })
@@ -316,15 +316,15 @@ export default function Home() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="relative mb-8">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto" />
             <div className="absolute inset-0 animate-pulse">
-              <div className="rounded-full h-16 w-16 bg-primary/10 mx-auto blur-xl"></div>
+              <div className="rounded-full h-16 w-16 bg-primary/10 mx-auto blur-xl" />
             </div>
           </div>
           <h2 className="text-2xl font-bold mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Wisey
           </h2>
-          <p className="text-muted-foreground">Loading your habits...</p>
+          <p className="text-muted-foreground">Carregando seus hábitos...</p>
         </div>
       </div>
     )
@@ -337,13 +337,23 @@ export default function Home() {
       <main className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
-            <div>
+            <div className="flex flex-col gap-2">
               <h1 className="text-5xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
-                Today
+                Hoje
               </h1>
+              <div className="flex flex-row items-center gap-2">
+                {/* <Avatar>
+                  <AvatarImage
+                    src={"https://github.com/omanramalho42.png"}
+                  />
+                </Avatar> */}
+                  <p className="text-sm">
+                    Olá {"john doe"} 👋
+                  </p>
+              </div>
               <p className="text-muted-foreground text-base">{today}</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
               <Button
                 onClick={() => setShowSettings(true)}
                 size="lg"
@@ -359,13 +369,14 @@ export default function Home() {
               >
                 <Plus className="h-7 w-7" />
               </Button>
-            </div>
-            <div className="flex gap-3">
-              <SignOutButton children={
-                <Button variant="ghost">
-                  <LogOut className='text-red-500 text-md' />
-                </Button>
-              } />
+              <SignOutButton
+                children={
+                  <Button variant="ghost">
+                    <LogOut className='text-red-500 text-md' />
+                  </Button>
+                }
+              />
+              {/* ADICIONAR SELECT LANGUAGE */}
             </div>
           </div>
 
@@ -379,6 +390,7 @@ export default function Home() {
                 <Button variant="ghost" size="icon" onClick={goToNextMonth} className="h-9 w-9">
                   <ChevronRight className="h-5 w-5" />
                 </Button>
+                {/* adicionar button restore to default */}
               </div>
             </div>
           </div>
@@ -389,7 +401,7 @@ export default function Home() {
                 variant="ghost"
                 size="icon"
                 onClick={goToPreviousDay}
-                className="h-10 w-10 flex-shrink-0 bg-muted/50 hover:bg-muted"
+                className="h-10 w-10 shrink-0 bg-muted/50 hover:bg-muted"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -399,7 +411,7 @@ export default function Home() {
                   {monthDates.map((date) => {
                     const isSelected = date.toISOString().split("T")[0] === selectedDateString
                     const isToday = date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
-                    const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" })
+                    const dayOfWeek = date.toLocaleDateString("pt-BR", { weekday: "short" })
 
                     return (
                       <button
@@ -408,9 +420,9 @@ export default function Home() {
                         onClick={() => {
                           setSelectedDate(new Date(date))
                         }}
-                        className={`flex flex-col items-center justify-center min-w-[70px] py-4 px-3 rounded-xl transition-all ${
+                        className={`flex flex-col items-center justify-center min-w-17.5 py-4 px-3 rounded-xl transition-all ${
                           isSelected
-                            ? "bg-gradient-to-br from-primary to-blue-600 text-primary-foreground shadow-lg scale-105"
+                            ? "bg-linear-to-br from-primary to-blue-600 text-primary-foreground shadow-lg scale-105"
                             : isToday
                               ? "bg-primary/10 text-foreground border-2 border-primary/30"
                               : "bg-muted/50 text-muted-foreground hover:bg-muted hover:scale-105"

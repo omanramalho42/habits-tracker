@@ -21,7 +21,6 @@ interface HabitCardProps {
 }
 
 export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selectedDate, onError }: HabitCardProps) {
-  console.log(habit, "habit card")
   const frequency =
     Array.isArray(habit.frequency) ? habit.frequency : []
 
@@ -67,7 +66,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
 
   return (
     <Card
-      className={`group p-5 bg-gradient-to-br transition-all hover:shadow-lg cursor-pointer ${
+      className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
         isCompletedToday
           ? "from-green-500/20 to-green-500/5 border-green-500/30"
           : "from-card to-card/50 border-border/50 hover:border-primary/30"

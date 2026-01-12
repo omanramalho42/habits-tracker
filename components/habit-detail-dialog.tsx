@@ -22,6 +22,8 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
 
   if (!habit) return null
 
+  console.log(habit, "Habit")
+
   const getMonthCalendar = () => {
     const firstDay = new Date(displayYear, displayMonth, 1)
     const lastDay = new Date(displayYear, displayMonth + 1, 0)
@@ -49,8 +51,6 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
     { value: 10, label: "November" },
     { value: 11, label: "December" },
   ]
-
-  console.log(habit, 'habit')
 // Cria um Set de datas concluídas para busca rápida (formato YYYY/MM/DD)
 
   const currentYear = new Date().getFullYear()
@@ -153,7 +153,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   Activity Calendar
                 </h3>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {/* <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Select
                   value={displayMonth.toString()}
                   onValueChange={(value) => setDisplayMonth(Number.parseInt(value))}
@@ -184,7 +184,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
             <div className="overflow-x-auto pb-2">
               <div className="w-full">
