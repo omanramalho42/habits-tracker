@@ -23,7 +23,7 @@ interface HeatMapHabitProps {
 }
 
 // --- FUNÇÃO DE PRÉ-PROCESSAMENTO CENTRALIZADA (Corrigida) ---
-function generateHeatMapValues(startDate, endDate, completions, frequency) {
+function generateHeatMapValues(startDate: Date, endDate: Date | null, completions: any[], frequency: any[]) {
     const results = [];
     let currentDate = new Date(startDate);
     currentDate.setHours(0, 0, 0, 0);

@@ -1,24 +1,39 @@
 "use client"
 
+import { redirect } from "next/navigation"
+import { useEffect, useState } from "react"
+
+import { currentUser } from "@clerk/nextjs/server"
+
 import axios from "axios"
 
-import { useEffect, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+
+import confetti from "canvas-confetti"
+
 import { Button } from "@/components/ui/button"
-import { Plus, ChevronLeft, ChevronRight, Settings } from "lucide-react"
 import { HabitCard } from "@/components/habit-card"
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
 import { EditHabitDialog } from "@/components/edit-habit-dialog"
 import { HabitDetailDialog } from "@/components/habit-detail-dialog"
 import { MoodWizard } from "@/components/mood-wizard"
 import { SettingsDialog } from "@/components/settings-dialog"
-import type { Habit, HabitWithStats } from "@/lib/types"
-import type { HabitFormData } from "@/components/habit-form"
-import { isHabitActiveOnDate } from "@/lib/habit-utils"
-import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
-import confetti from "canvas-confetti"
+
+import { isHabitActiveOnDate } from "@/lib/habit-utils"
+
+import type { Habit, HabitWithStats, HabitFormData } from "@/lib/types"
+
+import { Plus, ChevronLeft, ChevronRight, Settings, LogOut } from "lucide-react"
+import { SignOutButton } from "@clerk/nextjs"
 
 export default function Home() {
+  // const user = currentUser()
+  
+  // if(!user) {
+  //   redirect("/sign-in/redirect='home'")
+  // }
+
   const [habits, setHabits] = useState<HabitWithStats[]>([])
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingHabit, setEditingHabit] = useState<HabitWithStats | null>(null)
@@ -108,7 +123,7 @@ export default function Home() {
     try {
       const habit = habits.find((h) => h.id === habitId)
       const dateStr = date || selectedDate.toISOString().split("T")[0]
-      const isCompleting = !habit?.completions?.some((c) => c.completed_date === dateStr)
+      const isCompleting = !habit?.completions?.some((c) => c.completedDate === dateStr)
 
       const response = await fetch(`/api/habits/${habitId}/toggle`, {
         method: "POST",
@@ -218,7 +233,7 @@ export default function Home() {
     const selectedDateString = selectedDate.toISOString().split("T")[0]
     const activeHabits = habits.filter((habit) => isHabitActiveOnDate(habit, selectedDate))
     const completedCount = activeHabits.filter((habit) =>
-      habit.completions.some((c) => c.completed_date === selectedDateString),
+      habit.completions.some((c) => c.completedDate === selectedDateString),
     ).length
 
     setActiveHabitsForSelectedDate(activeHabits)
@@ -323,7 +338,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-5xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-5xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
                 Today
               </h1>
               <p className="text-muted-foreground text-base">{today}</p>
@@ -340,10 +355,17 @@ export default function Home() {
               <Button
                 onClick={() => setShowCreateDialog(true)}
                 size="lg"
-                className="rounded-full h-16 w-16 p-0 bg-gradient-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+                className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
               >
                 <Plus className="h-7 w-7" />
               </Button>
+            </div>
+            <div className="flex gap-3">
+              <SignOutButton children={
+                <Button variant="ghost">
+                  <LogOut className='text-red-500 text-md' />
+                </Button>
+              } />
             </div>
           </div>
 
@@ -406,7 +428,7 @@ export default function Home() {
                 variant="ghost"
                 size="icon"
                 onClick={goToNextDay}
-                className="h-10 w-10 flex-shrink-0 bg-muted/50 hover:bg-muted"
+                className="h-10 w-10 shrink-0 bg-muted/50 hover:bg-muted"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
@@ -414,8 +436,8 @@ export default function Home() {
           </div>
 
           {completedToday > 0 && activeHabitsForSelectedDate.length > 0 && (
-            <div className="bg-gradient-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-2xl p-6 text-center mb-6 shadow-sm">
-              <p className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
+            <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-2xl p-6 text-center mb-6 shadow-sm">
+              <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
                 {completedToday}/{activeHabitsForSelectedDate.length}
               </p>
               <p className="text-sm text-muted-foreground font-medium">Habits completed today</p>
@@ -436,7 +458,7 @@ export default function Home() {
               <Button
                 onClick={() => setShowCreateDialog(true)}
                 size="lg"
-                className="bg-gradient-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
+                className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 {habits.length === 0 ? "Create Your First Habit" : "Create New Habit"}
@@ -460,7 +482,11 @@ export default function Home() {
           )}
         </div>
 
-        <CreateHabitDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateHabit} />
+        <CreateHabitDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onSubmit={handleCreateHabit}
+        />
 
         <EditHabitDialog
           open={!!editingHabit}
@@ -475,7 +501,10 @@ export default function Home() {
           habit={detailHabit}
         />
 
-        <SettingsDialog open={showSettings} onOpenChange={setShowSettings} />
+        <SettingsDialog
+          open={showSettings}
+          onOpenChange={setShowSettings}
+        />
       </main>
 
       <Toaster />

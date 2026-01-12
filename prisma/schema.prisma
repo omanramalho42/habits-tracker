@@ -14,14 +14,14 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   email       String
   
   firstName   String?
   lastName    String?
   imageUrl    String?
   
-  clerkUserId String
+  clerkUserId String @unique
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -29,8 +29,6 @@ model User {
   settings     UserSettings?
   habits       Habit[]
   moodEntry   MoodEntry[]
-
-  @@unique([id, email, clerkUserId])
 }
 
 model UserSettings {

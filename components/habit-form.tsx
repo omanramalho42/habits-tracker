@@ -12,7 +12,7 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { WEEKDAYS } from "@/lib/habit-utils"
-import type { HabitWithStats } from "@/lib/types"
+import type { HabitFormData, HabitWithStats } from "@/lib/types"
 import { Switch } from "@/components/ui/switch"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
@@ -22,18 +22,6 @@ interface HabitFormProps {
   onCancel: () => void
   initialData?: HabitWithStats
   isSubmitting?: boolean
-}
-
-export interface HabitFormData {
-  name: string
-  emoji: string
-  goal: string
-  motivation: string
-  start_date: string
-  end_date: string | null
-  reminder: boolean
-  frequency: string[]
-  color: string
 }
 
 const COLOR_OPTIONS = [
@@ -51,8 +39,8 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
     emoji: initialData?.emoji || "🎯",
     goal: initialData?.goal || "",
     motivation: initialData?.motivation || "",
-    start_date: initialData?.start_date || new Date().toISOString().split("T")[0],
-    end_date: initialData?.end_date || null,
+    startDate: initialData?.startDate || new Date().toISOString().split("T")[0],
+    endDate: initialData?.endDate || null,
     reminder: initialData?.reminder || false,
     frequency: initialData?.frequency || ["M", "T", "W", "TH", "F", "SA", "S"],
     color: initialData?.color || "#3B82F6",
@@ -75,13 +63,13 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
   }
 
   const [date, setDate] = useState<Date | undefined>(
-    initialData?.start_date ? new Date(initialData.start_date) : new Date(),
+    initialData?.startDate ? new Date(initialData.startDate) : new Date(),
   )
 
-  const [neverEnds, setNeverEnds] = useState(!initialData?.end_date)
+  const [neverEnds, setNeverEnds] = useState(!initialData?.endDate)
 
   const [endDate, setEndDate] = useState<Date | undefined>(
-    initialData?.end_date ? new Date(initialData.end_date) : undefined,
+    initialData?.endDate ? new Date(initialData.endDate) : undefined,
   )
 
   return (
@@ -177,7 +165,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
                   if (newDate) {
                     setFormData((prev) => ({
                       ...prev,
-                      start_date: newDate.toISOString().split("T")[0],
+                      startDate: newDate.toISOString().split("T")[0],
                     }))
                   }
                 }}
@@ -201,7 +189,7 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
                   setNeverEnds(checked)
                   if (checked) {
                     setEndDate(undefined)
-                    setFormData((prev) => ({ ...prev, end_date: null }))
+                    setFormData((prev) => ({ ...prev, endDate: null }))
                   }
                 }}
               />
@@ -227,11 +215,11 @@ export function HabitForm({ onSubmit, onCancel, initialData, isSubmitting }: Hab
                     if (newDate) {
                       setFormData((prev) => ({
                         ...prev,
-                        end_date: newDate.toISOString().split("T")[0],
+                        endDate: newDate.toISOString().split("T")[0],
                       }))
                     }
                   }}
-                  disabled={(date) => date < (formData.start_date ? new Date(formData.start_date) : new Date())}
+                  disabled={(date) => date < (formData.startDate ? new Date(formData.startDate) : new Date())}
                   initialFocus
                 />
               </PopoverContent>

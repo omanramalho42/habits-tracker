@@ -1,5 +1,7 @@
 "use client"
 
+import { SignedOut, SignOutButton, UserProfile } from '@clerk/nextjs'
+
 import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -7,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { Mail, MessageSquare, Bell } from "lucide-react"
+import { Mail, MessageSquare, Bell, Settings, MoreHorizontal, LogOut } from "lucide-react"
 
 interface SettingsDialogProps {
   open: boolean
@@ -22,6 +24,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     email: "",
     phone: "",
   })
+
+  const [showSettingsUser, setShowSettingsUser] = useState(false);
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -70,9 +74,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border-border/50">
+      <DialogContent className="sm:max-w-125 bg-card/95 backdrop-blur-xl border-border/50">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Settings
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -93,12 +97,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </div>
             <Switch
               id="notifications"
-              checked={settings.notifications_enabled}
+              checked={settings?.notifications_enabled}
               onCheckedChange={(checked) => setSettings({ ...settings, notifications_enabled: checked })}
             />
           </div>
 
-          {settings.notifications_enabled && (
+          {settings?.notifications_enabled && (
             <>
               <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/30">
                 <div className="flex items-center justify-between">
@@ -160,6 +164,42 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </div>
             </>
           )}
+        </div>
+
+        <div className="space-y-6 py-4">
+          <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
+            <div className="flex flex-row w-full items-center justify-between space-x-3">
+              <Settings className="h-5 w-5 text-primary" />
+              <div className='flex flex-col w-full justify-start'>
+                <Label htmlFor="notifications" className="text-base font-semibold">
+                  Ajustes
+                </Label>
+                <p className="text-sm text-muted-foreground">Ajuste suas prefrencias e configurações aqui</p>
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowSettingsUser((prev) => !prev)
+                }}
+              >
+                <MoreHorizontal />
+              </Button>
+            </div>
+          </div>
+
+          <Dialog open={showSettingsUser} onOpenChange={setShowSettingsUser}>
+            <DialogContent className='flex'>
+              <DialogHeader className='flex flex-row items-center gap-2'>
+                <SignOutButton children={
+                   <Button variant="ghost">
+                    <LogOut className='text-red-500 text-md' />
+                  </Button>
+                } />
+                Desconectar
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+
         </div>
 
         <div className="flex justify-end gap-3">

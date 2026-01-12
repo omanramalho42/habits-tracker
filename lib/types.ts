@@ -12,6 +12,18 @@ export interface Habit {
   createdAt: string
 }
 
+export interface HabitFormData {
+  name: string
+  emoji: string
+  goal: string
+  motivation: string
+  startDate: string
+  endDate: string | null
+  reminder: boolean
+  frequency: string[]
+  color: string
+}
+
 export interface HabitCompletion {
   id: number
   habitId: number

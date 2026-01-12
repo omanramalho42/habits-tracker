@@ -90,18 +90,18 @@ export function getTodayString(): string {
 }
 
 export function isHabitActiveOnDate(
-  habit: { start_date: string; end_date: string | null; frequency: string[] },
+  habit: { startDate: string; endDate: string | null; frequency: string[] },
   date: Date,
 ): boolean {
   const dateStr = formatDate(date)
 
   // Check if date is before start date
-  if (dateStr < habit.start_date) {
+  if (dateStr < habit.startDate) {
     return false
   }
 
   // Check if date is after end date (if end date exists)
-  if (habit.end_date && dateStr > habit.end_date) {
+  if (habit.endDate && dateStr > habit.endDate) {
     return false
   }
 

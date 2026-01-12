@@ -9,14 +9,20 @@ export async function GET() {
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-  
-    const userSettings = await prisma.userSettings.upsert({
+
+    const user = await prisma.user.findFirst({
       where: {
-        userId: userId
-      },
-      update: {},
-      create: {
-        userId: userId
+        clerkUserId: userId
+      }
+    })
+
+    if(!user) {
+      return NextResponse.json({ error: "Error find user on db"}, { status: 400 })
+    }
+  
+    const userSettings = await prisma.userSettings.findUnique({
+      where: {
+        userId: user.id
       }
     })
   
