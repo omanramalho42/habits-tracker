@@ -2,10 +2,19 @@
 
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Card } from "@/components/ui/card"
-import { Check, TrendingUp, Calendar, Target, Flame, X } from "lucide-react"
-import type { HabitWithStats } from "@/lib/types"
+
+import HeatMapHabit from "@/components/heat-map"
+
 import { WEEKDAYS } from "@/lib/habit-utils"
-import HeatMapHabit from "./heat-map"
+
+import type { HabitWithStats } from "@/lib/types"
+
+import {
+  TrendingUp,
+  Calendar,
+  Target,
+  Flame
+} from "lucide-react"
 
 interface HabitDetailDialogProps {
   open: boolean

@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         goal,
         motivation,
         startDate: new Date(startDate),
-        endDate: new Date(endDate) ?? null,
+        endDate: endDate ? new Date(endDate) : null,
         reminder,
         frequency, // Json
         color,

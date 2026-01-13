@@ -9,13 +9,13 @@ export const WEEKDAY_MAP: { [key: string]: number } = {
 }
 
 export const WEEKDAYS = [
-  { key: "S", label: "S", name: "Sunday" },
-  { key: "M", label: "M", name: "Monday" },
-  { key: "T", label: "T", name: "Tuesday" },
-  { key: "W", label: "W", name: "Wednesday" },
-  { key: "TH", label: "TH", name: "Thursday" },
-  { key: "F", label: "F", name: "Friday" },
-  { key: "SA", label: "SA", name: "Saturday" },
+  { key: "S", label: "S", name: "Domingo" },
+  { key: "M", label: "M", name: "Segunda" },
+  { key: "T", label: "T", name: "Terça" },
+  { key: "W", label: "W", name: "Quarta" },
+  { key: "TH", label: "TH", name: "Quinta" },
+  { key: "F", label: "F", name: "Sexta" },
+  { key: "SA", label: "SA", name: "Sábado" },
 ]
 
 export function calculateStreak(completions: { completed_date: string }[]): {

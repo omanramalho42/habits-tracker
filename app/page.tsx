@@ -13,7 +13,7 @@ import confetti from "canvas-confetti"
 
 import { Button } from "@/components/ui/button"
 import { HabitCard } from "@/components/habit-card"
-import { CreateHabitDialog } from "@/components/create-habit-dialog"
+import { CreateHabitDialog, HabitSchemaType } from "@/components/create-habit-dialog"
 import { EditHabitDialog } from "@/components/edit-habit-dialog"
 import { HabitDetailDialog } from "@/components/habit-detail-dialog"
 import { MoodWizard } from "@/components/mood-wizard"
@@ -77,6 +77,25 @@ export default function Home() {
     setShowMoodWizard(false)
   }
 
+  const handleCreateHabit = async (data: HabitSchemaType) => {
+    console.log(data, 'data');
+    try {
+      const response = 
+        await axios.post(
+          '/api/habits',
+          JSON.stringify(data)
+        )
+    
+      if(response.data) {
+        return await fetchHabits()
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message, 'error')
+      }
+    }
+  }
+
   const fetchHabits: () => Promise<void> = async () => {
     try {
       const response = await axios.get("/api/habits")
@@ -94,18 +113,6 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleCreateHabit = async (data: HabitFormData) => {
-    console.log(data, "data");
-    const response = await fetch("/api/habits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) throw new Error("Failed to create habit")
-    await fetchHabits()
   }
 
   const handleUpdateHabit = async (data: HabitFormData) => {
@@ -368,13 +375,18 @@ export default function Home() {
               >
                 <Settings className="h-6 w-6" />
               </Button>
-              <Button
-                onClick={() => setShowCreateDialog(true)}
-                size="lg"
-                className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>
+              <CreateHabitDialog
+                onSuccessCallback={handleCreateHabit}
+                trigger={
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
+                    size="lg"
+                    className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Plus className="h-7 w-7" />
+                  </Button>    
+                }
+              />
               <SignOutButton
                 children={
                   <Button variant="ghost">
@@ -502,12 +514,6 @@ export default function Home() {
             </div>
           )}
         </div>
-
-        <CreateHabitDialog
-          open={showCreateDialog}
-          onOpenChange={setShowCreateDialog}
-          onSubmit={handleCreateHabit}
-        />
 
         <EditHabitDialog
           open={!!editingHabit}

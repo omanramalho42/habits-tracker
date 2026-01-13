@@ -52,10 +52,10 @@ export function HabitDetail({ habit, onBack, onToggle }: HabitDetailProps) {
     <div className="space-y-4">
       <Button variant="ghost" onClick={onBack} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back
+        Voltar
       </Button>
 
-      <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+      <Card className="p-6 bg-linear-to-br from-primary/10 to-primary/5 border-primary/20">
         <div className="flex items-center gap-4 mb-6">
           <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-background text-4xl">
             {habit.emoji}
@@ -83,12 +83,12 @@ export function HabitDetail({ habit, onBack, onToggle }: HabitDetailProps) {
       </Card>
 
       <Card className="p-6 bg-card border-border">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">Calendar</h3>
+        <h3 className="text-lg font-semibold mb-4 text-foreground">Calendário</h3>
 
         <div className="grid grid-cols-7 gap-2 mb-2">
           {WEEKDAYS.map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
-              {day}
+            <div key={day.key} className="text-center text-sm font-medium text-muted-foreground py-2">
+              {day.name}
             </div>
           ))}
         </div>

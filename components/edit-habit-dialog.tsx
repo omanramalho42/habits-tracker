@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { HabitForm, type HabitFormData } from "@/components/habit-form"
+import { type HabitFormData } from "@/lib/types"
 import type { HabitWithStats } from "@/lib/types"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -50,12 +50,12 @@ export function EditHabitDialog({ open, onOpenChange, onSubmit, habit }: EditHab
         <DialogHeader>
           <DialogTitle className="text-2xl">Edit Habit</DialogTitle>
         </DialogHeader>
-        <HabitForm
+        {/* <HabitForm
           onSubmit={handleSubmit}
           onCancel={() => onOpenChange(false)}
           initialData={habit}
           isSubmitting={isSubmitting}
-        />
+        /> */}
       </DialogContent>
     </Dialog>
   )
