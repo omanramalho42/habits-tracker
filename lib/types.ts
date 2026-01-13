@@ -28,6 +28,7 @@ export interface HabitCompletion {
   id: number
   habitId: number
   completedDate: string
+  completed_date: string
   createdAt: string
 }
 

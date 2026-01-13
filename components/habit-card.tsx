@@ -116,7 +116,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
                   )
                 })}
               </div>
-              <span className="text-xs text-muted-foreground font-medium">{habit.completions.length} completed</span>
+              <span className="text-xs text-muted-foreground font-medium">{habit.completions.length} completados</span>
             </div>
           </div>
         </div>

@@ -5,9 +5,6 @@ import { Card } from "@/components/ui/card"
 import { Check, TrendingUp, Calendar, Target, Flame, X } from "lucide-react"
 import type { HabitWithStats } from "@/lib/types"
 import { WEEKDAYS } from "@/lib/habit-utils"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import HeatMapHabit from "./heat-map"
 
 interface HabitDetailDialogProps {
@@ -17,41 +14,11 @@ interface HabitDetailDialogProps {
 }
 
 export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDialogProps) {
-  const [displayMonth, setDisplayMonth] = useState(new Date().getMonth())
-  const [displayYear, setDisplayYear] = useState(new Date().getFullYear())
-
   if (!habit) return null
 
   console.log(habit, "Habit")
 
-  const getMonthCalendar = () => {
-    const firstDay = new Date(displayYear, displayMonth, 1)
-    const lastDay = new Date(displayYear, displayMonth + 1, 0)
-
-    const days = []
-    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
-      days.push(new Date(d))
-    }
-    return days
-  }
-
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
-
-  const months = [
-    { value: 0, label: "January" },
-    { value: 1, label: "February" },
-    { value: 2, label: "March" },
-    { value: 3, label: "April" },
-    { value: 4, label: "May" },
-    { value: 5, label: "June" },
-    { value: 6, label: "July" },
-    { value: 7, label: "August" },
-    { value: 8, label: "September" },
-    { value: 9, label: "October" },
-    { value: 10, label: "November" },
-    { value: 11, label: "December" },
-  ]
-// Cria um Set de datas concluídas para busca rápida (formato YYYY/MM/DD)
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
@@ -136,7 +103,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
                     <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-primary" />
                   </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">Success</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground">Sucesso</div>
                 </div>
                 <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: habit.color }}>
                   {habit.completion_rate}%
@@ -150,7 +117,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 <h3 className="text-sm sm:text-base md:text-lg font-bold text-foreground">
-                  Activity Calendar
+                  Calendário de atividades
                 </h3>
               </div>
               {/* <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

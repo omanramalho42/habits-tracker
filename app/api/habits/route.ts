@@ -29,7 +29,8 @@ export async function GET() {
         orderBy: {
           createdAt: 'asc'
         }
-      });
+      })
+    console.log(habits,"habits")
 
     return NextResponse.json(habits)
   } catch (error) {
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         goal,
         motivation,
         startDate: new Date(startDate),
-        endDate: new Date(endDate),
+        endDate: new Date(endDate) ?? null,
         reminder,
         frequency, // Json
         color,

@@ -87,6 +87,7 @@ export default function Home() {
           return await statsResponse.data
         }),
       )
+      console.log(habitsWithStats, "habits stats")
       setHabits(habitsWithStats)
     } catch (error) {
       console.error("Error fetching habits:", error)
@@ -230,13 +231,20 @@ export default function Home() {
     if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
       return
     }
-
-    const selectedDateString = selectedDate.toISOString().split("T")[0]
-    const activeHabits = habits.filter((habit) => isHabitActiveOnDate(habit, selectedDate))
+    console.log(habits, "Habits")
+    const selectedDateString =
+      selectedDate.toISOString().split("T")[0]
+    const activeHabits =
+      habits.filter((habit) => 
+          isHabitActiveOnDate(habit, selectedDate)
+      )
     const completedCount = activeHabits.filter((habit) =>
-      habit.completions.some((c) => c.completedDate === selectedDateString),
+      habit.completions.some(
+        (completion) => 
+          completion.completed_date === selectedDateString
+      ),
     ).length
-
+    console.log(activeHabits, "active habits")
     setActiveHabitsForSelectedDate(activeHabits)
     setCompletedToday(completedCount)
   }
@@ -325,7 +333,9 @@ export default function Home() {
           <h2 className="text-2xl font-bold mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Wisey
           </h2>
-          <p className="text-muted-foreground">Carregando seus hábitos...</p>
+          <p className="text-muted-foreground">
+            Carregando seus hábitos...
+          </p>
         </div>
       </div>
     )
@@ -343,11 +353,6 @@ export default function Home() {
                 Hoje
               </h1>
               <div className="flex flex-row items-center gap-2">
-                {/* <Avatar>
-                  <AvatarImage
-                    src={"https://github.com/omanramalho42.png"}
-                  />
-                </Avatar> */}
                   <p className="text-sm">
                     Olá {"john doe"} 👋
                   </p>
@@ -410,9 +415,12 @@ export default function Home() {
               <div className="overflow-x-auto flex-1 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                 <div className="flex gap-2 min-w-max pb-2">
                   {monthDates.map((date) => {
-                    const isSelected = date.toISOString().split("T")[0] === selectedDateString
-                    const isToday = date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
-                    const dayOfWeek = date.toLocaleDateString("pt-BR", { weekday: "short" })
+                    const isSelected =
+                      date.toISOString().split("T")[0] === selectedDateString
+                    const isToday =
+                      date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
+                    const dayOfWeek =
+                      date.toLocaleDateString("pt-BR", { weekday: "short" })
 
                     return (
                       <button
@@ -453,7 +461,7 @@ export default function Home() {
               <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
                 {completedToday}/{activeHabitsForSelectedDate.length}
               </p>
-              <p className="text-sm text-muted-foreground font-medium">Habits completed today</p>
+              <p className="text-sm text-muted-foreground font-medium">Hábitos completos hoje</p>
             </div>
           )}
 
