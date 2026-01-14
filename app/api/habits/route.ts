@@ -30,7 +30,7 @@ export async function GET() {
           createdAt: 'asc'
         }
       })
-    console.log(habits,"habits")
+    // console.log(habits,"habits")
 
     return NextResponse.json(habits)
   } catch (error) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         emoji,
         goal,
         motivation,
-        startDate: new Date(startDate),
+        startDate: (new Date(startDate)),
         endDate: endDate ? new Date(endDate) : null,
         reminder,
         frequency, // Json

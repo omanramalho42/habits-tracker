@@ -1,5 +1,5 @@
 export interface Habit {
-  id: number
+  id: string
   name: string
   emoji: string
   goal: string
@@ -25,8 +25,8 @@ export interface HabitFormData {
 }
 
 export interface HabitCompletion {
-  id: number
-  habitId: number
+  id: string
+  habitId: string
   completedDate: string
   completed_date: string
   createdAt: string
@@ -41,7 +41,7 @@ export interface HabitWithStats extends Habit {
 }
 
 export interface MoodEntry {
-  id: number
+  id: string
   mood_type: string
   mood_level: string
   entry_date: string

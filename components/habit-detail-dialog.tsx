@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Calendar,
   Target,
-  Flame
+  Flame,
 } from "lucide-react"
 
 interface HabitDetailDialogProps {

@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 import { auth } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
     // 1️⃣ Buscar usuário interno pelo clerkUserId
     const user = await prisma.user.findUnique({
       where: {
-        id: userId
+        clerkUserId: userId
       },
     })
 
@@ -30,9 +29,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-  
     const { searchParams } = new URL(request.url)
-    const date = searchParams.get("date") || new Date().toISOString().split("T")[0]
+    const date =
+      searchParams.get("date") || 
+      new Date().toISOString().split("T")[0]
 
     const entry = await prisma.moodEntry.findUnique({
       where: {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     // 1️⃣ Buscar usuário interno pelo clerkUserId
     const user = await prisma.user.findUnique({
       where: {
-        id: clerkUserId
+        clerkUserId: clerkUserId
       },
     })
 

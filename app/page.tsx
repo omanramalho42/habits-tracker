@@ -1,39 +1,40 @@
 "use client"
 
-import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { currentUser } from "@clerk/nextjs/server"
+import { SignOutButton } from "@clerk/nextjs"
 
 import axios from "axios"
 
-import { useToast } from "@/hooks/use-toast"
-
 import confetti from "canvas-confetti"
+
+import { toast } from "sonner"
+
+import {
+  CreateHabitDialog,
+  HabitSchemaType
+} from "@/components/create-habit-dialog"
 
 import { Button } from "@/components/ui/button"
 import { HabitCard } from "@/components/habit-card"
-import { CreateHabitDialog, HabitSchemaType } from "@/components/create-habit-dialog"
-import { EditHabitDialog } from "@/components/edit-habit-dialog"
 import { HabitDetailDialog } from "@/components/habit-detail-dialog"
 import { MoodWizard } from "@/components/mood-wizard"
 import { SettingsDialog } from "@/components/settings-dialog"
-import { Toaster } from "@/components/ui/toaster"
 
-import { isHabitActiveOnDate } from "@/lib/habit-utils"
+import { isHabitActiveOnDate, normalizeDateOnly } from "@/lib/habit-utils"
 
-import type { Habit, HabitWithStats, HabitFormData } from "@/lib/types"
+import type { HabitWithStats } from "@/lib/types"
 
-import { Plus, ChevronLeft, ChevronRight, Settings, LogOut } from "lucide-react"
-import { SignOutButton } from "@clerk/nextjs"
-import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import {
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  LogOut
+} from "lucide-react"
 
 export default function Home() {
-  // const user = await currentUser()
-  
-  // if(!user) {
-  //   redirect("/sign-in/redirect='home'")
-  // }
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [habits, setHabits] = useState<HabitWithStats[]>([])
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -43,7 +44,6 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [showMoodWizard, setShowMoodWizard] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const { toast } = useToast()
 
   const [completedToday, setCompletedToday] = useState(0)
   const [activeHabitsForSelectedDate, setActiveHabitsForSelectedDate] = useState<HabitWithStats[]>([])
@@ -102,11 +102,12 @@ export default function Home() {
 
       const habitsWithStats: HabitWithStats[] = await Promise.all(
         response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(`/api/habits/${habit.id}/stats`)
+          const statsResponse = await axios.get(
+            `/api/habits/${habit.id}/stats`
+          )
           return await statsResponse.data
         }),
       )
-      console.log(habitsWithStats, "habits stats")
       setHabits(habitsWithStats)
     } catch (error) {
       console.error("Error fetching habits:", error)
@@ -115,39 +116,66 @@ export default function Home() {
     }
   }
 
-  const handleUpdateHabit = async (data: HabitFormData) => {
-    if (!editingHabit) return
+  // const handleUpdateHabit = async (data: HabitFormData) => {
+  //   if (!editingHabit) return
 
-    const response = await fetch(`/api/habits/${editingHabit.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
+  //   const response = await fetch(`/api/habits/${editingHabit.id}`, {
+  //     method: "PATCH",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify(data),
+  //   })
 
-    if (!response.ok) throw new Error("Failed to update habit")
-    await fetchHabits()
-  }
+  //   if (!response.ok) throw new Error("Failed to update habit")
+  //   await fetchHabits()
+  // }
 
-  const handleToggleHabit = async (habitId: number, date?: string) => {
+  const handleToggleHabit = async (habitId: string, date?: string) => {
+    const toastId =
+      toast.loading(
+        'Marcando hábito como completo...',
+        { id: 'toggle-habit' }
+      )
+
     try {
+      setIsLoading(true)
+
       const habit = habits.find((h) => h.id === habitId)
       const dateStr = date || selectedDate.toISOString().split("T")[0]
-      const isCompleting = !habit?.completions?.some((c) => c.completedDate === dateStr)
 
-      const response = await fetch(`/api/habits/${habitId}/toggle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: dateStr }),
-      })
+      // console.log(habitId, "habitId")
+      // console.log(dateStr, 'date')
+      // console.log(normalizeDateOnly(new Date(dateStr)), 'date str')
+      // console.log(habit, 'habit')
 
-      if (response.ok) {
-        await fetchHabits()
+      // ANALISAR A COMPARAÇÃO DE DATAS
+      //FOI FEITO NO updateActiveHabitsForSelectedDate
+      const isCompleting = 
+        !habit?.completions?.some(
+          (c) => 
+            c?.completed_date === dateStr
+        )
+
+      console.log(isCompleting, "is completing")
+      
+      const response = 
+        await axios.post(
+          `/api/habits/${habitId}/toggle`,
+          JSON.stringify({ date: dateStr })
+        )
+
+      if (response.data) {
         if (detailHabit && detailHabit.id === habitId) {
-          const statsResponse = await fetch(`/api/habits/${habitId}/stats`)
-          const updatedHabit = await statsResponse.json()
+          const statsResponse = 
+            await axios.get(
+              `/api/habits/${habitId}/stats`
+            )
+
+          const updatedHabit = statsResponse.data
+
           setDetailHabit(updatedHabit)
         }
 
+        await fetchHabits()
         if (isCompleting) {
           confetti({
             particleCount: 100,
@@ -155,70 +183,71 @@ export default function Home() {
             origin: { y: 0.6 },
             colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
           })
-          toast({
-            title: "🎉 Sucesso!",
-            description: "Hábito concluído com sucesso!",
-          })
+          toast.success(
+            "Hábito concluído com sucesso!",
+            { id: toastId }
+          )
         } else {
-          toast({
-            title: "Hábito desmarcado",
-            description: "A conclusão foi removida.",
-          })
+          toast.success(
+            "Hábito desmarcado com sucesso!",
+            { id: toastId }
+          )
         }
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Erro ao atualizar hábito. Tente novamente.",
-      })
+      if(error instanceof Error) {
+        console.log(error.message, "error")
+        toast.error(
+          error.message,
+          { id: toastId }
+        )
+      }
+    } finally {
+      setIsLoading(prev => !prev)
     }
   }
 
-  const handleDeleteHabit = async (habitId: number) => {
+  const handleDeleteHabit = async (habitId: string) => {
     try {
-      toast({
-        title: "Deletando hábito...",
-        description: "Por favor, aguarde.",
-      })
+      toast.loading("Deletando hábito...", { id: 'delete-habit' })
 
-      const response = await fetch(`/api/habits/${habitId}`, {
-        method: "DELETE",
-      })
+      const response = await axios.delete(`/api/habits/${habitId}`)
 
-      if (response.ok) {
+      if (response.data) {
+
         await fetchHabits()
+
         if (detailHabit?.id === habitId) setDetailHabit(null)
         if (editingHabit?.id === habitId) setEditingHabit(null)
 
-        toast({
-          title: "Sucesso!",
-          description: "Hábito deletado com sucesso.",
-        })
-      } else {
-        throw new Error("Failed to delete habit")
+        toast.success(
+          "Hábito deletado com sucesso.",
+          { id: "delete-habit" }
+        )
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Erro ao deletar hábito. Tente novamente.",
-      })
+      if(error instanceof Error) {
+        console.log(error.message)
+        toast.error(
+          "Erro ao deletar hábito. Tente novamente.",
+          { id: 'delete-habit' }
+        )
+      }
     }
   }
 
-  const handleViewDetail = async (habitId: number) => {
-    const statsResponse = await fetch(`/api/habits/${habitId}/stats`)
-    const habitWithStats = await statsResponse.json()
+  const handleViewDetail = async (habitId: string) => {
+    const statsResponse =
+      await axios.get(`/api/habits/${habitId}/stats`)
+
+    const habitWithStats =
+      await statsResponse.data
+
     setDetailHabit(habitWithStats)
   }
 
   const handleHabitError = (message: string) => {
-    toast({
-      variant: "destructive",
-      title: "Erro",
-      description: message,
-    })
+    toast.error(message)
   }
 
   const getMonthDates = () => {
@@ -238,20 +267,21 @@ export default function Home() {
     if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
       return
     }
-    console.log(habits, "Habits")
+    // console.log(habits, "Habits")
     const selectedDateString =
       selectedDate.toISOString().split("T")[0]
     const activeHabits =
       habits.filter((habit) => 
-          isHabitActiveOnDate(habit, selectedDate)
+        isHabitActiveOnDate(habit, selectedDate)
       )
+    // console.log(selectedDateString, 'selected date');
     const completedCount = activeHabits.filter((habit) =>
       habit.completions.some(
         (completion) => 
           completion.completed_date === selectedDateString
       ),
     ).length
-    console.log(activeHabits, "active habits")
+    // console.log(activeHabits, "active habits")
     setActiveHabitsForSelectedDate(activeHabits)
     setCompletedToday(completedCount)
   }
@@ -350,10 +380,15 @@ export default function Home() {
 
   return (
     <>
-      <MoodWizard open={showMoodWizard} onComplete={handleMoodComplete} />
+      <MoodWizard
+        open={showMoodWizard}
+        onComplete={handleMoodComplete}
+      />
 
       <main className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-8">
+
+          {/* HEADER + ACTIONS BUTTONS */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex flex-col gap-2">
               <h1 className="text-5xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
@@ -361,11 +396,12 @@ export default function Home() {
               </h1>
               <div className="flex flex-row items-center gap-2">
                   <p className="text-sm">
-                    Olá {"john doe"} 👋
+                    Olá 👋
                   </p>
               </div>
               <p className="text-muted-foreground text-base">{today}</p>
             </div>
+
             <div className="flex items-center gap-3">
               <Button
                 onClick={() => setShowSettings(true)}
@@ -397,7 +433,8 @@ export default function Home() {
               {/* ADICIONAR SELECT LANGUAGE */}
             </div>
           </div>
-
+          
+          {/* CURRENT SELECTION DATE */}
           <div className="mb-8 bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground">{currentMonthYear}</h2>
@@ -412,7 +449,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-
+          
+          {/* NAVIGATION CALENDAR */}
           <div className="mb-12 bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
             <div className="flex items-center gap-3">
               <Button
@@ -467,7 +505,8 @@ export default function Home() {
               </Button>
             </div>
           </div>
-
+          
+          {/* CARD ACTIVE HABITS */}
           {completedToday > 0 && activeHabitsForSelectedDate.length > 0 && (
             <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-2xl p-6 text-center mb-6 shadow-sm">
               <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
@@ -476,7 +515,7 @@ export default function Home() {
               <p className="text-sm text-muted-foreground font-medium">Hábitos completos hoje</p>
             </div>
           )}
-
+          {/* LIST HABITS (ARRAY EMPTY) */}
           {activeHabitsForSelectedDate.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-7xl mb-6">🎯</div>
@@ -488,19 +527,24 @@ export default function Home() {
                   ? "Create your first habit and begin building better routines that last"
                   : "No habits scheduled for this date. Try selecting a different day or create a new habit."}
               </p>
-              <Button
-                onClick={() => setShowCreateDialog(true)}
-                size="lg"
-                className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                {habits.length === 0 ? "Create Your First Habit" : "Create New Habit"}
-              </Button>
+              <CreateHabitDialog
+                onSuccessCallback={handleCreateHabit}
+                trigger={
+                  <Button
+                    size="lg"
+                    className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    {habits.length === 0 ? "Crie seu primeiro hábito" : "Criar novo hábito"}
+                  </Button>   
+                }
+              />
             </div>
           ) : (
             <div className="space-y-4">
               {activeHabitsForSelectedDate.map((habit) => (
                 <HabitCard
+                  loading={isLoading}
                   key={habit.id}
                   habit={habit}
                   onToggle={(id) => handleToggleHabit(id, selectedDateString)}
@@ -515,26 +559,26 @@ export default function Home() {
           )}
         </div>
 
-        <EditHabitDialog
+        {/* <EditHabitDialog
           open={!!editingHabit}
           onOpenChange={(open) => !open && setEditingHabit(null)}
           onSubmit={handleUpdateHabit}
           habit={editingHabit}
-        />
+        /> */}
 
+        {/* VIEW HABIT DETAILS */}
         <HabitDetailDialog
           open={!!detailHabit}
           onOpenChange={(open) => !open && setDetailHabit(null)}
           habit={detailHabit}
         />
 
+        {/* CONFIGURAÇÕES */}
         <SettingsDialog
           open={showSettings}
           onOpenChange={setShowSettings}
         />
       </main>
-
-      <Toaster />
     </>
   )
 }

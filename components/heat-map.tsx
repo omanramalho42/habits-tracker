@@ -85,7 +85,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
         .split('T')[0]
         .replace(/-/g, '/')
 
-        console.log(completionDate, formattedDate, "vs")
+        // console.log(completionDate, formattedDate, "vs")
 
       return completionDate === formattedDate
     })
@@ -111,7 +111,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
     currentDate.setDate(currentDate.getDate() + 1)
   }
 
-  console.log(valuesSchdules, "valuesSchdules (+)")
+  // console.log(valuesSchdules, "valuesSchdules (+)")
   // console.log(valuesCompletions, "valuesCompletions (=)");
   // console.log(normalizedStartDate, "normalizedStartDate")
 

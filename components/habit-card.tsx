@@ -10,42 +10,136 @@ import { Check, X, Pencil, Trash2, TrendingUp } from "lucide-react"
 import { WEEKDAYS, WEEKDAY_MAP } from "@/lib/habit-utils"
 import { cn } from "@/lib/utils"
 
+const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
+  0: 'S',   // Sunday
+  1: 'M',
+  2: 'T',
+  3: 'W',
+  4: 'TH',
+  5: 'F',
+  6: 'SA',
+}
+
 interface HabitCardProps {
   habit: HabitWithStats
-  onToggle: (habitId: number) => void
+  onToggle: (habitId: string) => void
   onEdit?: (habit: HabitWithStats) => void
-  onDelete?: (habitId: number) => void
+  onDelete?: (habitId: string) => void
   onClick?: () => void
   selectedDate?: Date
+  loading: boolean
   onError?: (message: string) => void
 }
 
-export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selectedDate, onError }: HabitCardProps) {
+function getStartOfWeek(date: Date) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() - d.getDay())
+  return d
+}
+
+function getEndOfWeek(date: Date) {
+  const d = getStartOfWeek(date)
+  d.setDate(d.getDate() + 6)
+  d.setHours(23, 59, 59, 999)
+  return d
+}
+
+export function HabitCard({
+  habit,
+  onToggle,
+  // onEdit,
+  // onDelete,
+  onClick,
+  selectedDate,
+  onError,
+  loading,
+}: HabitCardProps) {
+  // Calcula o início da semana com base na data selecionada
+  // Ex: segunda-feira 00:00:00
+  const startOfWeek = getStartOfWeek(new Date(selectedDate!))
+
+  // Calcula o final da semana com base na data selecionada
+  // Ex: domingo 23:59:59
+  const endOfWeek = getEndOfWeek(new Date(selectedDate!))
+// Cria um Set (estrutura que NÃO permite valores duplicados)
+// Ele vai armazenar as datas únicas em que o hábito foi concluído na semana
+  const completionSet = new Set(
+    // Filtra apenas conclusões válidas dentro da semana atual
+    habit.completions
+    .filter(c => {
+      if (!c.completedDate) return false
+      // Converte a data de conclusão em Date
+      const d = new Date(c.completedDate)
+      // Mantém apenas datas entre início e fim da semana
+      return d >= startOfWeek && d <= endOfWeek
+    })
+    // Converte a data para string no formato YYYY/MM/DD
+    // Isso evita problemas de timezone ao comparar datas
+    .map(c =>
+      new Date(c.completedDate!)
+      .toISOString()
+      .split('T')[0]
+      .replace(/-/g, '/')
+    )
+  )
+  // Converte cada data única para o dia da semana (0 a 6)
+  // e mapeia para a frequência do hábito
+  const completionFrequency = Array.from(completionSet).map(dateStr => {
+    // Quebra a string da data em números
+    const [year, month, day] = dateStr.split('/').map(Number)
+
+    // Cria a data manualmente para evitar bug de fuso horário
+    // (mês começa em 0 no JS)
+    const date = new Date(year, month - 1, day)
+    // Retorna a frequência associada ao dia da semana
+    return WEEKDAY_TO_FREQUENCY[date.getDay()]
+  })
+  // Remove frequências duplicadas
+  // Ex: se o hábito foi feito 2 vezes na segunda, conta só uma
+  const uniqueCompletionFrequency = Array.from(
+    new Set(completionFrequency)
+  )
+  // Garante que a frequência do hábito seja um array
+  // (caso venha null, undefined ou outro formato)
   const frequency =
     Array.isArray(habit.frequency) ? habit.frequency : []
-
+  // Define a data atual com base na data selecionada
+  // Se não existir, usa a data de hoje
   const currentDate =
     selectedDate || new Date()
+  // Cria uma string da data atual no formato YYYY-MM-DD
+  // Usada para comparação direta
   const todayStr =
     currentDate.toISOString().split("T")[0]
-
+  // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
     const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
     return completionDate === todayStr
   })
-
+  // Obtém o dia da semana atual (0 = domingo, 6 = sábado)
   const currentDayOfWeek = currentDate.getDay()
+  // Converte o número do dia da semana para as chaves do WEEKDAY_MAP
+  // Ex: 1 → ["MONDAY"]
   const currentDayKeys = Object.entries(WEEKDAY_MAP)
     .filter(([_, value]) => value === currentDayOfWeek)
     .map(([key]) => key)
-  const isActiveToday = currentDayKeys.some((key) => frequency.includes(key))
-
+  // Verifica se o hábito está ativo hoje
+  // Ex: se hoje é segunda e o hábito inclui "MONDAY"
+  const isActiveToday =
+    currentDayKeys.some((key) => frequency.includes(key))
+  // Cria a data de hoje zerando horas (00:00:00)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+  // Normaliza a data selecionada (remove horas)
   const checkDate = new Date(currentDate)
   checkDate.setHours(0, 0, 0, 0)
+  // Verifica se a data selecionada está no futuro
   const isFutureDate = checkDate > today
-
+  // Define se o usuário pode marcar/desmarcar o hábito
+  // Regras:
+  // - O hábito precisa estar ativo hoje
+  // - A data não pode ser futura 
   const canToggle = isActiveToday && !isFutureDate
 
   const handleToggleClick = (e: React.MouseEvent) => {
@@ -79,7 +173,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 flex-1 min-w-0">
           <div
-            className="flex items-center justify-center w-14 h-14 rounded-2xl text-3xl flex-shrink-0 shadow-sm"
+            className="flex items-center justify-center w-14 h-14 rounded-2xl text-3xl shrink-0 shadow-sm"
             style={{ backgroundColor: `${habit.color}20` }}
           >
             {habit.emoji}
@@ -99,24 +193,42 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
 
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-1">
-                {WEEKDAYS.map((day, index) => {
+                {WEEKDAYS.map((day) => {
+                  // ex: ['M', 'W', 'F']
+                  const completedWeekFrequency = uniqueCompletionFrequency
+
                   const isActive = frequency.includes(day.key)
-                  const isCompletedThisWeekday = isCompletedToday && currentDayOfWeek === index
+
+                  // ✅ agora olha para TODAS as conclusões da semana
+                  const isCompletedThisWeekday =
+                    completedWeekFrequency.includes(day.key)
 
                   return (
                     <div
-                      key={index}
+                      key={day.key}
                       className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${
-                        isActive ? "text-white shadow-sm" : "bg-muted/50 text-muted-foreground"
+                        isActive
+                          ? "text-white shadow-sm"
+                          : "bg-muted/50 text-muted-foreground"
                       }`}
-                      style={isActive ? { backgroundColor: isCompletedThisWeekday ? "#10B981" : habit.color } : {}}
+                      style={
+                        isActive
+                          ? {
+                              backgroundColor: isCompletedThisWeekday
+                                ? "#10B981"        // 🟢 completado
+                                : habit.color      // 🔵 ativo (schedule)
+                            }
+                          : {}
+                      }
                     >
                       {day.label}
                     </div>
                   )
                 })}
               </div>
-              <span className="text-xs text-muted-foreground font-medium">{habit.completions.length} completados</span>
+              <span className="text-xs text-muted-foreground font-medium">
+                {habit.completions.length} completados
+              </span>
             </div>
           </div>
         </div>
@@ -160,6 +272,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete, onClick, selected
           <Button
             variant={isCompletedToday ? "default" : "outline"}
             size="icon"
+            disabled={loading}
             className={cn(
               "h-11 w-11 rounded-xl transition-all",
               isCompletedToday && "shadow-md bg-green-500 hover:bg-red-500 border-green-500",

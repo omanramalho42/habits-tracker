@@ -89,27 +89,40 @@ export function getTodayString(): string {
   return formatDate(new Date())
 }
 
-export function isHabitActiveOnDate(
-  habit: { startDate: string; endDate: string | null; frequency: string[] },
-  date: Date,
-): boolean {
-  const dateStr = formatDate(date)
-
-  // Check if date is before start date
-  if (dateStr < habit.startDate) {
-    return false
-  }
-
-  // Check if date is after end date (if end date exists)
-  if (habit.endDate && dateStr > habit.endDate) {
-    return false
-  }
-
-  // Check if habit is scheduled for this day of week
-  const dayOfWeek = date.getDay()
-  const dayKeys = Object.entries(WEEKDAY_MAP)
-    .filter(([_, value]) => value === dayOfWeek)
-    .map(([key]) => key)
-
-  return dayKeys.some((key) => habit.frequency.includes(key))
+export function normalizeDateOnly(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
+
+export function isHabitActiveOnDate(
+  habit: {
+    startDate: string
+    endDate: string | null
+    frequency: string[]
+  },
+  date: Date
+): boolean {
+  const currentDate = normalizeDateOnly(date)
+  const habitStartDate = normalizeDateOnly(new Date(habit.startDate))
+
+  const habitEndDate = habit.endDate
+    ? normalizeDateOnly(new Date(habit.endDate))
+    : null
+
+  // ⛔ antes do início
+  if (currentDate < habitStartDate) {
+    return false
+  }
+
+  // ⛔ depois do fim (se existir)
+  if (habitEndDate && currentDate > habitEndDate) {
+    return false
+  }
+
+  // 📅 valida frequência
+  const dayOfWeek = currentDate.getDay()
+
+  return habit.frequency.some(
+    key => WEEKDAY_MAP[key] === dayOfWeek
+  )
+}
+

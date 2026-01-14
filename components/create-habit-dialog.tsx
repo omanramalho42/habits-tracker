@@ -26,6 +26,8 @@ import {
 import Picker from "@emoji-mart/react"
 import data from "@emoji-mart/data"
 
+import { useTheme } from "next-themes"
+
 import { format } from "date-fns"
 
 import { Button } from "@/components/ui/button"
@@ -85,8 +87,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
   const [open, setOpen] = useState<boolean>(false)
   const [color, setColor] = useState<boolean>(false)
 
-  const [showEmojiPicker, setShowEmojiPicker] =
-    useState<boolean>(false)
+  const theme = useTheme()
 
   const form = useForm<HabitSchemaType>({
     defaultValues: {
@@ -121,7 +122,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
         'Criando hábito....',
         { id: 'habits-create'}
       )
-
+      console.log(data, "data")
     try {
       await onSuccessCallback?.(data)
       
@@ -165,13 +166,13 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
           <DialogTitle className="text-2xl">
             Criar um novo hábito
           </DialogTitle>
-          <DialogDescription>
+          {/* <DialogDescription>
             Hábitos são essencias para uma vida organizada
-          </DialogDescription>
+          </DialogDescription> */}
         </DialogHeader>
 
         <Form {...form}>
-          <form className="space-y-4">
+          <form className="space-y-3">
 
             {/* ICONE */}
             <FormField
@@ -187,7 +188,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full min-h-18 sm:min-h-25"
+                          className="w-full min-h-16 sm:min-h-25"
                         >
                           {field.value ? (
                             <div className="flex flex-col items-center justify-center gap-1">
@@ -213,17 +214,18 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
                         side="bottom"
                         align="center"
                         className="
-                          w-[95vw] max-w-sm
+                          w-[90vw] max-w-sm
                           sm:w-105
                           p-0
                           max-h-[80vh]
                           overflow-hidden
                         "
                       >
-                        <div className="max-h-[70vh] overflow-y-auto">
+                        <div className="max-h-[70vh]">
                           <Picker
                             data={data}
-                            // theme={theme.resolvedTheme}
+                            theme={theme}
+                            disabled={isSubmitting}
                             navPosition="bottom"
                             previewPosition="top"
                             searchPosition="sticky"

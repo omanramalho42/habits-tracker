@@ -10,6 +10,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
+import { Toaster } from "sonner"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -70,7 +71,8 @@ export default async function RootLayout({
     >
       <html lang="pt-BR" className="dark">
         <body className={`font-sans antialiased`}>
-            {children}
+          {children}
+          <Toaster theme="dark" />
           <Analytics />
         </body>
       </html>
