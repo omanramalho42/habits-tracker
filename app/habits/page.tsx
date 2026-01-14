@@ -8,6 +8,7 @@ import axios from 'axios'
 import { toast } from 'sonner'
 
 import { HabitCard } from '@/components/habit-card'
+import { CreateHabitDialog, HabitSchemaType } from "@/components/create-habit-dialog"
 import { UpdateHabitSchemaType } from '@/components/update-habit-dialog'
 
 import {
@@ -16,7 +17,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import {
@@ -25,10 +25,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
-import { HabitWithStats } from '@/lib/types'
+import type { HabitWithStats } from '@/lib/types'
+
+import { Plus } from "lucide-react"
 
 export default function page() {
+  const [search, setSearch] = useState<string>("")
   const [habits, setHabits] =
     useState<HabitWithStats[]>([])
   const [loading, setLoading] =
@@ -58,6 +63,25 @@ export default function page() {
     fetchHabits()
   }, [])
 
+    const handleCreateHabit = async (data: HabitSchemaType) => {
+    console.log(data, 'data');
+    try {
+      const response = 
+        await axios.post(
+          '/api/habits',
+          data
+        )
+    
+      if(response.data) {
+        return await fetchHabits()
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message, 'error')
+      }
+    }
+  }
+  
   const handleUpdateHabit = async (data: UpdateHabitSchemaType) => {
     console.log(data, 'handle update here')
     const toastId = toast.loading(
@@ -146,16 +170,59 @@ export default function page() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
         <div className="space-y-4">
-          {habits.map((habit) => (
-            <HabitCard
-              loading={loading}
-              key={habit.id}
-              habit={habit}
-              onDelete={handleDeleteHabit}
-              onEdit={handleUpdateHabit}
-            />
-          ))}
+        <Input
+          placeholder="pesquise aqui pelo nome do hábito"
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setSearch(event.target.value)
+          }
+        />
+
+          {habits.length > 0 ? habits.filter((habit) => {
+            if (!search) return true
+
+            const searchValue = search.toLowerCase()
+
+            return (
+              habit.name.toLowerCase().includes(searchValue) ||
+              habit.emoji?.includes(search)
+            )
+          }).map((habit) => (
+            <div key={habit.id}>
+              <HabitCard
+                loading={loading}
+                habit={habit}
+                onDelete={handleDeleteHabit}
+                onEdit={handleUpdateHabit}
+              />
+            </div>
+          ))
+           : (
+            <div className="text-center py-20">
+              <div className="text-7xl mb-6">🎯</div>
+              <h2 className="text-2xl font-bold mb-3 text-foreground">
+                {habits.length === 0 ? "Comece sua jornada" : "Nenhum hábito encontrado para este dia"}
+              </h2>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                {habits.length === 0
+                  ? "Crie seu primeiro hábito e comece a construir melhor a sua rotina"
+                  : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
+              </p>
+              <CreateHabitDialog
+                onSuccessCallback={handleCreateHabit}
+                trigger={
+                  <Button
+                    size="lg"
+                    className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    {habits.length === 0 ? "Crie seu primeiro hábito" : "Criar novo hábito"}
+                  </Button>   
+                }
+              />
+            </div>
+          )}
         </div>
       </div>
     </main>

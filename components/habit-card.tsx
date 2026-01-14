@@ -1,15 +1,46 @@
 "use client"
 
-import type React from "react"
+import React, { useState } from "react"
 import { toast } from "react-toastify"
 
-import type { HabitWithStats } from "@/lib/types"
+import HeatMapHabit from "@/components/heat-map"
+
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { X, Pencil, Trash2, TrendingUp } from "lucide-react"
 import { WEEKDAYS, WEEKDAY_MAP } from "@/lib/habit-utils"
+
+import {
+UpdateHabitDialog,
+UpdateHabitSchemaType
+} from "./update-habit-dialog"
+
+import {
+  Dialog,
+  DialogHeader,
+  DialogTrigger,
+  DialogContent,
+  DialogDescription,
+  DialogTitle
+} from "@/components/ui/dialog"
+
 import { cn } from "@/lib/utils"
-import { UpdateHabitDialog, UpdateHabitSchemaType } from "./update-habit-dialog"
+
+import type { HabitWithStats } from "@/lib/types"
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+
+
+import {
+  X,
+  Pencil,
+  Trash2,
+  TrendingUp,
+  Eye
+} from "lucide-react"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -56,6 +87,7 @@ export function HabitCard({
   onError,
   loading,
 }: HabitCardProps) {
+  const [show, setShow] = useState<boolean>(false)
   // Calcula o início da semana com base na data selecionada
   // Ex: segunda-feira 00:00:00
   const startOfWeek = getStartOfWeek(new Date(selectedDate!))
@@ -172,6 +204,7 @@ export function HabitCard({
         onClick?.()
       }}
     >
+      {/* INFO */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 flex-1 min-w-0">
           <div
@@ -237,7 +270,41 @@ export function HabitCard({
                 {habit.completions.length} completados
               </span>
             </div>
+
           </div>
+              
+          {/* DIALOG SHOW HEATMAP */}
+
+          {/* {onEdit && (
+            <Dialog open={show} onOpenChange={setShow}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex flex-row gap-2 items-center">
+                  <Eye className="text-sm text-muted-foreground" />
+                  <p className="text-sm">
+                    Visualizar gráfico de atividade
+                  </p>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    Veja o gráfico de atividades dos seus hábitos
+                  </DialogTitle>
+                  <DialogDescription>
+                    Os hábitos concluidos são mostrados com a cor de tema definida no momento de criação do hábito
+                  </DialogDescription>
+                </DialogHeader>
+                <HeatMapHabit
+                  endDate={habit.endDate ? new Date(habit.endDate) : null}
+                  habitColor={habit.color}
+                  habitFrequency={habit.frequency}
+                  startDate={new Date(habit.startDate)}
+                  completions={habit.completions}
+                />
+              </DialogContent>
+            </Dialog>
+          )} */}
+
         </div>
 
         <div
@@ -308,8 +375,43 @@ export function HabitCard({
               )}
             </Button>
           )}
+          
         </div>
       </div>
+      
+      {/* COLLAPSIBLE SHOW HEATMAP */}
+      {onEdit && (
+        <Collapsible
+          open={show}
+          onOpenChange={setShow}
+          className="flex w-full flex-col"
+        >
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="outline"
+              className="flex flex-row gap-2 items-center w-full"
+            >
+              <Eye className="text-sm text-muted-foreground" />
+              <p className="text-sm">
+                Visualizar gráfico de atividade
+              </p>
+            </Button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="flex items-center justify-between">
+            <div className="rounded-lg p-4 space-y-2">
+              <HeatMapHabit
+                endDate={habit.endDate ? new Date(habit.endDate) : null}
+                habitColor={habit.color}
+                habitFrequency={habit.frequency}
+                startDate={new Date(habit.startDate)}
+                completions={habit.completions}
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
     </Card>
   )
 }

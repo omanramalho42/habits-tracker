@@ -490,12 +490,12 @@ export default function Home() {
             <div className="text-center py-20">
               <div className="text-7xl mb-6">🎯</div>
               <h2 className="text-2xl font-bold mb-3 text-foreground">
-                {habits.length === 0 ? "Start Your Journey" : "No Habits for This Day"}
+                {habits.length === 0 ? "Comece sua jornada" : "Nenhum hábito encontrado para este dia"}
               </h2>
               <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                 {habits.length === 0
-                  ? "Create your first habit and begin building better routines that last"
-                  : "No habits scheduled for this date. Try selecting a different day or create a new habit."}
+                  ? "Crie seu primeiro hábito e comece a construir melhor a sua rotina"
+                  : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
               </p>
               <CreateHabitDialog
                 onSuccessCallback={handleCreateHabit}

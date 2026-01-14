@@ -17,7 +17,7 @@ interface HeatMapHabitProps {
   habitColor: string
   startDate: Date
   endDate: Date | null
-  values: CompletionValue[] // Completions (habit.completions)
+  completions: CompletionValue[] // Completions (habit.completions)
   habitFrequency: string[] // Frequency (habit.frequency)
 }
 
@@ -25,7 +25,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
   habitColor,
   startDate,
   endDate,
-  values,
+  completions,
   habitFrequency
 }) => {
   // --- CONSTANTES ---
@@ -36,7 +36,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
   const WEEKDAYS = ["S", "M", "T", "W", "TH", "F", "SA"] as const
   
   // VERIFICAR COMPLETED_DATE NAO DEVERIA SER POSSIVELMENTE NULL
-  const valuesCompletions: HeatMapValue[] = values.map(completion => {
+  const valuesCompletions: HeatMapValue[] = completions.map(completion => {
     const baseDate = new Date(completion.completed_date!)
 
     const formattedDate = baseDate

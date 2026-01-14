@@ -179,7 +179,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   habitColor={habit.color}
                   startDate={new Date(habit.startDate)}
                   endDate={habit.endDate ? new Date(habit.endDate) : null}
-                  values={habit.completions}
+                  completions={habit.completions}
                   habitFrequency={habit.frequency}
                 />
               </div>
