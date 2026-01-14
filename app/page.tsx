@@ -1,5 +1,7 @@
 "use client"
 
+import { redirect } from "next/navigation"
+
 import { useEffect, useState } from "react"
 
 import { SignOutButton } from "@clerk/nextjs"
@@ -30,7 +32,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
-  LogOut
+  LogOut,
+  SquareDashedKanban,
+  ListIcon
 } from "lucide-react"
 
 export default function Home() {
@@ -83,7 +87,7 @@ export default function Home() {
       const response = 
         await axios.post(
           '/api/habits',
-          JSON.stringify(data)
+          data
         )
     
       if(response.data) {
@@ -115,19 +119,6 @@ export default function Home() {
       setLoading(false)
     }
   }
-
-  // const handleUpdateHabit = async (data: HabitFormData) => {
-  //   if (!editingHabit) return
-
-  //   const response = await fetch(`/api/habits/${editingHabit.id}`, {
-  //     method: "PATCH",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify(data),
-  //   })
-
-  //   if (!response.ok) throw new Error("Failed to update habit")
-  //   await fetchHabits()
-  // }
 
   const handleToggleHabit = async (habitId: string, date?: string) => {
     const toastId =
@@ -204,35 +195,6 @@ export default function Home() {
       }
     } finally {
       setIsLoading(prev => !prev)
-    }
-  }
-
-  const handleDeleteHabit = async (habitId: string) => {
-    try {
-      toast.loading("Deletando hábito...", { id: 'delete-habit' })
-
-      const response = await axios.delete(`/api/habits/${habitId}`)
-
-      if (response.data) {
-
-        await fetchHabits()
-
-        if (detailHabit?.id === habitId) setDetailHabit(null)
-        if (editingHabit?.id === habitId) setEditingHabit(null)
-
-        toast.success(
-          "Hábito deletado com sucesso.",
-          { id: "delete-habit" }
-        )
-      }
-    } catch (error) {
-      if(error instanceof Error) {
-        console.log(error.message)
-        toast.error(
-          "Erro ao deletar hábito. Tente novamente.",
-          { id: 'delete-habit' }
-        )
-      }
     }
   }
 
@@ -411,6 +373,14 @@ export default function Home() {
               >
                 <Settings className="h-6 w-6" />
               </Button>
+              <Button
+                onClick={() => redirect("/habits")}
+                size="lg"
+                variant="outline"
+                className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
+              >
+                <ListIcon className="h-6 w-6" />
+              </Button>
               <CreateHabitDialog
                 onSuccessCallback={handleCreateHabit}
                 trigger={
@@ -548,8 +518,8 @@ export default function Home() {
                   key={habit.id}
                   habit={habit}
                   onToggle={(id) => handleToggleHabit(id, selectedDateString)}
-                  onEdit={(h) => setEditingHabit(h)}
-                  onDelete={handleDeleteHabit}
+                  // onEdit={(h) => setEditingHabit(h)}
+                  // onDelete={handleDeleteHabit}
                   onClick={() => handleViewDetail(habit.id)}
                   selectedDate={selectedDate}
                   onError={handleHabitError}
@@ -558,13 +528,6 @@ export default function Home() {
             </div>
           )}
         </div>
-
-        {/* <EditHabitDialog
-          open={!!editingHabit}
-          onOpenChange={(open) => !open && setEditingHabit(null)}
-          onSubmit={handleUpdateHabit}
-          habit={editingHabit}
-        /> */}
 
         {/* VIEW HABIT DETAILS */}
         <HabitDetailDialog

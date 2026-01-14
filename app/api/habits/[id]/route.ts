@@ -32,8 +32,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       reminder,
       frequency,
       color,
-      start_date,
-      end_date
+      startDate,
+      endDate
     } = body
 
     const newHabit = await prisma.habit.update({
@@ -41,17 +41,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         id
       },
       data: {
-        name,
-        emoji,
-        goal,
-        motivation,
-        reminder,
-        frequency: JSON.stringify(frequency),
-        color,
-        startDate: start_date,
-        endDate: end_date
+        name: name,
+        emoji: emoji,
+        goal: goal,
+        motivation: motivation,
+        reminder: reminder,
+        frequency: frequency,
+        color: color,
+        startDate: startDate,
+        endDate: endDate
       }
     })
+
+    console.log(newHabit, "updating")
 
     return NextResponse.json(newHabit)
   } catch (error) {

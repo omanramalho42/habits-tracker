@@ -50,13 +50,13 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                   <div
-                    className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl text-3xl sm:text-4xl shadow-lg flex-shrink-0"
+                    className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl text-3xl sm:text-4xl shadow-lg shrink-0"
                     style={{ backgroundColor: `${habit.color}30` }}
                   >
                     {habit.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2 truncate">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                       {habit.name}
                     </h2>
                     <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
@@ -85,6 +85,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
               <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
@@ -96,6 +97,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   {habit.current_streak}
                 </div>
               </Card>
+
               <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
@@ -107,6 +109,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   {habit.longest_streak}
                 </div>
               </Card>
+
               <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 w-fit">
@@ -122,13 +125,20 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
           </div>
 
           <Card className="p-4 sm:p-6 bg-card border-border">
-            <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                <h3 className="text-sm sm:text-base md:text-lg font-bold text-foreground">
-                  Calendário de atividades
-                </h3>
+            <div className="flex">
+
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex flex-row items-center gap-2">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-foreground">
+                    Calendário de atividades
+                  </h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Aqui voce monitorar seu progresso com base na sua aviabilidade e hitórico de atividades.
+                </p>
               </div>
+
               {/* <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Select
                   value={displayMonth.toString()}
@@ -162,7 +172,8 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                 </Select>
               </div> */}
             </div>
-            <div className="overflow-x-auto pb-2">
+
+            <div className="overflow-x-auto">
               <div className="w-full">
                 <HeatMapHabit
                   habitColor={habit.color}
@@ -178,15 +189,15 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
             <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground flex-wrap">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded" style={{ backgroundColor: habit.color, opacity: 0.6 }} />
-                <span>Scheduled</span>
+                <span>Agendado</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-green-500" />
-                <span>Completed</span>
+                <span>Completado</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-muted opacity-20" />
-                <span>Not scheduled</span>
+                <span>Nãoa agendado</span>
               </div>
             </div>
           </Card>

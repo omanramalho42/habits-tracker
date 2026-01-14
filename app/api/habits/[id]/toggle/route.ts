@@ -9,8 +9,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json()
     const date = body.date || getTodayString()
 
-    console.log(new Date(date), 'date s')
-
     const existing = await prisma.habitCompletion.findFirst({
       where: {
         habitId: id,

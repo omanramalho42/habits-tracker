@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       color
     } = body
 
-    const newhHabit = await prisma.habit.create({
+    const newHabit = await prisma.habit.create({
       data: {
         userId: userDb.id,
         name,
@@ -89,7 +89,9 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(newhHabit)
+    console.log(newHabit, "creating")
+
+    return NextResponse.json(newHabit)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error create habits:", error)
