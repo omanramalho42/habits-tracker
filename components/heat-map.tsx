@@ -30,7 +30,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
 }) => {
   // --- CONSTANTES ---
   const COLOR_COMPLETED = habitColor
-  const COLOR_SCHEDULED = '#10B981' // Azul
+  const COLOR_SCHEDULED = 'hsl(var(--muted))' // Azul
   const COLOR_NO_HABIT = "hsl(var(--muted))" // Muted/Preto
 
   const WEEKDAYS = ["S", "M", "T", "W", "TH", "F", "SA"] as const
@@ -94,7 +94,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
 
     // 🔥 regra final
     if (/*isFrequencyDay && */hasCompletion) {
-      count = 1 // concluído
+      count = 2 // concluído
     }
     // else if (isFrequencyDay) {
     //   count = 0 // esperado mas não concluído
