@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 
 import { redirect } from 'next/navigation'
 
-import { SignOutButton } from '@clerk/nextjs'
+import { SignOutButton, useUser } from '@clerk/nextjs'
 
 import axios from 'axios'
 
@@ -38,6 +38,8 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
     month: "long",
     day: "numeric",
   })
+
+  const { user } = useUser()
 
   const fetchHabits: () => Promise<void> = async () => {
     try {
@@ -86,9 +88,11 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
           Hoje
         </h1>
         <div className="flex flex-row items-center gap-2">
-            <p className="text-sm">
-              Olá 👋
-            </p>
+          {" Olá "}
+          <p className="text-sm font-bold">
+            {user?.fullName}
+          </p>
+          {" 👋 "}
         </div>
         <p className="text-muted-foreground text-base">{today}</p>
       </div>

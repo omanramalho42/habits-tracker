@@ -15,27 +15,12 @@ import HeaderSection from "@/components/habits/header-section"
 export default function Home() {
   const [habits, setHabits] = useState<HabitWithStats[]>([])
   const [loading, setLoading] = useState(true)
+
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [showMoodWizard, setShowMoodWizard] = useState(false)
 
   useEffect(() => {
     fetchHabits()
-    checkMoodEntry()
   }, [])
-
-  const checkMoodEntry = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0]
-      const response = await fetch(`/api/mood?date=${today}`)
-      const entry = await response.json()
-
-      if (!entry) {
-        setShowMoodWizard(true)
-      }
-    } catch (error) {
-      console.error("Error checking mood entry:", error)
-    }
-  }
 
   const fetchHabits: () => Promise<void> = async () => {
     try {
