@@ -399,14 +399,16 @@ export function HabitCard({
           </CollapsibleTrigger>
 
           <CollapsibleContent className="flex items-center justify-between">
-            <div className="rounded-lg p-4 space-y-2">
-              <HeatMapHabit
-                endDate={habit.endDate ? new Date(habit.endDate) : null}
-                habitColor={habit.color}
-                habitFrequency={habit.frequency}
-                startDate={new Date(habit.startDate)}
-                completions={habit.completions}
-              />
+            <div className="overflow-x-auto">
+              <div className="w-full">
+                <HeatMapHabit
+                  endDate={habit.endDate ? new Date(habit.endDate) : null}
+                  habitColor={habit.color}
+                  habitFrequency={habit.frequency}
+                  startDate={new Date(habit.startDate)}
+                  completions={habit.completions}
+                />
+              </div>
             </div>
           </CollapsibleContent>
         </Collapsible>

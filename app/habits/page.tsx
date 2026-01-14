@@ -147,6 +147,7 @@ export default function page() {
   return (
     <main className='min-h-screen bg-background'>
       <div className="max-w-5xl mx-auto px-4 py-8">
+
         <Breadcrumb className="mb-5">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -172,12 +173,12 @@ export default function page() {
         </Breadcrumb>
 
         <div className="space-y-4">
-        <Input
-          placeholder="pesquise aqui pelo nome do hábito"
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setSearch(event.target.value)
-          }
-        />
+          <Input
+            placeholder="pesquise aqui pelo nome do hábito"
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setSearch(event.target.value)
+            }
+          />
 
           {habits.length > 0 ? habits.filter((habit) => {
             if (!search) return true
