@@ -82,18 +82,11 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
   }
 
   return (
-    <div className="flex items-center justify-between mb-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-5xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
-          Hoje
+    <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col">
+        <h1 className="text-1xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
+          Olá, {user?.fullName} 👋
         </h1>
-        <div className="flex flex-row items-center gap-2">
-          {" Olá "}
-          <p className="text-sm font-bold">
-            {user?.fullName}
-          </p>
-          {" 👋 "}
-        </div>
         <p className="text-muted-foreground text-base">{today}</p>
       </div>
 
