@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
+import axios from "axios"
+import { HabitWithStats } from "@/lib/types"
 
 interface MoodWizardProps {
-  open: boolean
-  onComplete: () => void
+  onSuccessCallback: (data: HabitWithStats[]) => void
+  trigger?: React.ReactNode
 }
 
 const MOOD_OPTIONS = [
@@ -59,11 +61,55 @@ const MOOD_LEVELS = {
   ],
 }
 
-export function MoodWizard({ open, onComplete }: MoodWizardProps) {
+export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
   const [step, setStep] = useState(1)
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [loading, setLoading] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(false)
+
+  useEffect(() => {
+    fetchHabits()
+    checkMoodEntry()
+  }, [])
+
+  const checkMoodEntry = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0]
+      const response = await fetch(`/api/mood?date=${today}`)
+      const entry = await response.json()
+
+      if (!entry) {
+        setOpen(true)
+      }
+    } catch (error) {
+      console.error("Error checking mood entry:", error)
+    }
+  }
+
+  const fetchHabits: () => Promise<void> = async () => {
+    try {
+      const response = await axios.get("/api/habits")
+
+      const habitsWithStats: HabitWithStats[] = await Promise.all(
+        response.data.map(async (habit: any) => {
+          const statsResponse = await axios.get(
+            `/api/habits/${habit.id}/stats`
+          )
+          return await statsResponse.data
+        }),
+      )
+      onSuccessCallback(habitsWithStats)
+      
+    } catch (error) {
+      console.error("Error fetching habits:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const { toast } = useToast()
 
   const handleMoodSelect = (moodType: string) => {
@@ -80,22 +126,19 @@ export function MoodWizard({ open, onComplete }: MoodWizardProps) {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch("/api/mood", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mood_type: selectedMood,
-          mood_level: selectedLevel,
-          entry_date: new Date().toISOString().split("T")[0],
-        }),
+      const response = await axios.post("/api/mood", {
+        mood_type: selectedMood,
+        mood_level: selectedLevel,
+        entry_date: new Date().toISOString().split("T")[0],
       })
 
-      if (response.ok) {
+      if (response.data) {
         toast({
-          title: "✅ Mood registered!",
+          title: "✅ Mood registrado!",
           description: "Your mood has been saved successfully.",
         })
-        onComplete()
+        
+        setOpen((prev) => !prev)
       } else {
         throw new Error("Failed to save mood")
       }
@@ -110,12 +153,20 @@ export function MoodWizard({ open, onComplete }: MoodWizardProps) {
     }
   }
 
-  const selectedMoodData = MOOD_OPTIONS.find((m) => m.type === selectedMood)
-  const moodLevels = selectedMood ? MOOD_LEVELS[selectedMood as keyof typeof MOOD_LEVELS] : []
+  const selectedMoodData = 
+    MOOD_OPTIONS.find((m) => m.type === selectedMood)
+
+  const moodLevels = 
+    selectedMood 
+    ? MOOD_LEVELS[selectedMood as keyof typeof MOOD_LEVELS] 
+    : []
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[500px] bg-background border-border p-0 overflow-hidden">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger>
+        {trigger}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-125 bg-background border-border p-0 overflow-hidden">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
@@ -125,8 +176,12 @@ export function MoodWizard({ open, onComplete }: MoodWizardProps) {
               exit={{ opacity: 0, x: -50 }}
               className="p-8"
             >
-              <h2 className="text-4xl font-bold text-foreground mb-2 text-balance">How are you feeling today?</h2>
-              <p className="text-muted-foreground mb-8 text-sm">Select to learn more</p>
+              <h2 className="text-4xl font-bold text-foreground mb-2 text-balance">
+                How are you feeling today?
+              </h2>
+              <p className="text-muted-foreground mb-8 text-sm">
+                Select to learn more
+              </p>
 
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {MOOD_OPTIONS.slice(0, 3).map((mood) => (

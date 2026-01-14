@@ -198,8 +198,9 @@ export function HabitCard({
         isCompletedToday && onToggle
           ? "from-green-500/20 to-green-500/5 border-green-500/30"
           : "from-card to-card/50 border-border/50 hover:border-primary/30"
-      }`}
+      } ${loading && 'opacity-50'}`}
       onClick={(e) => {
+        if (loading) return
         if ((e.target as HTMLElement).closest("button")) return
         onClick?.()
       }}
@@ -248,7 +249,7 @@ export function HabitCard({
                       className={cn(
                         'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all',
                         isActive
-                          ? "text-accent shadow-sm "
+                          ? "text-foreground shadow-sm "
                           : "bg-muted/50 text-muted-foreground"
                       )}
                       style={
@@ -256,7 +257,7 @@ export function HabitCard({
                           ? {
                               backgroundColor: isCompletedThisWeekday
                                 ? "#10B981"        // 🟢 completado
-                                : habit.color      // 🔵 ativo (schedule)
+                                : "red"      // 🔵 ativo (schedule)
                             }
                           : {}
                       }
@@ -274,7 +275,6 @@ export function HabitCard({
           </div>
               
           {/* DIALOG SHOW HEATMAP */}
-
           {/* {onEdit && (
             <Dialog open={show} onOpenChange={setShow}>
               <DialogTrigger asChild>
@@ -356,7 +356,7 @@ export function HabitCard({
               disabled={loading}
               className={cn(
                 "h-11 w-11 rounded-xl transition-all",
-                isCompletedToday && "shadow-md bg-green-500 hover:bg-red-500 border-green-500",
+                isCompletedToday && "shadow-md bg-red-500 hover:bg-red-500 border-red-500",
                 !isCompletedToday &&
                   !canToggle &&
                   "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500",

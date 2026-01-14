@@ -71,6 +71,7 @@ export default async function RootLayout({
     >
       <html lang="pt-BR" className="dark">
         <body className={`font-sans antialiased`}>
+          
           {children}
           <Toaster theme="dark" />
           <Analytics />
