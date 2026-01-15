@@ -224,7 +224,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
                         <div className="max-h-[70vh]">
                           <Picker
                             data={data}
-                            theme={theme}
+                            theme="dark"
                             disabled={isSubmitting}
                             navPosition="bottom"
                             previewPosition="top"
