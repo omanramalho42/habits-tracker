@@ -133,6 +133,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
             rx: 2, 
             ry: 2, 
           }}
+
           panelColors={{
             0: COLOR_NO_HABIT,
             1: COLOR_SCHEDULED,
@@ -168,10 +169,10 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
           <div className={`w-3 h-3 rounded-sm`} style={{ backgroundColor: COLOR_SCHEDULED }} />
           <span>Não Concluído</span>
         </div>
-        <div className="flex items-center space-x-1">
+        {/* <div className="flex items-center space-x-1">
           <div className={`w-3 h-3 rounded-sm bg-muted`} style={{ backgroundColor: COLOR_NO_HABIT }} />
           <span>Sem Hábito</span>
-        </div>
+        </div> */}
       </div>
     </div>
   )

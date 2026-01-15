@@ -84,7 +84,7 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
               <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
@@ -121,7 +121,8 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   {habit.completion_rate}%
                 </div>
               </Card>
-            </div>
+
+            </div> */}
           </div>
 
           <Card className="p-4 sm:p-6 bg-card border-border">
@@ -182,22 +183,6 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
                   completions={habit.completions}
                   habitFrequency={habit.frequency}
                 />
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground flex-wrap">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded" style={{ backgroundColor: habit.color, opacity: 0.6 }} />
-                <span>Agendado</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-green-500" />
-                <span>Completado</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-muted opacity-20" />
-                <span>Nãoa agendado</span>
               </div>
             </div>
           </Card>

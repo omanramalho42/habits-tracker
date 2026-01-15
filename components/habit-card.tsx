@@ -271,40 +271,7 @@ export function HabitCard({
                 {habit.completions.length} completados
               </span>
             </div>
-
           </div>
-              
-          {/* DIALOG SHOW HEATMAP */}
-          {/* {onEdit && (
-            <Dialog open={show} onOpenChange={setShow}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex flex-row gap-2 items-center">
-                  <Eye className="text-sm text-muted-foreground" />
-                  <p className="text-sm">
-                    Visualizar gráfico de atividade
-                  </p>
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    Veja o gráfico de atividades dos seus hábitos
-                  </DialogTitle>
-                  <DialogDescription>
-                    Os hábitos concluidos são mostrados com a cor de tema definida no momento de criação do hábito
-                  </DialogDescription>
-                </DialogHeader>
-                <HeatMapHabit
-                  endDate={habit.endDate ? new Date(habit.endDate) : null}
-                  habitColor={habit.color}
-                  habitFrequency={habit.frequency}
-                  startDate={new Date(habit.startDate)}
-                  completions={habit.completions}
-                />
-              </DialogContent>
-            </Dialog>
-          )} */}
-
         </div>
 
         <div
