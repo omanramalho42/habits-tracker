@@ -17,9 +17,9 @@ const CurrentSectionDate:React.FC<CurrentSectionDateProps> = ({
   selectedDate
 }) => {
   const [selectedMonth, setSelectedMonth] =
-    useState(new Date().getMonth())
+    useState(new Date(selectedDate).getMonth())
   const [selectedYear, setSelectedYear] =
-    useState(new Date().getFullYear())
+    useState(new Date(selectedDate).getFullYear())
 
   const goToPreviousMonth = () => {
     if (selectedMonth === 0) {

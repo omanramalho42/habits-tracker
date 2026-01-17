@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 
@@ -24,17 +24,32 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
   setSelectedYear
 }) => {
   const getMonthDates = () => {
-    const year = selectedYear
-    const month = selectedMonth
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
+    const firstDay = new Date(selectedYear, selectedMonth, 1)
+    const lastDay = new Date(selectedYear, selectedMonth + 1, 0)
     const daysInMonth = lastDay.getDate()
 
     return Array.from({ length: daysInMonth }, (_, i) => {
-      const date = new Date(year, month, i + 1)
+      const date = new Date(selectedYear, selectedMonth, i + 1)
       return date
     })
   }
+
+  useEffect(() => {
+  const dateKey = selectedDate.toLocaleDateString("pt-BR")
+
+  const el = document.querySelector(
+    `[data-date="${dateKey}"]`
+  )
+
+  if (el) {
+    el.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    })
+  }
+}, [selectedDate])
+
 
   const monthDates = getMonthDates()
 
@@ -96,9 +111,9 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
       }
     }, 100)
   }
-
+  console.log(selectedDate, "selected date")
   const selectedDateString =
-    selectedDate.toISOString().split("T")[0]
+    new Date(selectedDate).toLocaleDateString("pt-BR")
 
   return (
     <div className="mb-12 bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
@@ -116,16 +131,16 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
           <div className="flex gap-2 min-w-max pb-2">
             {monthDates.map((date) => {
               const isSelected =
-                date.toISOString().split("T")[0] === selectedDateString
+                date.toLocaleDateString("pt-BR") === selectedDateString
               const isToday =
-                date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
+                date.toLocaleDateString("pt-BR") === new Date().toLocaleDateString("pt-BR")
               const dayOfWeek =
                 date.toLocaleDateString("pt-BR", { weekday: "short" })
 
               return (
                 <button
                   key={date.toISOString()}
-                  data-date={date.toISOString().split("T")[0]}
+                  data-date={date.toLocaleDateString("pt-BR")}
                   onClick={() => {
                     onCallbackSuccess(new Date(date))
                   }}

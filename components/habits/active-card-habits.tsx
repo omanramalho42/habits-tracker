@@ -230,17 +230,18 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {activeHabitsForSelectedDate.map((habit) => (
-            <HabitCard
-              loading={loading}
-              key={habit.id}
-              habit={habit}
-              onToggle={(id) => handleToggleHabit(id, selectedDateString)}
-              onClick={() => handleViewDetail(habit.id)}
-              selectedDate={selectedDate}
-              onError={handleHabitError}
-            />
-          ))}
+          {[...activeHabitsForSelectedDate]
+            .map((habit) => (
+              <HabitCard
+                loading={loading}
+                key={habit.id}
+                habit={habit}
+                onToggle={(id) => handleToggleHabit(id, selectedDateString)}
+                onClick={() => handleViewDetail(habit.id)}
+                selectedDate={selectedDate}
+                onError={handleHabitError}
+              />
+            ))}
         </div>
       )}
 

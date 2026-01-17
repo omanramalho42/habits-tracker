@@ -39,8 +39,10 @@ import {
   Pencil,
   Trash2,
   TrendingUp,
-  Eye
+  Eye,
+  Check
 } from "lucide-react"
+import { Progress } from "./ui/progress"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -192,12 +194,17 @@ export function HabitCard({
       onToggle(habit.id)
   }
 
+  const completedDays = habit.completions.length
+  const totalDays = habit.endDate?.length ?? 365
+
+  const progress =
+    totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0
   return (
     <Card
       className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
         isCompletedToday && onToggle
-          ? "from-green-500/20 to-green-500/5 border-green-500/30"
-          : "from-card to-card/50 border-border/50 hover:border-primary/30"
+          ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
+          : "from-card-800 to-card/50 border-border/50 hover:border-card-700"
       } ${loading && 'opacity-50'}`}
       onClick={(e) => {
         if (loading) return
@@ -217,7 +224,7 @@ export function HabitCard({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-lg text-foreground">
+              <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
                 {habit.name}
               </h3>
               {habit.current_streak > 0 && (
@@ -256,20 +263,43 @@ export function HabitCard({
                         isActive
                           ? {
                               backgroundColor: isCompletedThisWeekday
-                                ? "#10B981"        // 🟢 completado
-                                : "red"      // 🔵 ativo (schedule)
+                                ? "#32CD32"        // 🟢 completado
+                                : "#B22222"      // 🔵 ativo (schedule)
                             }
                           : {}
                       }
                     >
-                      {day.label}
+                      {
+                        !isActive ? day.label 
+                        : isCompletedThisWeekday ? <Check /> 
+                        : day.keyPtBr
+                      }
                     </div>
                   )
                 })}
               </div>
-              <span className="text-xs text-muted-foreground font-medium">
-                {habit.completions.length} completados
-              </span>
+              <div className="flex items-center justify-between gap-2 w-full">
+                <span className="w-full text-xs text-muted-foreground font-medium">
+                  {habit.completions.length > 0 && habit.endDate ? (
+                    <p className="">
+                      {habit.completions.length} de {habit.endDate?.length} dias
+                    </p>
+                  ) : habit.completions.length === 0 ? (
+                    <p className="text-muted-foreground">Comece hoje</p>
+                  ) : !habit.endDate ? (
+                    <p className="">
+                      {habit.completions.length} conclúidos
+                    </p>
+                  ) : (
+                    <p className="">Nenhum dia ainda</p>
+                  )}
+                </span>
+                <Progress
+                  className="w-full h-1 mt-1 bg-gray-800"
+                  color={habit.color}
+                  value={progress}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -322,8 +352,8 @@ export function HabitCard({
               size="icon"
               disabled={loading}
               className={cn(
-                "h-11 w-11 rounded-xl transition-all",
-                isCompletedToday && "shadow-md bg-red-500 hover:bg-red-500 border-red-500",
+                "flex items-center rounded-full transition-all",
+                isCompletedToday && "shadow-md bg-transparent hover:bg-red-600/80",
                 !isCompletedToday &&
                   !canToggle &&
                   "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500",
@@ -338,7 +368,7 @@ export function HabitCard({
               ) : !canToggle ? (
                 <X className="h-5 w-5" />   // 👉 BLOQUEADO
               ) : (
-                <div className="h-5 w-5 rounded border-2 border-current" /> // 👉 MARCAR
+                <div className="h-4 w-4 rounded-full border border-current" /> // 👉 MARCAR
               )}
             </Button>
           )}

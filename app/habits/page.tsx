@@ -189,7 +189,7 @@ export default function page() {
               habit.name.toLowerCase().includes(searchValue) ||
               habit.emoji?.includes(search)
             )
-          }).map((habit) => (
+          }).sort((a, b) => b.completions.length - a.completions.length).map((habit) => (
             <div key={habit.id}>
               <HabitCard
                 loading={loading}
