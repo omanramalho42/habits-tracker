@@ -92,7 +92,6 @@ export function UpdateHabitDialog({
   onSuccessCallback,
   habit
 }: UpdateHabitDialogProps) {
-  console.log(habit, 'habit update')
   const [open, setOpen] = useState<boolean>(false)
   const [color, setColor] = useState<boolean>(false)
 

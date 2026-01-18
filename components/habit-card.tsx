@@ -14,15 +14,6 @@ UpdateHabitDialog,
 UpdateHabitSchemaType
 } from "./update-habit-dialog"
 
-import {
-  Dialog,
-  DialogHeader,
-  DialogTrigger,
-  DialogContent,
-  DialogDescription,
-  DialogTitle
-} from "@/components/ui/dialog"
-
 import { cn } from "@/lib/utils"
 
 import type { HabitWithStats } from "@/lib/types"
@@ -43,6 +34,7 @@ import {
   Check
 } from "lucide-react"
 import { Progress } from "./ui/progress"
+import { Skeleton } from "./ui/skeleton"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -90,29 +82,43 @@ export function HabitCard({
   loading,
 }: HabitCardProps) {
   const [show, setShow] = useState<boolean>(false)
+
   // Calcula o início da semana com base na data selecionada
   // Ex: segunda-feira 00:00:00
-  const startOfWeek = getStartOfWeek(new Date(selectedDate!))
-
+  const startOfWeek = getStartOfWeek(selectedDate ? new Date(selectedDate) : new Date())
+  
   // Calcula o final da semana com base na data selecionada
   // Ex: domingo 23:59:59
-  const endOfWeek = getEndOfWeek(new Date(selectedDate!))
+  const endOfWeek = getEndOfWeek(selectedDate ? new Date(selectedDate) : new Date())
+  
   // Cria um Set (estrutura que NÃO permite valores duplicados)
   // Ele vai armazenar as datas únicas em que o hábito foi concluído na semana
   const completionSet = new Set(
     // Filtra apenas conclusões válidas dentro da semana atual
     habit.completions
     .filter(c => {
-      if (!c.completedDate) return false
+      if (!c.completed_date) return false
       // Converte a data de conclusão em Date
       const d = new Date(c.completedDate)
+        .toISOString()
+        .split('T')[0]
+        .replace(/-/g, '/')
+
       // Mantém apenas datas entre início e fim da semana
-      return d >= startOfWeek && d <= endOfWeek
+      return d >= startOfWeek
+        .toISOString()
+        .split('T')[0]
+        .replace(/-/g, '/') 
+      && 
+        d <= endOfWeek
+        .toISOString()
+        .split('T')[0]
+        .replace(/-/g, '/')
     })
     // Converte a data para string no formato YYYY/MM/DD
     // Isso evita problemas de timezone ao comparar datas
     .map(c =>
-      new Date(c.completedDate!)
+      new Date(c.completed_date!)
       .toISOString()
       .split('T')[0]
       .replace(/-/g, '/')
@@ -123,18 +129,13 @@ export function HabitCard({
   const completionFrequency = Array.from(completionSet).map(dateStr => {
     // Quebra a string da data em números
     const [year, month, day] = dateStr.split('/').map(Number)
-
     // Cria a data manualmente para evitar bug de fuso horário
     // (mês começa em 0 no JS)
     const date = new Date(year, month - 1, day)
     // Retorna a frequência associada ao dia da semana
     return WEEKDAY_TO_FREQUENCY[date.getDay()]
   })
-  // Remove frequências duplicadas
-  // Ex: se o hábito foi feito 2 vezes na segunda, conta só uma
-  const uniqueCompletionFrequency = Array.from(
-    new Set(completionFrequency)
-  )
+
   // Garante que a frequência do hábito seja um array
   // (caso venha null, undefined ou outro formato)
   const frequency =
@@ -149,7 +150,7 @@ export function HabitCard({
     currentDate.toISOString().split("T")[0]
   // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
-    const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
+    const completionDate = new Date(c.completed_date).toISOString().split("T")[0]
     return completionDate === todayStr
   })
   // Obtém o dia da semana atual (0 = domingo, 6 = sábado)
@@ -199,6 +200,7 @@ export function HabitCard({
 
   const progress =
     totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0
+  
   return (
     <Card
       className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
@@ -219,161 +221,193 @@ export function HabitCard({
             className="flex items-center justify-center w-14 h-14 rounded-2xl text-3xl shrink-0 shadow-sm"
             style={{ backgroundColor: `${habit.color}20` }}
           >
-            {habit.emoji}
+            {!loading ? habit.emoji : (<Skeleton className="w-14 h-14 rounded-2xl shrink-0" />)}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
-                {habit.name}
-              </h3>
-              {habit.current_streak > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  {habit.current_streak}
-                </span>
+              {loading ? (
+                <div className="flex w-full justify-between">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-5 w-10 rounded-full" />
+                </div>
+              ) : (
+                <div className="flex items-center w-full">
+                  <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
+                    {habit.name}
+                  </h3>
+                  {habit.current_streak > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
+                      <TrendingUp className="h-3 w-3" />
+                      {habit.current_streak}
+                    </span>
+                  )}
+                  </div>
               )}
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              {habit.goal}
+              {!loading ? habit.goal : (<Skeleton className="h-4 w-64 mb-4 mt-2" />)}
             </p>
+            
+            {!loading ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1">
+                  {WEEKDAYS.map((day) => {
+                    const isActive = frequency.includes(day.key)
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-1">
-                {WEEKDAYS.map((day) => {
-                  // ex: ['M', 'W', 'F']
-                  const completedWeekFrequency = uniqueCompletionFrequency
+                    // ✅ agora olha para TODAS as conclusões da semana
+                    const isCompletedThisWeekday =
+                      completionFrequency.includes(day.key)
 
-                  const isActive = frequency.includes(day.key)
-
-                  // ✅ agora olha para TODAS as conclusões da semana
-                  const isCompletedThisWeekday =
-                    completedWeekFrequency.includes(day.key)
-
-                  return (
-                    <div
-                      key={day.key}
-                      className={cn(
-                        'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all',
-                        isActive
-                          ? "text-foreground shadow-sm "
-                          : "bg-muted/50 text-muted-foreground"
-                      )}
-                      style={
-                        isActive
-                          ? {
-                              backgroundColor: isCompletedThisWeekday
-                                ? "#32CD32"        // 🟢 completado
-                                : "#B22222"      // 🔵 ativo (schedule)
-                            }
-                          : {}
-                      }
-                    >
-                      {
-                        !isActive ? day.label 
-                        : isCompletedThisWeekday ? <Check /> 
-                        : day.keyPtBr
-                      }
-                    </div>
-                  )
-                })}
+                    return (
+                      <div
+                        key={day.key}
+                        className={cn(
+                          'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all',
+                          isActive
+                            ? "text-foreground shadow-sm "
+                            : "bg-muted/50 text-muted-foreground"
+                        )}
+                        style={
+                          isActive
+                            ? {
+                                backgroundColor: isCompletedThisWeekday
+                                  ? "#32CD32"        // 🟢 completado
+                                  : "#B22222"      // 🔵 ativo (schedule)
+                              }
+                            : {}
+                        }
+                      >
+                        {
+                          !isActive ? day.label 
+                          : isCompletedThisWeekday ? <Check /> 
+                          : day.keyPtBr
+                        }
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="flex items-center justify-between gap-2 w-full">
+                  <span className="w-full text-xs text-muted-foreground font-medium">
+                    {habit.completions.length > 0 && habit.endDate ? (
+                      <p className="">
+                        {habit.completions.length} de {habit.endDate?.length} dias
+                      </p>
+                    ) : habit.completions.length === 0 ? (
+                      <p className="text-muted-foreground">Comece hoje</p>
+                    ) : !habit.endDate ? (
+                      <p className="">
+                        {habit.completions.length} conclúidos
+                      </p>
+                    ) : (
+                      <p className="">Nenhum dia ainda</p>
+                    )}
+                  </span>
+                  <Progress
+                    className="w-full h-1 mt-1 bg-gray-800"
+                    color={habit.color}
+                    value={progress}
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-between gap-2 w-full">
-                <span className="w-full text-xs text-muted-foreground font-medium">
-                  {habit.completions.length > 0 && habit.endDate ? (
-                    <p className="">
-                      {habit.completions.length} de {habit.endDate?.length} dias
-                    </p>
-                  ) : habit.completions.length === 0 ? (
-                    <p className="text-muted-foreground">Comece hoje</p>
-                  ) : !habit.endDate ? (
-                    <p className="">
-                      {habit.completions.length} conclúidos
-                    </p>
-                  ) : (
-                    <p className="">Nenhum dia ainda</p>
-                  )}
-                </span>
-                <Progress
-                  className="w-full h-1 mt-1 bg-gray-800"
-                  color={habit.color}
-                  value={progress}
-                />
+            ) : (
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      className="w-7 h-7 rounded-lg"
+                    />
+                  ))}
+                </div>
+                {/* Progress text + bar */}
+                <div className="flex items-center justify-between gap-2 w-full">
+                  <Skeleton className="h-3 w-26" />
+                  <Skeleton className="h-1 w-full rounded-full" />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
-
-        <div
-          className={cn(
-            "flex items-center gap-1.5 transition-opacity",
-            "opacity-100 md:opacity-0 md:group-hover:opacity-100",
-          )}
-        >
-          {onEdit && (
-            <UpdateHabitDialog
-              habit={habit}
-              onSuccessCallback={(data) => onEdit(data)}
-              trigger={
-                <Button
-                  variant="ghost"
-                  disabled={!onEdit}
-                  size="icon"
-                  className="h-9 w-9 hover:bg-muted"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              }
-            />
-          )}
-
-          {/* CRIAR O DELETEDIALOGHABIT */}
-          {onDelete && (
-            <Button
-              variant="ghost"
-              disabled={!onDelete}
-              size="icon"
-              className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation()
-                if (confirm("Are you sure you want to delete this habit?")) {
-                  onDelete(habit.id)
+        
+        {!loading ?(
+          <div
+            className={cn(
+              "flex items-center gap-1.5 transition-opacity",
+              "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+            )}
+          >
+            {onEdit && (
+              <UpdateHabitDialog
+                habit={habit}
+                onSuccessCallback={(data) => onEdit(data)}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    disabled={!onEdit}
+                    size="icon"
+                    className="h-9 w-9 hover:bg-muted"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 }
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+              />
+            )}
 
-          {/*  */}
-          {onToggle && (
-            <Button
-              variant={isCompletedToday ? "default" : "outline"}
-              size="icon"
-              disabled={loading}
-              className={cn(
-                "flex items-center rounded-full transition-all",
-                isCompletedToday && "shadow-md bg-transparent hover:bg-red-600/80",
-                !isCompletedToday &&
-                  !canToggle &&
-                  "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500",
-                !isCompletedToday &&
-                  canToggle &&
-                  "hover:border-primary/50 hover:bg-primary/5",
-              )}
-              onClick={handleToggleClick}
-            >
-              {isCompletedToday ? (
-                <X className="h-5 w-5" />   // 👉 DESMARCAR
-              ) : !canToggle ? (
-                <X className="h-5 w-5" />   // 👉 BLOQUEADO
-              ) : (
-                <div className="h-4 w-4 rounded-full border border-current" /> // 👉 MARCAR
-              )}
-            </Button>
-          )}
-          
-        </div>
+            {/* CRIAR O DELETEDIALOGHABIT */}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                disabled={!onDelete}
+                size="icon"
+                className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (confirm("Are you sure you want to delete this habit?")) {
+                    onDelete(habit.id)
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+
+            {/*  */}
+            {onToggle && (
+              <Button
+                variant={isCompletedToday ? "default" : "outline"}
+                size="icon"
+                disabled={loading}
+                className={cn(
+                  "flex items-center rounded-full transition-all",
+                  isCompletedToday && "shadow-md bg-transparent hover:bg-red-600/80",
+                  !isCompletedToday &&
+                    !canToggle &&
+                    "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500",
+                  !isCompletedToday &&
+                    canToggle &&
+                    "hover:border-primary/50 hover:bg-primary/5",
+                )}
+                onClick={handleToggleClick}
+              >
+                {isCompletedToday ? (
+                  <X className="h-5 w-5" />   // 👉 DESMARCAR
+                ) : !canToggle ? (
+                  <X className="h-5 w-5" />   // 👉 BLOQUEADO
+                ) : (
+                  <div className="h-4 w-4 rounded-full border border-current" /> // 👉 MARCAR
+                )}
+              </Button>
+            )}
+            
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="h-6 w-6 rounded-md" />
+            <Skeleton className="h-6 w-6 rounded-md" />
+            {/* <Skeleton className="h-6 w-6 rounded-full" /> */}
+          </div>
+        )}
       </div>
       
       {/* COLLAPSIBLE SHOW HEATMAP */}

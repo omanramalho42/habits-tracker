@@ -37,9 +37,10 @@ export default function page() {
   const [habits, setHabits] =
     useState<HabitWithStats[]>([])
   const [loading, setLoading] =
-    useState<boolean>(false);
+    useState<boolean>(false)
   
   const fetchHabits: () => Promise<void> = async () => {
+    setLoading(true)
     try {
       const response = await axios.get("/api/habits")
 
@@ -63,7 +64,7 @@ export default function page() {
     fetchHabits()
   }, [])
 
-    const handleCreateHabit = async (data: HabitSchemaType) => {
+  const handleCreateHabit = async (data: HabitSchemaType) => {
     console.log(data, 'data');
     try {
       const response = 
@@ -81,7 +82,7 @@ export default function page() {
       }
     }
   }
-  
+
   const handleUpdateHabit = async (data: UpdateHabitSchemaType) => {
     console.log(data, 'handle update here')
     const toastId = toast.loading(
@@ -144,6 +145,14 @@ export default function page() {
     }
   }
   
+  console.log(habits, "habits has been defined")
+  console.log(loading, "loading")
+
+  // SERA QUE O HABITS DEVE SER INICIADO COMO NULL?
+  // REALIZAR MUTATION FN PARA CHAMADA A API E ENTÃO RECBER O STATUS DA OPERAÇÃO
+  // CASO COMPLETIONS.LENGHT === 0 ENTAO LISTA VISTA CASO CONTRARIO LISTA COM DADOS
+  // DESSA FORMA CONSIGO LIDAR COM O LOADING DA FORMA CORRETA
+  
   return (
     <main className='min-h-screen bg-background'>
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -160,7 +169,7 @@ export default function page() {
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1">
                   <BreadcrumbEllipsis className="size-4" />
-                  <span className="sr-only">Toggle menu</span>
+                  <span className="sr-only">Abrir menu</span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem>
@@ -198,8 +207,7 @@ export default function page() {
                 onEdit={handleUpdateHabit}
               />
             </div>
-          ))
-           : (
+          )) : (
             <div className="text-center py-20">
               <div className="text-7xl mb-6">🎯</div>
               <h2 className="text-2xl font-bold mb-3 text-foreground">

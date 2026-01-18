@@ -127,6 +127,32 @@
       radial-gradient(circle at 80% 80%, oklch(0.15 0.05 285 / 0.08) 0%, transparent 50%);
   }
 
+  .scroll-container {
+    /* overflow-x-auto */
+    overflow-x: auto;
+
+    /* flex-1 */
+    flex: 1 1 0%;
+
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.2) transparent; /* primary/20 */
+  }
+
+  /* Chrome, Edge, Safari */
+  .scroll-container::-webkit-scrollbar {
+    height: 6px; /* equivalente ao scrollbar-thin */
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(59, 130, 246, 0.2); /* primary/20 */
+    border-radius: 9999px;
+  }
+
+  .scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   /* Enhanced scrollbar with futuristic glow effect */
   .scrollbar-thin::-webkit-scrollbar {
     height: 8px;

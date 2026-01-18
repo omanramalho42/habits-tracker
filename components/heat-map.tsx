@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React from "react"
 import HeatMap, { HeatMapValue } from "@uiw/react-heat-map"
 import {
   Tooltip,
@@ -65,16 +65,6 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
       .toISOString()
       .split('T')[0]
       .replace(/-/g, '/')
-
-    // const dayName = WEEK_DAYS[currentDate.getDay()]
-    
-    // 🔹 verifica se esse dia pertence a alguma frequência
-    // const isFrequencyDay = habitFrequency.some(freq => {
-    //   const weekDay = FREQUENCY_TO_WEEKDAY[freq as FrequencyEnum]
-    //   // console.log(weekDay, "weekday")
-    //   return weekDay === dayName
-    // })
-    // console.log(isFrequencyDay, "isFrequencyDay")
     
     // 🔹 verifica se existe completion
     const hasCompletion = valuesCompletions.some(completion => {
@@ -84,8 +74,6 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
         .toISOString()
         .split('T')[0]
         .replace(/-/g, '/')
-
-        // console.log(completionDate, formattedDate, "vs")
 
       return completionDate === formattedDate
     })
@@ -111,18 +99,14 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
     currentDate.setDate(currentDate.getDate() + 1)
   }
 
-  // console.log(valuesSchdules, "valuesSchdules (+)")
-  // console.log(valuesCompletions, "valuesCompletions (=)");
-  // console.log(normalizedStartDate, "normalizedStartDate")
-
   return (
-    <div className="overflow-x-auto w-full">
+    <div className="scroll-container w-full">
       <div className="min-w-180 pb-4">
         <HeatMap
           value={valuesSchdules}
           startDate={startDate}
-//           endDate={normalizedEndDate} 
-          width={"100%"} 
+          endDate={endDate || undefined} 
+          width={"100%"}
           rectSize={12} 
           space={2}
           style={{
@@ -133,7 +117,6 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
             rx: 2, 
             ry: 2, 
           }}
-
           panelColors={{
             0: COLOR_NO_HABIT,
             1: COLOR_SCHEDULED,

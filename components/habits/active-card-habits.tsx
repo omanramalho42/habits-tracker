@@ -6,6 +6,7 @@ import axios from 'axios'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 
+import { HabitCard } from '@/components/habit-card'
 import { HabitDetailDialog } from '@/components/habit-detail-dialog'
 import {
   CreateHabitDialog,
@@ -13,12 +14,12 @@ import {
 } from '@/components/create-habit-dialog'
 
 import { Button } from '@/components/ui/button'
-import { HabitCard } from '@/components/habit-card'
+
+import { isHabitActiveOnDate } from '@/lib/habit-utils'
 
 import { Plus } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
-import { isHabitActiveOnDate } from '@/lib/habit-utils'
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -47,12 +48,10 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     useState<HabitWithStats[]>([])
 
   const updateActiveHabitsForSelectedDate = (habits: HabitWithStats[]) => {
+    setLoading(true)
     if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
       return
     }
-    // console.log(habits, "Habits")
-    const selectedDateString =
-      selectedDate.toISOString().split("T")[0]
     const activeHabits =
       habits.filter((habit) => 
         isHabitActiveOnDate(habit, selectedDate)
@@ -61,12 +60,13 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     const completedCount = activeHabits.filter((habit) =>
       habit.completions.some(
         (completion) => 
-          completion.completed_date === selectedDateString
+          completion.completed_date === selectedDate.toISOString().split("T")[0]
       ),
     ).length
     // console.log(activeHabits, "active habits")
     setActiveHabitsForSelectedDate(activeHabits)
     setCompletedToday(completedCount)
+    setLoading(false)
   }
 
   const fetchHabits: () => Promise<void> = async () => {
@@ -94,7 +94,7 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     toast.error(message)
   }
 
-  const handleToggleHabit = async (habitId: string, date?: string) => {
+  const handleToggleHabit = async (habitId: string, date: string) => {
     const toastId =
       toast.loading(
         'Alterando status do hábito...',
@@ -105,18 +105,21 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
       setLoading(true)
 
       const habit = habits.find((h) => h.id === habitId)
-      const dateStr = date || selectedDate?.toISOString().split("T")[0]
+
+      console.log(date, "data")
+      console.log(habit?.completions, "completions")
 
       const isCompleting = 
         !habit?.completions?.some(
           (c) => 
-            c?.completed_date === dateStr
+            c?.completed_date.toLowerCase() === date.toLowerCase()
         )
-      
+      console.log(isCompleting, "is completing")
+
       const response = 
         await axios.post(
           `/api/habits/${habitId}/toggle`,
-          JSON.stringify({ date: dateStr })
+          JSON.stringify({ date: date })
         )
 
       if (response.data) {
@@ -191,8 +194,6 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     }
   }
 
-  const selectedDateString = selectedDate.toISOString().split("T")[0]
-
   return (
     <div>
       {completedToday > 0 && activeHabitsForSelectedDate.length > 0 && (
@@ -236,7 +237,7 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
                 loading={loading}
                 key={habit.id}
                 habit={habit}
-                onToggle={(id) => handleToggleHabit(id, selectedDateString)}
+                onToggle={(id) => handleToggleHabit(id, selectedDate.toISOString().split("T")[0])}
                 onClick={() => handleViewDetail(habit.id)}
                 selectedDate={selectedDate}
                 onError={handleHabitError}
