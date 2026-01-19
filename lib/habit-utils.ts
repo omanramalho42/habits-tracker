@@ -18,13 +18,13 @@ export const WEEKDAYS = [
   { key: "SA", keyPtBr: "S", label: "SA", name: "Sábado" },
 ]
 
-export function calculateStreak(completions: { completed_date: string }[]): {
+export function calculateStreak(completions: { completedDate: string }[]): {
   currentStreak: number
   longestStreak: number
 } {
   if (!completions.length) return { currentStreak: 0, longestStreak: 0 }
 
-  const sortedDates = completions.map((c) => new Date(c.completed_date)).sort((a, b) => b.getTime() - a.getTime())
+  const sortedDates = completions.map((c) => new Date(c.completedDate)).sort((a, b) => b.getTime() - a.getTime())
 
   let currentStreak = 0
   let longestStreak = 0
@@ -101,12 +101,14 @@ export function isHabitActiveOnDate(
   },
   date: Date
 ): boolean {
+  console.log(date, 'date', habit, 'habit')
   const currentDate = normalizeDateOnly(date)
   const habitStartDate = normalizeDateOnly(new Date(habit.startDate))
-
   const habitEndDate = habit.endDate
-    ? normalizeDateOnly(new Date(habit.endDate))
-    : null
+  ? normalizeDateOnly(new Date(habit.endDate))
+  : null
+
+  // console.log(currentDate, habitStartDate, habitEndDate, "current | start | end -> date (!!)")
 
   // ⛔ antes do início
   if (currentDate < habitStartDate) {

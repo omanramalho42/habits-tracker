@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import axios from "axios"
 
@@ -11,38 +11,38 @@ import type { HabitWithStats } from "@/lib/types"
 import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
 import HeaderSection from "@/components/habits/header-section"
+import { useQuery } from "@tanstack/react-query"
 
 export default function Home() {
-  const [habits, setHabits] = useState<HabitWithStats[]>([])
-  const [loading, setLoading] = useState(true)
-
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  useEffect(() => {
-    fetchHabits()
-  }, [])
+  const { data: habits = [], isLoading, isFetching } = useQuery<HabitWithStats[]>({
+    queryKey: ["habits"],
+    queryFn: async () => {
+      const { data: habits } = await axios.get(`/api/habits?selectedDate=${selectedDate.toISOString().split("T")[0]}`)
 
-  const fetchHabits: () => Promise<void> = async () => {
-    try {
-      const response = await axios.get("/api/habits")
-
-      const habitsWithStats: HabitWithStats[] = await Promise.all(
-        response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(
+      const habitsWithStats = await Promise.all(
+        habits.map(async (habit: any) => {
+          const { data: stats } = await axios.get(
             `/api/habits/${habit.id}/stats`
           )
-          return await statsResponse.data
-        }),
-      )
-      setHabits(habitsWithStats)
-    } catch (error) {
-      console.error("Error fetching habits:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  if (loading) {
+          return {
+            ...habit,
+            stats,
+          }
+        })
+      )
+
+      return habitsWithStats
+    },
+    staleTime: 1000 * 60, // 1 min
+    retry: 1,
+  })
+
+  console.log(habits, "habits");
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -65,17 +65,13 @@ export default function Home() {
 
   return (
     <>
-      <MoodWizard
-        onSuccessCallback={setHabits}
-      />
+      {/* <MoodWizard /> */}
 
       <main className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-8">
 
           {/* HEADER + ACTIONS BUTTONS */}
-          <HeaderSection
-            onCallbackSuccess={setHabits}
-          />
+          <HeaderSection />
           
           {/* CURRENT SELECTION DATE */}
           <CurrentSectionDate
@@ -87,7 +83,7 @@ export default function Home() {
           <ActiveCardHabits
             habits={habits}
             selectedDate={selectedDate}
-            onSuccessCallback={setHabits}
+            // onSuccessCallback={setHabits}
           />
         </div>
       </main>

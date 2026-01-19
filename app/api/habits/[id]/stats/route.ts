@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { calculateStreak, getTodayString } from "@/lib/habit-utils"
+import { calculateStreak } from "@/lib/habit-utils"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -9,7 +9,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const habit = await prisma.habit.findUnique({
       where: {
         id,
-      }
+      },
+      include: {
+        completions: {
+          orderBy: {
+            completedDate: "desc",
+          },
+        },
+      },
     })
 
     if (!habit) {
@@ -18,28 +25,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }, { status: 404 })
     }
 
-    const completions = await prisma.habitCompletion.findMany({
-      where: {
-        habitId: id
-      },
-      orderBy: {
-        completedDate: 'desc'
+    const calculateStreakHabits = habit.completions.map((c) => {
+      return {
+        completedDate: 
+          new Date(c.completedDate)
+          .toISOString().split("T")[0]
       }
     })
+    
+    const { currentStreak, longestStreak } = calculateStreak(calculateStreakHabits)
 
-    const normalizedCompletions = completions.map((c) => ({
-      ...c,
-      completed_date: new Date(c.completedDate)
-        .toISOString()
-        .split("T")[0],
-    }))
-
-    const { currentStreak, longestStreak } = calculateStreak(normalizedCompletions)
-
-    const today = getTodayString()
+    const today = new Date().toISOString().split("T")[0]
     const isCompletedToday =
-      normalizedCompletions.some(
-        (c) => c.completed_date === today
+      habit.completions.some(
+        (c) => new Date(c.completedDate)
+        .toISOString()
+        .split("T")[0] === today
       )
 
     const totalDays =
@@ -47,14 +48,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         new Date().getTime() - new Date(habit.startDate).getTime()
       ) / (1000 * 60 * 60 * 24)) + 1
 
-    const completionRate = totalDays > 0 ? (normalizedCompletions.length / totalDays) * 100 : 0
+    const completionRate =
+      totalDays > 0 
+      ? (habit.completions.length / totalDays) * 100 
+      : 0
 
     return NextResponse.json({
       ...habit,
       current_streak: currentStreak,
       longest_streak: longestStreak,
       completion_rate: Math.round(completionRate),
-      completions: normalizedCompletions,
+      completions: habit.completions,
       is_completed_today: isCompletedToday,
     })
   } catch (error) {

@@ -1,14 +1,19 @@
+import { z } from 'zod'
+
 import { type NextRequest, NextResponse } from "next/server"
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import { isHabitActiveOnDate } from '@/lib/habit-utils'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { userId } = await auth()
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
     }
   
     const userDb = await prisma.user.findFirst({
@@ -18,19 +23,46 @@ export async function GET() {
     })
 
     if (!userDb) {
-      return NextResponse.json({ error: "user not find on db" }, { status: 401 })
+      return NextResponse.json({
+        error: "user not find on db"
+      }, { status: 401 })
     }
 
-    const habits =
-      await prisma.habit.findMany({
-        where: {
-          userId: userDb.id
-        },
-        orderBy: {
-          createdAt: 'asc'
-        }
+    const { searchParams } = new URL(request.url)
+    const paramDate = searchParams.get('selectedDate')
+
+    const validator = z.string()
+    const queryParams = validator.safeParse(paramDate)
+    
+    if (!queryParams.success) {
+      return Response.json(queryParams.error, {
+        status: 400,
       })
+    }
+
+    const selectedDate = new Date(queryParams.data)
+
+    const habits = await prisma.habit.findMany({
+      where: {
+        userId: userDb.id,
+      },
+      include: {
+        completions: {
+          orderBy: { completedDate: "desc" },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    })
+
     // console.log(habits,"habits")
+
+    // const activeHabits = habits.filter((habit: any) =>
+    //   isHabitActiveOnDate(habit, selectedDate)
+    // )
+
+    // console.log(activeHabits, "active habits!!")
 
     return NextResponse.json(habits)
   } catch (error) {

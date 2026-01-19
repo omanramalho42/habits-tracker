@@ -25,8 +25,6 @@ interface HabitDetailDialogProps {
 export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDialogProps) {
   if (!habit) return null
 
-  console.log(habit, "Habit")
-
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
 
   const currentYear = new Date().getFullYear()

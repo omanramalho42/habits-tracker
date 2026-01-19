@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
 import axios from 'axios'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
@@ -21,6 +23,7 @@ import { Plus } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
 
+
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
   selectedDate: Date
@@ -32,11 +35,12 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
   selectedDate,
   onSuccessCallback
 }) => {
-  console.log(habits, "habits")
   const [loading, setLoading] =
-    useState<boolean>(false)
+  useState<boolean>(false)
   const [detailHabit, setDetailHabit] =
-    useState<HabitWithStats | null>(null)
+  useState<HabitWithStats | null>(null)
+  
+  const queryClient = useQueryClient()
   
   useEffect(() => {
     updateActiveHabitsForSelectedDate(habits)
@@ -52,15 +56,17 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
       return
     }
+    console.log(habits, "habits")
     const activeHabits =
       habits.filter((habit) => 
         isHabitActiveOnDate(habit, selectedDate)
       )
+    console.log(activeHabits, "active habits")
     // console.log(selectedDateString, 'selected date');
     const completedCount = activeHabits.filter((habit) =>
-      habit.completions.some(
+      habit?.completions?.some(
         (completion) => 
-          completion.completed_date === selectedDate.toISOString().split("T")[0]
+          completion.completedDate === selectedDate.toISOString().split("T")[0]
       ),
     ).length
     // console.log(activeHabits, "active habits")
@@ -68,101 +74,10 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     setCompletedToday(completedCount)
     setLoading(false)
   }
-
-  const fetchHabits: () => Promise<void> = async () => {
-    try {
-      const response = await axios.get("/api/habits")
-
-      const habitsWithStats: HabitWithStats[] = await Promise.all(
-        response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(
-            `/api/habits/${habit.id}/stats`
-          )
-          return await statsResponse.data
-        }),
-      )
-      onSuccessCallback?.(habitsWithStats)
-
-    } catch (error) {
-      console.error("Error fetching habits:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  console.log(activeHabitsForSelectedDate, "active habits")
 
   const handleHabitError = (message: string) => {
     toast.error(message)
-  }
-
-  const handleToggleHabit = async (habitId: string, date: string) => {
-    const toastId =
-      toast.loading(
-        'Alterando status do hábito...',
-        { id: 'toggle-habit' }
-      )
-
-    try {
-      setLoading(true)
-
-      const habit = habits.find((h) => h.id === habitId)
-
-      console.log(date, "data")
-      console.log(habit?.completions, "completions")
-
-      const isCompleting = 
-        !habit?.completions?.some(
-          (c) => 
-            c?.completed_date.toLowerCase() === date.toLowerCase()
-        )
-      console.log(isCompleting, "is completing")
-
-      const response = 
-        await axios.post(
-          `/api/habits/${habitId}/toggle`,
-          JSON.stringify({ date: date })
-        )
-
-      if (response.data) {
-        if (detailHabit && detailHabit.id === habitId) {
-          const statsResponse = 
-            await axios.get(
-              `/api/habits/${habitId}/stats`
-            )
-            console.log(statsResponse, "stats response")
-          const updatedHabit: HabitWithStats[] = statsResponse.data
-
-          onSuccessCallback?.(updatedHabit)
-        }
-
-        await fetchHabits()
-        if (isCompleting) {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
-          })
-          toast.success(
-            "Hábito concluído com sucesso!",
-            { id: toastId }
-          )
-        } else {
-          toast.success(
-            "Hábito desmarcado com sucesso!",
-            { id: toastId }
-          )
-        }
-      }
-      setLoading(false)
-    } catch (error) {
-      if(error instanceof Error) {
-        console.log(error.message, "error")
-        toast.error(
-          error.message,
-          { id: toastId }
-        )
-      }
-    }
   }
 
   const handleViewDetail = async (habitId: string) => {
@@ -185,7 +100,7 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
         )
     
       if(response.data) {
-        return await fetchHabits()
+        // return await fetchHabits()
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -193,6 +108,73 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
       }
     }
   }
+
+  const handleToggleHabit = (habitId: string, date: string) => {
+    toast.loading("Alterando status do hábito...", {
+      id: "toggle-habit",
+    })
+
+    mutate({
+      habitId,
+      date,
+    })
+  }
+  
+  const { mutate, isPending, data } = useMutation({
+    mutationFn: async ({
+      habitId,
+      date,
+    }: {
+      habitId: string
+      date: string
+    }) => {
+      const response = await axios.post(
+        `/api/habits/${habitId}/toggle`,
+        { date }
+      )
+      return response.data
+    },
+
+    onSuccess: async (_, variables) => {
+      // 🔁 refetch automático dos hábitos
+      await queryClient.invalidateQueries({ queryKey: ["habits"] })
+
+      const { habitId, date } = variables
+
+      const habit = habits.find(h => h.id === habitId)
+
+      const isCompleting =
+        !habit?.completions?.some(
+          c => c.completedDate.toLowerCase() === date.toLowerCase()
+        )
+
+      if (isCompleting) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
+        })
+
+        toast.success("Hábito concluído com sucesso!", {
+          id: "toggle-habit",
+        })
+      } else {
+        toast.success("Hábito desmarcado com sucesso!", {
+          id: "toggle-habit",
+        })
+      }
+    },
+
+    onError: (error: any) => {
+      toast.error(
+        error?.message || "Erro ao alterar status do hábito",
+        { id: "toggle-habit" }
+      )
+    },
+  })
+
+  console.log(data, "data");
 
   return (
     <div>
@@ -234,7 +216,7 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
           {[...activeHabitsForSelectedDate]
             .map((habit) => (
               <HabitCard
-                loading={loading}
+                loading={isPending || loading}
                 key={habit.id}
                 habit={habit}
                 onToggle={(id) => handleToggleHabit(id, selectedDate.toISOString().split("T")[0])}
@@ -247,11 +229,11 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
       )}
 
       {/* VIEW HABIT DETAILS */}
-      <HabitDetailDialog
+      {/* <HabitDetailDialog
         open={!!detailHabit}
         onOpenChange={(open) => !open && setDetailHabit(null)}
         habit={detailHabit}
-      />
+      /> */}
     </div>
   )
 }

@@ -90,14 +90,14 @@ export function HabitCard({
   // Calcula o final da semana com base na data selecionada
   // Ex: domingo 23:59:59
   const endOfWeek = getEndOfWeek(selectedDate ? new Date(selectedDate) : new Date())
-  
+  console.log(habit, "hbit card")
   // Cria um Set (estrutura que NÃO permite valores duplicados)
   // Ele vai armazenar as datas únicas em que o hábito foi concluído na semana
   const completionSet = new Set(
     // Filtra apenas conclusões válidas dentro da semana atual
     habit.completions
     .filter(c => {
-      if (!c.completed_date) return false
+      if (!c.completedDate) return false
       // Converte a data de conclusão em Date
       const d = new Date(c.completedDate)
         .toISOString()
@@ -118,7 +118,7 @@ export function HabitCard({
     // Converte a data para string no formato YYYY/MM/DD
     // Isso evita problemas de timezone ao comparar datas
     .map(c =>
-      new Date(c.completed_date!)
+      new Date(c.completedDate!)
       .toISOString()
       .split('T')[0]
       .replace(/-/g, '/')
@@ -150,7 +150,7 @@ export function HabitCard({
     currentDate.toISOString().split("T")[0]
   // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
-    const completionDate = new Date(c.completed_date).toISOString().split("T")[0]
+    const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
     return completionDate === todayStr
   })
   // Obtém o dia da semana atual (0 = domingo, 6 = sábado)
@@ -221,7 +221,11 @@ export function HabitCard({
             className="flex items-center justify-center w-14 h-14 rounded-2xl text-3xl shrink-0 shadow-sm"
             style={{ backgroundColor: `${habit.color}20` }}
           >
-            {!loading ? habit.emoji : (<Skeleton className="w-14 h-14 rounded-2xl shrink-0" />)}
+            {loading ? (
+              <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+            ) : (
+              habit.emoji
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -245,9 +249,13 @@ export function HabitCard({
                   </div>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              {!loading ? habit.goal : (<Skeleton className="h-4 w-64 mb-4 mt-2" />)}
-            </p>
+            {!loading ?(
+              <p className="text-sm text-muted-foreground mb-3">
+                {habit.goal}
+              </p>
+            ) : (
+              <Skeleton className="h-4 w-64 mb-4 mt-2" />
+            )}
             
             {!loading ? (
               <div className="flex items-center gap-2 flex-wrap">

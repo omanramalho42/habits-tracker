@@ -65,7 +65,6 @@ export default function page() {
   }, [])
 
   const handleCreateHabit = async (data: HabitSchemaType) => {
-    console.log(data, 'data');
     try {
       const response = 
         await axios.post(
@@ -144,9 +143,6 @@ export default function page() {
       }
     }
   }
-  
-  console.log(habits, "habits has been defined")
-  console.log(loading, "loading")
 
   // SERA QUE O HABITS DEVE SER INICIADO COMO NULL?
   // REALIZAR MUTATION FN PARA CHAMADA A API E ENTÃO RECBER O STATUS DA OPERAÇÃO

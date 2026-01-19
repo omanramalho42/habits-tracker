@@ -26,7 +26,7 @@ import {
 import type { HabitWithStats } from '@/lib/types'
 
 interface HeaderSectionProps {
-  onCallbackSuccess: (data: HabitWithStats[]) => void
+  onCallbackSuccess?: (data: HabitWithStats[]) => void
 }
 
 const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
@@ -41,27 +41,6 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
 
   const { user } = useUser()
 
-  const fetchHabits: () => Promise<void> = async () => {
-    try {
-      const response = await axios.get("/api/habits")
-
-      const habitsWithStats: HabitWithStats[] = await Promise.all(
-        response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(
-            `/api/habits/${habit.id}/stats`
-          )
-          return await statsResponse.data
-        }),
-      )
-      onCallbackSuccess?.(habitsWithStats)
-
-    } catch (error) {
-      console.error("Error fetching habits:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleCreateHabit = async (data: HabitSchemaType) => {
     console.log(data, 'data');
     try {
@@ -72,7 +51,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
         )
     
       if(response.data) {
-        return await fetchHabits()
+        // return await fetchHabits()
       }
     } catch (error) {
       if (error instanceof Error) {
