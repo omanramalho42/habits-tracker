@@ -28,37 +28,37 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     },
   })
 
-  // FIND EXISTS FOLLOWING CATEGORY NAME
-  if(userDb) {
-    const {
-      color,
+  if (!userDb) {
+    throw new Error("User not found")
+  }
+
+  const {
+    color,
+    emoji,
+    frequency,
+    goal,
+    motivation,
+    name,
+    reminder,
+    startDate,
+    endDate
+  } = parsedBody.data
+
+  return await prisma.habit.create({
+    data: {
+      userId: userDb.id,
+      name,
       emoji,
-      frequency,
       goal,
       motivation,
-      name,
+      startDate: new Date(startDate),
+      endDate: endDate ? new Date(endDate) : null,
       reminder,
-      startDate,
-      endDate
-    } = parsedBody.data
-
-    return await prisma.$transaction([
-      prisma.habit.create({
-        data: {
-        userId: userDb.id,
-        name,
-        emoji,
-        goal,
-        motivation,
-        startDate: (new Date(startDate)),
-        endDate: endDate ? new Date(endDate) : null,
-        reminder,
-        frequency, // Json
-        color,
-        }, include: {
-          completions: true
-        }
-      }),
-    ])
-  }
+      frequency, // Json
+      color,
+    },
+    include: {
+      completions: true,
+    },
+  })
 }

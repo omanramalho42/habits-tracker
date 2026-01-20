@@ -25,9 +25,9 @@ interface HabitDetailDialogProps {
 }
 
 export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
-  if (!habit) return null
-  console.log(habit, "Habit")
   const [open, setOpen] = useState<boolean>(false)
+
+  if (!habit) return null
 
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
 
@@ -40,8 +40,6 @@ export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
         {trigger || (
           <Button
             variant="ghost"
-            role="combobox"
-            aria-expanded={open}
             className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
           >
             <PlusSquare className="mr-2 h-4 w-4" />

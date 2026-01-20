@@ -20,7 +20,7 @@ export const fetchHabits = async (
 
       return {
         ...habit,
-        stats,
+        ...stats,
       }
     })
   )

@@ -149,12 +149,17 @@ export default function page() {
             }
           />
 
-          {isFetching || isLoading ? (
+          {isLoading ? (
             <div className="flex w-full items-center justify-center mt-10">
               <Loader className="animate-spin" />
             </div>
           ) : (
             <>
+              {isFetching && (
+                <div className="flex w-full items-center justify-center mt-4">
+                  <Loader className="animate-spin" />
+                </div>
+              )}
               {habits.length > 0 ? habits.filter((habit) => {
                 if (!search) return true
 
@@ -167,7 +172,7 @@ export default function page() {
               }).sort((a, b) => b.completions.length - a.completions.length).map((habit) => (
                 <div key={habit.id}>
                   <HabitCard
-                    loading={isLoading}
+                    loading={isFetching}
                     habit={habit}
                     onDelete={handleDeleteHabit}
                     onEdit={handleUpdateHabit}

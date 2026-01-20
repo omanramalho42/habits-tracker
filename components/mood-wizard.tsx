@@ -72,7 +72,7 @@ const MOOD_LEVELS = {
   ],
 }
 
-export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
+export function MoodWizard({ trigger }: MoodWizardProps) {
   const moodSchema = z.object({
     mood: z.object({
       type: z.string(),
@@ -82,7 +82,7 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
     }),
     level: z.string(),
   })
-  const { control,watch, formState: { errors }} = useForm<z.infer<typeof moodSchema>>({
+  const { control, watch, formState: { errors }} = useForm<z.infer<typeof moodSchema>>({
     defaultValues: {
       mood: {},
       level: ""
@@ -93,7 +93,7 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
 
   const today = new Date().toISOString().split("T")[0]
 
-  const { data: mood } = useQuery<MoodEntry>({
+  const { data: mood, isFetched } = useQuery<MoodEntry>({
     queryKey: ["mood", today],
     queryFn: async () => {
       const { data } = await axios.get(`/api/mood?date=${today}`)
@@ -102,16 +102,10 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
     },
   })
 
-  const [open, setOpen] = useState<boolean>(mood?.entryDate ? true : false)
+  const [open, setOpen] = useState(false)
   useEffect(() => {
-    if (!mood) {
-      setOpen(true)
-    } else {
-      setOpen(false)
-    }
-  }, [mood])
-
-  console.log(mood, "Mood")
+    if (isFetched) setOpen(!mood)
+  }, [isFetched, mood])
 
   const queryClient = useQueryClient()
 
@@ -153,7 +147,7 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
     mutate()
   },[]);
 
-  if(mood) {
+  if (isFetched && mood) {
     return null
   }
 

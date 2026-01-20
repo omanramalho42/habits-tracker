@@ -5,8 +5,11 @@ export const CreateHabitSchema = z.object({
   emoji: z.string().default("🌍"),
   goal: z.string().optional().default(""),
   motivation: z.string().optional().default(""),
-  startDate: z.date(),
-  endDate: z.date().optional().nullable(),
+  startDate: z.coerce.date(),
+  endDate: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? null : v),
+    z.coerce.date().nullable()
+  ).optional(),
   reminder: z.boolean().optional().default(false),
   // z.enum(['M', 'T', 'W', 'TH', 'F', 'SA', 'S'])
   frequency: z.array(z.string()).default([]),
