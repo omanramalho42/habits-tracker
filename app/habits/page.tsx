@@ -149,7 +149,7 @@ export default function page() {
             }
           />
 
-          {isFetching ? (
+          {isFetching || isLoading ? (
             <div className="flex w-full items-center justify-center mt-10">
               <Loader className="animate-spin" />
             </div>
