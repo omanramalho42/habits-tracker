@@ -42,6 +42,8 @@ export default function page() {
     data: habits = [],
     isLoading,
     isFetching,
+    isError,
+    error,
   } = useQuery<HabitWithStats[]>({
     queryKey: ["habits"],
     queryFn: () => fetchHabits(),
@@ -149,10 +151,19 @@ export default function page() {
             }
           />
 
-          {isLoading ? (
-            <div className="flex w-full items-center justify-center mt-10">
-              <Loader className="animate-spin" />
+          {isError ? (
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-bold mb-3 text-foreground">
+                Não foi possível carregar hábitos
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {error instanceof Error ? error.message : "Tente novamente em instantes."}
+              </p>
             </div>
+          ) : isFetching || isLoading ? (
+             <div className="flex w-full items-center justify-center mt-10">
+               <Loader className="animate-spin" />
+             </div>
           ) : (
             <>
               {isFetching && (
