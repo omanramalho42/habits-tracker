@@ -1,132 +1,64 @@
+'use server'
 
-// export async function CreateHabit(form: CreateHabitSchemaType) {
-//   const parsedBody = CreateTransactionSchema.safeParse(form)
+import { redirect } from "next/navigation"
 
-//   if (!parsedBody.success) throw new Error(parsedBody.error.message)
+import { currentUser } from '@clerk/nextjs/server'
 
-//   const user = await currentUser()
-//   if (!user) {
-//     redirect('/sign-in')
-//   }
+import {
+  CreateHabitSchema,
+  CreateHabitSchemaType
+} from "@/lib/schema/habit"
 
-//   // VERIFICAR SE O USUARIO EXISTE NO BD
-//   const userDb = await prisma.user.findFirst({
-//     where: {
-//       clerkUserId: user.id,
-//     },
-//   })
+import { prisma } from "@/lib/prisma"
 
-//   // FIND EXISTS FOLLOWING CATEGORY NAME
-//   if(userDb) {
-//     const {
-//       amount,
-//       category,
-//       date,
-//       type,
-//       description,
-//       installments,
-//       isRecurring,
-//       recurrenceInterval
-//     } = parsedBody.data
+export async function CreateHabit(form: CreateHabitSchemaType) {
+  const parsedBody =  CreateHabitSchema.safeParse(form)
 
-//     const categoryRow = await prisma.category.findFirst({
-//       where: {
-//         userId: userDb.id,
-//         name: category,
-//         type: type,
-//       },
-//     })
-//     if (!categoryRow) throw new Error('Category not found')
+  if (!parsedBody.success) throw new Error(parsedBody.error.message)
 
-//     if (isRecurring && recurrenceInterval) {
-//       let nextRecurringDate: Date | undefined;
-//       const currentDate = new Date();
-      
-//       const calculatedDate = calculateNextOcurrence(
-//         date,
-//         recurrenceInterval
-//       )
+  const user = await currentUser()
+  if (!user) {
+    redirect('/sign-in')
+  }
 
-//       nextRecurringDate = 
-//         calculatedDate < currentDate 
-//         ? calculateNextOcurrence(
-//           currentDate,
-//           recurrenceInterval
-//         ) : calculatedDate;
+  // VERIFICAR SE O USUARIO EXISTE NO BD
+  const userDb = await prisma.user.findFirst({
+    where: {
+      clerkUserId: user.id,
+    },
+  })
 
-//         // CREATE ON DB
-//         // ISRECURRING: ISRECURRING || FALSE
-//         // RECURRINGINTERVAL: RECURRINGINTERVAL || NULL
-//         // NEXTRECURRINGDATE,
-//         // LSATPROCESSED: NULL,
-//     }
+  // FIND EXISTS FOLLOWING CATEGORY NAME
+  if(userDb) {
+    const {
+      color,
+      emoji,
+      frequency,
+      goal,
+      motivation,
+      name,
+      reminder,
+      startDate,
+      endDate
+    } = parsedBody.data
 
-//     return await prisma.$transaction([
-//       prisma.transaction.create({
-//         data: {
-//           userId: userDb.id,
-//           amount,
-//           date,
-//           description: description || '',
-//           type,
-//           categoryIcon: categoryRow.icon,
-//           categoryId: categoryRow.id
-//         }, include: {
-//           category: true
-//         }
-//       }),
-  
-//       prisma.monthHistory.upsert({
-//         where: {
-//           day_month_year_userId: {
-//             userId: userDb.id,
-//             day: date.getUTCDate(),
-//             month: date.getUTCMonth(),
-//             year: date.getUTCFullYear(),
-//           },
-//         },
-//         create: {
-//           userId: userDb.id,
-//           day: date.getUTCDate(),
-//           month: date.getUTCMonth(),
-//           year: date.getUTCFullYear(),
-//           expanse: type === 'expanse' ? amount : 0,
-//           income: type === 'income' ? amount : 0,
-//         },
-//         update: {
-//           expanse: {
-//             increment: type === 'expanse' ? amount : 0,
-//           },
-//           income: {
-//             increment: type === 'income' ? amount : 0,
-//           },
-//         },
-//       }),
-  
-//       prisma.yearHistory.upsert({
-//         where: {
-//           month_year_userId: {
-//             userId: userDb.id,
-//             month: date.getUTCMonth(),
-//             year: date.getUTCFullYear(),
-//           },
-//         },
-//         create: {
-//           userId: userDb.id,
-//           month: date.getUTCMonth(),
-//           year: date.getUTCFullYear(),
-//           expanse: type === 'expanse' ? amount : 0,
-//           income: type === 'income' ? amount : 0,
-//         },
-//         update: {
-//           expanse: {
-//             increment: type === 'expanse' ? amount : 0,
-//           },
-//           income: {
-//             increment: type === 'income' ? amount : 0,
-//           },
-//         },
-//       }),
-//     ])
-//   }
-// }
+    return await prisma.$transaction([
+      prisma.habit.create({
+        data: {
+        userId: userDb.id,
+        name,
+        emoji,
+        goal,
+        motivation,
+        startDate: (new Date(startDate)),
+        endDate: endDate ? new Date(endDate) : null,
+        reminder,
+        frequency, // Json
+        color,
+        }, include: {
+          completions: true
+        }
+      }),
+    ])
+  }
+}

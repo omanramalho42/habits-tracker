@@ -12,31 +12,22 @@ import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
 import HeaderSection from "@/components/habits/header-section"
 import { useQuery } from "@tanstack/react-query"
+import { fetchHabits } from "@/services/habits"
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const { data: habits = [], isLoading, isFetching } = useQuery<HabitWithStats[]>({
-    queryKey: ["habits"],
-    queryFn: async () => {
-      const { data: habits } = await axios.get(`/api/habits?selectedDate=${selectedDate.toISOString().split("T")[0]}`)
+  const selectedDateStr =
+    selectedDate.toISOString().split("T")[0]
 
-      const habitsWithStats = await Promise.all(
-        habits.map(async (habit: any) => {
-          const { data: stats } = await axios.get(
-            `/api/habits/${habit.id}/stats`
-          )
-
-          return {
-            ...habit,
-            stats,
-          }
-        })
-      )
-
-      return habitsWithStats
-    },
-    staleTime: 1000 * 60, // 1 min
+  const {
+    data: habits = [],
+    isLoading,
+    isFetching,
+  } = useQuery<HabitWithStats[]>({
+    queryKey: ["habits", selectedDateStr],
+    queryFn: () => fetchHabits(selectedDateStr),
+    staleTime: 1000 * 60,
     retry: 1,
   })
 
@@ -83,7 +74,6 @@ export default function Home() {
           <ActiveCardHabits
             habits={habits}
             selectedDate={selectedDate}
-            // onSuccessCallback={setHabits}
           />
         </div>
       </main>

@@ -10,8 +10,7 @@ import axios from 'axios'
 
 import { SettingsDialog } from '@/components/settings-dialog'
 import {
-  CreateHabitDialog,
-  HabitSchemaType
+  CreateHabitDialog
 } from '@/components/create-habit-dialog'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +23,7 @@ import {
 } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
+import { CreateHabitSchemaType } from '@/lib/schema/habit'
 
 interface HeaderSectionProps {
   onCallbackSuccess?: (data: HabitWithStats[]) => void
@@ -41,24 +41,24 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
 
   const { user } = useUser()
 
-  const handleCreateHabit = async (data: HabitSchemaType) => {
-    console.log(data, 'data');
-    try {
-      const response = 
-        await axios.post(
-          '/api/habits',
-          data
-        )
+  // const handleCreateHabit = async (data: CreateHabitSchemaType) => {
+  //   console.log(data, 'data');
+  //   try {
+  //     const response = 
+  //       await axios.post(
+  //         '/api/habits',
+  //         data
+  //       )
     
-      if(response.data) {
-        // return await fetchHabits()
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message, 'error')
-      }
-    }
-  }
+  //     if(response.data) {
+  //       // return await fetchHabits()
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       console.log(error.message, 'error')
+  //     }
+  //   }
+  // }
 
   return (
     <div className="flex items-start justify-between mb-8">
@@ -89,7 +89,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
           <ListIcon className="h-6 w-6" />
         </Button>
         <CreateHabitDialog
-          onSuccessCallback={handleCreateHabit}
+          // onSuccessCallback={handleCreateHabit}
           trigger={
             <Button
               size="lg"

@@ -8,6 +8,7 @@ export interface Habit {
   endDate: string | null
   reminder: boolean
   frequency: string[]
+  completions?: HabitCompletion[]
   color: string
   createdAt: string
 }
@@ -28,7 +29,7 @@ export interface HabitCompletion {
   id: string
   habitId: string
   completedDate: string
-  completed_date: string
+  completed_date?: string
   createdAt: string
 }
 

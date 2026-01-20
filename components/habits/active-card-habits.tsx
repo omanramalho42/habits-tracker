@@ -12,7 +12,6 @@ import { HabitCard } from '@/components/habit-card'
 import { HabitDetailDialog } from '@/components/habit-detail-dialog'
 import {
   CreateHabitDialog,
-  HabitSchemaType
 } from '@/components/create-habit-dialog'
 
 import { Button } from '@/components/ui/button'
@@ -22,6 +21,7 @@ import { isHabitActiveOnDate } from '@/lib/habit-utils'
 import { Plus } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
+import { CreateHabitSchemaType } from '@/lib/schema/habit'
 
 
 interface ActiveCardHabitsProps {
@@ -42,39 +42,39 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
   
   const queryClient = useQueryClient()
   
-  useEffect(() => {
-    updateActiveHabitsForSelectedDate(habits)
-  }, [selectedDate, habits])
+  // useEffect(() => {
+  //   updateActiveHabitsForSelectedDate(habits)
+  // }, [selectedDate, habits])
 
   const [completedToday, setCompletedToday] = 
     useState(0)
-  const [activeHabitsForSelectedDate, setActiveHabitsForSelectedDate] = 
-    useState<HabitWithStats[]>([])
+  // const [activeHabitsForSelectedDate, setActiveHabitsForSelectedDate] = 
+  //   useState<HabitWithStats[]>([])
 
-  const updateActiveHabitsForSelectedDate = (habits: HabitWithStats[]) => {
-    setLoading(true)
-    if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
-      return
-    }
-    console.log(habits, "habits")
-    const activeHabits =
-      habits.filter((habit) => 
-        isHabitActiveOnDate(habit, selectedDate)
-      )
-    console.log(activeHabits, "active habits")
-    // console.log(selectedDateString, 'selected date');
-    const completedCount = activeHabits.filter((habit) =>
-      habit?.completions?.some(
-        (completion) => 
-          completion.completedDate === selectedDate.toISOString().split("T")[0]
-      ),
-    ).length
-    // console.log(activeHabits, "active habits")
-    setActiveHabitsForSelectedDate(activeHabits)
-    setCompletedToday(completedCount)
-    setLoading(false)
-  }
-  console.log(activeHabitsForSelectedDate, "active habits")
+  // const updateActiveHabitsForSelectedDate = (habits: HabitWithStats[]) => {
+  //   setLoading(true)
+  //   if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
+  //     return
+  //   }
+  //   // console.log(habits, "habits")
+  //   const activeHabits =
+  //     habits.filter((habit) => 
+  //       isHabitActiveOnDate(habit, selectedDate)
+  //     )
+  //   // console.log(activeHabits, "active habits")
+  //   // console.log(selectedDateString, 'selected date');
+  //   const completedCount = activeHabits.filter((habit) =>
+  //     habit?.completions?.some(
+  //       (completion) => 
+  //         completion.completedDate === selectedDate.toISOString().split("T")[0]
+  //     ),
+  //   ).length
+  //   // console.log(activeHabits, "active habits")
+  //   setActiveHabitsForSelectedDate(activeHabits)
+  //   setCompletedToday(completedCount)
+  //   setLoading(false)
+  // }
+  // console.log(activeHabitsForSelectedDate, "active habits")
 
   const handleHabitError = (message: string) => {
     toast.error(message)
@@ -88,25 +88,6 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
       await statsResponse.data
 
     setDetailHabit(habitWithStats)
-  }
-
-  const handleCreateHabit = async (data: HabitSchemaType) => {
-    console.log(data, 'data');
-    try {
-      const response = 
-        await axios.post(
-          '/api/habits',
-          data
-        )
-    
-      if(response.data) {
-        // return await fetchHabits()
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message, 'error')
-      }
-    }
   }
 
   const handleToggleHabit = (habitId: string, date: string) => {
@@ -174,20 +155,18 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     },
   })
 
-  console.log(data, "data");
-
   return (
     <div>
-      {completedToday > 0 && activeHabitsForSelectedDate.length > 0 && (
+      {completedToday > 0 && habits.length > 0 && (
         <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-2xl p-6 text-center mb-6 shadow-sm">
           <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
-            {completedToday}/{activeHabitsForSelectedDate.length}
+            {completedToday}/{habits.length}
           </p>
           <p className="text-sm text-muted-foreground font-medium">Hábitos completos hoje</p>
         </div>
       )}
       {/* LIST HABITS (ARRAY EMPTY) */}
-      {activeHabitsForSelectedDate.length === 0 ? (
+      {habits.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-7xl mb-6">🎯</div>
           <h2 className="text-2xl font-bold mb-3 text-foreground">
@@ -199,7 +178,7 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
               : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
           </p>
           <CreateHabitDialog
-            onSuccessCallback={handleCreateHabit}
+            // onSuccessCallback={handleCreateHabit}
             trigger={
               <Button
                 size="lg"
@@ -213,7 +192,7 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {[...activeHabitsForSelectedDate]
+          {[...habits]
             .map((habit) => (
               <HabitCard
                 loading={isPending || loading}

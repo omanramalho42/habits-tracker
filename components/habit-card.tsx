@@ -287,7 +287,7 @@ export function HabitCard({
                         }
                       >
                         {
-                          !isActive ? day.label 
+                          !isActive ? day.keyPtBr 
                           : isCompletedThisWeekday ? <Check /> 
                           : day.keyPtBr
                         }

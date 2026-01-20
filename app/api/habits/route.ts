@@ -5,43 +5,37 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { isHabitActiveOnDate } from '@/lib/habit-utils'
+import { Habit } from '@prisma/client'
+// import { isHabitActiveOnDate } from '@/lib/habit-utils'
 
 export async function GET(request: Request) {
   try {
     const { userId } = await auth()
-
+    
     if (!userId) {
       return NextResponse.json({
         error: "Unauthorized"
       }, { status: 401 })
     }
-  
+    
     const userDb = await prisma.user.findFirst({
       where: {
         clerkUserId: userId
       }
     })
-
+    
     if (!userDb) {
       return NextResponse.json({
         error: "user not find on db"
       }, { status: 401 })
     }
-
+    
     const { searchParams } = new URL(request.url)
     const paramDate = searchParams.get('selectedDate')
-
+    
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
     
-    if (!queryParams.success) {
-      return Response.json(queryParams.error, {
-        status: 400,
-      })
-    }
-
-    const selectedDate = new Date(queryParams.data)
-
     const habits = await prisma.habit.findMany({
       where: {
         userId: userDb.id,
@@ -56,13 +50,22 @@ export async function GET(request: Request) {
       },
     })
 
-    // console.log(habits,"habits")
+    if (queryParams.success) {
+      // return Response.json(queryParams.error, {
+      //   status: 400,
+      // })
+      console.log(new Date(queryParams.data), "Nova data atualizada")
+      if(queryParams.data) {
+        const activeHabits: Habit[] = habits.filter((habit: any) =>
+          isHabitActiveOnDate(habit, new Date(queryParams.data))
+        )
+        console.log(paramDate, activeHabits.length, "active habits!!")
+        console.log(paramDate, habits.length, "date|habits")
 
-    // const activeHabits = habits.filter((habit: any) =>
-    //   isHabitActiveOnDate(habit, selectedDate)
-    // )
+        return NextResponse.json(activeHabits)
+      }    
 
-    // console.log(activeHabits, "active habits!!")
+    }
 
     return NextResponse.json(habits)
   } catch (error) {
@@ -80,7 +83,9 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth()
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
     }
 
     const userDb = await prisma.user.findFirst({
@@ -90,7 +95,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (!userDb) {
-      return NextResponse.json({ error: "user not find on db" }, { status: 401 })
+      return NextResponse.json({
+        error: "user not find on db"
+      }, { status: 401 })
     }
 
     const body = await request.json()

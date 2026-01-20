@@ -1,14 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import axios from 'axios'
 
 import { toast } from 'sonner'
 
+import { fetchHabits } from "@/services/habits"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+
 import { HabitCard } from '@/components/habit-card'
-import { CreateHabitDialog, HabitSchemaType } from "@/components/create-habit-dialog"
+import { CreateHabitDialog } from "@/components/create-habit-dialog"
 import { UpdateHabitSchemaType } from '@/components/update-habit-dialog'
 
 import {
@@ -34,121 +37,88 @@ import { Plus } from "lucide-react"
 
 export default function page() {
   const [search, setSearch] = useState<string>("")
-  const [habits, setHabits] =
-    useState<HabitWithStats[]>([])
-  const [loading, setLoading] =
-    useState<boolean>(false)
   
-  const fetchHabits: () => Promise<void> = async () => {
-    setLoading(true)
-    try {
-      const response = await axios.get("/api/habits")
+  const {
+    data: habits = [],
+    isLoading,
+    isFetching,
+  } = useQuery<HabitWithStats[]>({
+    queryKey: ["habits"],
+    queryFn: () => fetchHabits(),
+    staleTime: 1000 * 60,
+  })
 
-      const habitsWithStats: HabitWithStats[] = await Promise.all(
-        response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(
-            `/api/habits/${habit.id}/stats`
-          )
-          return await statsResponse.data
-        }),
-      )
-      setHabits(habitsWithStats)
-    } catch (error) {
-      console.error("Error fetching habits:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  useEffect(() => {
-    fetchHabits()
+  const queryClient = useQueryClient()
+
+  const handleUpdateHabit = useCallback((data: UpdateHabitSchemaType) => {
+    updateHabitMutation.mutate(data)
   }, [])
 
-  const handleCreateHabit = async (data: HabitSchemaType) => {
-    try {
-      const response = 
-        await axios.post(
-          '/api/habits',
-          data
-        )
-    
-      if(response.data) {
-        return await fetchHabits()
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message, 'error')
-      }
-    }
-  }
+  const updateHabitMutation = useMutation({
+    mutationFn: async (data: UpdateHabitSchemaType) => {
+      return axios.patch(
+        `/api/habits/${data.id}`,
+        data
+      )
+    },
+    onMutate: () => {
+      return toast.loading(
+        "Atualizando hábito...",
+        { id: "update-habit" }
+      )
+    },
+    onSuccess: (_, __, toastId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["habits"],
+        exact: false,
+      })
 
-  const handleUpdateHabit = async (data: UpdateHabitSchemaType) => {
-    console.log(data, 'handle update here')
-    const toastId = toast.loading(
-      "Atualizando hábito...",
-      { id: 'update-habit' }
-    )
-    try {
-      const response = 
-        await axios.patch(
-          `/api/habits/${data.id}`,
-          data,
-        )
+      toast.success(
+        "Hábito atualizado com sucesso.",
+        { id: toastId }
+      )
+    },
+    onError: (error: any, _, toastId) => {
+      toast.error(
+        error?.message ?? "Erro ao atualizar hábito",
+        { id: toastId }
+      )
+    },
+  })
 
-      if (response.data) {
-        await fetchHabits()
+  const handleDeleteHabit = useCallback((habitId: string) => {
+    deleteHabitMutation.mutate(habitId)
+  }, [])
 
-        toast.success(
-          "Hábito atualizado com sucesso.",
-          { id: toastId }
-        )
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message)
-        toast.error(
-          error.message,
-          { id: toastId }
-        )
-      }
-    }
+  const deleteHabitMutation = useMutation({
+    mutationFn: async (habitId: string) => {
+      return axios.delete(`/api/habits/${habitId}`)
+    },
+    onMutate: () => {
+      return toast.loading(
+        "Deletando hábito...",
+        { id: "delete-habit" }
+      )
+    },
+    onSuccess: (_, __, toastId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["habits"],
+        exact: false,
+      })
 
-    await fetchHabits()
-  }
+      toast.success(
+        "Hábito deletado com sucesso.",
+        { id: toastId }
+      )
+    },
+    onError: (error: any, _, toastId) => {
+      toast.error(
+        error?.message ?? "Erro ao deletar hábito",
+        { id: toastId }
+      )
+    },
+  })
 
-  const handleDeleteHabit = async (habitId: string) => {
-    const toastId = toast.loading(
-      "Deletando hábito...",
-      { id: 'delete-habit' }
-    )
-    try {
-      const response =
-        await axios.delete(`/api/habits/${habitId}`)
-
-      if (response.data) {
-        await fetchHabits()
-
-        toast.success(
-          "Hábito deletado com sucesso.",
-          { id: toastId }
-        )
-      }
-    } catch (error) {
-      if(error instanceof Error) {
-        console.log(error.message)
-        toast.error(
-          error.message,
-          { id: toastId }
-        )
-      }
-    }
-  }
-
-  // SERA QUE O HABITS DEVE SER INICIADO COMO NULL?
-  // REALIZAR MUTATION FN PARA CHAMADA A API E ENTÃO RECBER O STATUS DA OPERAÇÃO
-  // CASO COMPLETIONS.LENGHT === 0 ENTAO LISTA VISTA CASO CONTRARIO LISTA COM DADOS
-  // DESSA FORMA CONSIGO LIDAR COM O LOADING DA FORMA CORRETA
-  
   return (
     <main className='min-h-screen bg-background'>
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -197,7 +167,7 @@ export default function page() {
           }).sort((a, b) => b.completions.length - a.completions.length).map((habit) => (
             <div key={habit.id}>
               <HabitCard
-                loading={loading}
+                loading={isLoading}
                 habit={habit}
                 onDelete={handleDeleteHabit}
                 onEdit={handleUpdateHabit}
@@ -215,7 +185,7 @@ export default function page() {
                   : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
               </p>
               <CreateHabitDialog
-                onSuccessCallback={handleCreateHabit}
+                // onSuccessCallback={handleCreateHabit}
                 trigger={
                   <Button
                     size="lg"
