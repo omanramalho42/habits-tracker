@@ -51,18 +51,22 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button
-          onClick={() => setShow(true)}
-          size="lg"
-          variant="outline"
-          disabled={loading}
-          className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
-        >
-          <Settings className="h-6 w-6" />
-        </Button>
+      {/* CONFIGURAÇÕES */}
+        <SettingsDialog
+          trigger={
+            <Button
+              size="icon"
+              variant="outline"
+              disabled={loading}
+              className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
+            >
+              <Settings className="h-6 w-6" />
+            </Button>
+          }
+        />
         <Button
           onClick={() => redirect("/habits")}
-          size="lg"
+          size="icon"
           variant="outline"
           disabled={loading}
           className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
@@ -72,7 +76,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
         <CreateHabitDialog
           trigger={
             <Button
-              size="lg"
+              size="icon"
               disabled={loading}
               className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
             >
@@ -83,6 +87,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
         <SignOutButton
           children={
             <Button
+              size="icon"
               variant="ghost"
               disabled={loading}
             >
@@ -92,11 +97,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
         />
         {/* ADICIONAR SELECT LANGUAGE */}
       </div>
-      {/* CONFIGURAÇÕES */}
-      <SettingsDialog
-        open={show}
-        onOpenChange={setShow}
-      />
+
     </div>
   )
 }

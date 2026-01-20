@@ -31,10 +31,12 @@ import {
   Trash2,
   TrendingUp,
   Eye,
-  Check
+  Check,
+  EyeIcon
 } from "lucide-react"
 import { Progress } from "./ui/progress"
 import { Skeleton } from "./ui/skeleton"
+import { HabitDetailDialog } from "./habit-detail-dialog"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -379,6 +381,19 @@ export function HabitCard({
               </Button>
             )}
 
+            <HabitDetailDialog
+              habit={habit}
+              trigger={
+                <Button
+                  disabled={loading}
+                  size="icon"
+                  className="flex items-center bg-transparent"
+                >
+                  <EyeIcon />
+                </Button>
+              }
+            />
+
             {/*  */}
             {onToggle && (
               <Button
@@ -410,6 +425,7 @@ export function HabitCard({
           </div>
         ) : (
           <div className="flex items-center gap-1.5">
+            <Skeleton className="h-6 w-6 rounded-md" />
             <Skeleton className="h-6 w-6 rounded-md" />
             <Skeleton className="h-6 w-6 rounded-md" />
             {/* <Skeleton className="h-6 w-6 rounded-full" /> */}

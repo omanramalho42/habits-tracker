@@ -37,7 +37,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
   
   // VERIFICAR COMPLETED_DATE NAO DEVERIA SER POSSIVELMENTE NULL
   const valuesCompletions: HeatMapValue[] = completions.map(completion => {
-    const baseDate = new Date(completion.completed_date!)
+    const baseDate = new Date(completion.completedDate!)
 
     const formattedDate = baseDate
       .toISOString()

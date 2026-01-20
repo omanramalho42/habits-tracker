@@ -42,53 +42,23 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
   
   const queryClient = useQueryClient()
   
-  // useEffect(() => {
-  //   updateActiveHabitsForSelectedDate(habits)
-  // }, [selectedDate, habits])
 
   const [completedToday, setCompletedToday] = 
     useState(0)
-  // const [activeHabitsForSelectedDate, setActiveHabitsForSelectedDate] = 
-  //   useState<HabitWithStats[]>([])
-
-  // const updateActiveHabitsForSelectedDate = (habits: HabitWithStats[]) => {
-  //   setLoading(true)
-  //   if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
-  //     return
-  //   }
-  //   // console.log(habits, "habits")
-  //   const activeHabits =
-  //     habits.filter((habit) => 
-  //       isHabitActiveOnDate(habit, selectedDate)
-  //     )
-  //   // console.log(activeHabits, "active habits")
-  //   // console.log(selectedDateString, 'selected date');
-  //   const completedCount = activeHabits.filter((habit) =>
-  //     habit?.completions?.some(
-  //       (completion) => 
-  //         completion.completedDate === selectedDate.toISOString().split("T")[0]
-  //     ),
-  //   ).length
-  //   // console.log(activeHabits, "active habits")
-  //   setActiveHabitsForSelectedDate(activeHabits)
-  //   setCompletedToday(completedCount)
-  //   setLoading(false)
-  // }
-  // console.log(activeHabitsForSelectedDate, "active habits")
 
   const handleHabitError = (message: string) => {
     toast.error(message)
   }
 
-  const handleViewDetail = async (habitId: string) => {
-    const statsResponse =
-      await axios.get(`/api/habits/${habitId}/stats`)
+  // const handleViewDetail = async (habitId: string) => {
+  //   const statsResponse =
+  //     await axios.get(`/api/habits/${habitId}/stats`)
 
-    const habitWithStats =
-      await statsResponse.data
+  //   const habitWithStats =
+  //     await statsResponse.data
 
-    setDetailHabit(habitWithStats)
-  }
+  //   setDetailHabit(habitWithStats)
+  // }
 
   const handleToggleHabit = (habitId: string, date: string) => {
     toast.loading("Alterando status do hábito...", {
@@ -199,20 +169,12 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
                 key={habit.id}
                 habit={habit}
                 onToggle={(id) => handleToggleHabit(id, selectedDate.toISOString().split("T")[0])}
-                onClick={() => handleViewDetail(habit.id)}
                 selectedDate={selectedDate}
                 onError={handleHabitError}
               />
             ))}
         </div>
       )}
-
-      {/* VIEW HABIT DETAILS */}
-      {/* <HabitDetailDialog
-        open={!!detailHabit}
-        onOpenChange={(open) => !open && setDetailHabit(null)}
-        habit={detailHabit}
-      /> */}
     </div>
   )
 }

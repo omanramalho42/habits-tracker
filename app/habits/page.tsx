@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input"
 
 import type { HabitWithStats } from '@/lib/types'
 
-import { Plus } from "lucide-react"
+import { Loader, Plus } from "lucide-react"
 
 export default function page() {
   const [search, setSearch] = useState<string>("")
@@ -148,48 +148,55 @@ export default function page() {
             }
           />
 
-          {habits.length > 0 ? habits.filter((habit) => {
-            if (!search) return true
-
-            const searchValue = search.toLowerCase()
-
-            return (
-              habit.name.toLowerCase().includes(searchValue) ||
-              habit.emoji?.includes(search)
-            )
-          }).sort((a, b) => b.completions.length - a.completions.length).map((habit) => (
-            <div key={habit.id}>
-              <HabitCard
-                loading={isLoading}
-                habit={habit}
-                onDelete={handleDeleteHabit}
-                onEdit={handleUpdateHabit}
-              />
+          {isFetching ? (
+            <div className="flex w-full items-center justify-center mt-10">
+              <Loader className="animate-spin" />
             </div>
-          )) : (
-            <div className="text-center py-20">
-              <div className="text-7xl mb-6">🎯</div>
-              <h2 className="text-2xl font-bold mb-3 text-foreground">
-                {habits.length === 0 ? "Comece sua jornada" : "Nenhum hábito encontrado para este dia"}
-              </h2>
-              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                {habits.length === 0
-                  ? "Crie seu primeiro hábito e comece a construir melhor a sua rotina"
-                  : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
-              </p>
-              <CreateHabitDialog
-                // onSuccessCallback={handleCreateHabit}
-                trigger={
-                  <Button
-                    size="lg"
-                    className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    {habits.length === 0 ? "Crie seu primeiro hábito" : "Criar novo hábito"}
-                  </Button>   
-                }
-              />
-            </div>
+          ) : (
+            <>
+              {habits.length > 0 ? habits.filter((habit) => {
+                if (!search) return true
+
+                const searchValue = search.toLowerCase()
+
+                return (
+                  habit.name.toLowerCase().includes(searchValue) ||
+                  habit.emoji?.includes(search)
+                )
+              }).sort((a, b) => b.completions.length - a.completions.length).map((habit) => (
+                <div key={habit.id}>
+                  <HabitCard
+                    loading={isLoading}
+                    habit={habit}
+                    onDelete={handleDeleteHabit}
+                    onEdit={handleUpdateHabit}
+                  />
+                </div>
+              )) : (
+                <div className="text-center py-20">
+                  <div className="text-7xl mb-6">🎯</div>
+                  <h2 className="text-2xl font-bold mb-3 text-foreground">
+                    {habits.length === 0 ? "Comece sua jornada" : "Nenhum hábito encontrado para este dia"}
+                  </h2>
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                    {habits.length === 0
+                      ? "Crie seu primeiro hábito e comece a construir melhor a sua rotina"
+                      : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
+                  </p>
+                  <CreateHabitDialog
+                    trigger={
+                      <Button
+                        size="lg"
+                        className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
+                      >
+                        <Plus className="h-5 w-5 mr-2" />
+                        {habits.length === 0 ? "Crie seu primeiro hábito" : "Criar novo hábito"}
+                      </Button>   
+                    }
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
