@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { isHabitActiveOnDate } from '@/lib/habit-utils'
 import { Habit } from '@prisma/client'
-// import { isHabitActiveOnDate } from '@/lib/habit-utils'
 
 export async function GET(request: Request) {
   try {
@@ -51,16 +50,10 @@ export async function GET(request: Request) {
     })
 
     if (queryParams.success) {
-      // return Response.json(queryParams.error, {
-      //   status: 400,
-      // })
-      console.log(new Date(queryParams.data), "Nova data atualizada")
       if(queryParams.data) {
         const activeHabits: Habit[] = habits.filter((habit: any) =>
           isHabitActiveOnDate(habit, new Date(queryParams.data))
         )
-        console.log(paramDate, activeHabits.length, "active habits!!")
-        console.log(paramDate, habits.length, "date|habits")
 
         return NextResponse.json(activeHabits)
       }    

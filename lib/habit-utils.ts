@@ -112,15 +112,6 @@ export function isHabitActiveOnDate(
   const endMonth = end?.getUTCMonth()
   const endDay = end?.getUTCDate()
 
-  console.log(
-    `${currentYear}-${currentMonth + 1}-${currentDay}`,
-    "current date"
-  )
-  console.log(
-    `${startYear}-${startMonth + 1}-${startDay}`,
-    "start date"
-  )
-
   // ⛔ antes do início
   if (
     currentYear < startYear ||

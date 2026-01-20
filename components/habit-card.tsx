@@ -90,7 +90,6 @@ export function HabitCard({
   // Calcula o final da semana com base na data selecionada
   // Ex: domingo 23:59:59
   const endOfWeek = getEndOfWeek(selectedDate ? new Date(selectedDate) : new Date())
-  console.log(habit, "hbit card")
   // Cria um Set (estrutura que NÃO permite valores duplicados)
   // Ele vai armazenar as datas únicas em que o hábito foi concluído na semana
   const completionSet = new Set(

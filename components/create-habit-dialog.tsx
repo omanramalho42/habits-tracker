@@ -145,37 +145,6 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
     mutate(values)
   },[])
 
-  // const onSubmit: SubmitHandler<CreateHabitSchemaType> = async (data: CreateHabitSchemaType) => {
-  //   console.log("submmmitng")
-  //   // toasters aqui
-  //   const toastId =
-  //     toast.loading(
-  //       'Criando hábito....',
-  //       { id: 'habits-create'}
-  //     )
-  //     console.log(data, "data")
-  //   try {
-  //     await onSuccessCallback?.(data)
-      
-  //     reset()
-
-  //     setOpen(prev => !prev)
-
-  //     toast.success(
-  //       "Sucesso ao criar hábito", 
-  //       { id: toastId }
-  //     )
-  //   } catch (error) {
-  //     if(error instanceof Error) {
-  //       console.log(error.message)
-  //       return toast.error(
-  //         "Erro ao criar hábito",
-  //         { id: toastId }
-  //       )
-  //     }
-  //   }
-  // }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
