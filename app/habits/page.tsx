@@ -142,6 +142,7 @@ export default function page() {
 
         <div className="space-y-4">
           <Input
+            disabled={isFetching}
             placeholder="pesquise aqui pelo nome do hábito"
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               setSearch(event.target.value)
