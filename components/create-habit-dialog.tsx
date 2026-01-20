@@ -1,16 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   Controller,
-  SubmitHandler,
   useForm
 } from "react-hook-form"
 
-import { z } from "zod"
-
 import { HexColorPicker } from "react-colorful"
+import { toast } from 'sonner'
+
+import Picker from "@emoji-mart/react"
+import data from "@emoji-mart/data"
+
+import { useTheme } from "next-themes"
+import { format } from "date-fns"
+
+import { CreateHabit } from "@/app/habits/_actions/habits/habits"
 
 import {
   Dialog,
@@ -22,14 +29,6 @@ import {
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog"
-
-import Picker from "@emoji-mart/react"
-import data from "@emoji-mart/data"
-
-import { useTheme } from "next-themes"
-
-import { format } from "date-fns"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,7 +45,10 @@ import {
   FormItem,
   FormLabel
 } from "@/components/ui/form"
-
+import {
+  ToggleGroup,
+  ToggleGroupItem
+} from "@/components/ui/toggle-group"
 import { Switch } from "@/components/ui/switch"
 
 import { cn } from "@/lib/utils"
@@ -59,29 +61,12 @@ import {
   PlusSquare
 } from "lucide-react"
 
-import { toast } from 'sonner'
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group"
-
-export type HabitSchemaType = z.infer<typeof habitSchema>
+import type { CreateHabitSchemaType } from "@/lib/schema/habit"
 
 interface CreateHabitDialogProps {
   trigger?: React.ReactNode
-  onSuccessCallback?: (data: HabitSchemaType) => void
+  onSuccessCallback?: (data: CreateHabitSchemaType) => void
 }
-
-const habitSchema = z.object({
-  name: z.string(),
-  emoji: z.string().default("🌍"),
-  goal: z.string().optional().default(""),
-  motivation: z.string().optional().default(""),
-  startDate: z.string().date(),
-  endDate: z.string().date().optional().nullable(),
-  reminder: z.boolean().optional().default(false),
-  // z.enum(['M', 'T', 'W', 'TH', 'F', 'SA', 'S'])
-  frequency: z.array(z.string()).default([]),
-  color: z.string().optional().default("#3B82F6"),
-})
-
 
 export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
@@ -89,7 +74,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
 
   const theme = useTheme()
 
-  const form = useForm<HabitSchemaType>({
+  const form = useForm<CreateHabitSchemaType>({
     defaultValues: {
       name: "",
       goal: "",
@@ -99,7 +84,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
       emoji: "",
       endDate: null,
       reminder: false,
-      startDate: new Date().toISOString().split("T")[0]
+      startDate: new Date()
     }
   })
 
@@ -114,36 +99,51 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
     }
   } = form
 
-  const onSubmit: SubmitHandler<HabitSchemaType> = async (data: HabitSchemaType) => {
-    console.log("submmmitng")
-    // toasters aqui
-    const toastId =
-      toast.loading(
-        'Criando hábito....',
-        { id: 'habits-create'}
-      )
-      console.log(data, "data")
-    try {
-      await onSuccessCallback?.(data)
-      
-      reset()
+  const queryClient = useQueryClient()
+  
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (values: CreateHabitSchemaType) => {
+      console.log(values, "values")
+      return await CreateHabit(values)
+    },
+    onSuccess: async () => {
+      toast.success("Habito criado com sucesso! 🎉", {
+        id: "create-habit"
+      })
+
+      reset({
+        color: "",
+        emoji: "",
+        endDate: null,
+        frequency: [],
+        goal: "",
+        motivation: "",
+        name: "",
+        reminder: false,
+        startDate: new Date(),
+      })
+
+      await queryClient.invalidateQueries({
+        queryKey: [
+          "habits"
+        ]
+      })
 
       setOpen(prev => !prev)
+    },
+    onError: () => {
+      toast.error("Aconteceu algo errado", {
+        id: "create-habit",
+      })
+    },
+  })
 
-      toast.success(
-        "Sucesso ao criar hábito", 
-        { id: toastId }
-      )
-    } catch (error) {
-      if(error instanceof Error) {
-        console.log(error.message)
-        return toast.error(
-          "Sucesso ao criar hábito",
-          { id: toastId }
-        )
-      }
-    }
-  }
+  const onSubmit = useCallback((values: CreateHabitSchemaType) => {
+    console.log(values, 'values')
+    toast.loading("Criando hábito....", { id: "create-habit" })
+
+    mutate(values)
+  },[])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -153,6 +153,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
             variant="ghost"
             role="combobox"
             aria-expanded={open}
+            disabled={isPending}
             className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
           >
             <PlusSquare className="mr-2 h-4 w-4" />
@@ -406,11 +407,6 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
                     rules={{ required: !watch('reminder') }}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          <Label className="text-sm font-semibold">
-                            Data final
-                          </Label>
-                        </FormLabel>
                         <FormControl>
                           <Calendar
                             {...field}
@@ -444,7 +440,7 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
                       value={day.label}
                       className="flex-1"
                     >
-                      {day.label}
+                      {day.keyPtBr}
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>

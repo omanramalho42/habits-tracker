@@ -1,6 +1,6 @@
 "use client"
 
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Card } from "@/components/ui/card"
 
 import HeatMapHabit from "@/components/heat-map"
@@ -14,18 +14,20 @@ import {
   Calendar,
   Target,
   Flame,
+  PlusSquare,
 } from "lucide-react"
+import { useState } from "react"
+import { Button } from "./ui/button"
 
 interface HabitDetailDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  trigger: React.ReactNode
   habit: HabitWithStats | null
 }
 
-export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDialogProps) {
-  if (!habit) return null
+export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
+  const [open, setOpen] = useState<boolean>(false)
 
-  console.log(habit, "Habit")
+  if (!habit) return null
 
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
 
@@ -33,7 +35,18 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button
+            variant="ghost"
+            className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
+          >
+            <PlusSquare className="mr-2 h-4 w-4" />
+            Criar novo
+          </Button>
+        )}
+      </DialogTrigger>
       <DialogContent
         className="
           w-full h-dvh
@@ -44,6 +57,14 @@ export function HabitDetailDialog({ open, onOpenChange, habit }: HabitDetailDial
           overflow-hidden
         "
       >
+        <DialogHeader>
+          <DialogTitle className="text-2xl">
+            Detalhes do hábito
+          </DialogTitle>
+          {/* <DialogDescription>
+            Hábitos são essencias para uma vida organizada
+          </DialogDescription> */}
+        </DialogHeader>
         <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-custom">
           <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-linear-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 mb-4 sm:mb-6">
             <div className="flex flex-col gap-4 mb-4 sm:mb-6">

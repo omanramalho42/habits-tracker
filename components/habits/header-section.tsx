@@ -10,8 +10,7 @@ import axios from 'axios'
 
 import { SettingsDialog } from '@/components/settings-dialog'
 import {
-  CreateHabitDialog,
-  HabitSchemaType
+  CreateHabitDialog
 } from '@/components/create-habit-dialog'
 
 import { Button } from '@/components/ui/button'
@@ -24,9 +23,10 @@ import {
 } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
+import { CreateHabitSchemaType } from '@/lib/schema/habit'
 
 interface HeaderSectionProps {
-  onCallbackSuccess: (data: HabitWithStats[]) => void
+  onCallbackSuccess?: (data: HabitWithStats[]) => void
 }
 
 const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
@@ -41,46 +41,6 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
 
   const { user } = useUser()
 
-  const fetchHabits: () => Promise<void> = async () => {
-    try {
-      const response = await axios.get("/api/habits")
-
-      const habitsWithStats: HabitWithStats[] = await Promise.all(
-        response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(
-            `/api/habits/${habit.id}/stats`
-          )
-          return await statsResponse.data
-        }),
-      )
-      onCallbackSuccess?.(habitsWithStats)
-
-    } catch (error) {
-      console.error("Error fetching habits:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCreateHabit = async (data: HabitSchemaType) => {
-    console.log(data, 'data');
-    try {
-      const response = 
-        await axios.post(
-          '/api/habits',
-          data
-        )
-    
-      if(response.data) {
-        return await fetchHabits()
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message, 'error')
-      }
-    }
-  }
-
   return (
     <div className="flex items-start justify-between mb-8">
       <div className="flex flex-col">
@@ -91,18 +51,22 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button
-          onClick={() => setShow(true)}
-          size="lg"
-          variant="outline"
-          disabled={loading}
-          className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
-        >
-          <Settings className="h-6 w-6" />
-        </Button>
+      {/* CONFIGURAÇÕES */}
+        <SettingsDialog
+          trigger={
+            <Button
+              size="icon"
+              variant="outline"
+              disabled={loading}
+              className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
+            >
+              <Settings className="h-6 w-6" />
+            </Button>
+          }
+        />
         <Button
           onClick={() => redirect("/habits")}
-          size="lg"
+          size="icon"
           variant="outline"
           disabled={loading}
           className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
@@ -110,10 +74,9 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
           <ListIcon className="h-6 w-6" />
         </Button>
         <CreateHabitDialog
-          onSuccessCallback={handleCreateHabit}
           trigger={
             <Button
-              size="lg"
+              size="icon"
               disabled={loading}
               className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
             >
@@ -124,6 +87,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
         <SignOutButton
           children={
             <Button
+              size="icon"
               variant="ghost"
               disabled={loading}
             >
@@ -133,11 +97,7 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
         />
         {/* ADICIONAR SELECT LANGUAGE */}
       </div>
-      {/* CONFIGURAÇÕES */}
-      <SettingsDialog
-        open={show}
-        onOpenChange={setShow}
-      />
+
     </div>
   )
 }

@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
 
     const entry = await prisma.moodEntry.findUnique({
       where: {
+        userId: user.id,
         entryDate: new Date(date),
       },
     })

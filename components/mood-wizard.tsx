@@ -1,15 +1,26 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+
+import axios from "axios"
+import { Controller, useForm } from "react-hook-form"
+import z from "zod"
+
+import { motion, AnimatePresence } from "framer-motion"
+
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
-import { motion, AnimatePresence } from "framer-motion"
-import axios from "axios"
-import { HabitWithStats } from "@/lib/types"
+
+import type { HabitWithStats } from "@/lib/types"
+
+import { ArrowBigLeft } from "lucide-react"
+import { MoodEntry } from "@prisma/client"
+import { toast } from "sonner"
 
 interface MoodWizardProps {
-  onSuccessCallback: (data: HabitWithStats[]) => void
+  onSuccessCallback?: (data: HabitWithStats[]) => void
   trigger?: React.ReactNode
 }
 
@@ -61,105 +72,84 @@ const MOOD_LEVELS = {
   ],
 }
 
-export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
+export function MoodWizard({ trigger }: MoodWizardProps) {
+  const moodSchema = z.object({
+    mood: z.object({
+      type: z.string(),
+      emoji: z.string(),
+      color: z.string(),
+      label: z.string()
+    }),
+    level: z.string(),
+  })
+  const { control, watch, formState: { errors }} = useForm<z.infer<typeof moodSchema>>({
+    defaultValues: {
+      mood: {},
+      level: ""
+    }
+  });
+
   const [step, setStep] = useState(1)
-  const [selectedMood, setSelectedMood] = useState<string | null>(null)
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [loading, setLoading] = useState<boolean>(false)
-  const [open, setOpen] = useState<boolean>(false)
+  const today = new Date().toISOString().split("T")[0]
 
+  const { data: mood, isFetched } = useQuery<MoodEntry>({
+    queryKey: ["mood", today],
+    queryFn: async () => {
+      const { data } = await axios.get(`/api/mood?date=${today}`)
+
+      return data
+    },
+  })
+
+  const [open, setOpen] = useState(false)
   useEffect(() => {
-    fetchHabits()
-    checkMoodEntry()
-  }, [])
+    if (isFetched) setOpen(!mood)
+  }, [isFetched, mood])
 
-  const checkMoodEntry = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0]
-      const response = await fetch(`/api/mood?date=${today}`)
-      const entry = await response.json()
+  const queryClient = useQueryClient()
 
-      if (!entry) {
-        setOpen(true)
-      }
-    } catch (error) {
-      console.error("Error checking mood entry:", error)
-    }
-  }
-
-  const fetchHabits: () => Promise<void> = async () => {
-    try {
-      const response = await axios.get("/api/habits")
-
-      const habitsWithStats: HabitWithStats[] = await Promise.all(
-        response.data.map(async (habit: any) => {
-          const statsResponse = await axios.get(
-            `/api/habits/${habit.id}/stats`
-          )
-          return await statsResponse.data
-        }),
-      )
-      onSuccessCallback(habitsWithStats)
-      
-    } catch (error) {
-      console.error("Error fetching habits:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const { toast } = useToast()
-
-  const handleMoodSelect = (moodType: string) => {
-    setSelectedMood(moodType)
-  }
-
-  const handleLevelSelect = (level: string) => {
-    setSelectedLevel(level)
-  }
-
-  const handleSubmit = async () => {
-    if (!selectedMood || !selectedLevel) return
-
-    setIsSubmitting(true)
-
-    try {
-      const response = await axios.post("/api/mood", {
-        mood_type: selectedMood,
-        mood_level: selectedLevel,
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      return axios.post("/api/mood", {
+        mood_type: watch('mood').type,
+        mood_level: watch('level'),
         entry_date: new Date().toISOString().split("T")[0],
       })
+    },
+    onSuccess: async () => {
+      toast.success("Mood diário registrado com sucesso.", { id: "create-mood" })
 
-      if (response.data) {
-        toast({
-          title: "✅ Mood registrado!",
-          description: "Your mood has been saved successfully.",
-        })
-        
-        setOpen((prev) => !prev)
-      } else {
-        throw new Error("Failed to save mood")
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to save your mood. Please try again.",
+      // 🔥 AQUI A MÁGICA ACONTECE
+      await queryClient.invalidateQueries({
+        queryKey: ["habits", "stats"],
       })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
-  const selectedMoodData = 
-    MOOD_OPTIONS.find((m) => m.type === selectedMood)
+      await queryClient.invalidateQueries({
+        queryKey: ["mood"],
+      })
+
+      setOpen(false)
+    },
+    onError: () => {
+      toast.error("Erro ao salvar o mood. Por favor tente novamente.", { id: "create-mood"})
+    },
+  })
 
   const moodLevels = 
-    selectedMood 
-    ? MOOD_LEVELS[selectedMood as keyof typeof MOOD_LEVELS] 
+    watch('mood').type 
+    ? MOOD_LEVELS[watch("mood").type as keyof typeof MOOD_LEVELS] 
     : []
+
+  const handleCreateMood = useCallback(() => {
+    toast.loading("Registrando mood...", { id: "create-mood" })
+
+    mutate()
+  },[]);
+
+  if (isFetched && mood) {
+    return null
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -177,40 +167,44 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
               className="p-8"
             >
               <h2 className="text-4xl font-bold text-foreground mb-2 text-balance">
-                How are you feeling today?
+                Como você está se sentindo hoje?
               </h2>
               <p className="text-muted-foreground mb-8 text-sm">
-                Select to learn more
+                Selecione para ler mais...
               </p>
 
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {MOOD_OPTIONS.slice(0, 3).map((mood) => (
-                  <button
+                  <Controller
                     key={mood.type}
-                    onClick={() => handleMoodSelect(mood.type)}
-                    className={`py-3 px-4 rounded-xl font-medium transition-all text-sm ${
-                      selectedMood === mood.type
-                        ? "bg-primary text-primary-foreground shadow-lg scale-105"
-                        : "bg-muted text-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    {mood.label}
-                  </button>
+                    control={control}
+                    name="mood"
+                    render={({ field }) => (
+                      <Button
+                        onClick={() => field.onChange(mood)}
+                        className={`py-3 px-4 rounded-xl font-medium transition-all text-sm ${
+                          watch("mood").type === mood.type
+                            ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                            : "bg-muted text-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {mood.label}
+                      </Button>
+                    )}
+                  />
                 ))}
               </div>
 
-              {selectedMood && (
+              {watch("mood").emoji ? (
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className="rounded-3xl p-12 mb-6 flex items-center justify-center"
-                  style={{ backgroundColor: selectedMoodData?.color }}
+                  style={{ backgroundColor: watch("mood")?.color }}
                 >
-                  <span className="text-9xl">{selectedMoodData?.emoji}</span>
+                  <span className="text-9xl">{watch("mood")?.emoji}</span>
                 </motion.div>
-              )}
-
-              {!selectedMood && (
+              ) : (
                 <div className="rounded-3xl bg-yellow-400 p-12 mb-6 flex items-center justify-center">
                   <span className="text-9xl">😊</span>
                 </div>
@@ -218,15 +212,11 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
 
               <Button
                 onClick={() => setStep(2)}
-                disabled={!selectedMood}
+                disabled={!watch("mood").emoji}
                 className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-full py-6 text-base font-semibold"
               >
-                Get Started
+                Começar
               </Button>
-
-              <p className="text-center text-sm text-muted-foreground mt-4">
-                Already have an account? <span className="underline cursor-pointer">Log in</span>
-              </p>
             </motion.div>
           )}
 
@@ -236,8 +226,8 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="relative min-h-[600px] flex flex-col"
-              style={{ backgroundColor: selectedMoodData?.color || "#FCD34D" }}
+              className="relative min-h-150 flex flex-col"
+              style={{ backgroundColor: watch("mood")?.color || "#FCD34D" }}
             >
               <div className="flex items-center justify-between p-6">
                 <Button
@@ -245,14 +235,14 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
                   onClick={() => setStep(1)}
                   className="rounded-full w-10 h-10 p-0 bg-white/20 hover:bg-white/30"
                 >
-                  ←
+                  <ArrowBigLeft />
                 </Button>
                 <Button
-                  onClick={handleSubmit}
-                  disabled={!selectedLevel || isSubmitting}
+                  onClick={handleCreateMood}
+                  disabled={!watch("level") || isPending}
                   className="rounded-full px-6 bg-white/20 hover:bg-white/30 text-foreground font-semibold"
                 >
-                  {isSubmitting ? "Saving..." : "Save"}
+                  {isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </div>
 
@@ -262,12 +252,14 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
                   animate={{ scale: 1, opacity: 1 }}
                   className="text-9xl"
                 >
-                  {selectedMoodData?.emoji}
+                  {watch("mood")?.emoji}
                 </motion.div>
               </div>
 
               <div className="bg-background rounded-t-3xl p-8">
-                <h2 className="text-3xl font-bold text-foreground mb-2 text-balance">Select your today's mood</h2>
+                <h2 className="text-3xl font-bold text-foreground mb-2 text-balance">
+                  Selecione o seu mood de hoje
+                </h2>
 
                 <div className="h-24 relative mb-6">
                   <div className="absolute inset-0 flex items-end justify-center opacity-20">
@@ -283,22 +275,29 @@ export function MoodWizard({ trigger, onSuccessCallback }: MoodWizardProps) {
 
                 <div className="flex gap-3">
                   {moodLevels.map((level) => (
-                    <button
+                    <Controller
                       key={level.level}
-                      onClick={() => handleLevelSelect(level.level)}
-                      className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all text-sm ${
-                        selectedLevel === level.level
-                          ? "shadow-lg scale-105"
-                          : "bg-muted text-foreground hover:bg-muted/80"
-                      }`}
-                      style={
-                        selectedLevel === level.level ? { backgroundColor: selectedMoodData?.color, color: "#000" } : {}
-                      }
-                    >
-                      {level.label}
-                    </button>
+                      name="level"
+                      control={control}
+                      render={({ field }) => (
+                        <Button
+                          onClick={() => field.onChange(level.level)}
+                          className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all text-sm ${
+                            watch("level") === level.level
+                              ? "shadow-lg scale-105"
+                              : "bg-muted text-foreground hover:bg-muted/80"
+                          }`}
+                          style={
+                            watch("level") === level.level ? { backgroundColor: watch("mood")?.color, color: "#000" } : {}
+                          }
+                        >
+                          {level.label}
+                        </Button>
+                      )}
+                    />
                   ))}
                 </div>
+
               </div>
             </motion.div>
           )}

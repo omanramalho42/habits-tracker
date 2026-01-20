@@ -18,13 +18,13 @@ export const WEEKDAYS = [
   { key: "SA", keyPtBr: "S", label: "SA", name: "Sábado" },
 ]
 
-export function calculateStreak(completions: { completed_date: string }[]): {
+export function calculateStreak(completions: { completedDate: string }[]): {
   currentStreak: number
   longestStreak: number
 } {
   if (!completions.length) return { currentStreak: 0, longestStreak: 0 }
 
-  const sortedDates = completions.map((c) => new Date(c.completed_date)).sort((a, b) => b.getTime() - a.getTime())
+  const sortedDates = completions.map((c) => new Date(c.completedDate)).sort((a, b) => b.getTime() - a.getTime())
 
   let currentStreak = 0
   let longestStreak = 0
@@ -89,10 +89,6 @@ export function getTodayString(): string {
   return formatDate(new Date())
 }
 
-export function normalizeDateOnly(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
 export function isHabitActiveOnDate(
   habit: {
     startDate: string
@@ -101,28 +97,49 @@ export function isHabitActiveOnDate(
   },
   date: Date
 ): boolean {
-  const currentDate = normalizeDateOnly(date)
-  const habitStartDate = normalizeDateOnly(new Date(habit.startDate))
 
-  const habitEndDate = habit.endDate
-    ? normalizeDateOnly(new Date(habit.endDate))
-    : null
+  const currentYear = date.getUTCFullYear()
+  const currentMonth = date.getUTCMonth()
+  const currentDay = date.getUTCDate()
+
+  const start = new Date(habit.startDate)
+  const startYear = start.getUTCFullYear()
+  const startMonth = start.getUTCMonth()
+  const startDay = start.getUTCDate()
+
+  const end = habit.endDate ? new Date(habit.endDate) : null
+  const endYear = end?.getUTCFullYear()
+  const endMonth = end?.getUTCMonth()
+  const endDay = end?.getUTCDate()
 
   // ⛔ antes do início
-  if (currentDate < habitStartDate) {
+  if (
+    currentYear < startYear ||
+    (currentYear === startYear && currentMonth < startMonth) ||
+    (currentYear === startYear &&
+      currentMonth === startMonth &&
+      currentDay < startDay)
+  ) {
     return false
   }
 
-  // ⛔ depois do fim (se existir)
-  if (habitEndDate && currentDate > habitEndDate) {
-    return false
+  // ⛔ depois do fim
+  if (end) {
+    if (
+      currentYear > endYear! ||
+      (currentYear === endYear && currentMonth > endMonth!) ||
+      (currentYear === endYear &&
+        currentMonth === endMonth &&
+        currentDay > endDay!)
+    ) {
+      return false
+    }
   }
 
   // 📅 valida frequência
-  const dayOfWeek = currentDate.getDay()
+  const dayOfWeek = date.getUTCDay()
 
   return habit.frequency.some(
     key => WEEKDAY_MAP[key] === dayOfWeek
   )
 }
-

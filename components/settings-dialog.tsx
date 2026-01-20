@@ -3,20 +3,39 @@
 import { SignedOut, SignOutButton, UserProfile } from '@clerk/nextjs'
 
 import { useEffect, useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { Mail, MessageSquare, Bell, Settings, MoreHorizontal, LogOut } from "lucide-react"
+
+import {
+  Mail,
+  MessageSquare,
+  Bell,
+  Settings,
+  MoreHorizontal,
+  LogOut
+} from "lucide-react"
+import axios from 'axios'
+import { toast } from 'sonner'
 
 interface SettingsDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  trigger: React.ReactNode
 }
 
-export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+export function SettingsDialog({ trigger }: SettingsDialogProps) {
+  const [open, setOpen] = useState<boolean>(false)
   const [settings, setSettings] = useState({
     notifications_enabled: false,
     email_notifications: false,
@@ -27,7 +46,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   const [showSettingsUser, setShowSettingsUser] = useState(false);
   const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
 
   useEffect(() => {
     if (open) {
@@ -47,40 +65,48 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   const handleSave = async () => {
     setLoading(true)
-    try {
-      const response = await fetch("/api/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+    const toastId =
+      toast.loading("Salvando ajustes...", {
+        id: 'update-settings'
       })
 
-      if (response.ok) {
-        toast({
-          title: "Settings saved!",
-          description: "Your notification preferences have been updated.",
-        })
-        onOpenChange(false)
+    try {
+      const response =
+        await axios.patch(
+          "/api/settings",
+          settings
+        )
+
+      if (response.data) {
+        toast.success(
+          "Suas preferencias de notificações foram atualizadas.",
+          { id: toastId }
+        )
+
+        setOpen((prev) => !prev)
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to save settings. Please try again.",
-      })
+      toast.error(
+        "Falha ao salvar preferencias, tente novamente.",
+        { id: toastId }
+      )
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
       <DialogContent className="sm:max-w-125 bg-card/95 backdrop-blur-xl border-border/50">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Settings
+            Configurações
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Manage your notification preferences and account settings
+            Gerencia suas notificações, preferências e ajustes da conta aqui
           </DialogDescription>
         </DialogHeader>
 
@@ -90,14 +116,15 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <Bell className="h-5 w-5 text-primary" />
               <div>
                 <Label htmlFor="notifications" className="text-base font-semibold">
-                  Enable Notifications
+                  Ativar Notificações
                 </Label>
-                <p className="text-sm text-muted-foreground">Receive daily habit reminders</p>
+                <p className="text-sm text-muted-foreground">Receba notificações diárias</p>
               </div>
             </div>
             <Switch
               id="notifications"
               checked={settings?.notifications_enabled}
+              disabled
               onCheckedChange={(checked) => setSettings({ ...settings, notifications_enabled: checked })}
             />
           </div>
@@ -109,11 +136,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-blue-500" />
                     <Label htmlFor="email-notif" className="text-base font-medium">
-                      Email Notifications
+                      Notificações de email
                     </Label>
                   </div>
                   <Switch
                     id="email-notif"
+                    disabled
                     checked={settings.email_notifications}
                     onCheckedChange={(checked) => setSettings({ ...settings, email_notifications: checked })}
                   />
@@ -122,12 +150,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 {settings.email_notifications && (
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm">
-                      Email Address
+                      Endereço de email
                     </Label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="your@email.com"
+                      disabled
                       value={settings.email || ""}
                       onChange={(e) => setSettings({ ...settings, email: e.target.value })}
                       className="bg-background/50"
@@ -141,7 +170,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   <div className="flex items-center space-x-3">
                     <MessageSquare className="h-5 w-5 text-green-500" />
                     <Label htmlFor="sms-notif" className="text-base font-medium">
-                      SMS Notifications
+                      Notificações SMS
                     </Label>
                   </div>
                   <Switch
@@ -151,15 +180,17 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     disabled
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">SMS notifications coming soon!</p>
+                <p className="text-xs text-muted-foreground">
+                  Sistemas de notificações em breve
+                </p>
               </div>
 
               <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <p className="text-sm text-foreground">
-                  <strong>⏰ Reminder Time:</strong> Daily at 5:00 AM
+                  <strong>⏰ Relembrar:</strong> Todo dia as 5:00 da manhã
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  You'll receive reminders for all habits scheduled for that day
+                  Você vai receber notificações para todos os hábitos marcados para o dia de hoje
                 </p>
               </div>
             </>
@@ -174,7 +205,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 <Label htmlFor="notifications" className="text-base font-semibold">
                   Ajustes
                 </Label>
-                <p className="text-sm text-muted-foreground">Ajuste suas prefrencias e configurações aqui</p>
+                <p className="text-sm text-muted-foreground">
+                  Ajuste suas prefrencias e configurações aqui
+                </p>
               </div>
               <Button
                 variant="ghost"
@@ -203,12 +236,22 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={loading} className="bg-gradient-to-r from-primary to-blue-600">
-            {loading ? "Saving..." : "Save Changes"}
-          </Button>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                variant="outline"
+              >
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-linear-to-r from-primary to-blue-600"
+            >
+              {loading ? "Salvando..." : "Salvar mudanças"}
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
