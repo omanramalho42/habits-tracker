@@ -41,25 +41,6 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
 
   const { user } = useUser()
 
-  // const handleCreateHabit = async (data: CreateHabitSchemaType) => {
-  //   console.log(data, 'data');
-  //   try {
-  //     const response = 
-  //       await axios.post(
-  //         '/api/habits',
-  //         data
-  //       )
-    
-  //     if(response.data) {
-  //       // return await fetchHabits()
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       console.log(error.message, 'error')
-  //     }
-  //   }
-  // }
-
   return (
     <div className="flex items-start justify-between mb-8">
       <div className="flex flex-col">
@@ -89,7 +70,6 @@ const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
           <ListIcon className="h-6 w-6" />
         </Button>
         <CreateHabitDialog
-          // onSuccessCallback={handleCreateHabit}
           trigger={
             <Button
               size="lg"

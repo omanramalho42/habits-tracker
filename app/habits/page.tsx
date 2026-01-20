@@ -7,7 +7,7 @@ import axios from 'axios'
 
 import { toast } from 'sonner'
 
-import { fetchHabits } from "@/services/habits"
+import { deleteHabit, fetchHabits, updateHabit } from "@/services/habits"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { HabitCard } from '@/components/habit-card'
@@ -55,12 +55,7 @@ export default function page() {
   }, [])
 
   const updateHabitMutation = useMutation({
-    mutationFn: async (data: UpdateHabitSchemaType) => {
-      return axios.patch(
-        `/api/habits/${data.id}`,
-        data
-      )
-    },
+    mutationFn: updateHabit,
     onMutate: () => {
       return toast.loading(
         "Atualizando hábito...",
@@ -91,9 +86,7 @@ export default function page() {
   }, [])
 
   const deleteHabitMutation = useMutation({
-    mutationFn: async (habitId: string) => {
-      return axios.delete(`/api/habits/${habitId}`)
-    },
+    mutationFn: deleteHabit,
     onMutate: () => {
       return toast.loading(
         "Deletando hábito...",

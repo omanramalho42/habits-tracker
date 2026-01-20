@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 
-import axios from "axios"
-
 import { MoodWizard } from "@/components/mood-wizard"
 
 import type { HabitWithStats } from "@/lib/types"
