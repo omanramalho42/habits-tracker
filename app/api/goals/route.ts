@@ -26,6 +26,9 @@ export async function GET(request: Request) {
     }
     
     const goals = await prisma.goals.findMany({
+      where: {
+        userId: userDb.id,
+      },
       orderBy: {
         createdAt: "asc",
       },

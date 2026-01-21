@@ -116,7 +116,7 @@ export const WELCOME_EMAIL_TEMPLATE = `<!DOCTYPE html>
               <tr>
                 <td align="center">
                   <a
-                    href="https://budget-tracker-app-pearl.vercel.app/"
+                    href="{{appUrl}}"
                     style="
                       display:block;
                       width:100%;

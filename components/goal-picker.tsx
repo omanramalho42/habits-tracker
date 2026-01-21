@@ -9,7 +9,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
-import { fetchGoals } from '@/services/goals'
+import { fetchGoals, GoalsDTO } from '@/services/goals'
 import { Goals } from '@prisma/client'
 import { Control, useController } from 'react-hook-form'
 import { CreateHabitSchemaType } from '@/lib/schema/habit'
@@ -34,7 +34,7 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) =>
     isFetching,
     isError,
     error
-  } = useQuery<Goals[]>({
+  } = useQuery<GoalsDTO[]>({
     queryKey: ["goals"],
     queryFn: () => fetchGoals(),
     staleTime: 1000 * 60,
