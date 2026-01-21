@@ -34,6 +34,8 @@ export async function GET(request: Request) {
       },
     })
 
+    console.log(goals, "goals")
+
     return NextResponse.json(goals)
   } catch (error) {
     if (error instanceof Error) {

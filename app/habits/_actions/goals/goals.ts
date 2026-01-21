@@ -40,7 +40,7 @@ export async function CreateGoal(form: CreateGoalSchemaType) {
   return await prisma.goals.create({
     data: {
       name,
-      userId: user.id,
+      userId: userDb.id,
       description: description || "",
       emoji: emoji || ""
     }
