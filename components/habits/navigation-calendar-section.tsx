@@ -138,13 +138,13 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
                 date.toLocaleDateString("pt-BR", { weekday: "short" })
 
               return (
-                <button
+                <Button
                   key={date.toISOString()}
                   data-date={date.toLocaleDateString("pt-BR")}
                   onClick={() => {
                     onCallbackSuccess(new Date(date))
                   }}
-                  className={`flex flex-col items-center justify-center min-w-17.5 py-4 px-3 rounded-xl transition-all ${
+                  className={`h-full flex flex-col items-center justify-center min-w-17.5 py-4 px-3 rounded-xl transition-all ${
                     isSelected
                       ? "bg-linear-to-br from-primary to-blue-600 text-primary-foreground shadow-lg scale-105"
                       : isToday
@@ -154,7 +154,7 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
                 >
                   <span className="text-xs font-semibold uppercase mb-2">{dayOfWeek}</span>
                   <span className="text-2xl font-bold">{date.getDate()}</span>
-                </button>
+                </Button>
               )
             })}
           </div>

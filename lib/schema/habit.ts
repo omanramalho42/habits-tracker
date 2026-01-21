@@ -3,8 +3,12 @@ import { z } from "zod"
 export const CreateHabitSchema = z.object({
   name: z.string(),
   emoji: z.string().default("🌍"),
-  goal: z.string().optional().default(""),
-  motivation: z.string().optional().default(""),
+  goal: z.string().optional(),
+  clock: z.string().optional().default(""),
+  counter: z.coerce.number()
+    .min(1, "O valor minimo a ser selecionado é igual a 1")
+    .max(10, "O valor máximo a ser selecionado é igual a 10")
+    .optional(),
   startDate: z.coerce.date(),
   endDate: z.preprocess(
     (v) => (v === "" || v === null || v === undefined ? null : v),

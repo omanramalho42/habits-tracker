@@ -274,7 +274,7 @@ export function UpdateHabitDialog({
               )}
             />
 
-            <FormField
+            {/* <FormField
               name="goal"
               render={({ field }) => (
                 <FormItem>
@@ -325,7 +325,7 @@ export function UpdateHabitDialog({
                   {errors.motivation && (<span className="text-sm text-red-500">{errors.motivation?.message}</span>)}
                 </FormItem>
               )}
-            />
+            /> */}
 
             {/* DATA INICIAL */}
             <div>

@@ -9,79 +9,77 @@ import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 
 import { HabitCard } from '@/components/habit-card'
-import { HabitDetailDialog } from '@/components/habit-detail-dialog'
 import {
   CreateHabitDialog,
 } from '@/components/create-habit-dialog'
 
 import { Button } from '@/components/ui/button'
 
-import { isHabitActiveOnDate } from '@/lib/habit-utils'
-
 import { Plus } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
-import { CreateHabitSchemaType } from '@/lib/schema/habit'
-
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
   selectedDate: Date
-  onSuccessCallback?: (data: HabitWithStats[]) => void
 }
 
 const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
   habits,
-  selectedDate,
-  onSuccessCallback
+  selectedDate
 }) => {
-  const [loading, setLoading] =
-  useState<boolean>(false)
-  const [detailHabit, setDetailHabit] =
-  useState<HabitWithStats | null>(null)
-  
-  const queryClient = useQueryClient()
-  
+  const queryClient = useQueryClient()  
 
-  const [completedToday, setCompletedToday] = 
-    useState(0)
+  const completedToday = habits.reduce((total, habit) => {
+    const completed = habit.completions?.some(
+      (c) =>
+        new Date(c.completedDate).toISOString().split("T")[0] === 
+        new Date().toISOString().split("T")[0]
+    )
+
+    return completed ? total + 1 : total
+  }, 0)
 
   const handleHabitError = (message: string) => {
     toast.error(message)
   }
-
-  // const handleViewDetail = async (habitId: string) => {
-  //   const statsResponse =
-  //     await axios.get(`/api/habits/${habitId}/stats`)
-
-  //   const habitWithStats =
-  //     await statsResponse.data
-
-  //   setDetailHabit(habitWithStats)
-  // }
-
-  const handleToggleHabit = (habitId: string, date: string) => {
+  
+  const handleToggleHabit = (habitId: string, date: Date) => {
     toast.loading("Alterando status do hábito...", {
       id: "toggle-habit",
     })
+    console.log(date, 'date')
+
+    // const completionId = habits
+    //   .find(habit => habit.id === habitId)
+    //   ?.completions.find(c => {
+    //     const completionDate = new Date(c.completedDate)
+    //     return (
+    //       completionDate.getUTCFullYear() === date.getUTCFullYear() &&
+    //       completionDate.getUTCMonth() === date.getUTCMonth() &&
+    //       completionDate.getUTCDate() === date.getUTCDate()
+    //     )
+    //   })?.id
 
     mutate({
       habitId,
-      date,
+      date: date.toISOString(),
     })
+      
   }
   
-  const { mutate, isPending, data } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async ({
       habitId,
       date,
     }: {
       habitId: string
       date: string
+      completionId?: string
     }) => {
       const response = await axios.post(
         `/api/habits/${habitId}/toggle`,
-        { date }
+        { date: date }
       )
       return response.data
     },
@@ -90,13 +88,15 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
       // 🔁 refetch automático dos hábitos
       await queryClient.invalidateQueries({ queryKey: ["habits"] })
 
-      const { habitId, date } = variables
+      const { habitId, date, completionId } = variables
+
+      // console.log(completionId, 'completionId!');
+      // console.log(date, "date!");
 
       const habit = habits.find(h => h.id === habitId)
-
       const isCompleting =
         !habit?.completions?.some(
-          c => c.completedDate.toLowerCase() === date.toLowerCase()
+          c => new Date(c.completedDate).toISOString().split("T")[0] === new Date(date).toISOString().split("T")[0]
         )
 
       if (isCompleting) {
@@ -132,9 +132,12 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
           <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
             {completedToday}/{habits.length}
           </p>
-          <p className="text-sm text-muted-foreground font-medium">Hábitos completos hoje</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            Hábitos completos hoje
+          </p>
         </div>
       )}
+
       {/* LIST HABITS (ARRAY EMPTY) */}
       {habits.length === 0 ? (
         <div className="text-center py-20">
@@ -165,10 +168,10 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
           {[...habits]
             .map((habit) => (
               <HabitCard
-                loading={isPending || loading}
+                loading={isPending}
                 key={habit.id}
                 habit={habit}
-                onToggle={(id) => handleToggleHabit(id, selectedDate.toISOString().split("T")[0])}
+                onToggle={(id) => handleToggleHabit(id, selectedDate)}
                 selectedDate={selectedDate}
                 onError={handleHabitError}
               />

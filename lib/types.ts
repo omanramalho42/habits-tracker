@@ -13,6 +13,12 @@ export interface Habit {
   createdAt: string
 }
 
+export type WelcomeEmailData = {
+  email: string;
+  name: string;
+  intro: string;
+};
+
 export interface HabitFormData {
   name: string
   emoji: string

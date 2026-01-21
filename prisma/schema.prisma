@@ -49,28 +49,39 @@ model UserSettings {
   @@map("user_settings")
 }
 
+enum HabitStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
 
 model Habit {
   id          String @id @default(uuid())
   userId      String @map("user_id")
 
   name        String    @db.VarChar(255)
-  emoji       String    @db.VarChar(10)
-  goal        String    @db.VarChar(255)
-  motivation  String    @db.VarChar(255)
+  emoji       String?   @db.VarChar(10)
+
+  clock       String? @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
+  counter     Int?             // null = conta apenas 1 vez
+  status      HabitStatus @default(ACTIVE)
 
   startDate   DateTime  @default(now()) @map("start_date")
   endDate     DateTime? @map("end_date")
 
-  reminder    Boolean   @default(false)
-  frequency   Json      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
-  color       String    @default("#3B82F6") @db.VarChar(7)
+  reminder    Boolean?   @default(false)
+  frequency   Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  color       String?    @default("#3B82F6") @db.VarChar(7)
 
   createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   schedules   HabitSchedule[]
   completions HabitCompletion[]
+  goals       Goals[]   // many-to-many implícito
 
   @@index([userId])
   @@map("habits")
@@ -95,12 +106,15 @@ model HabitSchedule {
 
 model HabitCompletion {
   id      String @id @default(uuid())
+
   habitId String @map("habit_id")
 
   completedDate DateTime
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt @map("updated_at") //QUANDO O HÁBITO FOI ATUALIZADO (TOOGLE)
 
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habit       Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  annotations Annotations?
 
   @@unique([habitId, completedDate])
   @@map("habit_completions")
@@ -122,4 +136,40 @@ model MoodEntry {
   @@index([entryDate])
   @@index([userId])
   @@map("mood_entries")
+}
+
+model Goals {
+  id            String  @id @default(uuid())
+  userId        String  @map("user_id")
+
+  name          String
+  description   String
+  emoji         String   @db.VarChar(10)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+
+  habits        Habit[]
+
+  status        HabitStatus? @default(ACTIVE)
+  @@map("goals")
+}
+
+model Annotations {
+  id           String @id @default(uuid())
+  
+  name         String
+  content      String
+
+  completionId String @unique @map("completion_id")
+  completion   HabitCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+  
+  createdByAI Boolean? @default(false)
+  summary String?
+
+  imageUrl     String? @db.VarChar(255)
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime?  @updatedAt
+  @@map("annotations")
 }
