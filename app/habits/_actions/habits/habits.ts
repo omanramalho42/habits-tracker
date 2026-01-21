@@ -4,12 +4,13 @@ import { redirect } from "next/navigation"
 
 import { currentUser } from '@clerk/nextjs/server'
 
+import { prisma } from "@/lib/prisma"
+
 import {
   CreateHabitSchema,
-  CreateHabitSchemaType
+  type CreateHabitSchemaType
 } from "@/lib/schema/habit"
 
-import { prisma } from "@/lib/prisma"
 
 export async function CreateHabit(form: CreateHabitSchemaType) {
   const parsedBody =  CreateHabitSchema.safeParse(form)
@@ -36,12 +37,13 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     color,
     emoji,
     frequency,
-    goal,
-    motivation,
     name,
     reminder,
     startDate,
-    endDate
+    endDate,
+    clock,
+    counter,
+    goal
   } = parsedBody.data
 
   return await prisma.habit.create({
@@ -49,13 +51,18 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
       userId: userDb.id,
       name,
       emoji,
-      goal,
-      motivation,
       startDate: new Date(startDate),
       endDate: endDate ? new Date(endDate) : null,
       reminder,
       frequency, // Json
       color,
+      counter: Number(counter),
+      goals: {
+        connect: {
+          id: goal
+        }
+      },
+      clock
     },
     include: {
       completions: true,

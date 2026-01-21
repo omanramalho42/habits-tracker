@@ -41,7 +41,9 @@ export async function GET(request: Request) {
       },
       include: {
         completions: {
-          orderBy: { completedDate: "desc" },
+          orderBy: {
+            completedDate: "desc"
+          },
         },
       },
       orderBy: {
@@ -111,8 +113,6 @@ export async function POST(request: NextRequest) {
         userId: userDb.id,
         name,
         emoji,
-        goal,
-        motivation,
         startDate: (new Date(startDate)),
         endDate: endDate ? new Date(endDate) : null,
         reminder,

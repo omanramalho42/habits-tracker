@@ -22,6 +22,8 @@ export default function Home() {
     data: habits = [],
     isLoading,
     isFetching,
+    isError,
+    error
   } = useQuery<HabitWithStats[]>({
     queryKey: ["habits", selectedDateStr],
     queryFn: () => fetchHabits(selectedDateStr),
@@ -68,11 +70,22 @@ export default function Home() {
             onSuccessCallback={setSelectedDate}
           />
 
+          {isError ? (
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-bold mb-3 text-foreground">
+                Não foi possível carregar hábitos
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {error instanceof Error ? error.message : "Tente novamente em instantes."}
+              </p>
+            </div>
+          ) : (
+            <ActiveCardHabits
+              habits={habits}
+              selectedDate={selectedDate}
+            />
+          )}
           {/* CARD ACTIVE HABITS */}
-          <ActiveCardHabits
-            habits={habits}
-            selectedDate={selectedDate}
-          />
         </div>
       </main>
     </>

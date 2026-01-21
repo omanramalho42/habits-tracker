@@ -65,17 +65,15 @@ export async function POST(req: Request) {
           imageUrl: image_url,
         }
       })
-      //  await inngest.send({
-      //   name: 'app/user.created',
-      //   data: {
-      //     email: email_addresses[0].email_address,
-      //     name: first_name,
-      //     // country,
-      //     // investmentGoals,
-      //     // riskTolerance,
-      //     // preferredIndustry
-      //   }
-      // })
+
+      await inngest.send({
+        name: 'app/user.created',
+        data: {
+          email: email_addresses[0].email_address,
+          name: first_name,
+        }
+      })
+
       return new Response(JSON.stringify(newUser), {
         status: 201,
       })

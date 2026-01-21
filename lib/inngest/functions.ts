@@ -1,59 +1,105 @@
 import { inngest } from "./client"
-import { sendEmail } from "@/lib/email"
-import { dailyReminderEmailTemplate, welcomeEmailTemplate } from "@/lib/email-templates"
-import { neon } from "@neondatabase/serverless"
+import { sendDailyHabitsEmail, sendWelcomeEmail } from "../nodemailer"
 
-const sql = neon(process.env.DATABASE_URL!)
+import { prisma } from "../prisma"
 
-export const sendWelcomeEmail = inngest.createFunction(
-  { id: "send-welcome-email" },
-  { event: "user/created" },
-  async ({ event }) => {
-    const { email, firstName, userId } = event.data
+import { PERSONALIZED_WELCOME_EMAIL_PROMPT } from "./prompts"
 
-    await sendEmail({
-      to: email,
-      subject: "Welcome to Wisey! 🎯",
-      html: welcomeEmailTemplate(firstName || "there"),
+
+export const sendSignUpEmail = inngest.createFunction(
+  { id: 'sign-up-email' },
+  { event: 'app/user.created'},
+
+  async ({ event, step }) => {
+    const userProfile = `
+      - Nome: ${event.data.name}
+      - Emoji: ${event.data.emoji}
+    `
+    const prompt =
+      PERSONALIZED_WELCOME_EMAIL_PROMPT
+      .replace('{{userProfile}}', userProfile)
+
+    const response = await step.ai.infer('generate-welcome-intro', {
+      model: step.ai.models.gemini({ model: 'gemini-2.5-flash-lite' }),
+      body: {
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: prompt }
+            ]
+          }]
+      }
     })
 
-    return { success: true }
-  },
+    await step.run('send-welcome-email', async () => {
+      const part = response.candidates?.[0]?.content?.parts?.[0];
+      const introText = (part && 'text' in part ? part.text : null) || 'Obrigado por se juntar ao Habit. Agora voce consegue gerenciar sua rotina'
+
+      const { data: { email, name } } = event;
+
+      return await sendWelcomeEmail({
+        email,
+        name,
+        intro: introText
+      });
+    })
+
+    return {
+      success: true,
+      message: 'Welcome email sent successfully'
+    }
+  }
 )
 
-export const sendDailyReminders = inngest.createFunction(
-  { id: "send-daily-reminders" },
-  { cron: "0 5 * * *" }, // Every day at 5 AM
-  async () => {
-    const users = await sql`
-      SELECT user_id, email, notifications_enabled, email_notifications
-      FROM user_settings
-      WHERE notifications_enabled = true AND email_notifications = true AND email IS NOT NULL
-    `
+export const sendDailyHabitReminder = inngest.createFunction(
+  { id: "daily-habit-reminder" },
+  { cron: "0 8 * * *" },
+
+  async ({ step }) => {
+    const users = await step.run("fetch-users-with-habits", async () => {
+      return prisma.user.findMany({
+        include: {
+          habits: {
+            where: {
+              status: "ACTIVE",
+            },
+            include: {
+              completions: {
+                where: {
+                  completedDate: {
+                    gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+    })
 
     for (const user of users) {
-      const today = new Date().toISOString().split("T")[0]
-      const dayOfWeek = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase()
-      const weekdayKey = dayOfWeek.substring(0, 2)
+      const pendingHabits = user.habits.filter(
+        (habit) => habit.completions.length === 0
+      )
 
-      const habits = await sql`
-        SELECT name, icon
-        FROM habits
-        WHERE user_id = ${user.user_id}
-        AND start_date <= ${today}
-        AND (end_date IS NULL OR end_date >= ${today})
-        AND frequency::text LIKE '%' || ${weekdayKey} || '%'
-      `
+      if (pendingHabits.length === 0) continue
 
-      if (habits.length > 0) {
-        await sendEmail({
-          to: user.email,
-          subject: "☀️ Your Daily Habits Reminder",
-          html: dailyReminderEmailTemplate("there", habits as any),
+      await step.run(`send-email-${user.id}`, async () => {
+        return sendDailyHabitsEmail({
+          email: user.email,
+          name: user.firstName || "",
+          habits: pendingHabits.map(h => ({
+            name: h.name,
+            emoji: h.emoji
+          }))
         })
-      }
+      })
     }
 
-    return { sent: users.length }
-  },
+    return {
+      success: true,
+      message: "Daily habit reminders sent",
+    }
+  }
 )

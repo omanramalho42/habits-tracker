@@ -19,6 +19,8 @@ import { format } from "date-fns"
 
 import { CreateHabit } from "@/app/habits/_actions/habits/habits"
 
+import GoalPicker from "@/components/goal-picker"
+
 import {
   Dialog,
   DialogContent,
@@ -58,6 +60,7 @@ import { WEEKDAYS } from "@/lib/habit-utils"
 import {
   CalendarIcon,
   CircleOff,
+  Clock8Icon,
   PlusSquare
 } from "lucide-react"
 
@@ -68,20 +71,19 @@ interface CreateHabitDialogProps {
   onSuccessCallback?: (data: CreateHabitSchemaType) => void
 }
 
-export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDialogProps) {
+export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
   const [color, setColor] = useState<boolean>(false)
-
-  const theme = useTheme()
 
   const form = useForm<CreateHabitSchemaType>({
     defaultValues: {
       name: "",
       goal: "",
-      motivation: "",
+      clock: "",
       frequency: [],
       color: "",
       emoji: "",
+      counter: 1,
       endDate: null,
       reminder: false,
       startDate: new Date()
@@ -117,8 +119,9 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
         endDate: null,
         frequency: [],
         goal: "",
-        motivation: "",
+        clock: "",
         name: "",
+        counter: 1,
         reminder: false,
         startDate: new Date(),
       })
@@ -270,59 +273,80 @@ export function CreateHabitDialog({ trigger, onSuccessCallback }: CreateHabitDia
                 </FormItem>
               )}
             />
-
-            <FormField
-              name="goal"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="goal"
-                      className="text-sm font-semibold"
-                    >
-                      Objetivo
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="goal"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="exercitar 15 minutos por dia"
-                      className="mt-1.5"
-                    />
-                  </FormControl>
-                  {errors.goal && (<span className="text-sm text-red-500">{errors.goal?.message}</span>)}
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="motivation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="motivation"
-                      className="text-sm font-semibold"
-                    >
-                      Motivação
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="motivation"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="melhorar suas notas escolares"
-                      className="mt-1.5"
-                    />
-                  </FormControl>
-                  {errors.motivation && (<span className="text-sm text-red-500">{errors.motivation?.message}</span>)}
-                </FormItem>
-              )}
-            />
+            
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="goal" className="text-sm font-medium">
+                Vincular Objetivo
+              </Label>
+              {/* <span className="text-muted-foreground font-normal">
+                ({watch('categoriesId')?.length || 0} selecionados)
+              </span> */}
+              <GoalPicker
+                control={control}
+                onSuccessCallback={() => {}}
+              />
+            </div>
+            
+            <div className="flex justify-between gap-4 items-center">
+              <FormField
+                name="clock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Label
+                        htmlFor="clock"
+                        className="text-sm font-semibold"
+                      >
+                        Horario
+                      </Label>
+                    </FormLabel>
+                    <FormControl>
+                      <div className='relative'>
+                        <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
+                          <Clock8Icon className='size-4' />
+                        </div>
+                        <Input
+                          type='time'
+                          id='time-picker'
+                          step='1'
+                          className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+                          onChange={field.onChange}
+                          value={field.value}
+                        />
+                      </div>
+                    </FormControl>
+                    {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="counter"
+                control={control}
+                rules={{ min: 1, max: 10 }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Label
+                        htmlFor="counter"
+                        className="text-sm font-semibold"
+                      >
+                        Contador
+                      </Label>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id="counter"
+                        value={field.value}
+                        onChange={field.onChange}
+                        type="number"
+                      />
+                    </FormControl>
+                    {errors.counter && (<span className="text-sm text-red-500">{errors.counter?.message}</span>)}
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* DATA INICIAL */}
             <div>

@@ -101,6 +101,8 @@ export default function page() {
         exact: false,
       })
 
+      setSearch("")
+
       toast.success(
         "Hábito deletado com sucesso.",
         { id: toastId }

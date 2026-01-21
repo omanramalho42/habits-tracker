@@ -43,8 +43,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       data: {
         name: name,
         emoji: emoji,
-        goal: goal,
-        motivation: motivation,
         reminder: reminder,
         frequency: frequency,
         color: color,
