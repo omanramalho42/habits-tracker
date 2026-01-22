@@ -42,9 +42,11 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     startDate,
     endDate,
     clock,
-    counter,
+    limitCounter,
     goal
   } = parsedBody.data
+
+  console.log("creating service")
 
   return await prisma.habit.create({
     data: {
@@ -56,16 +58,57 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
       reminder,
       frequency, // Json
       color,
-      counter: Number(counter),
-      goals: {
+      limitCounter: Number(limitCounter) || 1,
+      counter: Number(0),
+      ...(goal  && {goals: {
         connect: {
           id: goal
         }
-      },
+      }}),
       clock
     },
     include: {
       completions: true,
     },
   })
+}
+
+export async function DeleteHabit(habitId: string) {
+  const user = await currentUser()
+  if (!user) {
+    redirect('/sign-in')
+  }
+
+  // VERIFICAR SE O USUARIO EXISTE NO BD
+  const userDb = await prisma.user.findFirst({
+    where: {
+      clerkUserId: user.id,
+    },
+  })
+
+  if (!userDb) {
+    throw new Error("User not found")
+  }
+
+  if (!habitId) {
+    throw new Error("habit Id is not set")
+  }
+
+  const existHabit = await prisma.habit.findFirst({
+    where: {
+      id: habitId,
+      userId: userDb.id
+    }
+  })
+
+  console.log("creating service")
+
+  if(existHabit) {
+    return await prisma.habit.delete({
+      where: {
+        id: existHabit.id,
+        userId: userDb.id
+      }
+    })
+  }
 }

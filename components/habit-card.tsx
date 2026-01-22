@@ -1,29 +1,30 @@
 "use client"
 
 import React, { useState } from "react"
+
 import { toast } from "react-toastify"
 
+import DeleteHabitDialog from "@/components/delete-habit-dialog"
 import HeatMapHabit from "@/components/heat-map"
+import {
+  UpdateHabitDialog,
+} from "@/components/update-habit-dialog"
+import { HabitDetailDialog } from "@/components/habit-detail-dialog"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { WEEKDAYS, WEEKDAY_MAP } from "@/lib/habit-utils"
-
-import {
-UpdateHabitDialog,
-UpdateHabitSchemaType
-} from "./update-habit-dialog"
-
-import { cn } from "@/lib/utils"
-
-import type { HabitWithStats } from "@/lib/types"
-
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { Progress } from "@/components/ui/progress"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 
+import { cn } from "@/lib/utils"
+
+import { WEEKDAYS, WEEKDAY_MAP } from "@/lib/habit-utils"
 
 import {
   X,
@@ -32,11 +33,13 @@ import {
   TrendingUp,
   Eye,
   Check,
-  EyeIcon
+  EyeIcon,
+  Clock10Icon,
+  Repeat
 } from "lucide-react"
-import { Progress } from "./ui/progress"
-import { Skeleton } from "./ui/skeleton"
-import { HabitDetailDialog } from "./habit-detail-dialog"
+
+import type { HabitWithStats } from "@/lib/types"
+import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -152,7 +155,10 @@ export function HabitCard({
   // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
     const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
-    return completionDate === todayStr
+    const limit = habit.limitCounter || 1
+    const counter = habit.counter || 0
+
+    return completionDate === todayStr && counter === limit
   })
   // Obtém o dia da semana atual (0 = domingo, 6 = sábado)
   const currentDayOfWeek = currentDate.getDay()
@@ -179,6 +185,16 @@ export function HabitCard({
   // - A data não pode ser futura 
   const canToggle = isActiveToday && !isFutureDate
 
+  const counter = habit.counter ?? 0
+  const limit = habit.limitCounter ?? 1
+
+  const completedProgress =
+    limit > 0
+      ? Math.min(counter / limit) * 100
+      : 0
+
+  const isCompleted = counter >= limit
+
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
 
@@ -192,6 +208,7 @@ export function HabitCard({
       }
       return
     }
+
     onToggle && 
       onToggle(habit.id)
   }
@@ -241,6 +258,7 @@ export function HabitCard({
                   <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
                     {habit.name}
                   </h3>
+                  {/* badge streak */}
                   {habit.current_streak > 0 && (
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
                       <TrendingUp className="h-3 w-3" />
@@ -250,14 +268,27 @@ export function HabitCard({
                   </div>
               )}
             </div>
-            {!loading ?(
-              <p className="text-sm text-muted-foreground mb-3">
-                {habit.goal}
-              </p>
+
+            {!loading ? (
+              <div className="relative flex flex-row gap-2">
+                <Badge
+                  variant="default"
+                  className="flex flex-row gap-2 text-sm text-foreground mb-3"
+                >
+                  <Repeat />
+                  {habit?.counter}/{habit?.limitCounter}
+                </Badge>
+                {habit.clock && (
+                <Badge variant="outline" className="text-sm flex flex-row gap-2 text-foreground mb-3">
+                  <Clock10Icon /> {habit?.clock}
+                </Badge>
+                )}
+              </div>
             ) : (
-              <Skeleton className="h-4 w-64 mb-4 mt-2" />
+              <Skeleton className="h-4 w-32 mb-4 mt-2" />
             )}
             
+            {/* FREQUENCY */}
             {!loading ? (
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1">
@@ -280,7 +311,9 @@ export function HabitCard({
                         style={
                           isActive
                             ? {
-                                backgroundColor: isCompletedThisWeekday
+                                backgroundColor: 
+                                  isCompletedThisWeekday &&
+                                  habit.limitCounter === habit.counter
                                   ? "#32CD32"        // 🟢 completado
                                   : "#B22222"      // 🔵 ativo (schedule)
                               }
@@ -296,6 +329,7 @@ export function HabitCard({
                     )
                   })}
                 </div>
+                
                 <div className="flex items-center justify-between gap-2 w-full">
                   <span className="w-full text-xs text-muted-foreground font-medium">
                     {habit.completions.length > 0 && habit.endDate ? (
@@ -305,7 +339,7 @@ export function HabitCard({
                     ) : habit.completions.length === 0 ? (
                       <p className="text-muted-foreground">Comece hoje</p>
                     ) : !habit.endDate ? (
-                      <p className="">
+                      <p className="flex-nowrap">
                         {habit.completions.length} conclúidos
                       </p>
                     ) : (
@@ -363,22 +397,20 @@ export function HabitCard({
               />
             )}
 
-            {/* CRIAR O DELETEDIALOGHABIT */}
             {onDelete && (
-              <Button
-                variant="ghost"
-                disabled={!onDelete}
-                size="icon"
-                className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (confirm("Are you sure you want to delete this habit?")) {
-                    onDelete(habit.id)
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <DeleteHabitDialog
+                habitId={habit.id}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    disabled={!onDelete}
+                    size="icon"
+                    className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                }
+              />
             )}
 
             <HabitDetailDialog
@@ -396,30 +428,26 @@ export function HabitCard({
 
             {/*  */}
             {onToggle && (
-              <Button
-                variant={isCompletedToday ? "default" : "outline"}
-                size="icon"
-                disabled={loading}
-                className={cn(
-                  "flex items-center rounded-full transition-all",
-                  isCompletedToday && "shadow-md bg-transparent hover:bg-red-600/80",
-                  !isCompletedToday &&
-                    !canToggle &&
-                    "opacity-50 cursor-not-allowed bg-red-500/10 border-red-500/30 text-red-500",
-                  !isCompletedToday &&
-                    canToggle &&
-                    "hover:border-primary/50 hover:bg-primary/5",
-                )}
-                onClick={handleToggleClick}
-              >
-                {isCompletedToday ? (
-                  <X className="h-5 w-5" />   // 👉 DESMARCAR
-                ) : !canToggle ? (
-                  <X className="h-5 w-5" />   // 👉 BLOQUEADO
-                ) : (
-                  <div className="h-4 w-4 rounded-full border border-current" /> // 👉 MARCAR
-                )}
-              </Button>
+              <div className="flex flex-col items-center gap-2">
+                <Progress
+                  className="w-full rounded-full max-w-sm"
+                  value={completedProgress}
+                />
+                <Button
+                  variant={isCompletedToday ? "default" : "outline"}
+                  size="icon"
+                  disabled={loading}
+                  onClick={handleToggleClick}
+                  className={cn(
+                    "relative w-7 h-7 rounded-full flex items-center justify-center transition",
+                    isCompletedToday
+                      ? "bg-primary text-white"
+                      : "bg-background border border-border"
+                  )}
+                >
+                  {isCompletedToday && <Check className="w-5 h-5" />}
+                </Button>
+              </div>
             )}
             
           </div>
@@ -456,9 +484,9 @@ export function HabitCard({
             <div className="overflow-x-auto">
               <div className="w-full">
                 <HeatMapHabit
+                  counter={habit.counter!}
                   endDate={habit.endDate ? new Date(habit.endDate) : null}
-                  habitColor={habit.color}
-                  habitFrequency={habit.frequency}
+                  habitColor={habit.color || "green"}
                   startDate={new Date(habit.startDate)}
                   completions={habit.completions}
                 />

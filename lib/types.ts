@@ -1,16 +1,22 @@
+import { Goals, HabitStatus } from "@prisma/client"
+
 export interface Habit {
   id: string
   name: string
-  emoji: string
-  goal: string
-  motivation: string
+  emoji?: string
+  goals?: Goals[]
+  clock?: string
+  limitCounter?: number
+  counter?: number
+  status: HabitStatus
   startDate: string
-  endDate: string | null
-  reminder: boolean
-  frequency: string[]
+  endDate?: string | null
+  reminder?: boolean
+  frequency?: string[]
   completions?: HabitCompletion[]
-  color: string
+  color?: string
   createdAt: string
+  updatedAt?: string
 }
 
 export type WelcomeEmailData = {
@@ -35,7 +41,6 @@ export interface HabitCompletion {
   id: string
   habitId: string
   completedDate: string
-  completed_date?: string
   createdAt: string
 }
 

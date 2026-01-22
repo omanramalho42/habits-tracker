@@ -5,9 +5,10 @@ export const CreateHabitSchema = z.object({
   emoji: z.string().default("🌍"),
   goal: z.string().optional(),
   clock: z.string().optional().default(""),
-  counter: z.coerce.number()
-    .min(1, "O valor minimo a ser selecionado é igual a 1")
+  limitCounter: z.coerce.number()
+    .min(0, "O valor minimo a ser selecionado é igual a 1")
     .max(10, "O valor máximo a ser selecionado é igual a 10")
+    .default(1)
     .optional(),
   startDate: z.coerce.date(),
   endDate: z.preprocess(
@@ -21,3 +22,34 @@ export const CreateHabitSchema = z.object({
 })
 
 export type CreateHabitSchemaType = z.infer<typeof CreateHabitSchema>
+
+export const UpdateHabitSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  emoji: z.string().default("🌍"),
+  goal: z.string().optional(),
+  clock: z.string().optional().default(""),
+  status: z.enum(["ACTIVE", "ARCHIVED", "PAUSED"]).optional(),
+  counter: z.coerce.number()
+    .min(0, "O valor minimo a ser selecionado é igual a 1")
+    .max(10, "O valor máximo a ser selecionado é igual a 10")
+    .default(0)
+    .optional(),
+  limitCounter: z.coerce.number()
+    .min(0, "O valor minimo a ser selecionado é igual a 1")
+    .max(10, "O valor máximo a ser selecionado é igual a 10")
+    .default(1)
+    .optional(),
+  // status: z.enum(['ACTIVE', 'PAUSED', 'ARCHIVED']).default("ACTIVE").optional(),
+  startDate: z.coerce.date(),
+  endDate: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? null : v),
+    z.coerce.date().nullable()
+  ).optional(),
+  reminder: z.boolean().optional().default(false),
+  frequency: z.array(z.string()).default([]),
+  color: z.string().optional().default("#3B82F6"),
+  updatedAt: z.coerce.date().optional(),
+})
+
+export type UpdateHabitSchemaType = z.infer<typeof UpdateHabitSchema>

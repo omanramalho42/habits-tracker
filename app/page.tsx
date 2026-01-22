@@ -31,7 +31,7 @@ export default function Home() {
     retry: 1,
   })
 
-  console.log(habits, "habits");
+  // console.log(habits, "habits");
 
   if (isLoading) {
     return (

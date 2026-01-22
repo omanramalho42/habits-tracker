@@ -1,6 +1,6 @@
 import axios from "axios"
 import { HabitWithStats } from "@/lib/types"
-import { UpdateHabitSchemaType } from "@/components/update-habit-dialog"
+import { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
 /* =======================
    FETCH

@@ -18,7 +18,7 @@ interface HeatMapHabitProps {
   startDate: Date
   endDate: Date | null
   completions: CompletionValue[] // Completions (habit.completions)
-  habitFrequency: string[] // Frequency (habit.frequency)
+  counter: number
 }
 
 const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
@@ -26,14 +26,12 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
   startDate,
   endDate,
   completions,
-  habitFrequency
+  counter,
 }) => {
   // --- CONSTANTES ---
   const COLOR_COMPLETED = habitColor
   const COLOR_SCHEDULED = 'hsl(var(--muted))' // Azul
   const COLOR_NO_HABIT = "hsl(var(--muted))" // Muted/Preto
-
-  const WEEKDAYS = ["S", "M", "T", "W", "TH", "F", "SA"] as const
   
   // VERIFICAR COMPLETED_DATE NAO DEVERIA SER POSSIVELMENTE NULL
   const valuesCompletions: HeatMapValue[] = completions.map(completion => {
@@ -44,9 +42,11 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
       .split("T")[0]
       .replace(/-/g, "/")
 
+    console.log(formattedDate, counter, 'heat map value')
+
     return {
       date: formattedDate,
-      count: 2 // 🟢 COMPLETED (nunca 1)
+      count: counter // 🟢 COMPLETED (nunca 1)
     }
   })
 
@@ -78,11 +78,11 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
       return completionDate === formattedDate
     })
 
-    let count: 0 | 1 | 2 = 0
+    let count: number = 0
 
     // 🔥 regra final
     if (/*isFrequencyDay && */hasCompletion) {
-      count = 2 // concluído
+      count = counter // concluído
     }
     // else if (isFrequencyDay) {
     //   count = 0 // esperado mas não concluído

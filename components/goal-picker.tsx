@@ -1,22 +1,38 @@
 "use client"
 
-import { Popover } from '@radix-ui/react-popover'
 import React, { useCallback, useState } from 'react'
-import { PopoverContent, PopoverTrigger } from './ui/popover'
-import { Button } from './ui/button'
-import CreateGoalDialog from './create-goal-dialog'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
-import { Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+
 import { useQuery } from '@tanstack/react-query'
-import { fetchGoals, GoalsDTO } from '@/services/goals'
-import { Goals } from '@prisma/client'
 import { Control, useController } from 'react-hook-form'
-import { CreateHabitSchemaType } from '@/lib/schema/habit'
+
+import { fetchGoals, GoalsDTO } from '@/services/goals'
+
+import CreateGoalDialog from '@/components/create-goal-dialog'
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@/components/ui/command'
+import { Button } from '@/components/ui/button'
+
+import { cn } from '@/lib/utils'
+
+import { Check } from 'lucide-react'
+
+import type { CreateHabitSchemaType, UpdateHabitSchemaType } from '@/lib/schema/habit'
 
 interface GoalPickerProps {
-  control: Control<CreateHabitSchemaType>
-  onSuccessCallback: (value: string) => void
+  control: Control<CreateHabitSchemaType | UpdateHabitSchemaType>
+  onSuccessCallback?: (value: string) => void
 }
 
 const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) => {

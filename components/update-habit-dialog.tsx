@@ -8,8 +8,6 @@ import {
   useForm
 } from "react-hook-form"
 
-import { z } from "zod"
-
 import { HexColorPicker } from "react-colorful"
 
 import {
@@ -30,6 +28,8 @@ import { useTheme } from "next-themes"
 
 import { format } from "date-fns"
 
+import GoalPicker from "@/components/goal-picker"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,46 +46,29 @@ import {
   FormItem,
   FormLabel
 } from "@/components/ui/form"
-
 import { Switch } from "@/components/ui/switch"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+
+import { WEEKDAYS } from "@/lib/habit-utils"
 
 import { cn } from "@/lib/utils"
 
-import { WEEKDAYS } from "@/lib/habit-utils"
+import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
 import {
   CalendarIcon,
   CircleOff,
+  Clock8Icon,
   PlusSquare
 } from "lucide-react"
 
-import { toast } from 'sonner'
-
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-
-// import type { HabitSchemaType } from "@/components/create-habit-dialog"
+import type { Habit } from "@/lib/types"
 
 interface UpdateHabitDialogProps {
   trigger?: React.ReactNode
   onSuccessCallback?: (data: UpdateHabitSchemaType) => void
-  habit: UpdateHabitSchemaType
+  habit: Habit
 }
-
-const habitSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  emoji: z.string().default("🌍"),
-  goal: z.string().optional().default(""),
-  motivation: z.string().optional().default(""),
-  startDate: z.string().date(),
-  endDate: z.string().date().optional().nullable(),
-  reminder: z.boolean().optional().default(false),
-  // z.enum(['M', 'T', 'W', 'TH', 'F', 'SA', 'S'])
-  frequency: z.array(z.string()).default([]),
-  color: z.string().optional().default("#3B82F6"),
-})
-
-export type UpdateHabitSchemaType = z.infer<typeof habitSchema>
 
 export function UpdateHabitDialog({
   trigger,
@@ -97,19 +80,24 @@ export function UpdateHabitDialog({
 
   const theme = useTheme()
 
+  const goalId = habit.goals?.map((goal) => goal.id)[0] || ""
+
   const form = useForm<UpdateHabitSchemaType>({
     defaultValues: {
       id: habit.id,
       name: habit.name,
-      goal: habit.goal || "",
-      motivation: habit.motivation || "",
+      limitCounter: habit.limitCounter || 1,
+      status: habit.status,
+      clock: habit.clock || "",
       frequency: habit.frequency || [],
       color: habit.color || "",
       emoji: habit.emoji || "",
+      goal: goalId,
       endDate: 
-        habit.endDate && habit.reminder ? habit.endDate : null,
-      startDate: habit.startDate,
+        habit.endDate && habit.reminder ? new Date(habit.endDate) : null,
+      startDate: new Date(habit.startDate),
       reminder: habit.reminder || false,
+      updatedAt: new Date()
     }
   })
 
@@ -124,32 +112,11 @@ export function UpdateHabitDialog({
   } = form
 
   const onSubmit: SubmitHandler<UpdateHabitSchemaType> = async (data: UpdateHabitSchemaType) => {
-    console.log("submmmitng")
-    // toasters aqui
-    const toastId =
-      toast.loading(
-        'Atualizando hábito....',
-        { id: 'habits-update'}
-      )
-      console.log(data, "data")
-    try {
-      await onSuccessCallback?.(data)
+    console.log(data, "data")
+  
+    await onSuccessCallback?.(data)
 
-      setOpen(prev => !prev)
-
-      toast.success(
-        "Sucesso ao atualizar hábito", 
-        { id: toastId }
-      )
-    } catch (error) {
-      if(error instanceof Error) {
-        console.log(error.message)
-        return toast.error(
-          "Sucesso ao atualizar hábito",
-          { id: toastId }
-        )
-      }
-    }
+    setOpen(prev => !prev)
   }
 
   return (
@@ -274,58 +241,78 @@ export function UpdateHabitDialog({
               )}
             />
 
-            {/* <FormField
-              name="goal"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="goal"
-                      className="text-sm font-semibold"
-                    >
-                      Objetivo
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="goal"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="exercitar 15 minutos por dia"
-                      className="mt-1.5"
-                    />
-                  </FormControl>
-                  {errors.goal && (<span className="text-sm text-red-500">{errors.goal?.message}</span>)}
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="motivation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="motivation"
-                      className="text-sm font-semibold"
-                    >
-                      Motivação
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="motivation"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="melhorar suas notas escolares"
-                      className="mt-1.5"
-                    />
-                  </FormControl>
-                  {errors.motivation && (<span className="text-sm text-red-500">{errors.motivation?.message}</span>)}
-                </FormItem>
-              )}
-            /> */}
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="goal" className="text-sm font-medium">
+                Vincular Objetivo
+              </Label>
+              {/* <span className="text-muted-foreground font-normal">
+                ({watch('categoriesId')?.length || 0} selecionados)
+              </span> */}
+              <GoalPicker
+                control={control}
+              />
+            </div>
+            
+            <div className="flex justify-between gap-4 items-center">
+              <FormField
+                name="clock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Label
+                        htmlFor="clock"
+                        className="text-sm font-semibold"
+                      >
+                        Horario
+                      </Label>
+                    </FormLabel>
+                    <FormControl>
+                      <div className='relative'>
+                        <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
+                          <Clock8Icon className='size-4' />
+                        </div>
+                        <Input
+                          type='time'
+                          id='time-picker'
+                          step='1'
+                          className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+                          onChange={field.onChange}
+                          value={field.value}
+                        />
+                      </div>
+                    </FormControl>
+                    {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="limitCounter"
+                control={control}
+                rules={{ min: 1, max: 10 }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Label
+                        htmlFor="counter"
+                        className="text-sm font-semibold"
+                      >
+                        Contador
+                      </Label>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id="limitCounter"
+                        value={field.value}
+                        onChange={field.onChange}
+                        type="number"
+                      />
+                    </FormControl>
+                    {errors.limitCounter && (<span className="text-sm text-red-500">{errors.limitCounter?.message}</span>)}
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* DATA INICIAL */}
             <div>
@@ -448,7 +435,7 @@ export function UpdateHabitDialog({
                       value={day.label}
                       className="flex-1"
                     >
-                      {day.label}
+                      {day.keyPtBr}
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>

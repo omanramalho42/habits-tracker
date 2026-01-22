@@ -80,9 +80,9 @@ export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                       {habit.name}
                     </h2>
-                    <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
-                      {habit.goal}
-                    </p>
+                    {/* <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
+                      {habit.goal.name}
+                    </p> */}
                   </div>
                 </div>
               </div>
@@ -198,11 +198,11 @@ export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
             <div className="overflow-x-auto">
               <div className="w-full">
                 <HeatMapHabit
-                  habitColor={habit.color}
+                  counter={habit.counter!}
+                  habitColor={habit.color || "#F9F9F9"}
                   startDate={new Date(habit.startDate)}
                   endDate={habit.endDate ? new Date(habit.endDate) : null}
                   completions={habit.completions}
-                  habitFrequency={habit.frequency}
                 />
               </div>
             </div>

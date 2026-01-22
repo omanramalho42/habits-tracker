@@ -14,7 +14,6 @@ import { toast } from 'sonner'
 import Picker from "@emoji-mart/react"
 import data from "@emoji-mart/data"
 
-import { useTheme } from "next-themes"
 import { format } from "date-fns"
 
 import { CreateHabit } from "@/app/habits/_actions/habits/habits"
@@ -83,7 +82,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
       frequency: [],
       color: "",
       emoji: "",
-      counter: 1,
+      limitCounter: 1,
       endDate: null,
       reminder: false,
       startDate: new Date()
@@ -121,7 +120,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
         goal: "",
         clock: "",
         name: "",
-        counter: 1,
+        limitCounter: 1,
         reminder: false,
         startDate: new Date(),
       })
@@ -278,9 +277,6 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
               <Label htmlFor="goal" className="text-sm font-medium">
                 Vincular Objetivo
               </Label>
-              {/* <span className="text-muted-foreground font-normal">
-                ({watch('categoriesId')?.length || 0} selecionados)
-              </span> */}
               <GoalPicker
                 control={control}
                 onSuccessCallback={() => {}}
@@ -320,7 +316,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                 )}
               />
               <FormField
-                name="counter"
+                name="limitCounter"
                 control={control}
                 rules={{ min: 1, max: 10 }}
                 render={({ field }) => (
@@ -336,13 +332,13 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                     <FormControl>
                       <Input
                         {...field}
-                        id="counter"
+                        id="limitCounter"
                         value={field.value}
                         onChange={field.onChange}
                         type="number"
                       />
                     </FormControl>
-                    {errors.counter && (<span className="text-sm text-red-500">{errors.counter?.message}</span>)}
+                    {errors.limitCounter && (<span className="text-sm text-red-500">{errors.limitCounter?.message}</span>)}
                   </FormItem>
                 )}
               />

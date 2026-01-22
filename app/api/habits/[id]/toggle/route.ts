@@ -41,37 +41,105 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const completedDate =
       new Date(bodyParams.data)
     
-    const existing = await prisma.habitCompletion.findFirst({
+    console.log(completedDate, "completed date")
+    
+    // 1️⃣ Busca a completion existente
+    const existingCompletion = await prisma.habitCompletion.findFirst({
       where: {
         habitId: id,
         completedDate,
-      }, select: {
-        id: true
-      }
+      },
+      include: {
+        habit: true,
+      },
     })
 
-    if (existing) {
-      // 2️⃣ Remove completion
+    // 2️⃣ NÃO EXISTE → cria
+    if (!existingCompletion) {
+      const habit = await prisma.habit.findUnique({
+        where: { id },
+        select: {
+          counter: true,
+          limitCounter: true,
+        },
+      })
+
+      await prisma.$transaction([
+        prisma.habitCompletion.create({
+          data: {
+            habitId: id,
+            completedDate,
+          },
+        }),
+
+        // 👉 se o hábito usa contador, inicia em 1
+        ...(habit?.limitCounter
+          ? [
+              prisma.habit.update({
+                where: { id },
+                data: { counter: 1 },
+              }),
+            ]
+          : []),
+      ])
+
+      return NextResponse.json({
+        completed: true,
+        counter: habit?.limitCounter ? 1 : null,
+      })
+    }
+
+    // 3️⃣ EXISTE e NÃO TEM contador → toggle normal
+    if (!existingCompletion.habit.limitCounter) {
       await prisma.habitCompletion.delete({
         where: {
-          id: existing.id,
-          habitId: id,
-          completedDate,
+          id: existingCompletion.id,
         },
       })
 
       return NextResponse.json({ completed: false })
     }
 
-    // 3️⃣ Cria completion
-    const newHabit = await prisma.habitCompletion.create({
-      data: {
-        habitId: id,
-        completedDate: new Date(date),
-      },
-    })
+    // 4️⃣ EXISTE e TEM contador
+    const currentCounter = existingCompletion.habit.counter ?? 0
+    const limitCounter = existingCompletion.habit.limitCounter ?? 1
 
-    return NextResponse.json(newHabit)
+    // 4.1️⃣ Ainda não chegou no limite → incrementa
+    if (currentCounter < limitCounter) {
+      const nextCounter = currentCounter + 1
+
+      await prisma.habit.update({
+        where: { id },
+        data: {
+          counter: nextCounter,
+        },
+      })
+
+      return NextResponse.json({
+        completed: true,
+        counter: nextCounter,
+      })
+    }
+
+    // 4.2️⃣ Chegou no limite → reset
+    await prisma.$transaction([
+      prisma.habitCompletion.delete({
+        where: {
+          id: existingCompletion.id,
+        },
+      }),
+      prisma.habit.update({
+        where: { id },
+        data: {
+          counter: 0,
+        },
+      }),
+    ])
+
+    return NextResponse.json({
+      completed: false,
+      counter: 0,
+    })
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error toggling habit completion:", error.message)

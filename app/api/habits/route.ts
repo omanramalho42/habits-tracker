@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { isHabitActiveOnDate } from '@/lib/habit-utils'
 import { Habit } from '@prisma/client'
+import { CreateHabitSchema } from '@/lib/schema/habit'
 
 export async function GET(request: Request) {
   try {
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
         userId: userDb.id,
       },
       include: {
+        goals: true,
         completions: {
           orderBy: {
             completedDate: "desc"
@@ -94,34 +96,51 @@ export async function POST(request: NextRequest) {
         error: "user not find on db"
       }, { status: 401 })
     }
-
+    
     const body = await request.json()
+
+    const parsedBody = CreateHabitSchema.safeParse(body)
+
+    if (!parsedBody.success) throw new Error(parsedBody.error.message)
+    
     const {
       name,
       emoji,
-      goal,
-      motivation,
       endDate,
       startDate,
       reminder, 
       frequency,
-      color
-    } = body
+      color,
+      clock,
+      limitCounter,
+      goal
+    } = parsedBody.data
 
     const newHabit = await prisma.habit.create({
       data: {
         userId: userDb.id,
         name,
         emoji,
-        startDate: (new Date(startDate)),
+        startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
         reminder,
         frequency, // Json
         color,
+        counter: Number(0),
+        limitCounter: Number(limitCounter) || 1,
+        ...(goal  && {goals: {
+          connect: {
+            id: goal
+          }
+        }}),
+        clock
+      },
+      include: {
+        completions: true,
       },
     })
 
-    console.log(newHabit, "creating")
+    console.log(newHabit, "creating api")
 
     return NextResponse.json(newHabit)
   } catch (error) {

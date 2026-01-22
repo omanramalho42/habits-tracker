@@ -48,24 +48,11 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     toast.loading("Alterando status do hábito...", {
       id: "toggle-habit",
     })
-    console.log(date, 'date')
-
-    // const completionId = habits
-    //   .find(habit => habit.id === habitId)
-    //   ?.completions.find(c => {
-    //     const completionDate = new Date(c.completedDate)
-    //     return (
-    //       completionDate.getUTCFullYear() === date.getUTCFullYear() &&
-    //       completionDate.getUTCMonth() === date.getUTCMonth() &&
-    //       completionDate.getUTCDate() === date.getUTCDate()
-    //     )
-    //   })?.id
 
     mutate({
       habitId,
       date: date.toISOString(),
     })
-      
   }
   
   const { mutate, isPending } = useMutation({
@@ -75,7 +62,6 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
     }: {
       habitId: string
       date: string
-      completionId?: string
     }) => {
       const response = await axios.post(
         `/api/habits/${habitId}/toggle`,
@@ -88,18 +74,40 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
       // 🔁 refetch automático dos hábitos
       await queryClient.invalidateQueries({ queryKey: ["habits"] })
 
-      const { habitId, date, completionId } = variables
-
-      // console.log(completionId, 'completionId!');
-      // console.log(date, "date!");
+      const { habitId, date } = variables
 
       const habit = habits.find(h => h.id === habitId)
+
       const isCompleting =
         !habit?.completions?.some(
-          c => new Date(c.completedDate).toISOString().split("T")[0] === new Date(date).toISOString().split("T")[0]
+          c => 
+            new Date(c.completedDate)
+            .toISOString()
+            .split("T")[0] === 
+            new Date(date)
+            .toISOString()
+            .split("T")[0]
         )
 
-      if (isCompleting) {
+      const limit = (habit?.limitCounter || 1) - 1
+      const currentCounter = habit?.counter || 0
+
+      console.log(limit, currentCounter, "current | limit")
+      console.log(isCompleting, "is completing")  
+
+      if(currentCounter < limit) {
+        toast.success("Hábito marcado com sucesso!", {
+          id: "toggle-habit",
+        })
+      }
+
+      if(currentCounter > limit) {
+        toast.success("Hábito desmarcado com sucesso!", {
+          id: "toggle-habit",
+        })
+      }
+
+      if (currentCounter === limit) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -108,10 +116,6 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
         })
 
         toast.success("Hábito concluído com sucesso!", {
-          id: "toggle-habit",
-        })
-      } else {
-        toast.success("Hábito desmarcado com sucesso!", {
           id: "toggle-habit",
         })
       }

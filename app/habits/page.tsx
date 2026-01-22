@@ -1,9 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import React, { useCallback, useEffect, useState } from 'react'
-
-import axios from 'axios'
+import React, { useCallback, useState } from 'react'
 
 import { toast } from 'sonner'
 
@@ -12,7 +10,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { HabitCard } from '@/components/habit-card'
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
-import { UpdateHabitSchemaType } from '@/components/update-habit-dialog'
 
 import {
   Breadcrumb,
@@ -34,6 +31,7 @@ import { Input } from "@/components/ui/input"
 import type { HabitWithStats } from '@/lib/types'
 
 import { Loader, Plus } from "lucide-react"
+import { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
 export default function page() {
   const [search, setSearch] = useState<string>("")
@@ -49,6 +47,8 @@ export default function page() {
     queryFn: () => fetchHabits(),
     staleTime: 1000 * 60,
   })
+
+  console.log(habits, "habits")
 
   const queryClient = useQueryClient()
 
