@@ -30,7 +30,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
 }) => {
   // --- CONSTANTES ---
   const COLOR_COMPLETED = habitColor
-  const COLOR_COMPLETED_6 = habitColor.replace(")", ", 0.8)").replace("rgb", "rgba")
+  // const COLOR_COMPLETED_6 = "red"
 
   const COLOR_SCHEDULED = 'hsl(var(--muted))' // Azul
   const COLOR_NO_HABIT = "hsl(var(--muted))" // Muted/Preto
@@ -122,7 +122,6 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
             0: COLOR_NO_HABIT,
             1: COLOR_SCHEDULED,
             2: COLOR_COMPLETED,
-            6: COLOR_COMPLETED_6,
           }}
           monthLabels={[
             "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
