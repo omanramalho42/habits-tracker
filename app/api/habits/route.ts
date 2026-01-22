@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
-    
+
     const habits = await prisma.habit.findMany({
       where: {
         userId: userDb.id,
@@ -60,10 +60,8 @@ export async function GET(request: Request) {
         )
 
         return NextResponse.json(activeHabits)
-      }    
-
+      }
     }
-
     return NextResponse.json(habits)
   } catch (error) {
     if (error instanceof Error) {
@@ -126,7 +124,6 @@ export async function POST(request: NextRequest) {
         reminder,
         frequency, // Json
         color,
-        counter: Number(0),
         limitCounter: Number(limitCounter) || 1,
         ...(goal  && {goals: {
           connect: {

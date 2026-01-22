@@ -156,7 +156,7 @@ export function HabitCard({
   const isCompletedToday = habit.completions?.some((c) => {
     const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
     const limit = habit.limitCounter || 1
-    const counter = habit.counter || 0
+    const counter = c.counter || 0
 
     return completionDate === todayStr && counter === limit
   })
@@ -185,7 +185,13 @@ export function HabitCard({
   // - A data não pode ser futura 
   const canToggle = isActiveToday && !isFutureDate
 
-  const counter = habit.counter ?? 0
+  const counter = 
+    habit.completions.find(
+      (c) => 
+        new Date(c.completedDate).toISOString().split("T")[0] === 
+       currentDate.toISOString().split("T")[0]
+    )?.counter || 0
+
   const limit = habit.limitCounter ?? 1
 
   const completedProgress =
@@ -193,7 +199,7 @@ export function HabitCard({
       ? Math.min(counter / limit) * 100
       : 0
 
-  const isCompleted = counter >= limit
+  const isCompleted = counter === limit
 
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -222,7 +228,7 @@ export function HabitCard({
   return (
     <Card
       className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
-        isCompletedToday && onToggle
+        isCompleted && onToggle
           ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
           : "from-card-800 to-card/50 border-border/50 hover:border-card-700"
       } ${loading && 'opacity-50'}`}
@@ -276,7 +282,7 @@ export function HabitCard({
                   className="flex flex-row gap-2 text-sm text-foreground mb-3"
                 >
                   <Repeat />
-                  {habit?.counter}/{habit?.limitCounter}
+                  {counter || 0}/{habit?.limitCounter}
                 </Badge>
                 {habit.clock && (
                 <Badge variant="outline" className="text-sm flex flex-row gap-2 text-foreground mb-3">
@@ -312,8 +318,7 @@ export function HabitCard({
                           isActive
                             ? {
                                 backgroundColor: 
-                                  isCompletedThisWeekday &&
-                                  habit.limitCounter === habit.counter
+                                  isCompletedThisWeekday && isCompleted
                                   ? "#32CD32"        // 🟢 completado
                                   : "#B22222"      // 🔵 ativo (schedule)
                               }
@@ -322,7 +327,7 @@ export function HabitCard({
                       >
                         {
                           !isActive ? day.keyPtBr 
-                          : isCompletedThisWeekday ? <Check /> 
+                          : isCompletedThisWeekday && isCompleted ? <Check /> 
                           : day.keyPtBr
                         }
                       </div>
@@ -414,6 +419,7 @@ export function HabitCard({
             )}
 
             <HabitDetailDialog
+              currentDate={selectedDate || new Date()}
               habit={habit}
               trigger={
                 <Button
@@ -434,18 +440,18 @@ export function HabitCard({
                   value={completedProgress}
                 />
                 <Button
-                  variant={isCompletedToday ? "default" : "outline"}
+                  variant={isCompleted ? "default" : "outline"}
                   size="icon"
                   disabled={loading}
                   onClick={handleToggleClick}
                   className={cn(
                     "relative w-7 h-7 rounded-full flex items-center justify-center transition",
-                    isCompletedToday
+                    isCompleted
                       ? "bg-primary text-white"
                       : "bg-background border border-border"
                   )}
                 >
-                  {isCompletedToday && <Check className="w-5 h-5" />}
+                  {isCompleted && <Check className="w-5 h-5" />}
                 </Button>
               </div>
             )}
@@ -484,7 +490,7 @@ export function HabitCard({
             <div className="overflow-x-auto">
               <div className="w-full">
                 <HeatMapHabit
-                  counter={habit.counter!}
+                  counter={counter}
                   endDate={habit.endDate ? new Date(habit.endDate) : null}
                   habitColor={habit.color || "green"}
                   startDate={new Date(habit.startDate)}

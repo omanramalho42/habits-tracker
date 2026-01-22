@@ -46,8 +46,6 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     goal
   } = parsedBody.data
 
-  console.log("creating service")
-
   return await prisma.habit.create({
     data: {
       userId: userDb.id,
@@ -59,7 +57,6 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
       frequency, // Json
       color,
       limitCounter: Number(limitCounter) || 1,
-      counter: Number(0),
       ...(goal  && {goals: {
         connect: {
           id: goal
@@ -100,8 +97,6 @@ export async function DeleteHabit(habitId: string) {
       userId: userDb.id
     }
   })
-
-  console.log("creating service")
 
   if(existHabit) {
     return await prisma.habit.delete({

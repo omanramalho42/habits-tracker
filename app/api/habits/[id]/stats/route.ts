@@ -1,14 +1,36 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { calculateStreak } from "@/lib/habit-utils"
+import { auth } from "@clerk/nextjs/server"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
+    }
+
+    const userDb = await prisma.user.findFirst({
+      where: {
+        clerkUserId: userId
+      }
+    })
+
+    if (!userDb) {
+      return NextResponse.json({
+        error: "user not find on db"
+      }, { status: 401 })
+    }
+
     const habit = await prisma.habit.findUnique({
       where: {
         id,
+        userId: userDb.id
       },
       include: {
         completions: {

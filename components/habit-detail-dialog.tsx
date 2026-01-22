@@ -1,38 +1,48 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Card } from "@/components/ui/card"
+import { useState } from "react"
 
 import HeatMapHabit from "@/components/heat-map"
+
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog"
+import { Card } from "@/components/ui/card"
+
 
 import { WEEKDAYS } from "@/lib/habit-utils"
 
 import type { HabitWithStats } from "@/lib/types"
 
 import {
-  TrendingUp,
   Calendar,
-  Target,
-  Flame,
   PlusSquare,
 } from "lucide-react"
-import { useState } from "react"
-import { Button } from "./ui/button"
 
 interface HabitDetailDialogProps {
   trigger: React.ReactNode
+  currentDate: Date;
   habit: HabitWithStats | null
 }
 
-export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
+export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
 
   if (!habit) return null
 
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
 
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i)
+  const counter = 
+    habit.completions.find(
+      (c) => 
+        new Date(c.completedDate).toISOString().split("T")[0] === 
+       currentDate.toISOString().split("T")[0]
+    )?.counter || 0
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -198,7 +208,7 @@ export function HabitDetailDialog({ trigger, habit }: HabitDetailDialogProps) {
             <div className="overflow-x-auto">
               <div className="w-full">
                 <HeatMapHabit
-                  counter={habit.counter!}
+                  counter={counter}
                   habitColor={habit.color || "#F9F9F9"}
                   startDate={new Date(habit.startDate)}
                   endDate={habit.endDate ? new Date(habit.endDate) : null}

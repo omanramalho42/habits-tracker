@@ -7,7 +7,6 @@ export interface Habit {
   goals?: Goals[]
   clock?: string
   limitCounter?: number
-  counter?: number
   status: HabitStatus
   startDate: string
   endDate?: string | null
@@ -41,6 +40,7 @@ export interface HabitCompletion {
   id: string
   habitId: string
   completedDate: string
+  counter?: number
   createdAt: string
 }
 

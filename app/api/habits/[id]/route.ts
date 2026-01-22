@@ -1,10 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import {
-  UpdateHabitSchema,
-  type UpdateHabitSchemaType
-} from "@/lib/schema/habit"
+
 import { auth } from "@clerk/nextjs/server"
+
+import { prisma } from "@/lib/prisma"
+
+import {
+  UpdateHabitSchema
+} from "@/lib/schema/habit"
+
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -32,7 +35,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     await prisma.habit.delete({
       where: {
-        id
+        id,
+        userId: userDb.id
       }
     })
     return NextResponse.json({ success: true })
@@ -97,7 +101,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if(existingGoal) {
       await prisma.habit.update({
         where: {
-          id
+          id,
+          userId: userDb.id
         },
         data: {
           goals: {

@@ -89,25 +89,31 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
             .split("T")[0]
         )
 
-      const limit = (habit?.limitCounter || 1) - 1
-      const currentCounter = habit?.counter || 0
+    const counter = 
+      habit?.completions.find(
+        (c) => 
+          new Date(c.completedDate).toISOString().split("T")[0] === 
+          new Date(selectedDate).toISOString().split("T")[0]
+      )?.counter || 0
 
-      console.log(limit, currentCounter, "current | limit")
+      const limit = (habit?.limitCounter || 1) - 1
+
+      console.log(limit, counter, "limit | current")
       console.log(isCompleting, "is completing")  
 
-      if(currentCounter < limit) {
+      if(counter < limit) {
         toast.success("Hábito marcado com sucesso!", {
           id: "toggle-habit",
         })
       }
 
-      if(currentCounter > limit) {
+      if(counter > limit) {
         toast.success("Hábito desmarcado com sucesso!", {
           id: "toggle-habit",
         })
       }
 
-      if (currentCounter === limit) {
+      if (counter === limit) {
         confetti({
           particleCount: 100,
           spread: 70,
