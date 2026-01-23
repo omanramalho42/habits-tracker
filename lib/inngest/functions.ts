@@ -54,10 +54,13 @@ export const sendSignUpEmail = inngest.createFunction(
 
 export const sendDailyHabitReminder = inngest.createFunction(
   { id: "daily-habit-reminder" },
-  { cron: "0 8 * * *" },
+  [{ event: 'app/send.daily.habits' }, { cron: "0 12 * * *" }],
 
   async ({ step }) => {
     const users = await step.run("fetch-users-with-habits", async () => {
+      const today = new Date()
+      today.setHours(0, 0 ,0 ,0)
+
       return prisma.user.findMany({
         include: {
           habits: {
@@ -68,7 +71,7 @@ export const sendDailyHabitReminder = inngest.createFunction(
               completions: {
                 where: {
                   completedDate: {
-                    gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                    gte: today,
                   },
                 },
               },
@@ -79,17 +82,17 @@ export const sendDailyHabitReminder = inngest.createFunction(
     })
 
     for (const user of users) {
-      const pendingHabits = user.habits.filter(
-        (habit) => habit.completions.length === 0
+      const allHabits = user.habits.filter(
+        (habit) => habit
       )
 
-      if (pendingHabits.length === 0) continue
+      if (allHabits.length === 0) continue
 
       await step.run(`send-email-${user.id}`, async () => {
         return sendDailyHabitsEmail({
           email: user.email,
           name: user.firstName || "",
-          habits: pendingHabits.map(h => ({
+          habits: allHabits.map(h => ({
             name: h.name,
             emoji: h.emoji
           }))

@@ -66,13 +66,15 @@ export async function POST(req: Request) {
         }
       })
 
-      await inngest.send({
-        name: 'app/user.created',
-        data: {
-          email: email_addresses[0].email_address,
-          name: first_name,
-        }
-      })
+      if(newUser) {
+        await inngest.send({
+          name: 'app/user.created',
+          data: {
+            email: email_addresses[0].email_address,
+            name: first_name,
+          }
+        })
+      }
 
       return new Response(JSON.stringify(newUser), {
         status: 201,
