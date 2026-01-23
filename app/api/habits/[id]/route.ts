@@ -117,6 +117,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     //QUANDO ATUALIZAR UM HÁBITO, EU DEVO PERCORRER MEUS COMPLETIONS DO HABITO E ATUALIZAR O LIMIT COUNTER
     const newStartdate = new Date(startDate)
       newStartdate.setHours(0,0,0,0)
+
+    console.log(newStartdate, "update date")
+
+    const today = new Date()
+    today.setHours(0,0,0)
+
     const newEnddate = 
       endDate ? new Date(endDate) : null
     if(newEnddate) {
@@ -137,7 +143,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         frequency, // Json
         color,
         limitCounter,
-        updatedAt: new Date(),
+        updatedAt: today,
         ...(goal  && {goals: {
           connect: {
             id: goal

@@ -99,9 +99,6 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
 
       const limit = (habit?.limitCounter || 1) - 1
 
-      console.log(limit, counter, "limit | current")
-      console.log(isCompleting, "is completing")  
-
       if(counter < limit) {
         toast.success("Hábito marcado com sucesso!", {
           id: "toggle-habit",
@@ -162,7 +159,6 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
               : "Nenhum hábito agendado para esta data. Tente selecionar um dia diferente ou crie um novo hábito."}
           </p>
           <CreateHabitDialog
-            // onSuccessCallback={handleCreateHabit}
             trigger={
               <Button
                 size="lg"

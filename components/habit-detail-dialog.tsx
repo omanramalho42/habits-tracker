@@ -21,11 +21,16 @@ import type { HabitWithStats } from "@/lib/types"
 
 import {
   Calendar,
-  PlusSquare,
+  Eye,
+  Flame,
+  Target,
+  TrendingUp,
 } from "lucide-react"
+import Image from "next/image"
+import { Label } from "./ui/label"
 
 interface HabitDetailDialogProps {
-  trigger: React.ReactNode
+  trigger?: React.ReactNode
   currentDate: Date;
   habit: HabitWithStats | null
 }
@@ -37,23 +42,23 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
 
   const frequency = Array.isArray(habit.frequency) ? habit.frequency : []
 
-  const counter = 
+  const completion = 
     habit.completions.find(
       (c) => 
         new Date(c.completedDate).toISOString().split("T")[0] === 
        currentDate.toISOString().split("T")[0]
-    )?.counter || 0
+    )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
           <Button
+            size="icon"
             variant="ghost"
-            className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
+            className='flex border-separate items-center bg-transparent justify-start rounded-none px-3 py-3 text-muted-foreground'
           >
-            <PlusSquare className="mr-2 h-4 w-4" />
-            Criar novo
+            <Eye className="mr-2 h-4 w-4" />
           </Button>
         )}
       </DialogTrigger>
@@ -75,7 +80,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
             Hábitos são essencias para uma vida organizada
           </DialogDescription> */}
         </DialogHeader>
-        <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-custom">
+        <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-custom space-y-3">
           <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-linear-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 mb-4 sm:mb-6">
             <div className="flex flex-col gap-4 mb-4 sm:mb-6">
               <div className="flex items-start justify-between gap-3">
@@ -114,8 +119,8 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
                 })}
               </div>
             </div>
-
-            {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              
+            <div className="grid grid-cols-3 gap-3">
 
               <Card className="p-3 sm:p-4 bg-background/50 backdrop-blur border-primary/10">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
@@ -153,8 +158,30 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
                 </div>
               </Card>
 
-            </div> */}
+            </div>
           </div>
+
+          <Card>
+            <div className="flex flex-col justify-center items-center space-y-3">
+              <Label className="font-light">"Anotações"</Label>
+              <Image
+                width={42}
+                height={42}
+                src={completion?.annotations?.imageUrl|| ""}
+                alt="annotation"
+              />
+              {completion?.annotations?.summary && (
+                <cite className="text-medium text-foreground text-sm">
+                  {completion.annotations.summary}
+                </cite>
+              )}
+              {completion?.annotations?.createdAt && (
+                <cite className="text-medium text-foreground text-sm">
+                  {new Date(completion.annotations?.createdAt).toLocaleDateString("pt-br")}
+                </cite>
+              )}
+            </div>
+          </Card>
 
           <Card className="p-4 sm:p-6 bg-card border-border">
             <div className="flex">
@@ -208,7 +235,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
             <div className="overflow-x-auto">
               <div className="w-full">
                 <HeatMapHabit
-                  counter={counter}
+                  counter={completion?.counter || 0}
                   habitColor={habit.color || "#F9F9F9"}
                   startDate={new Date(habit.startDate)}
                   endDate={habit.endDate ? new Date(habit.endDate) : null}

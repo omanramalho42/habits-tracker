@@ -34,6 +34,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
       include: {
         completions: {
+          include: {
+            annotations: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                summary: true,
+                createdAt: true
+              }
+            }
+          },
           orderBy: {
             completedDate: "desc",
           },

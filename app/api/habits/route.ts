@@ -40,14 +40,24 @@ export async function GET(request: Request) {
       where: {
         userId: userDb.id,
       },
-      include: {
-        goals: true,
-        completions: {
-          orderBy: {
-            completedDate: "desc"
-          },
-        },
-      },
+      // include: {
+      //   goals: true,
+      //   completions: {
+      //     include: {
+      //       annotations: {
+      //         select: {
+      //           summary: true,
+      //           imageUrl: true,
+      //           name: true,
+      //           id: true
+      //         }
+      //       }
+      //     },
+      //     orderBy: {
+      //       completedDate: "desc"
+      //     },
+      //   },
+      // },
       orderBy: {
         createdAt: "asc",
       },
@@ -55,7 +65,7 @@ export async function GET(request: Request) {
 
     if (queryParams.success) {
       if(queryParams.data) {
-        const activeHabits: Habit[] = habits.filter((habit: any) =>
+        const activeHabits: any[] = habits.filter((habit: any) =>
           isHabitActiveOnDate(habit, new Date(queryParams.data))
         )
 

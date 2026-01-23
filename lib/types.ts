@@ -1,4 +1,4 @@
-import { Goals, HabitStatus } from "@prisma/client"
+import { Annotations, Goals, HabitStatus } from "@prisma/client"
 
 export interface Habit {
   id: string
@@ -41,6 +41,7 @@ export interface HabitCompletion {
   habitId: string
   completedDate: string
   counter?: number
+  annotations?: Annotations
   createdAt: string
 }
 

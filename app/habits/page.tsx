@@ -186,6 +186,7 @@ export default function page() {
                 <div key={habit.id}>
                   <HabitCard
                     loading={isFetching}
+                    selectedDate={new Date()}
                     habit={habit}
                     onDelete={handleDeleteHabit}
                     onEdit={handleUpdateHabit}

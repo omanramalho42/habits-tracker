@@ -11,7 +11,6 @@ import {
   type CreateHabitSchemaType
 } from "@/lib/schema/habit"
 
-
 export async function CreateHabit(form: CreateHabitSchemaType) {
   const parsedBody =  CreateHabitSchema.safeParse(form)
 

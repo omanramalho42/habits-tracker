@@ -35,11 +35,12 @@ import {
   Check,
   EyeIcon,
   Clock10Icon,
-  Repeat
+  Repeat,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
+import CreateAnnotationDialog from "./create-annotation-dialog"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -57,7 +58,7 @@ interface HabitCardProps {
   onEdit?: (habit: UpdateHabitSchemaType) => void
   onDelete?: (habitId: string) => void
   onClick?: () => void
-  selectedDate?: Date
+  selectedDate: Date
   loading: boolean
   onError?: (message: string) => void
 }
@@ -224,7 +225,14 @@ export function HabitCard({
 
   const progress =
     totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0
-  
+
+  const todayCompletion =
+    habit.completions.find(
+      c =>
+        new Date(c.completedDate).toISOString().split("T")[0] ===
+        selectedDate.toISOString().split("T")[0]
+    ) ?? null
+
   return (
     <Card
       className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
@@ -251,7 +259,8 @@ export function HabitCard({
               <p className="text-[22px]">{habit.emoji}</p>
             )}
           </div>
-
+          
+          {/* DETAIL SECTION */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               {loading ? (
@@ -264,6 +273,19 @@ export function HabitCard({
                   <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
                     {habit.name}
                   </h3>
+                  <HabitDetailDialog
+                    currentDate={selectedDate || new Date()}
+                    habit={habit}
+                    trigger={
+                      <Button
+                        disabled={loading}
+                        size="icon"
+                        className="flex items-center bg-transparent"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                   {/* badge streak */}
                   {habit.current_streak > 0 && (
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
@@ -274,9 +296,10 @@ export function HabitCard({
                   </div>
               )}
             </div>
-
+            
+            {/* BADGES (COUNTER, CLOCK) */}
             {!loading ? (
-              <div className="relative flex flex-row gap-2">
+              <div className="relative flex flex-row gap-2 items-center">
                 {habit.limitCounter && habit.limitCounter > 1 && (
                   <Badge
                     variant="default"
@@ -377,9 +400,11 @@ export function HabitCard({
                 </div>
               </div>
             )}
+            
           </div>
         </div>
         
+        {/* ACTIONS (UPDATE, DELETE) */}
         {!loading ?(
           <div
             className={cn(
@@ -420,21 +445,8 @@ export function HabitCard({
               />
             )}
 
-            <HabitDetailDialog
-              currentDate={selectedDate || new Date()}
-              habit={habit}
-              trigger={
-                <Button
-                  disabled={loading}
-                  size="icon"
-                  className="flex items-center bg-transparent"
-                >
-                  <EyeIcon />
-                </Button>
-              }
-            />
 
-            {/*  */}
+            {/* COUNTER CHECKBOX */}
             {onToggle && (
               <div className="flex flex-col items-center gap-2">
                 <Progress
@@ -449,15 +461,20 @@ export function HabitCard({
                   className={cn(
                     "relative w-7 h-7 rounded-full flex items-center justify-center transition",
                     isCompleted
-                      ? "bg-primary text-white"
+                      ? `bg-primary text-white`
                       : "bg-background border border-border"
                   )}
                 >
                   {isCompleted && <Check className="w-5 h-5" />}
                 </Button>
+                {/* ANNOTATION */}
+                {isCompleted && !todayCompletion?.annotations && (
+                  <CreateAnnotationDialog
+                    completionId={todayCompletion?.id || ""}
+                  />
+                )}
               </div>
             )}
-            
           </div>
         ) : (
           <div className="flex items-center gap-1.5">
