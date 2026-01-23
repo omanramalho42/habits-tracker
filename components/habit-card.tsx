@@ -242,13 +242,13 @@ export function HabitCard({
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 flex-1 min-w-0">
           <div
-            className="flex items-center justify-center w-14 h-14 rounded-2xl text-3xl shrink-0 shadow-sm"
+            className="flex items-center justify-center w-8 h-8 rounded-2xl text-3xl shrink-0 shadow-sm"
             style={{ backgroundColor: `${habit.color}20` }}
           >
             {loading ? (
-              <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+              <Skeleton className="w-12 h-12 rounded-2xl shrink-0" />
             ) : (
-              habit.emoji
+              <p className="text-[22px]">{habit.emoji}</p>
             )}
           </div>
 
@@ -277,13 +277,15 @@ export function HabitCard({
 
             {!loading ? (
               <div className="relative flex flex-row gap-2">
-                <Badge
-                  variant="default"
-                  className="flex flex-row gap-2 text-sm text-foreground mb-3"
-                >
-                  <Repeat />
-                  {counter || 0}/{habit?.limitCounter}
-                </Badge>
+                {habit.limitCounter && habit.limitCounter > 1 && (
+                  <Badge
+                    variant="default"
+                    className="flex flex-row gap-2 text-sm text-foreground mb-3"
+                  >
+                    <Repeat />
+                    {counter || 0}/{habit?.limitCounter}
+                  </Badge>
+                )}
                 {habit.clock && (
                 <Badge variant="outline" className="text-sm flex flex-row gap-2 text-foreground mb-3">
                   <Clock10Icon /> {habit?.clock}
@@ -344,8 +346,8 @@ export function HabitCard({
                     ) : habit.completions.length === 0 ? (
                       <p className="text-muted-foreground">Comece hoje</p>
                     ) : !habit.endDate ? (
-                      <p className="flex-nowrap">
-                        {habit.completions.length} conclúidos
+                      <p className="">
+                        {habit.completions.length} concluídos
                       </p>
                     ) : (
                       <p className="">Nenhum dia ainda</p>

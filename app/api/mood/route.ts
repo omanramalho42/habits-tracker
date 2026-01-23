@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 import { auth } from "@clerk/nextjs/server"
+import z from "zod"
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,32 +17,31 @@ export async function GET(request: NextRequest) {
     }
 
     // 1️⃣ Buscar usuário interno pelo clerkUserId
-    const user = await prisma.user.findUnique({
+    const userDb = await prisma.user.findUnique({
       where: {
         clerkUserId: userId
       },
     })
 
-    if(!user) {
+    if(!userDb) {
       return NextResponse.json(
         { error: "User not found in database" },
         { status: 404 }
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const date =
-      searchParams.get("date") || 
-      new Date().toISOString().split("T")[0]
+    const today = new Date()
+    today.setHours(0,0,0,0)
 
+    console.log(today, 'new date')
     const entry = await prisma.moodEntry.findUnique({
       where: {
-        userId: user.id,
-        entryDate: new Date(date),
+        userId: userDb.id,
+        entryDate: today,
       },
     })
-
-    return NextResponse.json(entry || null)
+    console.log("mood finded")
+    return NextResponse.json(entry)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error fetching mood entry:", error.message)
@@ -76,16 +76,33 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       )
     }
-    const newEntryMood = await prisma.moodEntry.create({
-      data: {
+
+    const newDate = new Date(entry_date)
+    newDate.setHours(0,0,0,0)
+
+    const entry = await prisma.moodEntry.findUnique({
+      where: {
         userId: user.id,
-        moodType: mood_type,
-        moodLevel: mood_level,
-        entryDate: new Date(entry_date),
-      }
+        entryDate: newDate,
+      },
     })
 
-    return NextResponse.json(newEntryMood)
+    if(!entry) {
+      const newEntryMood = await prisma.moodEntry.create({
+        data: {
+          userId: user.id,
+          moodType: mood_type,
+          moodLevel: mood_level,
+          entryDate: newDate
+        }
+      })
+      return NextResponse.json(newEntryMood)
+    }
+
+    return NextResponse.json(
+      { error: "user mood entry already created" },
+      { status: 404 }
+    )
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error saving mood entry:", error.message)
