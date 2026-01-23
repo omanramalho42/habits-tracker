@@ -74,6 +74,9 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
   const [color, setColor] = useState<boolean>(false)
 
+  const today = new Date()
+  today.setHours(0,0,0,0)
+
   const form = useForm<CreateHabitSchemaType>({
     defaultValues: {
       name: "",
@@ -85,7 +88,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
       limitCounter: 1,
       endDate: null,
       reminder: false,
-      startDate: new Date()
+      startDate: today
     }
   })
 
@@ -122,7 +125,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
         name: "",
         limitCounter: 1,
         reminder: false,
-        startDate: new Date(),
+        startDate: today,
       })
 
       await queryClient.invalidateQueries({

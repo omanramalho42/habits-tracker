@@ -47,11 +47,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }, { status: 404 })
     }
 
+
     const calculateStreakHabits = habit.completions.map((c) => {
+      const completedDate = new Date(c.completedDate)
+      completedDate.setHours(0,0,0)
+
       return {
         completedDate: 
-          new Date(c.completedDate)
-          .toISOString().split("T")[0]
+          completedDate.toISOString().split("T")[0]
       }
     })
     
@@ -60,10 +63,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const today = new Date().toISOString().split("T")[0]
     const isCompletedToday =
       habit.completions.some(
-        (c) => new Date(c.completedDate)
-        .toISOString()
-        .split("T")[0] === today
-      )
+        (c) => {
+          const completedDate = new Date(c.completedDate)
+          completedDate.setHours(0,0,0)
+          
+          return completedDate
+          .toISOString()
+          .split("T")[0] === today
+        }
+    )
 
     const totalDays =
       Math.floor((

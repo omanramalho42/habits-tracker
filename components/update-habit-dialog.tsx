@@ -82,6 +82,14 @@ export function UpdateHabitDialog({
 
   const goalId = habit.goals?.map((goal) => goal.id)[0] || ""
 
+  const startDate = new Date(habit.startDate)
+  startDate.setHours(0,0,0,0)
+  const endDate = 
+    habit.endDate && habit.reminder ? new Date(habit.endDate) : null
+  if(endDate) {
+    endDate.setHours(0,0,0,0)
+  }
+
   const form = useForm<UpdateHabitSchemaType>({
     defaultValues: {
       id: habit.id,
@@ -93,9 +101,8 @@ export function UpdateHabitDialog({
       color: habit.color || "",
       emoji: habit.emoji || "",
       goal: goalId,
-      endDate: 
-        habit.endDate && habit.reminder ? new Date(habit.endDate) : null,
-      startDate: new Date(habit.startDate),
+      endDate,
+      startDate,
       reminder: habit.reminder || false,
       updatedAt: new Date()
     }

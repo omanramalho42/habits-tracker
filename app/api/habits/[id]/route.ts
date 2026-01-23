@@ -115,6 +115,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     //QUANDO ATUALIZAR UM HÁBITO, EU DEVO PERCORRER MEUS COMPLETIONS DO HABITO E ATUALIZAR O LIMIT COUNTER
+    const newStartdate = new Date(startDate)
+      newStartdate.setHours(0,0,0,0)
+    const newEnddate = 
+      endDate ? new Date(endDate) : null
+    if(newEnddate) {
+      newEnddate.setHours(0,0,0,0)
+    }
 
     const newHabit = await prisma.habit.update({
       where: {
@@ -124,8 +131,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         userId: userDb.id,
         name,
         emoji,
-        startDate: new Date(startDate),
-        endDate: endDate ? new Date(endDate) : null,
+        startDate: newStartdate,
+        endDate: newEnddate,
         reminder,
         frequency, // Json
         color,

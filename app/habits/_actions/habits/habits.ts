@@ -46,13 +46,21 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     goal
   } = parsedBody.data
 
+  const newStartdate = new Date(startDate)
+    newStartdate.setHours(0,0,0,0)
+  const newEnddate = 
+    endDate ? new Date(endDate) : null
+  if(newEnddate) {
+    newEnddate.setHours(0,0,0,0)
+  }
+
   return await prisma.habit.create({
     data: {
       userId: userDb.id,
       name,
       emoji,
-      startDate: new Date(startDate),
-      endDate: endDate ? new Date(endDate) : null,
+      startDate: newStartdate,
+      endDate: newEnddate,
       reminder,
       frequency, // Json
       color,

@@ -43,6 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const completedDate =
       new Date(bodyParams.data)
+    completedDate.setHours(0,0,0)
 
     console.log(completedDate, "completedDate")
     
