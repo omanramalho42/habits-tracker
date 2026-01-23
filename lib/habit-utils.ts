@@ -103,6 +103,8 @@ export function isHabitActiveOnDate(
   const currentDay = date.getUTCDate()
 
   const start = new Date(habit.startDate)
+  start.setHours(0,0,0,0)
+
   const startYear = start.getUTCFullYear()
   const startMonth = start.getUTCMonth()
   const startDay = start.getUTCDate()
