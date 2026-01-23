@@ -4,6 +4,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
     experimental: {
+    serverActions: {
+      bodySizeLimit: '4mb',
+    },
     allowedDevOrigins: [
       "https://mistyped-determinedly-jaylen.ngrok-free.dev",
     ],
