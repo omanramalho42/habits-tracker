@@ -51,7 +51,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       where: {
         habitId_completedDate: {
           habitId: id,
-          completedDate,
+          completedDate: new Date(completedDate),
         },
       },
       include: {

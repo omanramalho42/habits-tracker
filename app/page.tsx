@@ -13,7 +13,10 @@ import { useQuery } from "@tanstack/react-query"
 import { fetchHabits } from "@/services/habits"
 
 export default function Home() {
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  const [selectedDate, setSelectedDate] = useState(today)
 
   const selectedDateStr =
     selectedDate.toISOString().split("T")[0]
@@ -56,7 +59,7 @@ export default function Home() {
 
   return (
     <>
-      {/* <MoodWizard /> */}
+      <MoodWizard />
 
       <main className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-8">

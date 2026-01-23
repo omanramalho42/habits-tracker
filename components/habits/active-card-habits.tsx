@@ -29,12 +29,13 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
   selectedDate
 }) => {
   const queryClient = useQueryClient()  
+  console.log(habits, "habits")
 
   const completedToday = habits.reduce((total, habit) => {
     const completed = habit.completions?.some(
       (c) =>
         new Date(c.completedDate).toISOString().split("T")[0] === 
-        new Date().toISOString().split("T")[0]
+        new Date(selectedDate).toISOString().split("T")[0]
     )
 
     return completed ? total + 1 : total
