@@ -30,7 +30,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const habit = await prisma.habit.findUnique({
       where: {
         id,
-        userId: userDb.id
+        userId: userDb.id,
+        status: 'ACTIVE'
       },
       include: {
         completions: {
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const calculateStreakHabits = habit.completions.map((c) => {
       const completedDate = new Date(c.completedDate)
-      completedDate.setHours(0,0,0)
+      completedDate.setHours(0, 0, 0, 0)
 
       return {
         completedDate: 
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       habit.completions.some(
         (c) => {
           const completedDate = new Date(c.completedDate)
-          completedDate.setHours(0,0,0)
+          completedDate.setHours(0, 0, 0, 0)
           
           return completedDate
           .toISOString()

@@ -22,17 +22,8 @@ import {
   Settings
 } from 'lucide-react'
 
-import type { HabitWithStats } from '@/lib/types'
-import { CreateHabitSchemaType } from '@/lib/schema/habit'
-
-interface HeaderSectionProps {
-  onCallbackSuccess?: (data: HabitWithStats[]) => void
-}
-
-const HeaderSection:React.FC<HeaderSectionProps> = ({ onCallbackSuccess }) => {
+const HeaderSection:React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
-
-  const [show, setShow] = useState<boolean>(false)
   const today = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     month: "long",

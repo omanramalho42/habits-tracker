@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 
@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface NavigationCalendarSectionProps {
   selectedDate: Date
-  onCallbackSuccess: (date: Date) => void
+  onSuccessCallback: (date: Date) => void
   selectedMonth: number
   setSelectedMonth: (dateIdx: number) => void
   selectedYear: number
@@ -16,20 +16,30 @@ interface NavigationCalendarSectionProps {
 }
 
 const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
-  onCallbackSuccess,
+  onSuccessCallback,
   selectedDate,
   selectedMonth,
   selectedYear,
   setSelectedMonth,
   setSelectedYear
 }) => {
+
   const getMonthDates = () => {
-    const firstDay = new Date(selectedYear, selectedMonth, 1)
+    const now = new Date()
+
+    const hours = now.getHours()
+    const minutes = now.getMinutes()
+    const seconds = now.getSeconds()
+
     const lastDay = new Date(selectedYear, selectedMonth + 1, 0)
     const daysInMonth = lastDay.getDate()
 
     return Array.from({ length: daysInMonth }, (_, i) => {
       const date = new Date(selectedYear, selectedMonth, i + 1)
+
+      // Copia hora atual
+      date.setHours(hours, minutes, seconds)
+
       return date
     })
   }
@@ -50,13 +60,13 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
   }
 }, [selectedDate])
 
-
   const monthDates = getMonthDates()
 
   const goToPreviousDay = () => {
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() - 1)
-    onCallbackSuccess(newDate)
+    console.log("go to previus day new date:", newDate)
+    onSuccessCallback(newDate)
 
     if (
       newDate.getMonth() !== selectedMonth || 
@@ -84,7 +94,8 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
   const goToNextDay = () => {
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() + 1)
-    onCallbackSuccess(newDate)
+    console.log("go to next day new date:", newDate)
+    onSuccessCallback(newDate)
 
     const newMonth = newDate.getMonth()
     const newYear = newDate.getFullYear()
@@ -111,7 +122,6 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
       }
     }, 100)
   }
-  console.log(selectedDate, "selected date")
   const selectedDateString =
     new Date(selectedDate).toLocaleDateString("pt-BR")
 
@@ -142,7 +152,7 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
                   key={date.toISOString()}
                   data-date={date.toLocaleDateString("pt-BR")}
                   onClick={() => {
-                    onCallbackSuccess(new Date(date))
+                    onSuccessCallback(new Date(date))
                   }}
                   className={`h-full flex flex-col items-center justify-center min-w-17.5 py-4 px-3 rounded-xl transition-all ${
                     isSelected

@@ -88,7 +88,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       color,
       clock,
       limitCounter,
-      status,
       goal
     } = parsedBody.data
 
@@ -118,10 +117,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const newStartdate = new Date(startDate)
       newStartdate.setHours(0,0,0,0)
 
-    console.log(newStartdate, "update date")
-
     const today = new Date()
-    today.setHours(0,0,0)
+    today.setHours(0, 0, 0, 0)
 
     const newEnddate = 
       endDate ? new Date(endDate) : null

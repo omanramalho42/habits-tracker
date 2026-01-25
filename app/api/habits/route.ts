@@ -4,8 +4,8 @@ import { type NextRequest, NextResponse } from "next/server"
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+
 import { isHabitActiveOnDate } from '@/lib/habit-utils'
-import { Habit } from '@prisma/client'
 import { CreateHabitSchema } from '@/lib/schema/habit'
 
 export async function GET(request: Request) {
@@ -39,25 +39,8 @@ export async function GET(request: Request) {
     const habits = await prisma.habit.findMany({
       where: {
         userId: userDb.id,
+        status: 'ACTIVE'
       },
-      // include: {
-      //   goals: true,
-      //   completions: {
-      //     include: {
-      //       annotations: {
-      //         select: {
-      //           summary: true,
-      //           imageUrl: true,
-      //           name: true,
-      //           id: true
-      //         }
-      //       }
-      //     },
-      //     orderBy: {
-      //       completedDate: "desc"
-      //     },
-      //   },
-      // },
       orderBy: {
         createdAt: "asc",
       },
@@ -121,6 +104,8 @@ export async function POST(request: NextRequest) {
       color,
       clock,
       limitCounter,
+      custom_field,
+      duration,
       goal
     } = parsedBody.data
 
@@ -142,6 +127,8 @@ export async function POST(request: NextRequest) {
         reminder,
         frequency, // Json
         color,
+        customField: custom_field,
+        duration,
         limitCounter: Number(limitCounter) || 1,
         ...(goal  && {goals: {
           connect: {

@@ -126,9 +126,9 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) =>
 
 function GoalRow({ goal }: { goal: any }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 sm:w-full w-40">
       <span role="img">{goal.emoji}</span>
-      <span>{goal.name}</span>
+      <span className='truncate sm:max-w-auto'>{goal.name}</span>
     </div>
   )
 }

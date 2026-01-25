@@ -43,9 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const completedDate =
       new Date(bodyParams.data)
-    completedDate.setHours(0,0,0)
-
-    console.log(completedDate, "completedDate")
+    completedDate.setHours(0, 0, 0, 0)
     
     // 1️⃣ Busca a completion do dia
     const existingCompletion = await prisma.habitCompletion.findUnique({
@@ -64,15 +62,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
     })
 
-    console.log(existingCompletion, "existing completion")
-
     // 2️⃣ NÃO EXISTE → cria
     if (!existingCompletion) {
-      console.log("caso 1")
       const habit = await prisma.habit.findUnique({
         where: {
           id,
-          userId: userDb.id
+          userId: userDb.id,
+          status: "ACTIVE"
         },
         select: {
           limitCounter: true,
@@ -109,7 +105,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // 3️⃣ EXISTE e NÃO TEM contador → toggle normal
     if (!existingCompletion.habit.limitCounter) {
-      console.log("caso 2")
       await prisma.habitCompletion.delete({
         where: {
           id: existingCompletion.id,
@@ -123,10 +118,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const currentCounter = existingCompletion.counter ?? 0
     const limitCounter = existingCompletion.habit.limitCounter ?? 1
 
-    console.log(currentCounter, limitCounter, "counter")
     // 4.1️⃣ Ainda não chegou no limite → incrementa
     if (currentCounter < limitCounter) {
-      console.log("caso 3")
       const nextCounter = currentCounter + 1
 
       await prisma.habitCompletion.update({

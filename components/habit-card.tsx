@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 
 import { toast } from "react-toastify"
 
@@ -36,11 +36,16 @@ import {
   EyeIcon,
   Clock10Icon,
   Repeat,
+  Calendar1,
+  TimerIcon,
+  Play,
+  PlayCircle,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 import CreateAnnotationDialog from "./create-annotation-dialog"
+import { Habit } from "@prisma/client"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -77,6 +82,26 @@ function getEndOfWeek(date: Date) {
   return d
 }
 
+function timeToSeconds(time: string) {
+  const [h, m, s] = time.split(":").map(Number)
+  return h * 3600 + m * 60 + s
+}
+
+function getCurrentTimeHHMMSS(date: Date) {
+  console.log(new Date(date).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }), "dtt")
+  return new Date(date).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+}
+
 export function HabitCard({
   habit,
   onToggle,
@@ -88,11 +113,9 @@ export function HabitCard({
   loading,
 }: HabitCardProps) {
   const [show, setShow] = useState<boolean>(false)
-
   // Calcula o início da semana com base na data selecionada
   // Ex: segunda-feira 00:00:00
   const startOfWeek = getStartOfWeek(selectedDate ? new Date(selectedDate) : new Date())
-  
   // Calcula o final da semana com base na data selecionada
   // Ex: domingo 23:59:59
   const endOfWeek = getEndOfWeek(selectedDate ? new Date(selectedDate) : new Date())
@@ -137,6 +160,7 @@ export function HabitCard({
     // Cria a data manualmente para evitar bug de fuso horário
     // (mês começa em 0 no JS)
     const date = new Date(year, month - 1, day)
+    date.setHours(0 ,0, 0, 0)
     // Retorna a frequência associada ao dia da semana
     return WEEKDAY_TO_FREQUENCY[date.getDay()]
   })
@@ -220,6 +244,23 @@ export function HabitCard({
       onToggle(habit.id)
   }
 
+  const now = timeToSeconds(getCurrentTimeHHMMSS(selectedDate))
+
+  const start = habit.clock
+    ? timeToSeconds(habit.clock)
+    : null
+
+  const duration =
+    habit.duration
+      ? timeToSeconds(habit.duration)
+      : 3600
+
+  const isActiveHour =
+    start !== null && now >= start && now <= start + duration
+
+  const isOutHour =
+    start !== null && now > start + duration
+
   const completedDays = habit.completions.length
   const totalDays = habit.endDate?.length ?? 365
 
@@ -238,6 +279,10 @@ export function HabitCard({
       className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
         isCompleted && onToggle
           ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
+          : isActiveHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
+          ? "from-yellow-500/60 to-yellow-700/10 border-yellow-700/30 hover:border-yellow-500/30"
+          : isOutHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
+          ? "from-red-500/60 to-red-700/10 border-red-700/30 hover:border-red-500/30"
           : "from-card-800 to-card/50 border-border/50 hover:border-card-700"
       } ${loading && 'opacity-50'}`}
       onClick={(e) => {
@@ -264,12 +309,12 @@ export function HabitCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               {loading ? (
-                <div className="flex w-full justify-between">
+                <div className="flex w-full justify-between gap-2">
                   <Skeleton className="h-5 w-40" />
                   <Skeleton className="h-5 w-10 rounded-full" />
                 </div>
               ) : (
-                <div className="flex items-center w-full">
+                <div className="flex items-center w-full space-x-2">
                   <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
                     {habit.name}
                   </h3>
@@ -286,6 +331,7 @@ export function HabitCard({
                       </Button>
                     }
                   />
+                  {/* {habit.updatedAt && <Button variant="outline" size="icon"> <Calendar1 className="text-sm" /></Button>} */}
                   {/* badge streak */}
                   {habit.current_streak > 0 && (
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
@@ -299,21 +345,41 @@ export function HabitCard({
             
             {/* BADGES (COUNTER, CLOCK) */}
             {!loading ? (
-              <div className="relative flex flex-row gap-2 items-center">
+              <div className="relative flex flex-wrap gap-1 items-center">
                 {habit.limitCounter && habit.limitCounter > 1 && (
                   <Badge
                     variant="default"
                     className="flex flex-row gap-2 text-sm text-foreground mb-3"
                   >
-                    <Repeat />
-                    {counter || 0}/{habit?.limitCounter}
+                    <Repeat className="text-sm" />
+                    {counter || 0}/{habit?.limitCounter} {" "} {habit?.customField}
                   </Badge>
                 )}
                 {habit.clock && (
-                <Badge variant="outline" className="text-sm flex flex-row gap-2 text-foreground mb-3">
+                <Badge
+                  variant="default"
+                  className={
+                    cn(
+                      "text-sm flex flex-row gap-2 text-foreground mb-3",
+                       isActiveHour && 'bg-yellow-500/60',
+                       isOutHour && 'bg-red-500/60',
+                       isCompleted && 'bg-green-500/60'
+                    )
+                  }
+                >
                   <Clock10Icon /> {habit?.clock}
                 </Badge>
                 )}
+                {habit.duration && (
+                  <Badge
+                    variant="secondary"
+                    className="text-sm flex flex-row gap-2 text-foreground mb-3"
+                  >
+                    <TimerIcon />
+                    {habit.duration}
+                  </Badge>
+                )}
+
               </div>
             ) : (
               <Skeleton className="h-4 w-32 mb-4 mt-2" />
@@ -343,7 +409,7 @@ export function HabitCard({
                           isActive
                             ? {
                                 backgroundColor: 
-                                  isCompletedThisWeekday && isCompleted
+                                  isCompletedThisWeekday 
                                   ? "#32CD32"        // 🟢 completado
                                   : "#B22222"      // 🔵 ativo (schedule)
                               }
@@ -473,6 +539,18 @@ export function HabitCard({
                     completionId={todayCompletion?.id || ""}
                   />
                 )}
+                <div className="relative top-5">
+                  {isActiveHour && !isOutHour && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      disabled
+                      // onClick={}
+                    >
+                      <PlayCircle className="text-sm" />
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </div>

@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react'
 
+import NavigationCalendarSection from '@/components/habits/navigation-calendar-section'
+
 import { Button } from '@/components/ui/button'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import NavigationCalendarSection from './navigation-calendar-section'
 
 interface CurrentSectionDateProps {
   selectedDate: Date;
@@ -75,7 +76,7 @@ const CurrentSectionDate:React.FC<CurrentSectionDateProps> = ({
       </div>
       {/* NAVIGATION CALENDAR */}
       <NavigationCalendarSection
-        onCallbackSuccess={onSuccessCallback}
+        onSuccessCallback={onSuccessCallback}
         selectedDate={selectedDate}
         selectedMonth={selectedMonth}
         setSelectedMonth={setSelectedMonth}

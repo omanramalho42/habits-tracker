@@ -42,7 +42,9 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     endDate,
     clock,
     limitCounter,
-    goal
+    goal,
+    custom_field,
+    duration
   } = parsedBody.data
 
   const newStartdate = new Date(startDate)
@@ -61,6 +63,8 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
       startDate: newStartdate,
       endDate: newEnddate,
       reminder,
+      customField: custom_field,
+      duration,
       frequency, // Json
       color,
       limitCounter: Number(limitCounter) || 1,
@@ -98,19 +102,18 @@ export async function DeleteHabit(habitId: string) {
     throw new Error("habit Id is not set")
   }
 
-  const existHabit = await prisma.habit.findFirst({
+  const modifiedAt = new Date()
+  modifiedAt.setHours(0,0,0,0)
+
+  return await prisma.habit.update({
     where: {
       id: habitId,
       userId: userDb.id
+    },
+    data: {
+      status: 'ARCHIVED',
+      deletedAt: modifiedAt.toISOString(),
+      updatedAt:  modifiedAt.toISOString(),
     }
   })
-
-  if(existHabit) {
-    return await prisma.habit.delete({
-      where: {
-        id: existHabit.id,
-        userId: userDb.id
-      }
-    })
-  }
 }

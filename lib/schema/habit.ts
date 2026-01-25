@@ -2,11 +2,13 @@ import { z } from "zod"
 
 export const CreateHabitSchema = z.object({
   name: z.string(),
-  emoji: z.string().default("🌍"),
+  emoji: z.string().optional(),
   goal: z.string().optional(),
-  clock: z.string().optional().default(""),
+  clock: z.string().optional(),
+  custom_field: z.string().max(12, "O maximo de caracteres permitidos é 12").optional(),
+  duration: z.string().optional(),
   limitCounter: z.coerce.number()
-    .min(0, "O valor minimo a ser selecionado é igual a 1")
+    .min(1, "O valor minimo a ser selecionado é igual a 1")
     .max(10, "O valor máximo a ser selecionado é igual a 10")
     .default(1)
     .optional(),
@@ -26,9 +28,11 @@ export type CreateHabitSchemaType = z.infer<typeof CreateHabitSchema>
 export const UpdateHabitSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
-  emoji: z.string().default("🌍"),
+  emoji: z.string().optional(),
   goal: z.string().optional(),
-  clock: z.string().optional().default(""),
+  clock: z.string().optional(),
+  custom_field: z.string().max(12, "O maximo de caracteres permitidos é 12").optional(),
+  duration: z.string().optional(),
   status: z.enum(["ACTIVE", "ARCHIVED", "PAUSED"]).optional(),
   counter: z.coerce.number()
     .min(0, "O valor minimo a ser selecionado é igual a 1")

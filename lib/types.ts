@@ -7,6 +7,8 @@ export interface Habit {
   goals?: Goals[]
   clock?: string
   limitCounter?: number
+  customField?: string
+  duration?:  string 
   status: HabitStatus
   startDate: string
   endDate?: string | null

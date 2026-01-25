@@ -14,7 +14,7 @@ import { fetchHabits } from "@/services/habits"
 
 export default function Home() {
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  // today.setHours(0, 0, 0, 0)
   
   const [selectedDate, setSelectedDate] = useState(today)
 

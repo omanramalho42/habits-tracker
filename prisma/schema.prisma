@@ -56,28 +56,30 @@ enum HabitStatus {
 }
 
 model Habit {
-  id          String @id @default(uuid())
-  userId      String @map("user_id")
+  id            String @id @default(uuid())
+  userId        String @map("user_id")
 
-  name        String    @db.VarChar(255)
-  emoji       String?   @db.VarChar(10)
+  name          String    @db.VarChar(255)
+  emoji         String?   @db.VarChar(10)
 
-  clock       String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
+  customField   String?   @map("custom_field") @db.VarChar(12)
+  clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
 
-  limitCounter  Int? @default(1)
+  limitCounter  Int?    @default(1)
+  duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
 
   status      HabitStatus @default(ACTIVE)
 
-  startDate   DateTime  @default(now()) @map("start_date")
-  endDate     DateTime? @map("end_date")
+  startDate     DateTime  @default(now()) @map("start_date")
+  endDate       DateTime? @map("end_date")
 
-  reminder    Boolean?   @default(false)
-  frequency   Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
-  color       String?    @default("#3B82F6") @db.VarChar(7)
+  reminder      Boolean?   @default(false)
+  frequency     Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  color         String?    @default("#3B82F6") @db.VarChar(7)
 
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
 
   user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
