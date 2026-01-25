@@ -1,8 +1,8 @@
 "use client"
 
-import { SignedOut, SignOutButton, UserProfile } from '@clerk/nextjs'
-
 import { useEffect, useState } from "react"
+
+import UpdateUserSettingsDialog from '@/components/update-user-settings-dialog'
 
 import {
   Dialog,
@@ -110,149 +110,49 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
-            <div className="flex items-center space-x-3">
-              <Bell className="h-5 w-5 text-primary" />
-              <div>
-                <Label htmlFor="notifications" className="text-base font-semibold">
-                  Ativar Notificações
-                </Label>
-                <p className="text-sm text-muted-foreground">Receba notificações diárias</p>
-              </div>
-            </div>
-            <Switch
-              id="notifications"
-              checked={settings?.notifications_enabled}
-              disabled
-              onCheckedChange={(checked) => setSettings({ ...settings, notifications_enabled: checked })}
-            />
-          </div>
-
-          {settings?.notifications_enabled && (
-            <>
-              <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-blue-500" />
-                    <Label htmlFor="email-notif" className="text-base font-medium">
-                      Notificações de email
-                    </Label>
-                  </div>
-                  <Switch
-                    id="email-notif"
-                    disabled
-                    checked={settings.email_notifications}
-                    onCheckedChange={(checked) => setSettings({ ...settings, email_notifications: checked })}
-                  />
+        <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
+          <UpdateUserSettingsDialog
+            trigger={
+              <div className="flex flex-row w-full items-center justify-between space-x-3">
+                <Settings className="h-5 w-5 text-primary" />
+                <div className='flex flex-col w-full justify-start'>
+                  <Label htmlFor="notifications" className="text-base font-semibold">
+                    Ajustes
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Ajuste suas prefrencias e configurações aqui
+                  </p>
                 </div>
-
-                {settings.email_notifications && (
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm">
-                      Endereço de email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      disabled
-                      value={settings.email || ""}
-                      onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                      className="bg-background/50"
-                    />
-                  </div>
-                )}
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowSettingsUser((prev) => !prev)
+                  }}
+                >
+                  <MoreHorizontal />
+                </Button>
               </div>
-
-              <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <MessageSquare className="h-5 w-5 text-green-500" />
-                    <Label htmlFor="sms-notif" className="text-base font-medium">
-                      Notificações SMS
-                    </Label>
-                  </div>
-                  <Switch
-                    id="sms-notif"
-                    checked={settings.sms_notifications}
-                    onCheckedChange={(checked) => setSettings({ ...settings, sms_notifications: checked })}
-                    disabled
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Sistemas de notificações em breve
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <p className="text-sm text-foreground">
-                  <strong>⏰ Relembrar:</strong> Todo dia as 5:00 da manhã
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Você vai receber notificações para todos os hábitos marcados para o dia de hoje
-                </p>
-              </div>
-            </>
-          )}
+            }
+          />
         </div>
 
-        <div className="space-y-6 py-4">
-          <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
-            <div className="flex flex-row w-full items-center justify-between space-x-3">
-              <Settings className="h-5 w-5 text-primary" />
-              <div className='flex flex-col w-full justify-start'>
-                <Label htmlFor="notifications" className="text-base font-semibold">
-                  Ajustes
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Ajuste suas prefrencias e configurações aqui
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setShowSettingsUser((prev) => !prev)
-                }}
-              >
-                <MoreHorizontal />
-              </Button>
-            </div>
-          </div>
-
-          <Dialog open={showSettingsUser} onOpenChange={setShowSettingsUser}>
-            <DialogContent className='flex'>
-              <DialogHeader className='flex flex-row items-center gap-2'>
-                <SignOutButton children={
-                   <Button variant="ghost">
-                    <LogOut className='text-red-500 text-md' />
-                  </Button>
-                } />
-                Desconectar
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-            </DialogClose>
+        <DialogFooter>
+          <DialogClose asChild>
             <Button
-              onClick={handleSave}
-              disabled={loading}
-              className="bg-linear-to-r from-primary to-blue-600"
+              variant="outline"
             >
-              {loading ? "Salvando..." : "Salvar mudanças"}
+              Cancelar
             </Button>
-          </DialogFooter>
-        </div>
+          </DialogClose>
+          <Button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-linear-to-r from-primary to-blue-600"
+          >
+            {loading ? "Salvando..." : "Salvar mudanças"}
+          </Button>
+        </DialogFooter>
+
       </DialogContent>
     </Dialog>
   )

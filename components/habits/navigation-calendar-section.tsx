@@ -65,7 +65,6 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
   const goToPreviousDay = () => {
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() - 1)
-    console.log("go to previus day new date:", newDate)
     onSuccessCallback(newDate)
 
     if (
@@ -94,7 +93,6 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
   const goToNextDay = () => {
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() + 1)
-    console.log("go to next day new date:", newDate)
     onSuccessCallback(newDate)
 
     const newMonth = newDate.getMonth()

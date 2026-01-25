@@ -51,6 +51,7 @@ import {
   ToggleGroupItem
 } from "@/components/ui/toggle-group"
 import { Switch } from "@/components/ui/switch"
+import { Card } from "./ui/card"
 
 import { cn } from "@/lib/utils"
 
@@ -64,7 +65,6 @@ import {
 } from "lucide-react"
 
 import type { CreateHabitSchemaType } from "@/lib/schema/habit"
-import { Card } from "./ui/card"
 
 interface CreateHabitDialogProps {
   trigger?: React.ReactNode

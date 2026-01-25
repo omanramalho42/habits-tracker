@@ -2,15 +2,17 @@
 
 import { useState } from "react"
 
-import { MoodWizard } from "@/components/mood-wizard"
+import { useQuery } from "@tanstack/react-query"
 
-import type { HabitWithStats } from "@/lib/types"
+import { fetchHabits } from "@/services/habits"
+
+import { MoodWizard } from "@/components/mood-wizard"
 
 import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
 import HeaderSection from "@/components/habits/header-section"
-import { useQuery } from "@tanstack/react-query"
-import { fetchHabits } from "@/services/habits"
+
+import type { HabitWithStats } from "@/lib/types"
 
 export default function Home() {
   const today = new Date()

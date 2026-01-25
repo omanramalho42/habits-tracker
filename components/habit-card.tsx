@@ -88,12 +88,6 @@ function timeToSeconds(time: string) {
 }
 
 function getCurrentTimeHHMMSS(date: Date) {
-  console.log(new Date(date).toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }), "dtt")
   return new Date(date).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",

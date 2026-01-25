@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
     const today = new Date()
     today.setHours(0,0,0,0)
 
-    console.log(today, 'new date')
     const entry = await prisma.moodEntry.findUnique({
       where: {
         userId: userDb.id,
