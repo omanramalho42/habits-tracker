@@ -151,8 +151,8 @@ model Goals {
   userId        String  @map("user_id")
 
   name          String
-  description   String
-  emoji         String   @db.VarChar(10)
+  description   String?
+  emoji         String?   @db.VarChar(10)
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
@@ -167,13 +167,13 @@ model Annotations {
   id           String @id @default(uuid())
   
   name         String
-  content      String
+  content      String?
 
   completionId String @unique @map("completion_id")
   completion   HabitCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
   
-  createdByAI Boolean? @default(false)
-  summary String?
+  createdByAI  Boolean? @default(false)
+  summary      String?
 
   imageUrl     String? @db.VarChar(255)
 

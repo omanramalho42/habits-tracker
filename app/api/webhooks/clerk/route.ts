@@ -66,17 +66,17 @@ export async function POST(req: Request) {
         }
       })
 
-      if(newUser) {
-        const response = await inngest.send({
-          name: 'app/user.created',
-          data: {
-            email: email_addresses[0].email_address,
-            name: first_name,
-          }
-        })
+      // if(newUser) {
+      //   const response = await inngest.send({
+      //     name: 'app/user.created',
+      //     data: {
+      //       email: email_addresses[0].email_address,
+      //       name: first_name,
+      //     }
+      //   })
 
-        console.log(response, 'inngest sending');
-      }
+      //   console.log(response, 'inngest sending');
+      // }
 
       return new Response(JSON.stringify(newUser), {
         status: 201,
