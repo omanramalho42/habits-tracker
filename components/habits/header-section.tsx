@@ -95,7 +95,7 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        />
+        /> */}
         <CreateRoutineDialog
           trigger={
             <Button
@@ -106,7 +106,7 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        /> */}
+        />
         <SignOutButton
           children={
             <Button
