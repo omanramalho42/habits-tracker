@@ -5,15 +5,10 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Control, useController } from 'react-hook-form'
 
-import { fetchGoals, GoalsDTO } from '@/services/goals'
+import { fetchHabits } from '@/services/habits'
 
-import CreateGoalDialog from '@/components/create-goal-dialog'
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
+import { CreateRoutineSchemaType } from '@/components/create-routine-dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Command,
   CommandEmpty,
@@ -23,46 +18,40 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { Button } from '@/components/ui/button'
-
+import { CreateHabitDialog } from './create-habit-dialog'
+import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-import { Check } from 'lucide-react'
-
-import type { CreateHabitSchemaType, UpdateHabitSchemaType } from '@/lib/schema/habit'
-
-interface GoalPickerProps {
-  control: Control<CreateHabitSchemaType | UpdateHabitSchemaType>
-  onSuccessCallback?: (value: string) => void
+interface HabitPickerProps {
+  control: Control<CreateRoutineSchemaType>
 }
 
-const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) => {
+const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
   const [open, setOpen] = useState<boolean>(false)
-
   const { field } = useController({
     control: control,
-    name: 'goal'
+    name: 'habit'
   })
 
-  // REALIZAR UMA QUERY PARA OBJETIVOS
   const {
-    data: goals = [],
+    data: habits = [],
     isLoading,
     isFetching,
     isError,
     error
-  } = useQuery<GoalsDTO[]>({
-    queryKey: ["goals"],
-    queryFn: () => fetchGoals(),
+  } = useQuery({
+    queryKey: ['habits'],
+    queryFn: () => fetchHabits(),
     staleTime: 1000 * 60,
-    retry: 1,
+    retry: 1
   })
 
-  const selectedGoal =
-    goals.find(
+  const selectedHabit =
+    habits.find(
       (goal: any) => 
         goal.id === field.value || ""
     )
-  
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -72,10 +61,10 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) =>
           className="w-full justify-between"
           variant="outline"
         >
-        {selectedGoal ? (
-            <GoalRow goal={selectedGoal} />
+        {selectedHabit ? (
+            <HabitRow habit={selectedHabit} />
           ) : (
-            'Selecione o objetivo'
+            'Selecione o hábito'
           )}
         </Button>
       </PopoverTrigger>
@@ -87,31 +76,29 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) =>
         >
           <CommandInput
             disabled={isLoading || isFetching}
-            placeholder="Pesquise o objetivo..."
+            placeholder="Pesquise o hábito..."
           />
-          <CreateGoalDialog
-            // onSuccessCallback={() => {}}
-          />
+          <CreateHabitDialog />
           <CommandEmpty className='p-2'>
             <p className='text-sm'>
-              Objetivo não encontrado
+              Hábito não encontrado
             </p>
             <p className="text-xs text-muted-foreground">
-              Criar novo objetivo
+              Criar novo Hábito
             </p>
           </CommandEmpty>
           <CommandGroup>
             <CommandList>
-              {goals && (
-                goals.map((goal) => (
+              {habits && (
+                habits.map((habit) => (
                   <CommandItem
-                    key={goal.id}
+                    key={habit.id}
                     onSelect={() => {
-                      field.onChange(goal.id)
+                      field.onChange(habit.id)
                       setOpen((prev) => !prev)
                     }}
                   >
-                    <GoalRow goal={goal} />
+                    <HabitRow habit={habit} />
                     <Check className={cn("mr-2 h-4 w-4 opacity-0")} />
                   </CommandItem>
                 ))
@@ -124,14 +111,13 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) =>
   )
 }
 
-function GoalRow({ goal }: { goal: any }) {
+function HabitRow({ habit }: { habit: any }) {
   return (
-    <div className="flex items-center gap-2 sm:w-full w-40">
-      <span role="img">{goal.emoji}</span>
-      <span className='truncate sm:max-w-auto'>{goal.name}</span>
+    <div className="flex items-center gap-3 sm:w-full w-30">
+      <span role="img">{habit.emoji}</span>
+      <span className='truncate sm:max-w-auto'>{habit.name}</span>
     </div>
   )
 }
 
-
-export default GoalPicker
+export default HabitPicker

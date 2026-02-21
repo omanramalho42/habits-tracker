@@ -68,7 +68,6 @@ export default function Home() {
 
           {/* HEADER + ACTIONS BUTTONS */}
           <HeaderSection />
-          
           {/* CURRENT SELECTION DATE */}
           <CurrentSectionDate
             selectedDate={selectedDate}

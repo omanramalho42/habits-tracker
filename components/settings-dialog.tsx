@@ -1,8 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import UpdateUserSettingsDialog from '@/components/update-user-settings-dialog'
+
+import { UserSettings } from "@prisma/client"
+import { useQuery } from "@tanstack/react-query"
+import { fetchUserSettings } from "@/services/settings"
 
 import {
   Dialog,
@@ -27,8 +31,7 @@ import {
   MoreHorizontal,
   LogOut
 } from "lucide-react"
-import axios from 'axios'
-import { toast } from 'sonner'
+
 
 interface SettingsDialogProps {
   trigger: React.ReactNode
@@ -36,64 +39,17 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
-  const [settings, setSettings] = useState({
-    notifications_enabled: false,
-    email_notifications: false,
-    sms_notifications: false,
-    email: "",
-    phone: "",
+
+  const {
+    data: userSettings,
+    isLoading,
+    isFetching,
+    isError,
+    error
+  } = useQuery<UserSettings>({
+    queryKey: ["user-settings"],
+    queryFn: () => fetchUserSettings(),
   })
-
-  const [showSettingsUser, setShowSettingsUser] = useState(false);
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (open) {
-      fetchSettings()
-    }
-  }, [open])
-
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch("/api/settings")
-      const data = await response.json()
-      setSettings(data)
-    } catch (error) {
-      console.error("Error fetching settings:", error)
-    }
-  }
-
-  const handleSave = async () => {
-    setLoading(true)
-    const toastId =
-      toast.loading("Salvando ajustes...", {
-        id: 'update-settings'
-      })
-
-    try {
-      const response =
-        await axios.patch(
-          "/api/settings",
-          settings
-        )
-
-      if (response.data) {
-        toast.success(
-          "Suas preferencias de notificações foram atualizadas.",
-          { id: toastId }
-        )
-
-        setOpen((prev) => !prev)
-      }
-    } catch (error) {
-      toast.error(
-        "Falha ao salvar preferencias, tente novamente.",
-        { id: toastId }
-      )
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -112,6 +68,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
 
         <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
           <UpdateUserSettingsDialog
+            userSettings={userSettings ?? null}
             trigger={
               <div className="flex flex-row w-full items-center justify-between space-x-3">
                 <Settings className="h-5 w-5 text-primary" />
@@ -125,9 +82,6 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                 </div>
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    setShowSettingsUser((prev) => !prev)
-                  }}
                 >
                   <MoreHorizontal />
                 </Button>
@@ -141,16 +95,16 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
             <Button
               variant="outline"
             >
-              Cancelar
+              Fechar
             </Button>
           </DialogClose>
-          <Button
+          {/* <Button
             onClick={handleSave}
-            disabled={loading}
+            disabled={isLoading}
             className="bg-linear-to-r from-primary to-blue-600"
           >
-            {loading ? "Salvando..." : "Salvar mudanças"}
-          </Button>
+            {isLoading ? "Salvando..." : "Salvar mudanças"}
+          </Button> */}
         </DialogFooter>
 
       </DialogContent>

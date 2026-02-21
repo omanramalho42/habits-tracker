@@ -40,37 +40,70 @@ export async function PATCH(request: Request) {
     const { userId } = await auth()
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        clerkUserId: userId
+      }
+    })
+
+    if(!user) {
+      return NextResponse.json({
+        error: "Error find user on db"
+      }, { status: 400 })
     }
 
     const {
-      notifications_enabled,
-      email_notifications,
-      sms_notifications,
+      name,
       email,
-      phone
+      allow_notifications,
+      theme,
+      isTravelling
     } = await request.json()
 
-    const updated = await prisma.userSettings.upsert({
-      where: { userId },
-      update: {
-        notificationsEnabled: notifications_enabled,
-        emailNotifications: email_notifications,
-        smsNotifications: sms_notifications,
-        email,
-        phone,
-      },
-      create: {
-        userId,
-        notificationsEnabled: notifications_enabled ?? true,
-        emailNotifications: email_notifications ?? true,
-        smsNotifications: sms_notifications ?? false,
-        email,
-        phone,
-      },
+    console.log({email}, {allow_notifications}, "new info")
+
+    const existUserSettings = await prisma.userSettings.findUnique({
+      where: {
+        userId: user.id
+      }
     })
 
-    return NextResponse.json(updated)
+    console.log(existUserSettings, "exists user")
+
+    if(!existUserSettings) {
+      const updated = await prisma.userSettings.create({
+        data: {
+          userId: user.id,
+          notificationsEnabled: allow_notifications,
+          email: email
+          // user: {
+          //   connect: {
+          //     clerkUserId: user.id
+          //   }
+          // }
+        }
+      })
+
+      return NextResponse.json(updated)
+    } else {
+      const updated = await prisma.userSettings.update({
+        where: {
+          userId: existUserSettings.userId
+        },
+        data: {
+          notificationsEnabled: allow_notifications,
+          email: email,
+        }
+      })
+
+      console.log(updated, "updated user settings")
+      return NextResponse.json(updated)
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.log("error", error.message);

@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react'
 
-import { SignOutButton } from '@clerk/nextjs'
-
 import { useForm } from 'react-hook-form'
 
 import z from 'zod'
@@ -33,19 +31,22 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 
 import {
-  Bell,
   BellDot,
-  LogOut,
   Mail,
   MessageSquare,
   PlusSquare
 } from 'lucide-react'
+import axios from 'axios'
+
+import { UserSettings } from '@prisma/client'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface UpdateUserSettingsDialogProps {
   trigger: React.ReactNode
+  userSettings: UserSettings | null
 }
 
-const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trigger }) => {
+const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trigger, userSettings }) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const UpdateUserSettingsSchema = z.object({
@@ -58,15 +59,18 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
 
   type UpdateUserSettingsSchemaType = z.infer<typeof UpdateUserSettingsSchema>
 
+  console.log(userSettings, "settings");
+
   const form = useForm<UpdateUserSettingsSchemaType>({
     defaultValues: {
       name: "",
-      email: "",
-      allow_notifications: false,
+      email: userSettings?.email || "",
+      allow_notifications: userSettings?.notificationsEnabled,
       theme: "dark",
       isTravelling: false
     }
   })
+
   const {
     formState: { errors, isLoading },
     control,
@@ -75,17 +79,44 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
     handleSubmit
   } = form
 
-  const onSubmit = (values: UpdateUserSettingsSchemaType) => {
+  const queryClient = useQueryClient()
+
+  const onSubmit = async (values: UpdateUserSettingsSchemaType) => {
     console.log(values, "values")
     toast.loading(
       "Atualizando configurações do usuário",
       { id: 'update-settings' }
     )
 
-    // setOpen((prev) => !prev)
-    // reset({
-    //   name: ""
-    // })
+    try {
+      const res = 
+        await axios.patch(
+          "/api/settings",
+          values
+        )
+  
+      if(res.data) {
+        toast.success(
+          "Configurações do usuário atualizadas com sucesso! 🎉",
+          { id: 'update-settings' }
+        )
+
+        setOpen((prev) => !prev)
+
+        queryClient.invalidateQueries({
+          queryKey: ["user-settings"],
+          // exact: false,
+        })
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message)
+        toast.error(
+          "Houve um erro ao atualizar configurações do usuário",
+          { id: 'update-settings' }
+        )
+      }
+    }
   }
 
   return (
@@ -169,7 +200,6 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isLoading}
-                      className=''
                     />
                   </FormControl>
                   {errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>}

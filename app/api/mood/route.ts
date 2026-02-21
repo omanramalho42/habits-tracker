@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
         entryDate: today,
       },
     })
-    console.log("mood finded")
     return NextResponse.json(entry)
   } catch (error) {
     if (error instanceof Error) {
