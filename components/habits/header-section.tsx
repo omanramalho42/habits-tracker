@@ -36,20 +36,22 @@ const HeaderSection:React.FC = () => {
 
   return (
     <div className="flex items-start justify-between mb-8">
-      <div className="flex flex-col">
+      
+      <div className="flex flex-col space-y-2">
         <h1 className="text-1xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
           Olá, {user?.fullName} 👋
         </h1>
-        <p className="text-muted-foreground text-base">{today}</p>
+        <p className="text-muted-foreground text-base">
+          {today}
+        </p>
+        <h1 className='text-2xl font-bold text-yellow-500'>
+          <Clock
+            format={'HH:mm:ss'}
+            ticking={true}
+            timezone={'America/Sao_paulo'}
+          />
+        </h1>
       </div>
-
-      <h1 className='text-2xl font-bold text-yellow-500'>
-        <Clock
-          format={'HH:mm:ss'}
-          ticking={true}
-          timezone={'America/Sao_paulo'}
-        />
-      </h1>
 
       <div className="flex items-center flex-wrap gap-3">
       {/* CONFIGURAÇÕES */}
@@ -96,7 +98,7 @@ const HeaderSection:React.FC = () => {
             </Button>
           }
         /> */}
-        <CreateRoutineDialog
+        {/* <CreateRoutineDialog
           trigger={
             <Button
               size="icon"
@@ -117,7 +119,7 @@ const HeaderSection:React.FC = () => {
               <LogOut className='text-red-500 text-md' />
             </Button>
           }
-        />
+        /> */}
         {/* ADICIONAR SELECT LANGUAGE */}
       </div>
 
