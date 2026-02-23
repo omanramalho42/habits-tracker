@@ -108,7 +108,7 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        />
+        /> */}
         <SignOutButton
           children={
             <Button
@@ -119,7 +119,7 @@ const HeaderSection:React.FC = () => {
               <LogOut className='text-red-500 text-md' />
             </Button>
           }
-        /> */}
+        />
         {/* ADICIONAR SELECT LANGUAGE */}
       </div>
 
