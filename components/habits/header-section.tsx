@@ -87,7 +87,7 @@ const HeaderSection:React.FC = () => {
             </Button>    
           }
         />
-        {/* <CreateCheckPointDialog
+        <CreateCheckPointDialog
           trigger={
             <Button
               size="icon"
@@ -97,8 +97,8 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        /> */}
-        {/* <CreateRoutineDialog
+        />
+        <CreateRoutineDialog
           trigger={
             <Button
               size="icon"
@@ -108,7 +108,7 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        /> */}
+        />
         <SignOutButton
           children={
             <Button

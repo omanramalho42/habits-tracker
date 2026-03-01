@@ -28,7 +28,7 @@ interface HabitPickerProps {
 
 const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
   const [open, setOpen] = useState<boolean>(false)
-  const { field } = useController({
+  const { field, formState: { errors } } = useController({
     control: control,
     name: 'habit'
   })
@@ -55,19 +55,25 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          role='combobox'
-          aria-expanded={open}
-          className="w-full justify-between"
-          variant="outline"
-        >
-        {selectedHabit ? (
-            <HabitRow habit={selectedHabit} />
-          ) : (
-            'Selecione o hábito'
-          )}
-        </Button>
+        <div className='flex flex-col justify-start items-start gap-1'>
+          <Button
+            role='combobox'
+            aria-expanded={open}
+            className={cn("w-full justify-between")}
+            variant="outline"
+          >
+          {selectedHabit ? (
+              <HabitRow habit={selectedHabit} />
+            ) : (
+              <p>
+                Selecione o hábito
+              </p>
+            )}
+          </Button>
+          {errors.habit && <p className='text-red-500 text-sm'>{errors.habit.message}</p>}
+        </div>
       </PopoverTrigger>
+
       <PopoverContent className='w-50 p-0'>
         <Command
           onSubmit={(e) => {

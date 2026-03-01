@@ -9,6 +9,7 @@ const nextConfig = {
     },
     allowedDevOrigins: [
       "https://mistyped-determinedly-jaylen.ngrok-free.dev",
+      "https://localhost:3000"
     ],
   },
   images: {

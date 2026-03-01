@@ -133,5 +133,4 @@ function GoalRow({ goal }: { goal: any }) {
   )
 }
 
-
 export default GoalPicker
