@@ -24,13 +24,14 @@ import { cn } from '@/lib/utils'
 
 interface HabitPickerProps {
   control: Control<CreateRoutineSchemaType>
+  index: number;
 }
 
-const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
+const HabitPicker:React.FC<HabitPickerProps> = ({ control, index }) => {
   const [open, setOpen] = useState<boolean>(false)
   const { field, formState: { errors } } = useController({
     control: control,
-    name: 'habit'
+    name: `habits.${index}.habitId`
   })
 
   const {
@@ -48,8 +49,8 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
 
   const selectedHabit =
     habits.find(
-      (goal: any) => 
-        goal.id === field.value || ""
+      (habit: any) => 
+        habit.id === field.value || ""
     )
 
   return (
@@ -70,7 +71,13 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
               </p>
             )}
           </Button>
-          {errors.habit && <p className='text-red-500 text-sm'>{errors.habit.message}</p>}
+          <div className="absolute">
+            {errors.habits && errors.habits[index]?.habitId && (
+              <p className='relative top-16 text-red-500 text-sm'>
+                {errors.habits[index]?.habitId?.message}
+              </p>
+            )}
+          </div>
         </div>
       </PopoverTrigger>
 

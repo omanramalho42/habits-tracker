@@ -1,27 +1,15 @@
 "use client"
 
-import React, { Fragment, useState } from 'react'
+import React, { useState } from 'react'
 
-import Link from 'next/link'
-
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
 
 import Picker from "@emoji-mart/react"
 import data from "@emoji-mart/data"
-import {
-  Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-  useComboboxAnchor,
-} from "@/components/ui/combobox"
 import z from 'zod'
+
+import { motion, AnimatePresence } from "framer-motion" 
+import { format } from "date-fns"
 
 import HabitPicker from '@/components/habit-picker'
 import {
@@ -41,29 +29,36 @@ import {
   FormItem,
   FormLabel
 } from '@/components/ui/form'
-
+import { Calendar } from '@/components/ui/calendar'
+import MultipleSelector from '@/components/ui/multi-select'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardFooter } from '@/components/ui/card'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+
+import { cn } from '@/lib/utils'
 
 import {
   AlarmClock,
   CalendarIcon,
   CircleOff,
   Clock8Icon,
+  Edit,
   PlusSquare,
   Trash
 } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardFooter } from '@/components/ui/card'
-
-import { motion, AnimatePresence } from "framer-motion"
-
-import { cn } from '@/lib/utils'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { format } from "date-fns"
-import { Calendar } from './ui/calendar'
-import MultipleSelector from './ui/multi-select'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select'
 
 interface CreateRoutineDialogProps {
   trigger: React.ReactNode
@@ -73,9 +68,10 @@ const routineSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   emoji: z.string().optional(),
-  startDate: z.coerce.date(),
-  clock: z.string(),
-  duration: z.string(),
+  dateRange: z.object({
+    from: z.coerce.date(),
+    to: z.coerce.date()
+  }),
   cron: z.string(),
   frequency: z.array(
     z.object({
@@ -84,17 +80,25 @@ const routineSchema = z.object({
       key: z.string()
     })
   ),
-  habit: z.string(),
+  habits: z.array(
+    z.object({
+      habitId: z.string().min(1, "Selecione um hábito"),
+      clock: z.string().min(1, "Horário é obrigatório"),
+      duration: z.string().min(1, "Duração é obrigatória"),
+    })
+  )
 })
 
 export type CreateRoutineSchemaType = z.infer<typeof routineSchema>
 
 const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => {
-  const [openModal, setOpenModal] = useState<boolean>(false)
-  const [step, setStep] = useState(1)
-  const [isFlying, setIsFlying] = useState<boolean>(false)
+  const [openModal, setOpenModal] =
+    useState<boolean>(false)
+  const [isFlying, setIsFlying] =
+    useState<boolean>(false)
 
-  const addButtonRef = React.useRef<HTMLButtonElement>(null)
+  const addButtonRef =
+    React.useRef<HTMLButtonElement>(null)
 
   const frequency = [
     { label: 'domingo', key: 'D', value: 'dom' },
@@ -111,68 +115,66 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
     {value: "diariamente", label: "diariamente"},
   ]
 
-  const [habits, setHabits] = useState<{
-    clock: string;
-    duration: string;
-    habitId: string;
-  }[]>([]);
-
   const handleAdd = async () => {
-    await triggerRHF()
-    if(!watch("habit")) {
-      setError('habit', {
-        type: 'manual',
-        message: 'Por favor selecione um hábito válido'
-      })
+    const isValidHabitId =
+      await triggerRHF(`habits.${fields.length}.habitId`)
+    const isValidHabitClock = 
+      await triggerRHF(`habits.${fields.length}.clock`)
+    const isValidHabitDuration = 
+      await triggerRHF(`habits.${fields.length}.duration`)
+    
+    const isValid = 
+      isValidHabitId && 
+      isValidHabitClock && 
+      isValidHabitDuration
+    
+    if(!isValid) {
+      if(!isValidHabitId) {
+        setError(
+          `habits.${fields.length}.habitId`,
+          { message: "Vincule pelo menos 1 hábito" })
+      }
+      if(!isValidHabitClock) {
+        setError(
+          `habits.${fields.length}.clock`,
+          { message: "Campo requerido" })
+      }
+
+      if(!isValidHabitDuration) {
+        setError(
+          `habits.${fields.length}.duration`,
+          { message: "Campo requerido" })
+      }
+
       return
     }
-    
-    if (!addButtonRef.current) return
 
-    setIsFlying(true)
+    const currentHabits =
+      form.getValues("habits")
 
-    if(
-      watch('clock') !== "" && 
-      watch('duration') !== "" && 
-      watch('habit') !== ""
-    ) {
-      const newHabit = {
-        clock: watch('clock'),
-        duration: watch('duration'),
-        habitId: watch('habit')
-      }
-      if(habits.length > 0) {
-        setHabits([...habits, newHabit])
-      } else {
-        setHabits([newHabit])
-      }
-    }
-    // simula duração da animação
-    setTimeout(() => {
-      setIsFlying(false)
-      // setStep(2)
-    }, 700)
+    console.log(currentHabits, "current habits")
+    append({
+      habitId: currentHabits[fields.length].habitId,
+      clock: currentHabits[fields.length].clock,
+      duration: currentHabits[fields.length].duration
+    })
+    // if (!addButtonRef.current) return
 
-    setValue('clock', ""),
-    setValue('duration', ""),
-    setValue('habit', "")
+    // setIsFlying(true)
+
+    // // simula duração da animação
+    // setTimeout(() => {
+    //   setIsFlying(false)
+    // }, 700)
   }
 
   const handleRemove = (habitId: string) => {
-    const newHabitsArray: {
-      clock: string;
-      duration: string;
-      habitId: string
-    }[] = habits.filter(
-      habit => 
-        habit.habitId
-          .trim()
-          .toLowerCase() !==
-        habitId
-          .trim()
-          .toLowerCase()
+    const currentHabits = form.getValues("habits")
+
+    form.setValue(
+      "habits",
+      currentHabits.filter(h => h.habitId !== habitId)
     )
-    setHabits(newHabitsArray)
   }
 
   const [open, setOpen] = useState<boolean>(false)
@@ -185,9 +187,8 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
       cron: "",
       description: "",
       frequency: [],
-      startDate: today, 
-      clock: "",
-      duration: ""
+      dateRange: { from: today },
+      habits: []
     }
   })
 
@@ -206,9 +207,14 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
     }
   } = form
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "habits"
+  })
+
   const onSubmit = (values: CreateRoutineSchemaType) => {
     console.log(values, "values");
-    setStep(1)
+    // setHabits([])
     reset()
   }
 
@@ -272,206 +278,228 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
         </AnimatePresence>
         
         <Form {...form}>
-          <form className='space-y-1'>
-            <FormField
-              name='name'
-              control={control}
-              rules={{ required: true, min: 5 }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="name"
-                      className="text-sm font-semibold"
-                    >
-                      Nome da rotina
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="
-                        bg-black/50
-                        border border-white/10
-                        focus:border-blue-500/60
-                        focus:ring-1 focus:ring-blue-500/30
-                        rounded-lg
-                        text-white
-                        placeholder:text-white/30
-                      "
-                      {...field}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder='ex: teste'
-                    />
-                  </FormControl>
-                  {errors && errors.name && (
-                    <span className='text-sm text-red-500'>
-                      {errors.name.message}
-                    </span>
-                  )}
-                </FormItem>
-              )}
-            />
-            <FormField
-              name='description'
-              control={control}
-              rules={{ required: true, min: 5 }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="description"
-                      className="text-sm font-semibold"
-                    >
-                      Descrição da rotina
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="
-                        bg-black/50
-                        border border-white/10
-                        focus:border-blue-500/60
-                        focus:ring-1 focus:ring-blue-500/30
-                        rounded-lg
-                        text-white
-                        placeholder:text-white/30
-                      "
-                      {...field}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder='ex: coloque uma breve descrição da rotina'
-                    />
-                  </FormControl>
-                  {errors && errors.name && (
-                    <span className='text-sm text-red-500'>
-                      {errors.name.message}
-                    </span>
-                  )}
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="emoji"
-              render={({ field }) => (
-                <FormItem className="grid-cols-1 gap-3">
-                  <FormLabel htmlFor="icon">
-                    Icone
-                  </FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Card
-                          className="w-full h-full"
+          <form className='space-y-2'>
+
+            <div className="flex flex-row gap-2">
+              <div className="flex w-[75%] flex-col gap-1">
+                <FormField
+                  name='name'
+                  control={control}
+                  rules={{ required: true, min: 5 }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <Label
+                          htmlFor="name"
+                          className="text-sm font-semibold"
                         >
-                          {field.value ? (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <span className="text-3xl" role="img">
-                                {field.value}
-                              </span>
-                              <p className="text-xs text-muted-foreground">
-                                Toque para trocar
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <CircleOff className="h-6 w-6 text-muted-foreground" />
-                              <p className="text-xs text-muted-foreground text-center">
-                                Toque para selecionar
-                              </p>
-                            </div>
-                          )}
-                        </Card>
-                      </PopoverTrigger>
-
-                      <PopoverContent
-                        side="bottom"
-                        align="center"
-                        className="
-                          bg-transparent
-                          border-none
-                          w-[90vw] max-w-sm
-                          sm:w-105
-                          p-0
-                          max-h-[80vh]
-                          overflow-hidden
-                        "
-                      >
-                        <div className="">
-                          <Picker
-                            data={data}
-                            theme="dark"
-                            disabled={isSubmitting}
-                            navPosition="bottom"
-                            previewPosition="top"
-                            searchPosition="sticky"
-                            skinTonePosition="preview"
-                            onEmojiSelect={(emoji: { native: string }) => {
-                              field.onChange(emoji.native)
-                            }}
-                          />
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* DATAS */}
-            <div className="flex justify-between gap-2">
-              {/* DATA INICIAL E FINAL */}
-              <div className='w-full'>
-                <Label className="text-sm font-semibold mb-1.5 block">
-                  Data inicial
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn("w-full justify-start text-left font-normal", !watch('startDate') && "text-muted-foreground")}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {watch('startDate') 
-                        ? format(watch('startDate'), "PPP") 
-                        : <span>Escolha a data</span>
-                      }
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <FormField
-                      name="startDate"
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <FormItem>
-                          {/* <FormLabel></FormLabel> */}
-                          <FormControl>
-                            <Calendar
-                              {...field}
-                              mode="range"
-                              // selected={new Date(field.value.from)}
-                              // onSelect={field.onChange}
-                            />
-                          </FormControl>
-                          {errors.startDate && (<span className="text-sm text-red-500">{errors.startDate?.message}</span>)}
-                        </FormItem>
+                          Nome da rotina
+                        </Label>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="
+                            bg-black/50
+                            border border-white/10
+                            focus:border-blue-500/60
+                            focus:ring-1 focus:ring-blue-500/30
+                            rounded-lg
+                            text-white
+                            placeholder:text-white/30
+                          "
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder='ex: teste'
+                        />
+                      </FormControl>
+                      {errors && errors.name && (
+                        <span className='text-sm text-red-500'>
+                          {errors.name.message}
+                        </span>
                       )}
-                    />
-                  </PopoverContent>
-                </Popover>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name='description'
+                  control={control}
+                  rules={{ required: true, min: 5 }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <Label
+                          htmlFor="description"
+                          className="text-sm font-semibold"
+                        >
+                          Descrição da rotina
+                        </Label>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="
+                            bg-black/50
+                            border border-white/10
+                            focus:border-blue-500/60
+                            focus:ring-1 focus:ring-blue-500/30
+                            rounded-lg
+                            text-white
+                            placeholder:text-white/30
+                          "
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder='ex: coloque uma breve descrição da rotina'
+                        />
+                      </FormControl>
+                      {errors && errors.name && (
+                        <span className='text-sm text-red-500'>
+                          {errors.name.message}
+                        </span>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className='flex-1'>
+                <FormField
+                  control={control}
+                  name="emoji"
+                  render={({ field }) => (
+                    <FormItem className="grid-cols-1">
+                      <FormLabel htmlFor="icon">
+                        Icone
+                      </FormLabel>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Card
+                              className="w-full h-full"
+                            >
+                              {field.value ? (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <span className="text-3xl" role="img">
+                                    {field.value}
+                                  </span>
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Toque para trocar
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Toque para selecionar
+                                  </p>
+                                </div>
+                              )}
+                            </Card>
+                          </PopoverTrigger>
+
+                          <PopoverContent
+                            side="bottom"
+                            align="center"
+                            className="
+                              bg-transparent
+                              border-none
+                              w-[90vw] max-w-sm
+                              sm:w-105
+                              p-0
+                              max-h-[80vh]
+                              overflow-hidden
+                            "
+                          >
+                            <div className="">
+                              <Picker
+                                data={data}
+                                theme="dark"
+                                disabled={isSubmitting}
+                                navPosition="bottom"
+                                previewPosition="top"
+                                searchPosition="sticky"
+                                skinTonePosition="preview"
+                                onEmojiSelect={(emoji: { native: string }) => {
+                                  field.onChange(emoji.native)
+                                }}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
+            
+            {/* DATAS */}
+            <div className='flex flex-col gap-1 w-full'>
+              <Label className="text-sm font-semibold block">
+                Data
+              </Label>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !watch('dateRange') && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {watch('dateRange')?.from ? (
+                      watch('dateRange').to ? (
+                        <>
+                          {format(watch('dateRange').from, "dd/MM/yyyy")} -{" "}
+                          {format(watch('dateRange').to, "dd/MM/yyyy")}
+                        </>
+                      ) : (
+                        format(watch('dateRange').from, "dd/MM/yyyy")
+                      )
+                    ) : (
+                      <span>Escolha o intervalo de datas</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
 
-            {/* FREQUENCIA */}
-            <div className='flex flex-col gap-2 items-start justify-start'>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <FormField
+                    name="dateRange" // Recomendo mudar de 'startDate' para 'dateRange' para ficar claro que é um objeto
+                    control={control} // Certifica-te de passar o control do useForm
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={field.value?.from}
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            numberOfMonths={2} // Opcional: mostra 2 meses para facilitar o range
+                          />
+                        </FormControl>
+                        {errors.dateRange && (
+                          <span className="text-xs text-red-500 px-2 pb-2 block">
+                            {errors.dateRange?.message}
+                          </span>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* CRONOGRAMA */}
+            <div className='flex flex-col gap-2'>
               <Label>Cronograma</Label>
               <Controller
                 control={control}
                 name='cron'
                 render={({ field }) => {
                   return (
-                    <div className='w-full space-y-2'>
+                    <div className='w-full'>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger className='w-full'>
                           <SelectValue placeholder='Selecione o cronograma' />
@@ -479,9 +507,12 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Cronograma</SelectLabel>
-                            {crons.map((item) => {
+                            {crons.map((item, index) => {
                               return (
-                                <SelectItem value={item.value}>
+                                <SelectItem 
+                                  key={index}
+                                  value={item.value}
+                                >
                                   {item.label}
                                 </SelectItem>
                               )
@@ -494,7 +525,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                 }}
               />
             </div>
-
+            {/* FREQUENCIA */}
             <div className='flex flex-col gap-2 items-start'>
               <Label>Frequencia</Label>
               <Controller
@@ -521,11 +552,11 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                 }}
               />
             </div>
+
             {/* ADICIONAR HABITOS A ROTINA */}
             <Dialog open={openModal} onOpenChange={setOpenModal}>
               <DialogTrigger asChild>
                 <Button
-                  style={{ zIndex: -1 }}
                   className='w-full my-4'
                   type='button'
                 >
@@ -539,30 +570,33 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                     Vincular hábito ou atividade a rotina
                   </DialogTitle>
                   <DialogDescription>
-                    Vincular habitos e ativiades
+                    Vincular habitos e atividades
                   </DialogDescription>
                 </DialogHeader>
 
                 {/* VINCULAR HABITOS */}
                 <Card className='p-4'>
+
                   <div className="flex flex-row justify-between gap-3">
                     <FormField
-                      name="clock"
+                      name={`habits.${fields.length}.clock`}
                       rules={{ required: true }}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem className="w-full">
                           <FormLabel>
                             <Label
                               htmlFor="clock"
                               className="text-sm font-semibold"
                             >
-                              Horario
+                              Horário
                             </Label>
                           </FormLabel>
                           <FormControl>
-                            <div className='relative'>
+                            <div className='relative flex items-center'>
                               <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
-                                <AlarmClock className="size-4 text-blue-400/70" />
+                                <AlarmClock 
+                                  className="size-4 text-blue-400/70"
+                                />
                               </div>
                               <Input
                                 type='time'
@@ -574,14 +608,22 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                               />
                             </div>
                           </FormControl>
-                          {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
+
+                          <div className="absolute">
+                            {fieldState.error && (
+                              <span className="relative top-16 text-sm text-red-500">
+                                {fieldState.error?.message}
+                              </span>
+                            )}
+                          </div>
+
                         </FormItem>
                       )}
                     />
                     <FormField
-                      name="duration"
+                      name={`habits.${fields.length}.duration`}
                       rules={{ required: true }}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem className="w-full">
                           <FormLabel>
                             <Label
@@ -592,7 +634,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                             </Label>
                           </FormLabel>
                           <FormControl>
-                            <div className='relative'>
+                            <div className='relative flex items-center'>
                               <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
                                 <Clock8Icon className="size-4 text-blue-400/70" />
                               </div>
@@ -606,54 +648,99 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                               />
                             </div>
                           </FormControl>
-                          {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
+
+                          <div className='absolute'>
+                            {fieldState.error && (
+                              <span className="relative top-16 text-sm text-red-500">
+                                {fieldState.error?.message}
+                              </span>
+                            )}
+                          </div>
+
                         </FormItem>
                       )}
                     />    
                   </div>
                   
                   <div className="flex flex-col gap-2 w-full">
-                    <Label htmlFor="goal" className={cn(errors.habit && 'text-red-500 font-semibold')}>
+                    <Label
+                      htmlFor="habits"
+                      className={cn(errors.habits && errors.habits[fields.length]?.habitId && 'text-red-500 font-semibold')}
+                    >
                       Vincular hábito
                     </Label>
                     <HabitPicker
+                      index={fields.length}
                       control={control}
                     />
                   </div>
+
                   {/* HABITOS VINCULADOS  */}
                   <div className='flex flex-col gap-3'>
                     <Label>Hábitos vinculados: </Label>
                     <Card className="px-4 py-4 max-h-40 overflow-auto">
-                      {habits.length !== 0 ? (
+                      {fields.length !== 0 ? (
                         <div className='flex flex-col gap-2'>
-                          {habits.map((habit) => (
-                            <div key={habit.habitId} className='flex flex-row gap-4 justify-between items-center'>
-                              <div className='flex min-w-22 flex-row gap-2 items-center'>
-                                <Clock8Icon className='w-4 h-4' />
-                                <p className='text-sm'>
-                                  {habit.clock}
-                                </p>
+                          {fields.map((habit, index) => (
+                            <div
+                              key={index}
+                              className='flex flex-row gap-4 justify-between items-center'
+                            >
+                              <div className='flex flex-row gap-2'>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className='flex flex-row gap-2 items-center'>
+                                      <Clock8Icon className='w-4 h-4' />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className='text-sm'>
+                                      horário: {habit.clock}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+
+
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className='flex flex-row gap-2 items-center'>
+                                      <AlarmClock className='w-4 h-4' />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className='text-sm'>
+                                      duração: {habit.duration}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </div>
 
                               <div className='flex flex-row gap-2 items-center'>
-                                <AlarmClock className='w-4 h-4' />
-                                <p className='text-sm'>
-                                  {habit.duration}
+                                <p className='w-full text-sm'>
+                                  {/* {habit.habitId.slice(0, 20).concat("...")} */}
                                 </p>
                               </div>
 
-                              {/* <p className='w-full text-sm'>
-                                {habit.habitId.slice(0, 10)}
-                              </p> */}
-                              <Button
-                                type='button'
-                                variant="ghost"
-                                onClick={() => handleRemove(habit.habitId)}
-                              >
-                                <Trash 
-                                  className='text-red-500 text-sm'
-                                />
-                              </Button>
+                              <div className='flex flex-row gap-1'>
+                                <Button
+                                  type='button'
+                                  variant="ghost"
+                                  onClick={() => handleRemove(habit.habitId)}
+                                >
+                                  <Trash
+                                    className='text-red-500 text-sm'
+                                  />
+                                </Button>
+                                <Button
+                                  type='button'
+                                  disabled
+                                  variant="ghost"
+                                >
+                                  <Edit
+                                    className='text-info-500 text-sm'
+                                  />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -713,36 +800,71 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
             <div className='flex flex-col gap-3 max-w-180'>
               <Label>Hábitos vinculados: </Label>
               <Card className="px-4 py-4 max-h-40 overflow-auto">
-                {habits.length !== 0 ? (
+                {fields.length !== 0 ? (
                   <div className='flex flex-col gap-2'>
-                    {habits.map((habit) => (
-                      <div key={habit.habitId} className='flex flex-row gap-4 justify-between items-center'>
-                        <div className='flex min-w-22 flex-row gap-2 items-center'>
-                          <Clock8Icon className='w-4 h-4' />
-                          <p className='text-sm'>
-                            {habit.clock}
-                          </p>
+                    {fields.map((habit) => (
+                      <div
+                        key={habit.habitId}
+                        className='flex flex-row gap-4 justify-between items-center'
+                      >
+                        <div className='flex flex-row gap-2'>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className='flex flex-row gap-2 items-center'>
+                                <Clock8Icon className='w-4 h-4' />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className='text-sm'>
+                                horário: {habit.clock}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className='flex flex-row gap-2 items-center'>
+                                <AlarmClock className='w-4 h-4' />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className='text-sm'>
+                                duração: {habit.duration}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
 
                         <div className='flex flex-row gap-2 items-center'>
-                          <AlarmClock className='w-4 h-4' />
-                          <p className='text-sm'>
-                            {habit.duration}
+                          <p className='w-full text-sm'>
+                            {/* {habit.habitId.slice(0, 20).concat("...")} */}
                           </p>
                         </div>
 
-                        {/* <p className='w-full text-sm'>
-                          {habit.habitId.slice(0, 10)}
-                        </p> */}
-                        <Button
-                          type='button'
-                          variant="ghost"
-                          onClick={() => handleRemove(habit.habitId)}
-                        >
-                          <Trash 
-                            className='text-red-500 text-sm'
-                          />
-                        </Button>
+                        <div className='flex flex-row gap-2'>
+                          <Button
+                            type='button'
+                            variant="ghost"
+                            onClick={() => handleRemove(habit.habitId)}
+                          >
+                            <Trash
+                              className='text-red-500 text-sm'
+                            />
+                          </Button>
+                          <Button
+                            type='button'
+                            variant="ghost"
+                            onClick={() => {
+                              setOpenModal(prev => !prev)
+                            }}
+                            disabled={true}
+                          >
+                            <Edit
+                              className='text-info-500 text-sm'
+                            />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
