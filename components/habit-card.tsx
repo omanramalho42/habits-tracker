@@ -40,13 +40,15 @@ import {
   TimerIcon,
   Play,
   PlayCircle,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 import CreateAnnotationDialog from "./create-annotation-dialog"
 import { Habit } from "@prisma/client"
-
+import { GripVertical } from "lucide-react"
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
   1: 'M',
@@ -312,19 +314,57 @@ export function HabitCard({
                   <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
                     {habit.name}
                   </h3>
-                  <HabitDetailDialog
-                    currentDate={selectedDate || new Date()}
-                    habit={habit}
-                    trigger={
-                      <Button
-                        disabled={loading}
-                        size="icon"
-                        className="flex items-center bg-transparent"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
+                
+                  <div className="flex z-9999999 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <UpdateHabitDialog
+                      habit={habit}
+                      // onSuccessCallback={(data) => onEdit(data)}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          disabled={!onEdit}
+                          size="icon"
+                          className="h-9 w-9 hover:bg-muted"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    <DeleteHabitDialog
+                      habitId={habit.id}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          disabled={!onDelete}
+                          size="icon"
+                          className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    <HabitDetailDialog
+                      currentDate={selectedDate || new Date()}
+                      habit={habit}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          disabled={loading}
+                          size="icon"
+                          className="flex items-center bg-transparent"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
+
+                  {habit.goals && habit.goals.length > 0 && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      🎯 {habit.goals.map((g) => g.name).join(", ")}
+                    </p>
+                  )}
+
                   {/* {habit.updatedAt && <Button variant="outline" size="icon"> <Calendar1 className="text-sm" /></Button>} */}
                   {/* badge streak */}
                   {habit.current_streak > 0 && (
@@ -389,14 +429,16 @@ export function HabitCard({
                     // ✅ agora olha para TODAS as conclusões da semana
                     const isCompletedThisWeekday =
                       completionFrequency.includes(day.key)
-
+                    
                     return (
                       <div
                         key={day.key}
                         className={cn(
-                          'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all',
+                          'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
                           isActive
-                            ? "text-foreground shadow-sm "
+                            ? "bg-success text-success-foreground"
+                            :  WEEKDAY_TO_FREQUENCY[today.getDay()].includes(day.key)
+                            ? "bg-primary/30 text-primary ring-1 ring-primary"
                             : "bg-muted/50 text-muted-foreground"
                         )}
                         style={
@@ -436,12 +478,12 @@ export function HabitCard({
                       <p className="">Nenhum dia ainda</p>
                     )}
                   </span>
-                  <Progress
-                    className="w-full h-1 mt-1 bg-gray-800"
-                    color={habit.color}
-                    value={progress}
-                  />
                 </div>
+
+                <Progress
+                  className="w-full gradient-progress h-1 mt-1 bg-gray-800 transition-all duration-500"
+                  value={progress}
+                />
               </div>
             ) : (
               <div className="flex flex-col">
@@ -505,7 +547,6 @@ export function HabitCard({
               />
             )}
 
-
             {/* COUNTER CHECKBOX */}
             {onToggle && (
               <div className="flex flex-col items-center gap-2">
@@ -528,11 +569,11 @@ export function HabitCard({
                   {isCompleted && <Check className="w-5 h-5" />}
                 </Button>
                 {/* ANNOTATION */}
-                {isCompleted && !todayCompletion?.annotations && (
+                {/* {isCompleted && !todayCompletion?.annotations && (
                   <CreateAnnotationDialog
                     completionId={todayCompletion?.id || ""}
                   />
-                )}
+                )} */}
                 <div className="relative top-5">
                   {isActiveHour && !isOutHour && (
                     <Button

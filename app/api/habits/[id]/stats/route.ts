@@ -74,7 +74,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const today = new Date().toISOString().split("T")[0]
     const isCompletedToday =
-      habit.completions && habit.completions.some(
+      habit.completions.some(
         (c) => {
           const completedDate = new Date(c.completedDate)
           completedDate.setHours(0, 0, 0, 0)
