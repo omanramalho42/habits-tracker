@@ -49,7 +49,7 @@ model UserSettings {
   @@map("user_settings")
 }
 
-enum Status {
+enum HabitStatus {
   ACTIVE
   PAUSED
   ARCHIVED
@@ -68,7 +68,7 @@ model Habit {
   // clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
   // duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
 
-  status        Status @default(ACTIVE)
+  status        HabitStatus @default(ACTIVE)
 
   // startDate     DateTime  @default(now()) @map("start_date")
   // endDate       DateTime? @map("end_date")
@@ -106,7 +106,7 @@ model Task {
   updatedAt   DateTime?  @updatedAt @map("updated_at")
   deletedAt   DateTime?  @map("deleted_at")
 
-  status      Status     @default(ACTIVE)
+  status      HabitStatus     @default(ACTIVE)
 
   schedules   TaskSchedule[]
   completions TaskCompletion[]
@@ -170,7 +170,7 @@ model Routine {
   frequency Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
   emoji     String    @db.VarChar(10)
 
-  status    Status    @default(ACTIVE)
+  status    HabitStatus    @default(ACTIVE)
 
   habitSchedules HabitSchedule[]
   taskSchedules  TaskSchedule[]
@@ -184,7 +184,7 @@ model TaskSchedule {
   duration      String    @db.VarChar(20)
   clock         String    @db.VarChar(20)
 
-  status        Status    @default(ACTIVE)
+  status        HabitStatus    @default(ACTIVE)
 
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt      @map("updated_at")
@@ -206,7 +206,7 @@ model HabitSchedule {
   duration      String    @db.VarChar(20)
   clock         String    @db.VarChar(20)
 
-  status        Status    @default(ACTIVE)
+  status        HabitStatus    @default(ACTIVE)
 
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt      @map("updated_at")
@@ -275,7 +275,7 @@ model Goals {
   tasks         Task[]
   checkpoints   CheckPoint[]
 
-  status        Status? @default(ACTIVE)
+  status        HabitStatus? @default(ACTIVE)
   @@map("goals")
 }
 
@@ -293,7 +293,7 @@ model Categories {
 
   habits        Habit[]
 
-  status        Status? @default(ACTIVE)
+  status        HabitStatus? @default(ACTIVE)
   @@map("categories")
 }
 
