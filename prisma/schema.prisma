@@ -65,16 +65,16 @@ model Habit {
   customField   String?   @map("custom_field") @db.VarChar(12)
   limitCounter  Int?    @default(1)
 
-  // clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
-  // duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
+  clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
+  duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
 
   status        HabitStatus @default(ACTIVE)
 
-  // startDate     DateTime  @default(now()) @map("start_date")
-  // endDate       DateTime? @map("end_date")
+  startDate     DateTime  @default(now()) @map("start_date")
+  endDate       DateTime? @map("end_date")
 
-  // reminder      Boolean?   @default(false)
-  // frequency     Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  reminder      Boolean?   @default(false)
+  frequency     Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
   color         String?    @default("#3B82F6") @db.VarChar(7)
 
   createdAt     DateTime  @default(now()) @map("created_at")
