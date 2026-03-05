@@ -434,7 +434,7 @@ export function HabitCard({
                       <div
                         key={day.key}
                         className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
+                          'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
                           isActive
                             ? "bg-success text-success-foreground"
                             :  WEEKDAY_TO_FREQUENCY[today.getDay()].includes(day.key)
