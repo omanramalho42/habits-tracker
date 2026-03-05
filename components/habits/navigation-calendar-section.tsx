@@ -124,7 +124,7 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
     new Date(selectedDate).toLocaleDateString("pt-BR")
 
   return (
-    <div className="mb-12 bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
+    <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -135,7 +135,7 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
           <ChevronLeft className="h-5 w-5" />
         </Button>
 
-        <div className="overflow-x-auto flex-1 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+        <div className="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-primary px-4 py-2">
           <div className="flex gap-2 min-w-max pb-2">
             {monthDates.map((date) => {
               const isSelected =
@@ -152,12 +152,12 @@ const NavigationCalendarSection:React.FC<NavigationCalendarSectionProps> = ({
                   onClick={() => {
                     onSuccessCallback(new Date(date))
                   }}
-                  className={`h-full flex flex-col items-center justify-center min-w-17.5 py-4 px-3 rounded-xl transition-all ${
-                    isSelected
-                      ? "bg-linear-to-br from-primary to-blue-600 text-primary-foreground shadow-lg scale-105"
-                      : isToday
-                        ? "bg-primary/10 text-foreground border-2 border-primary/30"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:scale-105"
+                className={`flex flex-col items-center min-w-14 h-full py-3 px-2 rounded-md cursor-pointer transition-all ${
+                  isSelected
+                    ? "bg-linear-to-br from-primary to-blue-600 text-primary-foreground shadow-lg scale-105"
+                    : isToday
+                      ? "bg-primary/10 text-foreground border-2 border-primary/30"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:scale-105"
                   }`}
                 >
                   <span className="text-xs font-semibold uppercase mb-2">{dayOfWeek}</span>

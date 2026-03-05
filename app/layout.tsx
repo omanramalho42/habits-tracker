@@ -3,7 +3,7 @@ import type React from "react"
 import type { Metadata } from "next"
 
 import { ClerkProvider } from "@clerk/nextjs"
-import { Geist, Geist_Mono } from "next/font/google"
+import { JetBrains_Mono, Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 
 import "./globals.css"
@@ -12,9 +12,12 @@ import { currentUser } from "@clerk/nextjs/server"
 import { Toaster } from "sonner"
 import QueryClientProvider from "@/components/providers/query-client-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { cn } from "@/lib/utils"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const jetBrainsMono =
+  JetBrains_Mono({ subsets: ["latin"] })
+const spaceGrotesk =
+  Space_Grotesk({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Wisey - Habit Tracker",
@@ -70,8 +73,17 @@ export default async function RootLayout({
         },
       }}
     >
-      <html lang="pt-BR" className="dark">
-        <body className={`font-sans antialiased`}>
+      <html
+        lang="pt-BR"
+        className={
+          cn(
+            "dark",
+            // spaceGrotesk.className,
+            jetBrainsMono.className
+          )
+        }
+      >
+        <body className={`antialiased`}>
           <Toaster theme="dark" />
           <QueryClientProvider>
             {/* <ThemeProvider

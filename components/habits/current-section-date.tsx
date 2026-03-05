@@ -49,12 +49,13 @@ const CurrentSectionDate:React.FC<CurrentSectionDateProps> = ({
   )
 
   return (
-    <div className="mb-8 bg-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-foreground">
+    <div className="bg-card/50 rounded-2xl p-5 border border-border/50">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-medium text-foreground">
           {currentMonthYear}
         </h2>
-        <div className="flex gap-2">
+        {/* CRIAR UM ALTERNADOR DE MES A ANO DINAMICO */}
+        <div className="flex gap-2 space-y-2">
           <Button
             variant="ghost"
             size="icon"
@@ -71,7 +72,6 @@ const CurrentSectionDate:React.FC<CurrentSectionDateProps> = ({
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
-          {/* adicionar button restore to default */}
         </div>
       </div>
       {/* NAVIGATION CALENDAR */}

@@ -102,7 +102,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
 
   return (
     <div className="scroll-container w-full">
-      <div className="min-w-180 pb-4">
+      <div className="">
         <HeatMap
           value={valuesSchdules}
           startDate={startDate}
@@ -144,7 +144,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
         />
       </div>
       {/* --- Legendas --- */}
-      <div className="flex justify-start gap-4 text-sm mt-3 flex-wrap">
+      <div className="flex justify-start gap-4 text-sm flex-wrap">
         <div className="flex items-center space-x-1">
           <div className={`w-3 h-3 rounded-sm`} style={{ backgroundColor: COLOR_COMPLETED }} />
           <span>Concluído</span>

@@ -134,9 +134,11 @@ const ActiveCardHabits:React.FC<ActiveCardHabitsProps> = ({
   })
 
   return (
-    <div>
+    <div className='flex flex-col space-y-6'>
+
+      {/* PROGRESS CARD */}
       {completedToday > 0 && habits.length > 0 && (
-        <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-2xl p-6 text-center mb-6 shadow-sm">
+        <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-xl p-8 text-center shadow-sm">
           <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
             {completedToday}/{habits.length}
           </p>

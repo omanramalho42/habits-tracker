@@ -49,7 +49,7 @@ model UserSettings {
   @@map("user_settings")
 }
 
-enum HabitStatus {
+enum Status {
   ACTIVE
   PAUSED
   ARCHIVED
@@ -63,18 +63,18 @@ model Habit {
   emoji         String?   @db.VarChar(10)
 
   customField   String?   @map("custom_field") @db.VarChar(12)
-  clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
-
   limitCounter  Int?    @default(1)
-  duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
 
-  status      HabitStatus @default(ACTIVE)
+  // clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
+  // duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
 
-  startDate     DateTime  @default(now()) @map("start_date")
-  endDate       DateTime? @map("end_date")
+  status        Status @default(ACTIVE)
 
-  reminder      Boolean?   @default(false)
-  frequency     Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  // startDate     DateTime  @default(now()) @map("start_date")
+  // endDate       DateTime? @map("end_date")
+
+  // reminder      Boolean?   @default(false)
+  // frequency     Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
   color         String?    @default("#3B82F6") @db.VarChar(7)
 
   createdAt     DateTime  @default(now()) @map("created_at")
@@ -85,27 +85,141 @@ model Habit {
 
   schedules   HabitSchedule[]
   completions HabitCompletion[]
-  goals       Goals[]   // many-to-many implícito
+  goals       Goals[]
+  categories  Categories[]
 
   @@index([userId])
   @@map("habits")
 }
 
+model Task {
+  id           String  @id @default(uuid())
+  userId       String  @map("user_id")
+
+  name        String     @db.VarChar(100)
+  description String?    @db.VarChar(255)
+
+  startDate   DateTime   @default(now()) @map("start_date")
+  endDate     DateTime?  @map("end_date")
+
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime?  @updatedAt @map("updated_at")
+  deletedAt   DateTime?  @map("deleted_at")
+
+  status      Status     @default(ACTIVE)
+
+  schedules   TaskSchedule[]
+  completions TaskCompletion[]
+  goals       Goals[]
+
+  checkpointId  String?  @map("checkpoint_id")
+  checkpoints   CheckPoint[]
+}
+
+model CheckPoint {
+  id          String    @id @unique @default(uuid())
+  userId      String                    @map("user_id")
+
+  name        String    @db.VarChar(100)
+  description String?   @db.VarChar(255)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt      @map("updated_at")
+  deletedAt   DateTime?                 @map("deleted_at")
+
+  startDate   DateTime  @default(now()) @map("start_date")
+  endDate     DateTime?                 @map("end_date")
+  
+  goal  Goals[]
+
+  tasks Task[]
+  @@map("checkpoint")
+}
+
+model TaskCompletion {
+  id          String      @id @default(uuid())
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  completedDate DateTime  @map("completed_date")
+  isCompleted   Boolean?  @default(false) @map("is_completed")
+  
+  taskId        String    @map("task_id")
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  annotations   Annotations[]
+
+  @@unique([taskId, completedDate])
+  @@index([completedDate])
+  @@map("task_completion")
+}
+
+model Routine {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt  @map("updated_at")
+
+  startDate DateTime  @default(now()) @map("start_date")
+  endDate   DateTime? @map("end_date")
+
+  cron      String?   @default("")
+  frequency Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  emoji     String    @db.VarChar(10)
+
+  status    Status    @default(ACTIVE)
+
+  habitSchedules HabitSchedule[]
+  taskSchedules  TaskSchedule[]
+
+  @@map("routine")
+}
+
+model TaskSchedule {
+  id            String    @unique @id @default(uuid())
+
+  duration      String    @db.VarChar(20)
+  clock         String    @db.VarChar(20)
+
+  status        Status    @default(ACTIVE)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
+
+  routineId     String    @map("routine_id")
+  routine       Routine   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  taskId        String    @map("task_id")
+  task          Task      @relation(fields: [taskId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([routineId, clock])
+  @@index([routineId, clock])
+  @@map("task_schedule")
+}
+
 model HabitSchedule {
-  id            String @id @default(uuid())
-  habitId       String @map("habit_id")
+  id            String    @unique @id @default(uuid())
 
-  scheduledDate DateTime 
-  isCompleted   Boolean   @default(false)
-  completedAt   DateTime? 
-  createdAt     DateTime  @default(now())
+  duration      String    @db.VarChar(20)
+  clock         String    @db.VarChar(20)
 
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  status        Status    @default(ACTIVE)
 
-  @@unique([habitId, scheduledDate])
-  @@index([scheduledDate])
-  @@index([habitId, scheduledDate])
-  @@map("habit_schedules")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
+
+  routineId     String    @map("routine_id")
+  routine       Routine   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  habitId       String    @map("habit_id")
+  habit         Habit     @relation(fields: [habitId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([routineId, clock])
+  @@index([routineId, clock])
+  @@map("habit_schedule")
 }
 
 model HabitCompletion {
@@ -113,11 +227,11 @@ model HabitCompletion {
 
   habitId String @map("habit_id")
 
-  completedDate DateTime
+  completedDate DateTime @map("completed_date")
   counter       Int? @default(0)            // null = conta apenas 1 vez
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
 
   habit       Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
   annotations Annotations?
@@ -127,14 +241,14 @@ model HabitCompletion {
 }
 
 model MoodEntry {
-  id      String @id @default(uuid())
-  userId  String @map("user_id")
+  id      String      @id @default(uuid())
+  userId  String      @map("user_id")
 
-  moodType  String   @db.VarChar(50) @map("mood_type")
-  moodLevel String   @db.VarChar(50) @map("mood_level")
-  entryDate DateTime @unique @default(now()) @map("entry_date")
+  moodType  String    @db.VarChar(50) @map("mood_type")
+  moodLevel String    @db.VarChar(50) @map("mood_level")
+  entryDate DateTime  @default(now()) @map("entry_date")
   
-  createdAt DateTime @default(now()) 
+  createdAt DateTime  @default(now()) 
   updatedAt DateTime? @updatedAt
 
   // Relations
@@ -154,31 +268,81 @@ model Goals {
   description   String?
   emoji         String?   @db.VarChar(10)
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
+
+  habits        Habit[]
+  tasks         Task[]
+  checkpoints   CheckPoint[]
+
+  status        Status? @default(ACTIVE)
+  @@map("goals")
+}
+
+model Categories {
+  id            String  @id @default(uuid())
+  userId        String  @map("user_id")
+
+  name          String
+  description   String?
+  emoji         String?   @db.VarChar(10)
+  color         String?   @db.VarChar(7)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
 
   habits        Habit[]
 
-  status        HabitStatus? @default(ACTIVE)
-  @@map("goals")
+  status        Status? @default(ACTIVE)
+  @@map("categories")
 }
 
 model Annotations {
   id           String @id @default(uuid())
-  
+
   name         String
   content      String?
-
-  completionId String @unique @map("completion_id")
-  completion   HabitCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
   
-  createdByAI  Boolean? @default(false)
+  createdByAI  Boolean? @default(false) @map("created_by_ai")
   summary      String?
 
   imageUrl     String? @db.VarChar(255)
 
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime?  @updatedAt
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime?  @updatedAt      @map("updated_at")
 
+  completionId String @unique @map("completion_id")
+  completion       HabitCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+
+  tasksCompletions TaskCompletion[]
   @@map("annotations")
 }
+
+//GOALS
+//  CHECKPOINTS
+
+//TASKS
+//  TASKS: SCHEDULES, COMPLETIONS
+
+//HABITS
+//  HABITS: SCHEDULES, COMPLETIONS
+
+//ROUTINES
+
+//ANNOTATIONS
+
+//MOOD
+//SLEEP
+
+//EXERCICES
+//METRICS
+
+//DIET
+
+//ACHVIMENTS
+
+//FINANCES
+
+//HEALTHNESS
+
+//THERAPIST

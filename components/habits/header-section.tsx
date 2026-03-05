@@ -35,7 +35,7 @@ const HeaderSection:React.FC = () => {
   const { user } = useUser()
 
   return (
-    <div className="flex items-start justify-between mb-8">
+    <div className="flex items-start justify-between">
       
       <div className="flex flex-col space-y-2">
         <h1 className="text-1xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
@@ -61,7 +61,7 @@ const HeaderSection:React.FC = () => {
               size="icon"
               variant="outline"
               disabled={loading}
-              className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
+              className="rounded-full p-0 border-border/50 hover:bg-muted"
             >
               <Settings className="h-6 w-6" />
             </Button>
@@ -72,7 +72,7 @@ const HeaderSection:React.FC = () => {
           size="icon"
           variant="outline"
           disabled={loading}
-          className="rounded-full h-14 w-14 p-0 border-border/50 hover:bg-muted"
+          className="rounded-full p-0 border-border/50 hover:bg-muted"
         >
           <ListIcon className="h-6 w-6" />
         </Button>
@@ -81,13 +81,13 @@ const HeaderSection:React.FC = () => {
             <Button
               size="icon"
               disabled={loading}
-              className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+              className="rounded-full p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="h-7 w-7" />
             </Button>    
           }
         />
-        <CreateCheckPointDialog
+        {/* <CreateCheckPointDialog
           trigger={
             <Button
               size="icon"
@@ -97,8 +97,8 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        />
-        <CreateRoutineDialog
+        /> */}
+        {/* <CreateRoutineDialog
           trigger={
             <Button
               size="icon"
@@ -108,7 +108,7 @@ const HeaderSection:React.FC = () => {
               <Plus className="h-7 w-7" />
             </Button>
           }
-        />
+        /> */}
         <SignOutButton
           children={
             <Button

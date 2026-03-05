@@ -64,7 +64,7 @@ export default function Home() {
       {/* <MoodWizard /> */}
 
       <main className="min-h-screen bg-background">
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex flex-col space-y-6 max-w-5xl mx-auto px-4 py-8">
 
           {/* HEADER + ACTIONS BUTTONS */}
           <HeaderSection />
@@ -73,7 +73,7 @@ export default function Home() {
             selectedDate={selectedDate}
             onSuccessCallback={setSelectedDate}
           />
-
+          
           {isError ? (
             <div className="text-center py-20">
               <h2 className="text-2xl font-bold mb-3 text-foreground">
