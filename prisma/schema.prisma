@@ -63,10 +63,10 @@ model Habit {
   emoji         String?   @db.VarChar(10)
 
   customField   String?   @map("custom_field") @db.VarChar(12)
-  limitCounter  Int?    @default(1)
+  limitCounter  Int?      @default(1)
 
   clock         String?   @db.VarChar(8) // HH:mm:ss       // horário definido do hábito
-  duration      String? @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
+  duration      String?   @db.VarChar(8) //DURAÇÃO DE UM HÁBITO
 
   status        HabitStatus @default(ACTIVE)
 
@@ -346,3 +346,4 @@ model Annotations {
 //HEALTHNESS
 
 //THERAPIST
+
