@@ -315,7 +315,7 @@ export function HabitCard({
                     {habit.name}
                   </h3>
                 
-                  <div className="flex z-9999999 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 ">
                     <UpdateHabitDialog
                       habit={habit}
                       // onSuccessCallback={(data) => onEdit(data)}
@@ -511,7 +511,7 @@ export function HabitCard({
           <div
             className={cn(
               "flex items-center gap-1.5 transition-opacity",
-              "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+              // "opacity-100 md:opacity-0 md:group-hover:opacity-100",
             )}
           >
             {onEdit && (

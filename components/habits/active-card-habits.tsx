@@ -13,7 +13,7 @@ import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 import { Button } from "@/components/ui/button"
 
-import { GripVertical, Plus } from "lucide-react"
+import { ArrowUpDownIcon, GripVertical, Plus } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 
@@ -178,26 +178,36 @@ function SortableHabit({
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-start gap-2">
-      {/* HANDLE */}
-      <div
+    <div ref={setNodeRef} style={style} className="relative">
+      {/* DRAG HANDLE */}
+      <Button
+        variant="outline"
+        size="icon"
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground mt-4"
+        className="
+          absolute 
+          top-20
+          right-4
+          cursor-grab
+          active:cursor-grabbing
+          text-muted-foreground
+          rounded-md
+          p-1
+          transition
+          z-10
+        "
       >
-        <GripVertical size={18} />
-      </div>
+        <ArrowUpDownIcon size={18} />
+      </Button>
 
-      {/* CARD */}
-      <div className="flex-1">
-        <HabitCard
-          loading={isPending}
-          habit={habit}
-          onToggle={(id: string) => onToggle(id)}
-          selectedDate={selectedDate}
-          onError={onError}
-        />
-      </div>
+      <HabitCard
+        loading={isPending}
+        habit={habit}
+        onToggle={(id: string) => onToggle(id)}
+        selectedDate={selectedDate}
+        onError={onError}
+      />
     </div>
   )
 }
