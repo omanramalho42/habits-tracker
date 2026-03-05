@@ -46,9 +46,11 @@ import {
 
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
+
 import CreateAnnotationDialog from "./create-annotation-dialog"
 import { Habit } from "@prisma/client"
 import { GripVertical } from "lucide-react"
+
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
   1: 'M',
@@ -288,7 +290,7 @@ export function HabitCard({
       }}
     >
       {/* INFO */}
-      <div className="flex items-start justify-between gap-4">
+      <div aria-selected={false} className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 flex-1 min-w-0">
           <div
             className="flex items-center justify-center w-8 h-8 rounded-2xl text-3xl shrink-0 shadow-sm"
@@ -316,7 +318,7 @@ export function HabitCard({
                   </h3>
                 
                   <div className="flex items-center gap-1 ">
-                    <UpdateHabitDialog
+                    {/* <UpdateHabitDialog
                       habit={habit}
                       // onSuccessCallback={(data) => onEdit(data)}
                       trigger={
@@ -329,8 +331,8 @@ export function HabitCard({
                           <Pencil className="h-4 w-4" />
                         </Button>
                       }
-                    />
-                    <DeleteHabitDialog
+                    /> */}
+                    {/* <DeleteHabitDialog
                       habitId={habit.id}
                       trigger={
                         <Button
@@ -342,7 +344,7 @@ export function HabitCard({
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       }
-                    />
+                    />*/}
                     <HabitDetailDialog
                       currentDate={selectedDate || new Date()}
                       habit={habit}
@@ -356,7 +358,13 @@ export function HabitCard({
                           <EyeIcon className="h-4 w-4" />
                         </Button>
                       }
-                    />
+                    /> 
+                    {/* ANNOTATION */}
+                    {isCompleted && !todayCompletion?.annotations && (
+                      <CreateAnnotationDialog
+                        completionId={todayCompletion?.id || ""}
+                      />
+                    )}
                   </div>
 
                   {habit.goals && habit.goals.length > 0 && (
@@ -568,12 +576,7 @@ export function HabitCard({
                 >
                   {isCompleted && <Check className="w-5 h-5" />}
                 </Button>
-                {/* ANNOTATION */}
-                {/* {isCompleted && !todayCompletion?.annotations && (
-                  <CreateAnnotationDialog
-                    completionId={todayCompletion?.id || ""}
-                  />
-                )} */}
+
                 <div className="relative top-5">
                   {isActiveHour && !isOutHour && (
                     <Button

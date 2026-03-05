@@ -13,7 +13,7 @@ import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 import { Button } from "@/components/ui/button"
 
-import { ArrowUpDownIcon, GripVertical, Plus } from "lucide-react"
+import { ArrowUpDownIcon, GripVertical, Plus, Search } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 
@@ -26,6 +26,7 @@ import {
 
 import { CSS } from "@dnd-kit/utilities"
 import { DndContext } from "@dnd-kit/core"
+import { Input } from "../ui/input"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -58,8 +59,13 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     toast.error(message)
   }
 
+  const toasterId = "toggle-habit"
+
   const handleToggleHabit = (habitId: string, date: Date) => {
-    toast.loading("Alterando status do hábito...", { id: "toggle-habit" })
+    toast.loading(
+      "Alterando status do hábito...", {
+        id: `toggle-habit`,
+    })
 
     mutate({
       habitId,
@@ -82,7 +88,13 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     },
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["habits"] })
+      toast.success(
+        "status do hábito alterado com sucesso.", {
+          id: `toggle-habit`,
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["habits"]
+      })
     },
 
     onError: (error: any) => {
@@ -105,6 +117,11 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     })
   }
 
+  const [filter, setFilter] = useState<string>("");
+  const handleFilterHabits = (value: string) => {
+    setFilter(value)
+  }
+
   return (
     <div className="flex flex-col space-y-6">
       {completedToday > 0 && habits.length > 0 && (
@@ -118,46 +135,66 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
         </div>
       )}
 
-      {habitsState.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="text-7xl mb-6">🎯</div>
+      <div className="flex flex-row gap-2 items-center justify-center">
+        <Button variant="outline" type="button" size="icon">
+          <Search className="w-4 h-4" />
+        </Button>
+        <Input
+          type="text"
+          placeholder="pesquise pelo nome do hábito..."
+          value={filter}
+          onChange={(event) => {
+            handleFilterHabits(event.target.value)
+          }}
+        />
+      </div>
+      
+      <div className="flex flex-col gap-3 overflow-x-visible px-2" aria-selected={false}>
+        <p className="text-sm font-bold text-foreground">
+          Hábitos
+        </p>
+        
+        {habitsState.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-7xl mb-6">🎯</div>
 
-          <h2 className="text-2xl font-bold mb-3 text-foreground">
-            Comece sua jornada
-          </h2>
+            <h2 className="text-2xl font-bold mb-3 text-foreground">
+              Comece sua jornada
+            </h2>
 
-          <CreateHabitDialog
-            trigger={
-              <Button size="lg">
-                <Plus className="h-5 w-5 mr-2" />
-                Criar hábito
-              </Button>
-            }
-          />
-        </div>
-      ) : (
-        <DndContext onDragEnd={handleDragEnd}>
-          <SortableContext
-            items={habitsState.map((h) => h.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-4">
-              {habitsState.map((habit) => (
-                <SortableHabit
-                  key={habit.id}
-                  habit={habit}
-                  selectedDate={selectedDate}
-                  isPending={isPending}
-                  onToggle={(id: string) =>
-                    handleToggleHabit(id, selectedDate)
-                  }
-                  onError={handleHabitError}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      )}
+            <CreateHabitDialog
+              trigger={
+                <Button size="lg">
+                  <Plus className="h-5 w-5 mr-2" />
+                  Criar hábito
+                </Button>
+              }
+            />
+          </div>
+        ) : (
+          <DndContext onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={habitsState.map((h) => h.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-4">
+                {habitsState.map((habit) => habit.name.includes(filter) && (
+                  <SortableHabit
+                    key={habit.id}
+                    habit={habit}
+                    selectedDate={selectedDate}
+                    isPending={isPending}
+                    onToggle={(id: string) =>
+                      handleToggleHabit(id, selectedDate)
+                    }
+                    onError={handleHabitError}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
     </div>
   )
 }

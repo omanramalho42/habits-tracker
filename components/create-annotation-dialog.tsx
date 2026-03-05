@@ -80,7 +80,9 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
 
   const { mutate } = useMutation({
     mutationFn: async (values: CreateAnnotationSchemaType) => {
-      toast.loading("Criando anotação...", { id: 'create-annotation' })
+      toast.loading("Criando anotação...", {
+        id: 'create-annotation'
+      })
       
       return await createAnnotation(values)
     },

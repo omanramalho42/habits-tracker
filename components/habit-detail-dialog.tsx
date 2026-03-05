@@ -36,13 +36,10 @@ import { formatDate, WEEKDAYS } from "@/lib/habit-utils"
 import type { HabitWithStats } from "@/lib/types"
 
 import {
-  Calendar,
+  ChevronLeft,
+  ChevronRight,
   Eye,
-  Flame,
-  Target,
-  TrendingUp,
 } from "lucide-react"
-import CalendarDnd from "./dnd/calendar-dnd"
 import Image from "next/image"
 
 interface HabitDetailDialogProps {
@@ -52,9 +49,36 @@ interface HabitDetailDialogProps {
 }
 
 export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDialogProps) {
+  // Dentro do seu componente:
+  const [date, setDate] =
+    useState(currentDate)
+  const handlePrevMonth = () => {
+    setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))
+  }
+  const formatDateKey = (date: Date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+
+    return `${y}-${m}-${d}`
+  }
+  const isToday = (day: number) => {
+    const today = new Date()
+
+    return (
+      day === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    )
+  }
   const [open, setOpen] =
     useState<boolean>(false)
-  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const [selectedDay, setSelectedDay] =
+    useState<number | null>(null)
 
   if (!habit) return null
 
@@ -89,76 +113,97 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
     return newArrayCompletions;
   }, [habit]);
 
-  const heatMapData = useMemo(() => {
-    if (!habit?.completions) return [];
+  // const heatMapData = useMemo(() => {
+  //   if (!habit?.completions) return [];
 
-    const weeks: { date: Date; completed: boolean }[][] = [];
-    const today = new Date();
-    const start = new Date(today);
+  //   const weeks: { date: Date; completed: boolean }[][] = [];
+  //   const today = new Date();
+  //   const start = new Date(today);
 
-    start.setDate(start.getDate() - 83);
-    start.setDate(start.getDate() - start.getDay());
+  //   start.setDate(start.getDate() - 83);
+  //   start.setDate(start.getDate() - start.getDay());
 
-    let currentWeek: { date: Date; completed: boolean }[] = [];
-    const d = new Date(start);
+  //   let currentWeek: { date: Date; completed: boolean }[] = [];
+  //   const d = new Date(start);
 
-    while (d <= today) {
-      const key = formatDate(d);
+  //   while (d <= today) {
+  //     const key = formatDate(d);
 
-      const completed = habit.completions.some(
-        (c) => c.completedDate === key
-      );
+  //     const completed = habit.completions.some(
+  //       (c) => c.completedDate === key
+  //     );
 
-      currentWeek.push({
-        date: new Date(d),
-        completed,
-      });
+  //     currentWeek.push({
+  //       date: new Date(d),
+  //       completed,
+  //     });
 
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
+  //     if (currentWeek.length === 7) {
+  //       weeks.push(currentWeek);
+  //       currentWeek = [];
+  //     }
 
-      d.setDate(d.getDate() + 1);
-    }
+  //     d.setDate(d.getDate() + 1);
+  //   }
 
-    if (currentWeek.length > 0) weeks.push(currentWeek);
+  //   if (currentWeek.length > 0) weeks.push(currentWeek);
 
-    return weeks;
-  }, [habit]);
-  console.log(heatMapData, "HEAT MAP DATA!")
+  //   return weeks;
+  // }, [habit]);
+  // console.log(heatMapData, "HEAT MAP DATA!")
 
+// Gera os dias do calendário dinamicamente sempre que o mês muda
   const calendarData = useMemo(() => {
-    if (!habit?.completions) return [];
+    if (!habit?.completions) return []
 
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year = date.getFullYear()
+    const month = date.getMonth()
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
 
-    const cells: { day: number | null; completed: boolean }[] = [];
+    const cells: {
+      day: number | null
+      completed: boolean
+    }[] = []
 
+    // espaços antes do primeiro dia
     for (let i = 0; i < firstDay; i++) {
-      cells.push({ day: null, completed: false });
+      cells.push({ day: null, completed: false })
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
-      const key = formatDate(new Date(year, month, d));
+      const cellDate = new Date(year, month, d)
+      const key = formatDateKey(cellDate)
 
       const completed = habit.completions.some(
         (c) => c.completedDate === key
-      );
+      )
 
       cells.push({
         day: d,
-        completed,
-      });
+        completed
+      })
     }
 
-    return cells;
-  }, [habit]);
+    return cells
+  }, [habit?.completions, date])
+
+
+  // Verifica se o hábito foi completado naquele dia exato
+  const isHabitCompleted = (day: any) => {
+    if (!day || !habit?.completions) return false;
+    
+    return habit.completions.some((completion) => {
+      const compDate = new Date(completion.completedDate);
+      return (
+        compDate.getDate() === day &&
+        compDate.getMonth() === date.getMonth() &&
+        compDate.getFullYear() === date.getFullYear()
+      );
+    });
+  };
+
   console.log(calendarData, "calendar data")
 
   return (
@@ -190,7 +235,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-3 mt-2">
+        <div className="grid grid-cols-3 gap-3 mt-1">
           <div className="bg-secondary rounded-lg p-3 text-center">
             <p className="text-2xl font-bold text-foreground">
               {totalCompleted}
@@ -235,7 +280,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
           </div>
         )}
 
-        <div className="mt-2">
+        <div className="mt-1">
           <p className="text-xs text-muted-foreground mb-1">
             Frequência: semanalmente
           </p>
@@ -266,7 +311,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
           </div>
         </div>
 
-        <Tabs defaultValue="heatmap" className="mt-4">
+        <Tabs defaultValue="heatmap" className="mt-1">
 
           <TabsList className="bg-secondary w-full">
             <TabsTrigger value="heatmap" className="flex-1 text-xs">
@@ -415,52 +460,83 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
             </ResponsiveContainer>
           </TabsContent>
 
-          <TabsContent value="calendar" className="mt-3 flex flex-col min-h-68.5">
-            <p className="text-xs text-muted-foreground mb-2">
-              {new Date().toLocaleDateString(
-                "pt-BR", {
+          <TabsContent value="calendar" className="mt-1 flex flex-col min-h-68.5">
+            
+            {/* Cabeçalho de Navegação */}
+            <div className="flex items-center justify-between mb-1 w-full max-w-55 mx-auto">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handlePrevMonth} 
+                className="p-1 hover:bg-muted rounded-md text-muted-foreground transition"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              
+              <p className="text-xs text-muted-foreground font-medium capitalize">
+                {date.toLocaleDateString("pt-BR", {
                   month: "long",
                   year: "numeric"
-                }
-              )}
-            </p>
+                })}
+              </p>
+
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleNextMonth} 
+                className="p-1 hover:bg-muted rounded-md text-muted-foreground transition"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Grid do Calendário */}
             <div className="grid grid-cols-7 gap-2 w-fit mx-auto">
+              {/* Dias da Semana */}
               {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
                 <div
-                  key={i}
+                  key={`weekday-${i}`}
                   className="text-center text-[10px] text-muted-foreground font-bold py-1"
                 >
                   {d}
                 </div>
               ))}
-              {calendarData.map((cell, i) => (
-                <div
-                  key={i}
-                  onClick={() => setSelectedDay(cell.day)}
-                  style={{
-                    backgroundColor:habit.completions.find((completion) =>
-                      new Date(completion.completedDate).getDate() === cell.day
-                    ) && habit.color
-                  }}
-                  className={`w-8 h-8 rounded-md flex items-center justify-center text-[11px] font-medium cursor-pointer hover:bg-muted transition ${
-                    habit.completions.find((completion) =>
-                      new Date(completion.completedDate).getDate() === cell.day
-                    )
-                      ? `bg-blue-500`
-                      : cell.completed
-                      ? "bg-green-500 text-success-foreground"
-                      : "bg-secondary text-muted-foreground"
-                  } ${cell.day === new Date().getDate() ? "ring-1 ring-primary" : ""}`}
-                >
-                  <p className="text-foreground"> 
-                    {cell.day}
-                  </p>
-                </div>
-              ))}
+              
+              {/* Dias do Mês */}
+              {calendarData.map((cell, i) => {
+                // Se for um espaço vazio (antes do dia 1)
+                if (!cell.day) {
+                  return <div key={`empty-${i}`} className="w-8 h-8" />;
+                }
+
+                const completed = isHabitCompleted(cell.day);
+
+                return (
+                  <div
+                    key={`day-${cell.day}`}
+                    onClick={() => setSelectedDay(cell.day)} // Sugestão: talvez você precise passar a data completa aqui futuramente
+                    style={{
+                      backgroundColor: completed ? habit.color : undefined
+                    }}
+                    className={`w-8 h-8 rounded-md flex items-center justify-center text-[11px] font-medium cursor-pointer hover:bg-muted transition ${
+                      completed
+                        ? `bg-blue-500` // Cor de fallback caso habit.color não exista
+                        : cell.completed // Mantive do seu código original
+                        ? "bg-green-500 text-success-foreground"
+                        : "bg-secondary text-muted-foreground"
+                    } ${isToday(cell.day) ? "ring-1 ring-primary" : ""}`}
+                  >
+                    <p className={completed ? "text-white" : "text-foreground"}> 
+                      {cell.day}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </TabsContent>
         </Tabs>
-
+        
+        {/* ANNOTATIONS */}
         <Dialog open={selectedDay !== null} onOpenChange={() => setSelectedDay(null)}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto scroll-container bg-card border-border">
             <DialogHeader>
