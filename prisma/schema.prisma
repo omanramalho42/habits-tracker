@@ -227,7 +227,7 @@ model HabitCompletion {
 
   habitId String @map("habit_id")
 
-  completedDate DateTime @map("completed_date")
+  completedDate DateTime? @map("completed_date")
   counter       Int? @default(0)            // null = conta apenas 1 vez
 
   createdAt     DateTime  @default(now()) @map("created_at")

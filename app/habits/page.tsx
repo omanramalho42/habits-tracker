@@ -48,7 +48,7 @@ export default function page() {
     staleTime: 1000 * 60,
   })
 
-  console.log(habits, "habits")
+  console.log(habits, "habits ! ")
 
   const queryClient = useQueryClient()
 

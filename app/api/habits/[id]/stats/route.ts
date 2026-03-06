@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 
     const calculateStreakHabits = habit.completions.map((c) => {
-      const completedDate = new Date(c.completedDate)
+      const completedDate = new Date(c.completedDate!)
       completedDate.setHours(0, 0, 0, 0)
 
       return {
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const isCompletedToday =
       habit.completions.some(
         (c) => {
-          const completedDate = new Date(c.completedDate)
+          const completedDate = new Date(c.completedDate!)
           completedDate.setHours(0, 0, 0, 0)
           
           return completedDate
@@ -91,8 +91,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       ) / (1000 * 60 * 60 * 24)) + 1
 
     const completionRate =
-      totalDays > 0 
-      ? (habit.completions.length / totalDays) * 100 
+      365 > 0 
+      ? (habit.completions.length / 365) * 100 
       : 0
 
     return NextResponse.json({

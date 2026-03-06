@@ -98,6 +98,9 @@ export function isHabitActiveOnDate(
   date: Date
 ): boolean {
 
+  // console.log(habit, "habit!!!!!!!");
+  // console.log(date, "date")
+
   const currentYear = date.getUTCFullYear()
   const currentMonth = date.getUTCMonth()
   const currentDay = date.getUTCDate()
@@ -141,7 +144,7 @@ export function isHabitActiveOnDate(
   // 📅 valida frequência
   const dayOfWeek = date.getUTCDay()
 
-  return habit.frequency.some(
+  return habit?.frequency?.some(
     key => WEEKDAY_MAP[key] === dayOfWeek
   )
 }
