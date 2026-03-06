@@ -134,10 +134,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         userId: userDb.id,
         name,
         emoji,
-        startDate: newStartdate,
-        endDate: newEnddate,
-        reminder,
-        frequency, // Json
+        // startDate: newStartdate,
+        // endDate: newEnddate,
+        // reminder,
+        // frequency, // Json
         color,
         limitCounter,
         updatedAt: today,
@@ -146,7 +146,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             id: goal
           }
         }}),
-        clock
+        // clock
       },
       include: {
         completions: true,

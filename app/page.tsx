@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useQuery } from "@tanstack/react-query"
 
@@ -8,11 +8,13 @@ import { fetchHabits } from "@/services/habits"
 
 import { MoodWizard } from "@/components/mood-wizard"
 
+
 import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
 import HeaderSection from "@/components/habits/header-section"
 
 import type { HabitWithStats } from "@/lib/types"
+import { DndContext, useDraggable } from "@dnd-kit/core"
 
 export default function Home() {
   const today = new Date()
@@ -35,8 +37,6 @@ export default function Home() {
     staleTime: 1000 * 60,
     retry: 1,
   })
-
-  // console.log(habits, "habits");
 
   if (isLoading) {
     return (
@@ -73,6 +73,8 @@ export default function Home() {
             selectedDate={selectedDate}
             onSuccessCallback={setSelectedDate}
           />
+
+          {/* <MultipleContainers /> */}
           
           {isError ? (
             <div className="text-center py-20">

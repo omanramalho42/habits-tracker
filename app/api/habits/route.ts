@@ -48,13 +48,17 @@ export async function GET(request: Request) {
 
     if (queryParams.success) {
       if(queryParams.data) {
+        console.log(habits, "habits");
+
         const activeHabits: any[] = habits.filter((habit: any) =>
           isHabitActiveOnDate(habit, new Date(queryParams.data))
         )
-
+        console.log(activeHabits, "achtive")
+        
         return NextResponse.json(activeHabits)
       }
     }
+
     return NextResponse.json(habits)
   } catch (error) {
     if (error instanceof Error) {
@@ -122,20 +126,20 @@ export async function POST(request: NextRequest) {
         userId: userDb.id,
         name,
         emoji,
-        startDate: newStartdate,
-        endDate: newEnddate,
-        reminder,
-        frequency, // Json
+        // startDate: newStartdate,
+        // endDate: newEnddate,
+        // reminder,
+        // frequency, // Json
         color,
         customField: custom_field,
-        duration,
+        // duration,
         limitCounter: Number(limitCounter) || 1,
         ...(goal  && {goals: {
           connect: {
             id: goal
           }
         }}),
-        clock
+        // clock
       },
       include: {
         completions: true,

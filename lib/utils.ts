@@ -17,3 +17,12 @@ export function toSafeDate(dateStr?: string | null) {
   // meio-dia local (anti-timezone bug)
   return new Date(year, month - 1, day, 12, 0, 0)
 }
+
+const defaultInitializer = (index: number) => index;
+
+export function createRange<T = number>(
+  length: number,
+  initializer: (index: number) => any = defaultInitializer
+): T[] {
+  return [...new Array(length)].map((_, index) => initializer(index));
+}
