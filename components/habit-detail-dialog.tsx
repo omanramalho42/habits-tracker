@@ -49,7 +49,6 @@ interface HabitDetailDialogProps {
 }
 
 export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDialogProps) {
-  // Dentro do seu componente:
   const [date, setDate] =
     useState(currentDate)
   const handlePrevMonth = () => {
@@ -77,8 +76,15 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
   }
   const [open, setOpen] =
     useState<boolean>(false)
-  const [selectedDay, setSelectedDay] =
-    useState<number | null>(null)
+    const [selectedDay, setSelectedDay] = useState<number | null>(null)
+
+    // const habitName = useMemo(() => {
+    //   return habit?.name
+    // }, [habit])
+
+    // const habitCategory = useMemo(() => {
+    //   return habit?.category
+    // }, [habit])
 
   if (!habit) return null
 
@@ -189,7 +195,6 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
     return cells
   }, [habit?.completions, date])
 
-
   // Verifica se o hábito foi completado naquele dia exato
   const isHabitCompleted = (day: any) => {
     if (!day || !habit?.completions) return false;
@@ -202,9 +207,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
         compDate.getFullYear() === date.getFullYear()
       );
     });
-  };
-
-  console.log(calendarData, "calendar data")
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -286,10 +289,9 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
           </p>
           <div className="flex gap-1">
             {WEEKDAYS.map((day) => {
-              const isActive =
-                frequency?.map(
-                  (item) => item.includes(day.key)
-                )
+              const isActive = frequency.some(
+                (item) => item.includes(day.key)
+              )
               return (
                 <div
                   key={day.key}
@@ -550,7 +552,9 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
                 .filter(
                   (completion) =>
                     new Date(completion.completedDate).getDate() === selectedDay
-                ).map((completion, i) => completion.annotations && (
+                )
+                .filter((completion) => completion.annotations)
+                .map((completion, i) => (
                   <div key={completion.id} className="flex flex-col gap-2 ">
                     <p className="text-sm">
                       {formatDate(new Date(completion.completedDate))}:
@@ -576,7 +580,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
               {habit.completions.filter(
                 (completion) =>
                   new Date(completion.completedDate).getDate() === selectedDay
-              ).length === 0 && (
+              ).filter((completion) => completion.annotations).length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   Nenhuma anotação neste dia.
                 </p>

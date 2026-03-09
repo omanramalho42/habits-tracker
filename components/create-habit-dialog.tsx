@@ -53,14 +53,8 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Card } from "./ui/card"
 
-import { cn } from "@/lib/utils"
-
-import { WEEKDAYS } from "@/lib/habit-utils"
-
 import {
-  CalendarIcon,
   CircleOff,
-  Clock8Icon,
   PlusSquare
 } from "lucide-react"
 
@@ -162,6 +156,8 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
           <Button
             variant="ghost"
             role="combobox"
+            aria-label="Criar novo"
+            title="Criar novo"
             aria-expanded={open}
             disabled={isPending}
             className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
@@ -174,8 +170,9 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
 
       <DialogContent className="max-w-[90vw]">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
-            Criar um novo hábito
+          <DialogTitle className="flex flex-row items-center justify-start gap-3 text-2xl">
+            <p>Criar um novo</p>
+            <p style={{ color: watch('color') }}>hábito</p>
           </DialogTitle>
         </DialogHeader>
 
@@ -296,7 +293,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
               </div>
             </div>
             
-            <div className="flex flex-row justify-between gap-3">
+            {/* <div className="flex flex-row justify-between gap-3">
               <FormField
                 name="clock"
                 render={({ field }) => (
@@ -359,7 +356,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                   </FormItem>
                 )}
               />
-            </div>
+            </div> */}
 
             <div className="flex justify-between gap-4 items-center">
               <FormField
@@ -372,13 +369,13 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                         className="text-sm font-semibold"
                         htmlFor="custom_field"
                       >
-                        descrição
+                        Nome do contador
                       </Label>
                     </FormLabel>
                     <FormControl>
                       <Input
                         id="custom_field"
-                        placeholder="ex: folhas..."
+                        placeholder="ex: Páginas..."
                         onChange={field.onChange}
                         type="text"
                       />
@@ -398,7 +395,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                         htmlFor="counter"
                         className="text-sm font-semibold"
                       >
-                        Contador
+                        Quantidade max
                       </Label>
                     </FormLabel>
                     <FormControl>
@@ -410,14 +407,18 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                         type="number"
                       />
                     </FormControl>
-                    {errors.limitCounter && (<span className="text-sm text-red-500">{errors.limitCounter?.message}</span>)}
+                    {errors.limitCounter && (
+                      <span className="text-sm text-red-500">
+                        {errors.limitCounter?.message}
+                      </span>
+                    )}
                   </FormItem>
                 )}
               />
             </div>
 
             {/* DATA INICIAL */}
-            <div>
+            {/* <div>
               <Label className="text-sm font-semibold mb-1.5 block">Data inicial</Label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -435,7 +436,6 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                     rules={{ required: true }}
                     render={({ field }) => (
                       <FormItem>
-                        {/* <FormLabel></FormLabel> */}
                         <FormControl>
                           <Calendar
                             {...field}
@@ -450,10 +450,10 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                   />
                 </PopoverContent>
               </Popover>
-            </div>
+            </div> */}
             
             {/* REMINDER */}
-            <div className="flex flex-col gap-2 justify-between items-start">
+            {/* <div className="flex flex-col gap-2 justify-between items-start">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <FormField
@@ -482,7 +482,6 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                 </div>
               </div>
               
-              {/* SUBSTITUIR POR UM RANGE PARA REMOVER ESTE CAMPO */}
               {watch('reminder') && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -516,10 +515,10 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                   </PopoverContent>
                 </Popover>
               )}
-            </div>
+            </div> */}
             
             {/* alldays */}
-            <div className="flex flex-col justify-start gap-1">
+            {/* <div className="flex flex-col justify-start gap-1">
               <Label htmlFor="allDays" className="text-sm font-semibold">
                 Todos os dias
               </Label>
@@ -537,9 +536,9 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                   form.setValue("frequency", allDays)
                 }}
               />
-            </div>
+            </div> */}
 
-            <Controller
+            {/* <Controller
               name="frequency"
               render={({ field }) => (
                 <ToggleGroup
@@ -559,7 +558,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                   ))}
                 </ToggleGroup>
               )}
-            />
+            /> */}
 
             {/* COLOR PICKER */}
             <Dialog open={color} onOpenChange={setColor}>

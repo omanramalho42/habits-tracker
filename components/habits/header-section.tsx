@@ -55,6 +55,8 @@ const HeaderSection:React.FC = () => {
           <CreateHabitDialog
             trigger={
               <Button
+                aria-label="Criar hábito"
+                title="Criar hábito"
                 size="icon"
                 disabled={loading}
                 className="rounded-full p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"

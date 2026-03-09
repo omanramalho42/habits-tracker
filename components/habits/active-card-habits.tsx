@@ -13,7 +13,7 @@ import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 import { Button } from "@/components/ui/button"
 
-import { AlarmCheckIcon, AlarmClock, ArrowUpDownIcon, Clock, Clock10, Filter, GripVertical, Play, PlayCircle, Plus, Search, StopCircle } from "lucide-react"
+import { AlarmCheckIcon, AlarmClock, ArrowUpDownIcon, Clock, Clock10, Filter, GripVertical, Play, PlayCircle, Plus, PlusIcon, Search, StopCircle } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 
@@ -29,6 +29,7 @@ import { DndContext } from "@dnd-kit/core"
 import { Input } from "../ui/input"
 import { Card } from "../ui/card"
 import { Checkbox } from "../ui/checkbox"
+import CreateRoutineDialog from "../create-routine-dialog"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -45,12 +46,16 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
   
   const [done, setDone] = useState(false)
 
-  // console.log({ habitsState });
-  // console.log({ habits });
-
   useEffect(() => {
     setHabitsState(habits)
+  }, [])
+  useEffect(() => {
+    if (habitsState.length === 0) {
+      setHabitsState(habits)
+    }
   }, [habits])
+  // CRIAR ELEMENTO POSITITON (INDEX) EM HABITS
+  // CRIAR ROTA PATCH PARA UPDATE DE POSITION APÓS DRAG AND DROP (REORDER)
 
   const completedToday = habits.reduce((total, habit) => {
     const completed = habit.completions?.some(
@@ -118,6 +123,10 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       const oldIndex = items.findIndex((i) => i.id === active.id)
       const newIndex = items.findIndex((i) => i.id === over.id)
 
+      if (oldIndex < 0 || newIndex < 0) {
+        return items
+      }
+
       return arrayMove(items, oldIndex, newIndex)
     })
   }
@@ -140,26 +149,25 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
         </div>
       )}
 
-      {/* <div className="flex flex-row gap-2 items-center justify-center">
-        <Button variant="outline" type="button" size="icon">
-          <Search className="w-4 h-4" />
-        </Button>
-        <Input
-          type="text"
-          placeholder="pesquise pelo nome da rotina."
-          value={filter}
-          onChange={(event) => {
-            handleFilterHabits(event.target.value)
-          }}
-        />
-      </div> */}
-
       {/* ROUTINES */}
-      <div className="flex flex-col gap-3 overflow-x-visible px-2">
-        <div className="flex flex-row justify-between items-center w-full">
+      <div className="flex flex-col gap-1 px-2">
+        <p className="text-sm">
+          Rotinas
+        </p>
+
+        <div className="flex flex-row gap-2 justify-between items-center w-full">
           <p className="text-sm font-bold text-foreground">
-            Rotinas
+            Alimentação
           </p>
+          <Input
+            className="w-full"
+            type="text"
+            placeholder="pesquise pelo nome."
+            value={filter}
+            onChange={(event) => {
+              handleFilterHabits(event.target.value)
+            }}
+          />
           <Button
             variant="outline"
             type="button"
@@ -168,87 +176,85 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
             <Filter />
           </Button>
         </div>
-        {['1', '2', '3'].map((item) => {
-          return (
-            <Card key={item} className="p-4 hover:border-primary/40 transition-all cursor-pointer">
-              <div className="flex items-center gap-4">
+        <div className="flex flex-col mt-4 gap-3 max-h-[300px] overflow-auto pr-3 scroll-container">
+          {['1', '2', '3', '4', '5', '6'].map((item) => {
+            return (
+              <Card key={item} className="p-4 hover:border-primary/40 transition-all cursor-pointer">
+                <div className="flex items-center gap-4">
 
-                {/* ICON */}
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
-                  <span className="text-lg">🌍</span>
-                </div>
-
-                {/* CONTENT */}
-                <div className="flex flex-col flex-1">
-
-                  {/* TIME ROW */}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-
-                    <div className="flex items-center gap-1">
-                      <Clock10 className="w-3.5 h-3.5"/>
-                      <span>12:00</span>
-                    </div>
-
-                    <span className="opacity-40">+</span>
-
-                    <div className="flex items-center gap-1">
-                      <AlarmClock className="w-3.5 h-3.5"/>
-                      <span>1:30h</span>
-                    </div>
-
-                    <span className="opacity-40">→</span>
-
-                    <div className="flex text-orange-400 items-center gap-1 font-medium">
-                      <Clock className="w-3.5 h-3.5"/>
-                      <span>13:30</span>
-                    </div>
-
+                  {/* ICON */}
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
+                    <span className="text-lg">🌍</span>
                   </div>
 
-                  {/* TITLE */}
-                  <p
-                    className={`text-sm font-medium transition-all ${
-                      done
-                        ? "line-through text-muted-foreground opacity-60"
-                        : "text-foreground"
-                    }`}
-                  >
-                    Dar banho nos cachorros
-                  </p>
+                  {/* CONTENT */}
+                  <div className="flex flex-col flex-1">
 
+                    {/* TIME ROW */}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+
+                      <div className="flex items-center gap-1">
+                        <Clock10 className="w-3.5 h-3.5"/>
+                        <span>08:00</span>
+                      </div>
+
+                      <span className="opacity-40">+</span>
+
+                      <div className="flex items-center gap-1">
+                        <AlarmClock className="w-3.5 h-3.5"/>
+                        <span>1:30h</span>
+                      </div>
+
+                      <span className="opacity-40">→</span>
+
+                      <div className="flex text-orange-400 items-center gap-1 font-medium">
+                        <Clock className="w-3.5 h-3.5"/>
+                        <span>09:30</span>
+                      </div>
+
+                    </div>
+
+                    {/* TITLE */}
+                    <p
+                      className={`text-sm font-medium transition-all ${
+                        done
+                          ? "line-through text-muted-foreground opacity-60"
+                          : "text-foreground"
+                      }`}
+                    >
+                      Café da manhã
+                    </p>
+
+                  </div>
+                  {/* CHECKBOX */}
+                  <Checkbox
+                    className="mt-1"
+                    checked={done}
+                    onCheckedChange={(value) => setDone(!!value)}
+                  />
                 </div>
-                {/* CHECKBOX */}
-                <Checkbox
-                  className="mt-1"
-                  checked={done}
-                  onCheckedChange={(value) => setDone(!!value)}
-                />
-              </div>
-            </Card>
-          )
-        })}
+              </Card>
+            )
+          })}
+        </div>
       </div>
-
-      {/* <div className="flex flex-row gap-2 items-center justify-center">
-        <Button variant="outline" type="button" size="icon">
-          <Search className="w-4 h-4" />
-        </Button>
-        <Input
-          type="text"
-          placeholder="pesquise pelo nome do hábito..."
-          value={filter}
-          onChange={(event) => {
-            handleFilterHabits(event.target.value)
-          }}
-        />
-      </div> */}
       
       {/* HABITS */}
-      <div className="flex flex-col gap-2 overflow-x-visible px-2" aria-selected={false}>
-        <div className="flex flex-row justify-between items-center w-full">
+      <div className="flex mt-10 flex-col gap-2 px-2 max-h-[450px] overflow-auto pr-3 scroll-container" aria-selected={false}>
+        <div className="flex flex-row justify-between gap-2 items-center w-full">
           <p className="text-sm font-bold text-foreground">
             Hábitos
           </p>
+          <div className="flex flex-row gap-2 w-full items-center justify-center">
+            <Input
+              type="text"
+              placeholder="pesquise pelo nome."
+              value={filter}
+              onChange={(event) => {
+                handleFilterHabits(event.target.value)
+              }}
+            />
+          </div>
           <Button
             variant="outline"
             type="button"
@@ -258,46 +264,52 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           </Button>
         </div>
         
-        {habitsState.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-7xl mb-6">🎯</div>
+        <div className="my-4">
+          {habitsState.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-7xl mb-6">🎯</div>
 
-            <h2 className="text-2xl font-bold mb-3 text-foreground">
-              Comece sua jornada
-            </h2>
+              <h2 className="text-2xl font-bold mb-3 text-foreground">
+                Comece sua jornada
+              </h2>
 
-            <CreateHabitDialog
-              trigger={
-                <Button size="lg">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Criar hábito
-                </Button>
-              }
-            />
-          </div>
-        ) : (
-          <DndContext onDragEnd={handleDragEnd}>
-            <SortableContext
-              items={habitsState.map((h) => h.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="space-y-4">
-                {habitsState.map((habit) => habit.name.includes(filter) && (
-                  <SortableHabit
-                    key={habit.id}
-                    habit={habit}
-                    selectedDate={selectedDate}
-                    isPending={isPending}
-                    onToggle={(id: string) =>
-                      handleToggleHabit(id, selectedDate)
-                    }
-                    onError={handleHabitError}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
+              <CreateHabitDialog
+                trigger={
+                  <Button
+                    aria-label="Criar hábito"
+                    title="Criar hábito"
+                    size="lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Criar hábito
+                  </Button>
+                }
+              />
+            </div>
+          ) : (
+            <DndContext onDragEnd={handleDragEnd}>
+              <SortableContext
+                items={habitsState.map((h) => h.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-4">
+                  {habitsState.map((habit) => habit.name.includes(filter) && (
+                    <SortableHabit
+                      key={habit.id}
+                      habit={habit}
+                      selectedDate={selectedDate}
+                      isPending={isPending}
+                      onToggle={(id: string) =>
+                        handleToggleHabit(id, selectedDate)
+                      }
+                      onError={handleHabitError}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </div>
       </div>
     </div>
   )

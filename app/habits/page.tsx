@@ -206,6 +206,8 @@ export default function page() {
                   <CreateHabitDialog
                     trigger={
                       <Button
+                        aria-label="Criar hábito"
+                        title="Criar hábito"
                         size="lg"
                         className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
                       >

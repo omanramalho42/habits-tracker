@@ -54,11 +54,15 @@ import {
   AlarmClock,
   CalendarIcon,
   CircleOff,
+  Clock,
+  Clock10,
   Clock8Icon,
   Edit,
+  PlusCircle,
   PlusSquare,
   Trash
 } from 'lucide-react'
+import { HabitsPicker } from './habits-picker'
 
 interface CreateRoutineDialogProps {
   trigger: React.ReactNode
@@ -94,11 +98,6 @@ export type CreateRoutineSchemaType = z.infer<typeof routineSchema>
 const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => {
   const [openModal, setOpenModal] =
     useState<boolean>(false)
-  const [isFlying, setIsFlying] =
-    useState<boolean>(false)
-
-  const addButtonRef =
-    React.useRef<HTMLButtonElement>(null)
 
   const frequency = [
     { label: 'domingo', key: 'D', value: 'dom' },
@@ -158,14 +157,6 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
       clock: currentHabits[fields.length].clock,
       duration: currentHabits[fields.length].duration
     })
-    // if (!addButtonRef.current) return
-
-    // setIsFlying(true)
-
-    // // simula duração da animação
-    // setTimeout(() => {
-    //   setIsFlying(false)
-    // }, 700)
   }
 
   const handleRemove = (habitId: string) => {
@@ -235,7 +226,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
       </DialogTrigger>
 
       <DialogContent
-        className={cn("max-w-180 bg-[#070B14]/80 backdrop-blur-xl border border-blue-500/40 rounded-2xl shadow-[0_0_40px_rgba(37,99,235,0.35)] text-white")}
+        className={cn("bg-[#070B14]/80 backdrop-blur-xl border border-blue-500/40 rounded-2xl shadow-[0_0_40px_rgba(37,99,235,0.35)] text-white")}
       >
         <DialogHeader className="space-y-1">
           <DialogTitle className="text-xl font-semibold tracking-tight">
@@ -245,43 +236,13 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
             Rotinas servem para gerenciar melhor o seu dia
           </DialogDescription>
         </DialogHeader>
-
-        <AnimatePresence>
-          {isFlying && (
-            <motion.div
-              initial={{
-                opacity: 1,
-                scale: 1,
-                x: 0,
-                y: 0
-              }}
-              animate={{
-                opacity: 0,
-                scale: 0.3,
-                x: 260,   // ajuste fino visual
-                y: -180
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.7, ease: "easeInOut" }}
-              className="
-                pointer-events-none
-                absolute
-                bottom-24
-                right-10
-                bg-blue-500
-                rounded-full
-                w-10 h-10
-                shadow-[0_0_30px_rgba(37,99,235,0.8)]
-              "
-            />
-          )}
-        </AnimatePresence>
         
         <Form {...form}>
           <form className='space-y-2'>
 
-            <div className="flex flex-row gap-2">
-              <div className="flex w-[75%] flex-col gap-1">
+            <div className="grid grid-cols-3 justify-start items-start gap-3">
+              {/* ICONE */}
+              <div className="flex col-span-2 flex-col items-stretch gap-2">
                 <FormField
                   name='name'
                   control={control}
@@ -361,75 +322,73 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                   )}
                 />
               </div>
-              <div className='flex-1'>
-                <FormField
-                  control={control}
-                  name="emoji"
-                  render={({ field }) => (
-                    <FormItem className="grid-cols-1">
-                      <FormLabel htmlFor="icon">
-                        Icone
-                      </FormLabel>
-                      <FormControl>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Card
-                              className="w-full h-full"
-                            >
-                              {field.value ? (
-                                <div className="flex flex-col items-center justify-center gap-1">
-                                  <span className="text-3xl" role="img">
-                                    {field.value}
-                                  </span>
-                                  <p className="text-xs text-muted-foreground text-center">
-                                    Toque para trocar
-                                  </p>
-                                </div>
-                              ) : (
-                                <div className="flex flex-col items-center justify-center gap-1">
-                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
-                                  <p className="text-xs text-muted-foreground text-center">
-                                    Toque para selecionar
-                                  </p>
-                                </div>
-                              )}
-                            </Card>
-                          </PopoverTrigger>
-
-                          <PopoverContent
-                            side="bottom"
-                            align="center"
-                            className="
-                              bg-transparent
-                              border-none
-                              w-[90vw] max-w-sm
-                              sm:w-105
-                              p-0
-                              max-h-[80vh]
-                              overflow-hidden
-                            "
+              <FormField
+                control={control}
+                name="emoji"
+                render={({ field }) => (
+                  <FormItem className="grid-cols-1">
+                    <FormLabel htmlFor="icon" className='mb-1'>
+                      Icone
+                    </FormLabel>
+                    <FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Card
+                            className="w-full h-full"
                           >
-                            <div className="">
-                              <Picker
-                                data={data}
-                                theme="dark"
-                                disabled={isSubmitting}
-                                navPosition="bottom"
-                                previewPosition="top"
-                                searchPosition="sticky"
-                                skinTonePosition="preview"
-                                onEmojiSelect={(emoji: { native: string }) => {
-                                  field.onChange(emoji.native)
-                                }}
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                            {field.value ? (
+                              <div className="flex flex-col items-center justify-center gap-1">
+                                <span className="text-3xl" role="img">
+                                  {field.value}
+                                </span>
+                                <p className="text-xs text-muted-foreground text-center">
+                                  Toque para trocar
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center gap-1">
+                                <CircleOff className="h-6 w-6 text-muted-foreground" />
+                                <p className="text-xs text-muted-foreground text-center">
+                                  Toque para selecionar
+                                </p>
+                              </div>
+                            )}
+                          </Card>
+                        </PopoverTrigger>
+
+                        <PopoverContent
+                          side="bottom"
+                          align="center"
+                          className="
+                            bg-transparent
+                            border-none
+                            w-[90vw] max-w-sm
+                            sm:w-105
+                            p-0
+                            max-h-[80vh]
+                            overflow-hidden
+                          "
+                        >
+                          <div className="">
+                            <Picker
+                              data={data}
+                              theme="dark"
+                              disabled={isSubmitting}
+                              navPosition="bottom"
+                              previewPosition="top"
+                              searchPosition="sticky"
+                              skinTonePosition="preview"
+                              onEmojiSelect={(emoji: { native: string }) => {
+                                field.onChange(emoji.native)
+                              }}
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
             
             {/* DATAS */}
@@ -525,6 +484,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                 }}
               />
             </div>
+
             {/* FREQUENCIA */}
             <div className='flex flex-col gap-2 items-start'>
               <Label>Frequencia</Label>
@@ -552,334 +512,13 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                 }}
               />
             </div>
+            
+            <Label>Vincular hábitos</Label>
+            <HabitsPicker />
+          </form>
+        </Form>
 
-            {/* ADICIONAR HABITOS A ROTINA */}
-            <Dialog open={openModal} onOpenChange={setOpenModal}>
-              <DialogTrigger asChild>
-                <Button
-                  className='w-full my-4'
-                  type='button'
-                >
-                  Vincular hábito ou atividade a rotina
-                </Button>
-              </DialogTrigger>
-
-              <DialogContent className='max-w-180'>
-                <DialogHeader>
-                  <DialogTitle>
-                    Vincular hábito ou atividade a rotina
-                  </DialogTitle>
-                  <DialogDescription>
-                    Vincular habitos e atividades
-                  </DialogDescription>
-                </DialogHeader>
-
-                {/* VINCULAR HABITOS */}
-                <Card className='p-4'>
-
-                  <div className="flex flex-row justify-between gap-3">
-                    <FormField
-                      name={`habits.${fields.length}.clock`}
-                      rules={{ required: true }}
-                      render={({ field, fieldState }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>
-                            <Label
-                              htmlFor="clock"
-                              className="text-sm font-semibold"
-                            >
-                              Horário
-                            </Label>
-                          </FormLabel>
-                          <FormControl>
-                            <div className='relative flex items-center'>
-                              <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
-                                <AlarmClock 
-                                  className="size-4 text-blue-400/70"
-                                />
-                              </div>
-                              <Input
-                                type='time'
-                                id='time-picker'
-                                step='1'
-                                className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-                                onChange={field.onChange}
-                                value={field.value}
-                              />
-                            </div>
-                          </FormControl>
-
-                          <div className="absolute">
-                            {fieldState.error && (
-                              <span className="relative top-16 text-sm text-red-500">
-                                {fieldState.error?.message}
-                              </span>
-                            )}
-                          </div>
-
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      name={`habits.${fields.length}.duration`}
-                      rules={{ required: true }}
-                      render={({ field, fieldState }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>
-                            <Label
-                              htmlFor="duration"
-                              className="text-sm font-semibold"
-                            >
-                              Duração
-                            </Label>
-                          </FormLabel>
-                          <FormControl>
-                            <div className='relative flex items-center'>
-                              <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
-                                <Clock8Icon className="size-4 text-blue-400/70" />
-                              </div>
-                              <Input
-                                type='time'
-                                id='time-picker'
-                                step='1'
-                                className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-                                onChange={field.onChange}
-                                value={field.value}
-                              />
-                            </div>
-                          </FormControl>
-
-                          <div className='absolute'>
-                            {fieldState.error && (
-                              <span className="relative top-16 text-sm text-red-500">
-                                {fieldState.error?.message}
-                              </span>
-                            )}
-                          </div>
-
-                        </FormItem>
-                      )}
-                    />    
-                  </div>
-                  
-                  <div className="flex flex-col gap-2 w-full">
-                    <Label
-                      htmlFor="habits"
-                      className={cn(errors.habits && errors.habits[fields.length]?.habitId && 'text-red-500 font-semibold')}
-                    >
-                      Vincular hábito
-                    </Label>
-                    <HabitPicker
-                      index={fields.length}
-                      control={control}
-                    />
-                  </div>
-
-                  {/* HABITOS VINCULADOS  */}
-                  <div className='flex flex-col gap-3'>
-                    <Label>Hábitos vinculados: </Label>
-                    <Card className="px-4 py-4 max-h-40 overflow-auto">
-                      {fields.length !== 0 ? (
-                        <div className='flex flex-col gap-2'>
-                          {fields.map((habit, index) => (
-                            <div
-                              key={index}
-                              className='flex flex-row gap-4 justify-between items-center'
-                            >
-                              <div className='flex flex-row gap-2'>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className='flex flex-row gap-2 items-center'>
-                                      <Clock8Icon className='w-4 h-4' />
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className='text-sm'>
-                                      horário: {habit.clock}
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-
-
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className='flex flex-row gap-2 items-center'>
-                                      <AlarmClock className='w-4 h-4' />
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className='text-sm'>
-                                      duração: {habit.duration}
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </div>
-
-                              <div className='flex flex-row gap-2 items-center'>
-                                <p className='w-full text-sm'>
-                                  {/* {habit.habitId.slice(0, 20).concat("...")} */}
-                                </p>
-                              </div>
-
-                              <div className='flex flex-row gap-1'>
-                                <Button
-                                  type='button'
-                                  variant="ghost"
-                                  onClick={() => handleRemove(habit.habitId)}
-                                >
-                                  <Trash
-                                    className='text-red-500 text-sm'
-                                  />
-                                </Button>
-                                <Button
-                                  type='button'
-                                  disabled
-                                  variant="ghost"
-                                >
-                                  <Edit
-                                    className='text-info-500 text-sm'
-                                  />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className='text-sm text-center'>
-                          ainda não há hábitos vinculados.
-                        </p>
-                      )}
-                    </Card>
-                  </div>
-                    
-                  <CardFooter className='px-0'>
-                    <Button
-                      ref={addButtonRef}
-                      onClick={handleAdd}
-                      disabled={isSubmitting}
-                      type='button'
-                      className="
-                        w-full
-                        mt-2
-                        bg-blue-600
-                        hover:bg-blue-500
-                        text-white
-                        rounded-lg
-                        shadow-[0_0_25px_rgba(37,99,235,0.55)]
-                        transition-all
-                      "
-                    >
-                      <span>Adicionar</span>
-                      <PlusSquare className="ml-2 size-4" />
-                    </Button>
-                  </CardFooter>
-
-                </Card>
-                
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                    >
-                      Cancelar
-                    </Button>
-                  </DialogClose>
-                  <Button
-                    onClick={() => setOpenModal((prev) => !prev)}
-                    type='button'
-                  >
-                    Salvar
-                  </Button>
-                </DialogFooter>
-
-              </DialogContent>
-            </Dialog>
-
-            {/* HABITOS VINCULADOS  */}
-            <div className='flex flex-col gap-3 max-w-180'>
-              <Label>Hábitos vinculados: </Label>
-              <Card className="px-4 py-4 max-h-40 overflow-auto">
-                {fields.length !== 0 ? (
-                  <div className='flex flex-col gap-2'>
-                    {fields.map((habit) => (
-                      <div
-                        key={habit.habitId}
-                        className='flex flex-row gap-4 justify-between items-center'
-                      >
-                        <div className='flex flex-row gap-2'>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className='flex flex-row gap-2 items-center'>
-                                <Clock8Icon className='w-4 h-4' />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className='text-sm'>
-                                horário: {habit.clock}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className='flex flex-row gap-2 items-center'>
-                                <AlarmClock className='w-4 h-4' />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className='text-sm'>
-                                duração: {habit.duration}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-
-                        <div className='flex flex-row gap-2 items-center'>
-                          <p className='w-full text-sm'>
-                            {/* {habit.habitId.slice(0, 20).concat("...")} */}
-                          </p>
-                        </div>
-
-                        <div className='flex flex-row gap-2'>
-                          <Button
-                            type='button'
-                            variant="ghost"
-                            onClick={() => handleRemove(habit.habitId)}
-                          >
-                            <Trash
-                              className='text-red-500 text-sm'
-                            />
-                          </Button>
-                          <Button
-                            type='button'
-                            variant="ghost"
-                            onClick={() => {
-                              setOpenModal(prev => !prev)
-                            }}
-                            disabled={true}
-                          >
-                            <Edit
-                              className='text-info-500 text-sm'
-                            />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className='text-sm text-center'>
-                    ainda não há hábitos vinculados.
-                  </p>
-                )}
-              </Card>
-            </div>
-              
-        </form>
-      </Form>
-
-        <DialogFooter>
+        <DialogFooter className='flex flex-row-reverse'>
           <DialogClose asChild>
             <Button
               type="button"

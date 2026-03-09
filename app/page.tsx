@@ -15,6 +15,7 @@ import HeaderSection from "@/components/habits/header-section"
 
 import type { HabitWithStats } from "@/lib/types"
 import { DndContext, useDraggable } from "@dnd-kit/core"
+import Footer from "@/components/habits/footer"
 
 export default function Home() {
   const today = new Date()
@@ -93,6 +94,8 @@ export default function Home() {
           )}
           {/* CARD ACTIVE HABITS */}
         </div>
+
+        <Footer />
       </main>
     </>
   )

@@ -126,20 +126,20 @@ export async function POST(request: NextRequest) {
         userId: userDb.id,
         name,
         emoji,
-        // startDate: newStartdate,
-        // endDate: newEnddate,
-        // reminder,
-        // frequency, // Json
+        startDate: newStartdate,
+        endDate: newEnddate,
+        reminder,
+        frequency, // Json
         color,
         customField: custom_field,
-        // duration,
+        duration,
         limitCounter: Number(limitCounter) || 1,
         ...(goal  && {goals: {
           connect: {
             id: goal
           }
         }}),
-        // clock
+        clock
       },
       include: {
         completions: true,

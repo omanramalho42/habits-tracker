@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 
 import { toast } from "react-toastify"
 
@@ -36,20 +36,14 @@ import {
   EyeIcon,
   Clock10Icon,
   Repeat,
-  Calendar1,
   TimerIcon,
-  Play,
   PlayCircle,
-  ChevronUp,
-  ChevronDown,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
 import CreateAnnotationDialog from "./create-annotation-dialog"
-import { Habit } from "@prisma/client"
-import { GripVertical } from "lucide-react"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -353,6 +347,8 @@ export function HabitCard({
                           variant="ghost"
                           disabled={loading}
                           size="icon"
+                          aria-label="Ver detalhes do hábito"
+                          title="Ver detalhes do hábito"
                           className="flex items-center bg-transparent"
                         >
                           <EyeIcon className="h-4 w-4" />
@@ -360,9 +356,9 @@ export function HabitCard({
                       }
                     /> 
                     {/* ANNOTATION */}
-                    {isCompleted && !todayCompletion?.annotations && (
+                    {isCompleted && !!todayCompletion?.id && (todayCompletion.annotations) && (
                       <CreateAnnotationDialog
-                        completionId={todayCompletion?.id || ""}
+                        completionId={todayCompletion.id}
                       />
                     )}
                   </div>
@@ -445,7 +441,7 @@ export function HabitCard({
                           'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
                           isActive
                             ? "bg-success text-success-foreground"
-                            :  WEEKDAY_TO_FREQUENCY[today.getDay()].includes(day.key)
+                            :  WEEKDAY_TO_FREQUENCY[today.getDay()] === day.key
                             ? "bg-primary/30 text-primary ring-1 ring-primary"
                             : "bg-muted/50 text-muted-foreground"
                         )}
@@ -525,11 +521,13 @@ export function HabitCard({
             {onEdit && (
               <UpdateHabitDialog
                 habit={habit}
-                onSuccessCallback={(data) => onEdit(data)}
+                onSuccessCallback={onEdit ? (data) => onEdit(data) : undefined}
                 trigger={
                   <Button
                     variant="ghost"
                     disabled={!onEdit}
+                    aria-label="Editar hábito"
+                    title="Editar hábito"
                     size="icon"
                     className="h-9 w-9 hover:bg-muted"
                   >
@@ -547,6 +545,8 @@ export function HabitCard({
                     variant="ghost"
                     disabled={!onDelete}
                     size="icon"
+                    aria-label="Deletar hábito"
+                    title="Deletar hábito"
                     className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />

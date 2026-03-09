@@ -10,6 +10,7 @@ import DroppableCell from "./droppable-cell"
 import { Button } from "../ui/button"
 
 import "./styles.css"
+import { cn } from "@/lib/utils"
 
 const initialEvents = [
   { id: "id1", title: "Event 1", date: "2026-03-01" },
@@ -36,7 +37,7 @@ export default function CalendarDnd({ bookedDates = [] }) {
   }
 
   function DayButton(props: any) {
-    const { day, ...rest } = props
+    const { day, className, ...rest } = props
     const currentDate = format(day.date, "yyyy-MM-dd")
 
     const eventsOfDay = events.filter(
@@ -45,8 +46,9 @@ export default function CalendarDnd({ bookedDates = [] }) {
 
     return (
       <Button
-        variant="ghost" {...rest}
-        className="w-full h-full"
+        variant="ghost"
+        {...rest}
+        className={cn(className, "w-full h-full")}
       >
         <DroppableCell id={currentDate}>
           <div className="grid grid-cols-3 gap-1 items-start">
