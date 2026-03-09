@@ -78,8 +78,6 @@ export async function PATCH(request: Request) {
       }
     })
 
-    console.log(existUserSettings, "exists user")
-
     if(!existUserSettings) {
       const updated = await prisma.userSettings.create({
         data: {
@@ -106,7 +104,7 @@ export async function PATCH(request: Request) {
         }
       })
 
-      console.log(updated, "updated user settings")
+      // console.log(updated, "updated user settings")
       return NextResponse.json(updated)
     }
   } catch (error) {

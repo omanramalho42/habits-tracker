@@ -44,7 +44,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
       .split("T")[0]
       .replace(/-/g, "/")
 
-    console.log(formattedDate, counter, 'heat map value')
+    // console.log(formattedDate, counter, 'heat map value')
 
     return {
       date: formattedDate,
@@ -79,7 +79,6 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
 
       return completionDate === formattedDate
     })
-    console.log(counter, 'counter')
     let count: number = 0
     // 🔥 regra final
     if (/*isFrequencyDay && */hasCompletion) {

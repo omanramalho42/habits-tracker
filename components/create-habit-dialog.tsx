@@ -77,7 +77,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
       name: "",
       goal: "",
       clock: "",
-      frequency: [],
+      frequency: ["S","M","T","W","TH","F","SA",],
       color: "",
       emoji: "",
       limitCounter: 1,
@@ -144,7 +144,9 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
 
   const onSubmit = useCallback((values: CreateHabitSchemaType) => {
     console.log(values, 'values')
-    toast.loading("Criando hábito....", { id: "create-habit" })
+    toast.loading("Criando hábito....", {
+      id: "create-habit"
+    })
 
     mutate(values)
   },[])

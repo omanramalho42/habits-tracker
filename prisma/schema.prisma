@@ -56,8 +56,8 @@ enum HabitStatus {
 }
 
 model Habit {
-  id            String @id @default(uuid())
-  userId        String @map("user_id")
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
 
   name          String    @db.VarChar(255)
   emoji         String?   @db.VarChar(10)
@@ -74,12 +74,14 @@ model Habit {
   endDate       DateTime? @map("end_date")
 
   reminder      Boolean?   @default(false)
-  frequency     Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  frequency     Json?      @default("[\"S\",\"M\",\"T\",\"W\",\"TH\",\"F\",\"SA\"]")
   color         String?    @default("#3B82F6") @db.VarChar(7)
 
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt @map("updated_at")
   deletedAt     DateTime? @map("deleted_at")
+
+  indexPos      Int?
 
   user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -88,6 +90,7 @@ model Habit {
   goals       Goals[]
   categories  Categories[]
 
+  @@index([indexPos])
   @@index([userId])
   @@map("habits")
 }
@@ -157,20 +160,23 @@ model TaskCompletion {
 }
 
 model Routine {
-  id        String    @id @default(uuid())
-  userId    String    @map("user_id")
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt  @map("updated_at")
+  name        String
+  description String?
 
-  startDate DateTime  @default(now()) @map("start_date")
-  endDate   DateTime? @map("end_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt  @map("updated_at")
 
-  cron      String?   @default("")
-  frequency Json?      @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
-  emoji     String    @db.VarChar(10)
+  startDate   DateTime  @default(now()) @map("start_date")
+  endDate     DateTime? @map("end_date")
 
-  status    HabitStatus    @default(ACTIVE)
+  cron        String?   @default("")
+  frequency   Json?     @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
+  emoji       String?    @db.VarChar(10) @default("")
+
+  status      HabitStatus    @default(ACTIVE)
 
   habitSchedules HabitSchedule[]
   taskSchedules  TaskSchedule[]
@@ -203,19 +209,19 @@ model TaskSchedule {
 model HabitSchedule {
   id            String    @unique @id @default(uuid())
 
-  duration      String    @db.VarChar(20)
-  clock         String    @db.VarChar(20)
+  duration      String?    @db.VarChar(20)
+  clock         String?    @db.VarChar(20)
 
   status        HabitStatus    @default(ACTIVE)
 
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt      @map("updated_at")
 
-  routineId     String    @map("routine_id")
-  routine       Routine   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  routineId     String?    @map("routine_id")
+  routine       Routine?   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  habitId       String    @map("habit_id")
-  habit         Habit     @relation(fields: [habitId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  habitId       String?    @map("habit_id")
+  habit         Habit?     @relation(fields: [habitId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([routineId, clock])
   @@index([routineId, clock])

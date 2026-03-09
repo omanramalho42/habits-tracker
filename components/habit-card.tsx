@@ -156,7 +156,6 @@ export function HabitCard({
     // Retorna a frequência associada ao dia da semana
     return WEEKDAY_TO_FREQUENCY[date.getDay()]
   })
-
   // Garante que a frequência do hábito seja um array
   // (caso venha null, undefined ou outro formato)
   const frequency =
@@ -172,6 +171,7 @@ export function HabitCard({
   // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
     const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
+
     const limit = habit.limitCounter || 1
     const counter = c.counter || 0
 
@@ -269,7 +269,7 @@ export function HabitCard({
   return (
     <Card
       className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
-        isCompleted && onToggle
+        isCompletedToday && onToggle
           ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
           : isActiveHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
           ? "from-yellow-500/60 to-yellow-700/10 border-yellow-700/30 hover:border-yellow-500/30"
@@ -312,33 +312,6 @@ export function HabitCard({
                   </h3>
                 
                   <div className="flex items-center gap-1 ">
-                    {/* <UpdateHabitDialog
-                      habit={habit}
-                      // onSuccessCallback={(data) => onEdit(data)}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          disabled={!onEdit}
-                          size="icon"
-                          className="h-9 w-9 hover:bg-muted"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      }
-                    /> */}
-                    {/* <DeleteHabitDialog
-                      habitId={habit.id}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          disabled={!onDelete}
-                          size="icon"
-                          className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      }
-                    />*/}
                     <HabitDetailDialog
                       currentDate={selectedDate || new Date()}
                       habit={habit}
@@ -356,7 +329,7 @@ export function HabitCard({
                       }
                     /> 
                     {/* ANNOTATION */}
-                    {isCompleted && !!todayCompletion?.id && (todayCompletion.annotations) && (
+                    {isCompleted && !!todayCompletion?.id && (!todayCompletion.annotations) && (
                       <CreateAnnotationDialog
                         completionId={todayCompletion.id}
                       />

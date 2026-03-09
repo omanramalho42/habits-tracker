@@ -116,7 +116,7 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
   }
 
   //PROCESSAR O ARQUIVO E DETECTAR SE É VIDEO, PDF, IMAGEM, TEXTO
-  console.log(files, "files")
+  // console.log(files, "files")
 
   const uploadedFiles = []
 

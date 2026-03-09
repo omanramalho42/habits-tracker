@@ -37,7 +37,7 @@ export function HabitDetail({ habit, onBack, onToggle }: HabitDetailProps) {
   const isDateCompleted = (day: number) => {
     const now = new Date()
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-    return habit.completions.some((c) => c.completed_date === dateStr)
+    return habit.completions.some((c) => c.completedDate === dateStr)
   }
 
   const handleDayClick = (day: number) => {
@@ -62,7 +62,7 @@ export function HabitDetail({ habit, onBack, onToggle }: HabitDetailProps) {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-1">{habit.name}</h2>
-            <p className="text-muted-foreground">{habit.goal}</p>
+            {/* <p className="text-muted-foreground">{habit?.goals}</p> */}
           </div>
         </div>
 

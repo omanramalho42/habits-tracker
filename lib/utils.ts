@@ -18,6 +18,17 @@ export function toSafeDate(dateStr?: string | null) {
   return new Date(year, month - 1, day, 12, 0, 0)
 }
 
+export function getTodayDay() {
+  const now = new Date()
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(now)
+}
+
 export function createRange<T = number>(
   length: number,
   initializer: (index: number) => T = ((index) => index as T)

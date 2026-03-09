@@ -63,6 +63,7 @@ import {
 } from "lucide-react"
 
 import type { Habit } from "@/lib/types"
+import { Card } from "./ui/card"
 
 interface UpdateHabitDialogProps {
   trigger?: React.ReactNode
@@ -77,8 +78,6 @@ export function UpdateHabitDialog({
 }: UpdateHabitDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
   const [color, setColor] = useState<boolean>(false)
-
-  const theme = useTheme()
 
   const goalId = habit.goals?.map((goal) => goal.id)[0] || ""
 
@@ -151,144 +150,143 @@ export function UpdateHabitDialog({
 
         <Form {...form}>
           <form className="space-y-3">
+            <div className="grid grid-cols-3 justify-start items-start gap-3">
+              {/* ICONE */}
+              <div className="flex flex-col">
+                <FormField
+                  control={control}
+                  name="emoji"
+                  render={({ field }) => (
+                    <FormItem className="grid-cols-1 gap-3">
+                      <FormLabel htmlFor="icon">
+                        Icone
+                      </FormLabel>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Card
+                              className="w-full h-full"
+                            >
+                              {field.value ? (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <span className="text-3xl" role="img">
+                                    {field.value}
+                                  </span>
+                                  <p className="text-xs text-muted-foreground">
+                                    Toque para trocar
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Toque para selecionar
+                                  </p>
+                                </div>
+                              )}
+                            </Card>
+                          </PopoverTrigger>
 
-            {/* ICONE */}
-            <FormField
-              control={control}
-              name="emoji"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Icone
-                  </FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full min-h-16 sm:min-h-25"
+                          <PopoverContent
+                            side="bottom"
+                            align="center"
+                            className="
+                              bg-transparent
+                              border-none
+                              w-[90vw] max-w-sm
+                              sm:w-105
+                              p-0
+                              max-h-[80vh]
+                              overflow-hidden
+                            "
+                          >
+                            <div className="">
+                              <Picker
+                                data={data}
+                                theme="dark"
+                                disabled={isSubmitting}
+                                navPosition="bottom"
+                                previewPosition="top"
+                                searchPosition="sticky"
+                                skinTonePosition="preview"
+                                onEmojiSelect={(emoji: { native: string }) => {
+                                  field.onChange(emoji.native)
+                                }}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="w-full col-span-2 flex flex-col gap-3 justify-start items-start">
+                <FormField
+                  name="name"
+                  rules={{ required: true, min: 5 }}
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>
+                        <Label
+                          htmlFor="name"
+                          className="text-sm font-semibold"
                         >
-                          {field.value ? (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <span className="text-3xl" role="img">
-                                {field.value}
-                              </span>
-                              <p className="text-xs text-muted-foreground">
-                                Toque para trocar
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <CircleOff className="h-8 w-8 text-muted-foreground" />
-                              <p className="text-xs text-muted-foreground">
-                                Toque para selecionar
-                              </p>
-                            </div>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent
-                        side="bottom"
-                        align="center"
-                        className="
-                          w-[90vw] max-w-sm
-                          sm:w-105
-                          p-0
-                          max-h-[80vh]
-                          overflow-hidden
-                        "
-                      >
-                        <div className="max-h-[70vh]">
-                          <Picker
-                            data={data}
-                            theme={theme}
-                            disabled={isSubmitting}
-                            navPosition="bottom"
-                            previewPosition="top"
-                            searchPosition="sticky"
-                            skinTonePosition="preview"
-                            onEmojiSelect={(emoji: { native: string }) => {
-                              field.onChange(emoji.native)
-                            }}
-                          />
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              name="name"
-              rules={{ required: true, min: 5 }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="name"
-                      className="text-sm font-semibold"
-                    >
-                      Nome do hábito
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="name"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Acordar cedo pelas manhãs.."
-                      className="mt-1.5"
-                    />
-                  </FormControl>
-                  {errors.name && (<span className="text-sm text-red-500">{errors.name?.message}</span>)}
-                </FormItem>
-              )}
-            />
-
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="goal" className="text-sm font-medium">
-                Vincular Objetivo
-              </Label>
-              {/* <span className="text-muted-foreground font-normal">
-                ({watch('categoriesId')?.length || 0} selecionados)
-              </span> */}
-              <GoalPicker
-                control={control}
-              />
+                          Nome do hábito
+                        </Label>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          id="name"
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Acordar cedo pelas manhãs.."
+                          className="truncate"
+                        />
+                      </FormControl>
+                      {errors.name && (<span className="text-sm text-red-500">{errors.name?.message}</span>)}
+                    </FormItem>
+                  )}
+                />
+                
+                {/* GOALS */}
+                <div className="flex flex-col gap-2 w-full">
+                  <Label htmlFor="goal" className="text-sm font-medium">
+                    Vincular Objetivo
+                  </Label>
+                  <GoalPicker
+                    control={control}
+                  />
+                </div>
+              </div>
             </div>
+
             
             <div className="flex justify-between gap-4 items-center">
               <FormField
-                name="clock"
+                name="custom_field"
+                rules={{ max: 12 }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
                       <Label
-                        htmlFor="clock"
                         className="text-sm font-semibold"
+                        htmlFor="custom_field"
                       >
-                        Horario
+                        Nome do contador
                       </Label>
                     </FormLabel>
                     <FormControl>
-                      <div className='relative'>
-                        <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
-                          <Clock8Icon className='size-4' />
-                        </div>
-                        <Input
-                          type='time'
-                          id='time-picker'
-                          step='1'
-                          className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-                          onChange={field.onChange}
-                          value={field.value}
-                        />
-                      </div>
+                      <Input
+                        id="custom_field"
+                        placeholder="ex: Páginas..."
+                        onChange={field.onChange}
+                        type="text"
+                      />
                     </FormControl>
-                    {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
+                    {errors.custom_field && (<span className="text-sm text-red-500">{errors.custom_field.message}</span>)}
                   </FormItem>
                 )}
               />
@@ -303,7 +301,7 @@ export function UpdateHabitDialog({
                         htmlFor="counter"
                         className="text-sm font-semibold"
                       >
-                        Contador
+                        Quantidade max
                       </Label>
                     </FormLabel>
                     <FormControl>
@@ -315,7 +313,11 @@ export function UpdateHabitDialog({
                         type="number"
                       />
                     </FormControl>
-                    {errors.limitCounter && (<span className="text-sm text-red-500">{errors.limitCounter?.message}</span>)}
+                    {errors.limitCounter && (
+                      <span className="text-sm text-red-500">
+                        {errors.limitCounter?.message}
+                      </span>
+                    )}
                   </FormItem>
                 )}
               />
@@ -426,6 +428,27 @@ export function UpdateHabitDialog({
                 </Popover>
               )}
             </div>
+
+            {/* alldays */}
+            <div className="flex flex-col justify-start gap-1">
+              <Label htmlFor="allDays" className="text-sm font-semibold">
+                Todos os dias
+              </Label>
+              <Switch
+                id="allDays"
+                checked={watch("frequency").length === WEEKDAYS.length}
+                onCheckedChange={() => {
+                  const allDays: string[] =
+                    WEEKDAYS.map((day) => day.label)
+                  
+                  if (watch("frequency").length === allDays.length) {
+                    return form.setValue("frequency", [])
+                  }
+
+                  form.setValue("frequency", allDays)
+                }}
+              />
+            </div>
             
             <Controller
               name="frequency"
@@ -505,7 +528,6 @@ export function UpdateHabitDialog({
                     setOpen
                   }}
                   className="flex-1 bg-transparent"
-                  disabled={!isSubmitting}
                 >
                   Cancelar
                 </Button>

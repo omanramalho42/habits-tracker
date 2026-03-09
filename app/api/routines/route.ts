@@ -1,12 +1,11 @@
 import { z } from 'zod'
 
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 
-import { isHabitActiveOnDate } from '@/lib/habit-utils'
-import { CreateHabitSchema } from '@/lib/schema/habit'
+import { createRoutineSchema } from '@/lib/schema/routine'
 
 export async function GET(request: Request) {
   try {
@@ -36,7 +35,7 @@ export async function GET(request: Request) {
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
 
-    const habits = await prisma.habit.findMany({
+    const routines = await prisma.routine.findMany({
       where: {
         userId: userDb.id,
         status: 'ACTIVE'
@@ -45,23 +44,20 @@ export async function GET(request: Request) {
         createdAt: "asc",
       },
       include: {
-        completions: true,
-        schedules: true,
+        habitSchedules: {
+          include: {
+            habit: {
+              include: {
+                completions: true
+              }
+            }
+          }
+        },
+        taskSchedules: true
       }
     })
 
-    if (queryParams.success) {
-      if(queryParams.data) {
-
-        const activeHabits: any[] = habits.filter((habit: any) =>
-          isHabitActiveOnDate(habit, new Date(queryParams.data))
-        )
-        
-        return NextResponse.json(activeHabits)
-      }
-    }
-
-    return NextResponse.json(habits)
+    return NextResponse.json(routines)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error fetching habits:", error.message)
@@ -96,64 +92,58 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json()
 
-    const parsedBody = CreateHabitSchema.safeParse(body)
+    const parsedBody = createRoutineSchema.safeParse(body)
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
     const {
       name,
       emoji,
-      endDate,
-      startDate,
-      reminder, 
-      frequency,
-      color,
-      clock,
-      limitCounter,
-      custom_field,
-      duration,
-      goal
+      dateRange,
+      habits,
+      cron,
+      description,
+      frequency
     } = parsedBody.data
 
-    const newStartdate = new Date(startDate)
+    const newStartdate = new Date(dateRange.from)
       newStartdate.setHours(0,0,0,0)
     const newEnddate = 
-      endDate ? new Date(endDate) : null
+      dateRange.to ? new Date(dateRange.to) : null
     if(newEnddate) {
       newEnddate.setHours(0,0,0,0)
     }
 
-    const newHabit = await prisma.habit.create({
+    const newRoutine = await prisma.routine.create({
       data: {
         userId: userDb.id,
-        name,
         emoji,
         startDate: newStartdate,
         endDate: newEnddate,
-        reminder,
-        frequency, // Json
-        color,
-        customField: custom_field,
-        duration,
-        limitCounter: Number(limitCounter) || 1,
-        ...(goal  && {goals: {
-          connect: {
-            id: goal
+        frequency,
+        cron,
+        name,
+        description,
+
+        ...(habits?.length && {
+          habitSchedules: {
+            connectOrCreate: habits.map((habitId) => ({
+              where: { id: habitId },
+              create: {
+                habitId: habitId,
+              }
+            }))
           }
-        }}),
-        clock
-      },
-      include: {
-        completions: true,
-      },
+        })
+      }
     })
 
-    return NextResponse.json(newHabit)
+    return NextResponse.json(newRoutine)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error create habits:", error)
+      console.error("Error routine habits:", error)
       return NextResponse.json({
-        error: "Failed to create new habit"
+        error: "Failed to create new routine"
       }, { status: 500 })
     }
   }

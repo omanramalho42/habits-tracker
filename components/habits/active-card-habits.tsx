@@ -1,19 +1,25 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import axios from "axios"
 import { toast } from "sonner"
-import confetti from "canvas-confetti"
 
 import { HabitCard } from "@/components/habit-card"
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 import { Button } from "@/components/ui/button"
 
-import { AlarmCheckIcon, AlarmClock, ArrowUpDownIcon, Clock, Clock10, Filter, GripVertical, Play, PlayCircle, Plus, PlusIcon, Search, StopCircle } from "lucide-react"
+import {
+  AlarmClock,
+  ArrowUpDownIcon,
+  Clock,
+  Clock10,
+  Filter,
+  Plus,
+} from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 
@@ -29,7 +35,6 @@ import { DndContext } from "@dnd-kit/core"
 import { Input } from "../ui/input"
 import { Card } from "../ui/card"
 import { Checkbox } from "../ui/checkbox"
-import CreateRoutineDialog from "../create-routine-dialog"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -43,17 +48,15 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
   const queryClient = useQueryClient()
 
   const [habitsState, setHabitsState] = useState<HabitWithStats[]>([])
-  
-  const [done, setDone] = useState(false)
 
-  useEffect(() => {
-    setHabitsState(habits)
-  }, [])
-  useEffect(() => {
-    if (habitsState.length === 0) {
-      setHabitsState(habits)
-    }
-  }, [habits])
+  // useEffect(() => {
+  //   setHabitsState(habits)
+  // }, [queryClient])
+  // useEffect(() => {
+  //   if (habitsState.length === 0) {
+  //     setHabitsState(habits)
+  //   }
+  // }, [habits])
   // CRIAR ELEMENTO POSITITON (INDEX) EM HABITS
   // CRIAR ROTA PATCH PARA UPDATE DE POSITION APÓS DRAG AND DROP (REORDER)
 
@@ -76,7 +79,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       "Alterando status do hábito...", {
         id: `toggle-habit`,
     })
-
+    date.setHours(0,0,0,0)
     mutate({
       habitId,
       date: date.toISOString(),
@@ -102,6 +105,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
         "status do hábito alterado com sucesso.", {
           id: `toggle-habit`,
       })
+
       await queryClient.invalidateQueries({
         queryKey: ["habits"]
       })
@@ -131,7 +135,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     })
   }
 
-  const [filter, setFilter] = useState<string>("");
+  const [filter, setFilter] = useState<string>("")
   const handleFilterHabits = (value: string) => {
     setFilter(value)
   }
@@ -147,97 +151,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
             Hábitos completos hoje
           </p>
         </div>
-      )}
-
-      {/* ROUTINES */}
-      <div className="flex flex-col gap-1 px-2">
-        <p className="text-sm">
-          Rotinas
-        </p>
-
-        <div className="flex flex-row gap-2 justify-between items-center w-full">
-          <p className="text-sm font-bold text-foreground">
-            Alimentação
-          </p>
-          <Input
-            className="w-full"
-            type="text"
-            placeholder="pesquise pelo nome."
-            value={filter}
-            onChange={(event) => {
-              handleFilterHabits(event.target.value)
-            }}
-          />
-          <Button
-            variant="outline"
-            type="button"
-            size="icon-lg"
-          >
-            <Filter />
-          </Button>
-        </div>
-        <div className="flex flex-col mt-4 gap-3 max-h-[300px] overflow-auto pr-3 scroll-container">
-          {['1', '2', '3', '4', '5', '6'].map((item) => {
-            return (
-              <Card key={item} className="p-4 hover:border-primary/40 transition-all cursor-pointer">
-                <div className="flex items-center gap-4">
-
-                  {/* ICON */}
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
-                    <span className="text-lg">🌍</span>
-                  </div>
-
-                  {/* CONTENT */}
-                  <div className="flex flex-col flex-1">
-
-                    {/* TIME ROW */}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-
-                      <div className="flex items-center gap-1">
-                        <Clock10 className="w-3.5 h-3.5"/>
-                        <span>08:00</span>
-                      </div>
-
-                      <span className="opacity-40">+</span>
-
-                      <div className="flex items-center gap-1">
-                        <AlarmClock className="w-3.5 h-3.5"/>
-                        <span>1:30h</span>
-                      </div>
-
-                      <span className="opacity-40">→</span>
-
-                      <div className="flex text-orange-400 items-center gap-1 font-medium">
-                        <Clock className="w-3.5 h-3.5"/>
-                        <span>09:30</span>
-                      </div>
-
-                    </div>
-
-                    {/* TITLE */}
-                    <p
-                      className={`text-sm font-medium transition-all ${
-                        done
-                          ? "line-through text-muted-foreground opacity-60"
-                          : "text-foreground"
-                      }`}
-                    >
-                      Café da manhã
-                    </p>
-
-                  </div>
-                  {/* CHECKBOX */}
-                  <Checkbox
-                    className="mt-1"
-                    checked={done}
-                    onCheckedChange={(value) => setDone(!!value)}
-                  />
-                </div>
-              </Card>
-            )
-          })}
-        </div>
-      </div>
+      )}      
       
       {/* HABITS */}
       <div className="flex mt-10 flex-col gap-2 px-2 max-h-[450px] overflow-auto pr-3 scroll-container" aria-selected={false}>
@@ -264,8 +178,9 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           </Button>
         </div>
         
+        {/* EMPRT ARRAY */}
         <div className="my-4">
-          {habitsState.length === 0 ? (
+          {habits.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-7xl mb-6">🎯</div>
 
@@ -289,11 +204,13 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           ) : (
             <DndContext onDragEnd={handleDragEnd}>
               <SortableContext
-                items={habitsState.map((h) => h.id)}
+                items={habits.map((h) => h.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-4">
-                  {habitsState.map((habit) => habit.name.includes(filter) && (
+                  {habits.map((habit) => habit.name.toLowerCase().trim().includes(
+                    filter.toLowerCase().trim()
+                  ) && (
                     <SortableHabit
                       key={habit.id}
                       habit={habit}
@@ -323,7 +240,9 @@ function SortableHabit({
   onError,
 }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: habit.id })
+    useSortable({
+      id: habit.id
+    })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -334,6 +253,7 @@ function SortableHabit({
     <div ref={setNodeRef} style={style} className="relative">
       {/* DRAG HANDLE */}
       <Button
+        disabled={isPending}
         variant="outline"
         size="icon"
         {...attributes}

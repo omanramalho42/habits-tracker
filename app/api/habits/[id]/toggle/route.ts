@@ -34,6 +34,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json()
     const date = body?.date ?? getTodayString()
 
+    // console.log(date, "date");
+
     const validator = z.string().datetime()
     const bodyParams = validator.safeParse(date)
 
