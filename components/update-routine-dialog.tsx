@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 
 import Picker from "@emoji-mart/react"
 import data from "@emoji-mart/data"
@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { createRoutine } from '@/services/routines'
+import { updateRoutine } from '@/services/routines'
 
 import {
   Dialog,
@@ -32,7 +32,6 @@ import {
   FormLabel
 } from '@/components/ui/form'
 import { Calendar } from '@/components/ui/calendar'
-import MultipleSelector from '@/components/ui/multi-select'
 import {
   Select,
   SelectContent,
@@ -58,99 +57,51 @@ import { cn } from '@/lib/utils'
 import {
   CalendarIcon,
   CircleOff,
-  PlusSquare,
+  PencilIcon,
 } from 'lucide-react'
 
-import type { CreateRoutineSchemaType } from '@/lib/schema/routine'
+import type { UpdateRoutineSchemaType } from '@/lib/schema/routine'
 import MultiHabitsPicker from './multi-habit-picker-dialog'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { WEEKDAYS } from '@/lib/habit-utils'
+import { HabitSchedule } from '@prisma/client'
+import { HabitWithStats } from '@/lib/types'
 
-interface CreateRoutineDialogProps {
+interface UpdateRoutineDialogProps {
   trigger: React.ReactNode
+  onSuccessCallback?: (data: UpdateRoutineSchemaType) => void
+  routine: any
 }
 
-const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => {
-  // const [openModal, setOpenModal] =
-  //   useState<boolean>(false)
-
+const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routine, onSuccessCallback }) => {
   const crons = [
     {value:"semanalmente", label:"semanalmente"},
     {value:"mensalmente", label: "mensalmente"},
     {value: "diariamente", label: "diariamente"},
   ]
 
-  // const handleAdd = async () => {
-  //   const isValidHabitId =
-  //     await triggerRHF(`habits.${fields.length}.habitId`)
-  //   const isValidHabitClock = 
-  //     await triggerRHF(`habits.${fields.length}.clock`)
-  //   const isValidHabitDuration = 
-  //     await triggerRHF(`habits.${fields.length}.duration`)
-    
-  //   const isValid = 
-  //     isValidHabitId && 
-  //     isValidHabitClock && 
-  //     isValidHabitDuration
-    
-  //   if(!isValid) {
-  //     if(!isValidHabitId) {
-  //       setError(
-  //         `habits.${fields.length}.habitId`,
-  //         { message: "Vincule pelo menos 1 hábito" })
-  //     }
-  //     if(!isValidHabitClock) {
-  //       setError(
-  //         `habits.${fields.length}.clock`,
-  //         { message: "Campo requerido" })
-  //     }
-
-  //     if(!isValidHabitDuration) {
-  //       setError(
-  //         `habits.${fields.length}.duration`,
-  //         { message: "Campo requerido" })
-  //     }
-
-  //     return
-  //   }
-
-  //   const currentHabits =
-  //     form.getValues("habits")
-
-  //   // console.log(currentHabits, "current habits")
-  //   append({
-  //     habitId: currentHabits[fields.length].habitId,
-  //     clock: currentHabits[fields.length].clock,
-  //     duration: currentHabits[fields.length].duration
-  //   })
-  // }
-
-  // const handleRemove = (habitId: string) => {
-  //   const currentHabits = form.getValues("habits")
-
-  //   form.setValue(
-  //     "habits",
-  //     currentHabits?.filter(h => h.habitId !== habitId)
-  //   )
-  // }
-
   const [open, setOpen] = useState<boolean>(false)
   const today = new Date()
   today.setHours(0,0,0,0)
 
-  const form = useForm<CreateRoutineSchemaType>({
+  console.log(routine, "routine")
+
+  const form = useForm<UpdateRoutineSchemaType>({
     defaultValues: {
-      name: "",
-      cron: "",
-      description: "",
-      frequency: [],
+      id: routine.id,
+      name: routine.name,
+      cron: routine?.cron || "",
+      description: routine.description || "",
+      emoji: routine.emoji || "",
+      frequency: routine.frequency as string[] || [],
       dateRange: {
-        from: today
+        from: routine.startDate,
+        // to: routine?.endDate || null
       },
-      habits: []
+      habits: routine.habitSchedules.map((item: HabitSchedule & { habit: HabitWithStats }) => item.habit) || []
     }
   })
-
+  
   const {
     handleSubmit,
     reset,
@@ -164,40 +115,39 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
 
   const queryClient = useQueryClient()
   
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (values: CreateRoutineSchemaType) => {
-      console.log(values, "values")
-      return await createRoutine(values)
+  const { isPending, mutate } = useMutation({
+    mutationFn: updateRoutine,
+    onMutate: () => {
+      return toast.loading(
+        "Atualizando rotina...",
+        { id: "update-routine" }
+      )
     },
-    onSuccess: async () => {
-      toast.success("Rotina criada com sucesso! 🎉", {
-        id: "create-routine"
+    onSuccess: (_, __, toastId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["routines"],
+        exact: false,
       })
 
-      reset()
-
-      await queryClient.invalidateQueries({
-        queryKey: [
-          "routines"
-        ]
-      })
-
-      setOpen((prev) => !prev)
+      toast.success(
+        "Rotina atualizado com sucesso.",
+        { id: toastId }
+      )
     },
-    onError: () => {
-      toast.error("Erro ao criar rotina", {
-        id: "create-routine",
-      })
-    }
+    onError: (error: any, _, toastId) => {
+      toast.error(
+        error?.message ?? "Erro ao atualizar rotina",
+        { id: toastId }
+      )
+    },
   })
 
-  const onSubmit = (values: CreateRoutineSchemaType) => {
-    console.log(values, 'values')
-    toast.loading("Criando rotina...", {
-      id: "create-routine"
-    })
+  const onSubmit: SubmitHandler<UpdateRoutineSchemaType> = async (data: UpdateRoutineSchemaType) => {
+    console.log(data, "data!")
 
-    mutate(values)
+    mutate(data)
+
+    setOpen(prev => !prev)
   }
 
   return (
@@ -210,8 +160,8 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
             aria-expanded={open}
             className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
           >
-            <PlusSquare className="mr-2 h-4 w-4" />
-            Criar novo
+            <PencilIcon className="mr-2 h-4 w-4" />
+            Editar
           </Button>
         )}
       </DialogTrigger>
@@ -221,7 +171,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
       >
         <DialogHeader className="space-y-1">
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            Criar rotina
+            editar rotina
           </DialogTitle>
           <DialogDescription className="text-sm text-blue-100/60">
             Rotinas servem para gerenciar melhor o seu dia
@@ -279,7 +229,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                   name='description'
                   control={control}
                   disabled={isPending}
-                  rules={{ required: true, min: 5 }}
+                  rules={{ required: false, min: 5 }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -544,7 +494,9 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
             />
             
             <Label>Vincular hábitos</Label>
-            <MultiHabitsPicker control={control} />
+            <MultiHabitsPicker
+              control={control}
+            />
           </form>
         </Form>
 
@@ -581,4 +533,4 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
   )
 }
 
-export default CreateRoutineDialog
+export default UpdateRoutineDialog

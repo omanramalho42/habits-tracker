@@ -107,8 +107,6 @@ export function MoodWizard({ trigger }: MoodWizardProps) {
     if (isFetched) setOpen(!mood)
   }, [isFetched, mood])
 
-  console.log(mood, "mood")
-
   const queryClient = useQueryClient()
 
   const { mutate, isPending } = useMutation({

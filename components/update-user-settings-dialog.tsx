@@ -59,7 +59,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
 
   type UpdateUserSettingsSchemaType = z.infer<typeof UpdateUserSettingsSchema>
 
-  console.log(userSettings, "settings");
+  // console.log(userSettings, "settings");
 
   const form = useForm<UpdateUserSettingsSchemaType>({
     defaultValues: {

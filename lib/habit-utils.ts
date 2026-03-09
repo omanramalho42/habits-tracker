@@ -22,9 +22,17 @@ export function calculateStreak(completions: { completedDate: string }[]): {
   currentStreak: number
   longestStreak: number
 } {
-  if (!completions.length) return { currentStreak: 0, longestStreak: 0 }
+  if (!completions.length) return {
+    currentStreak: 0,
+    longestStreak: 0
+  }
 
-  const sortedDates = completions.map((c) => new Date(c.completedDate)).sort((a, b) => b.getTime() - a.getTime())
+  const sortedDates = 
+    completions.map(
+      (c) => new Date(c.completedDate))
+      .sort((a, b) => 
+        b.getTime() - a.getTime()
+    )
 
   let currentStreak = 0
   let longestStreak = 0
@@ -97,9 +105,6 @@ export function isHabitActiveOnDate(
   },
   date: Date
 ): boolean {
-
-  // console.log(habit, "habit!!!!!!!");
-  // console.log(date, "date")
 
   const currentYear = date.getUTCFullYear()
   const currentMonth = date.getUTCMonth()

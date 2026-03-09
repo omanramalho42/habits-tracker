@@ -7,7 +7,6 @@ import { Control, useController } from 'react-hook-form'
 
 import { fetchHabits } from '@/services/habits'
 
-import { CreateRoutineSchemaType } from '@/components/create-routine-dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Command,
@@ -21,17 +20,17 @@ import { Button } from '@/components/ui/button'
 import { CreateHabitDialog } from './create-habit-dialog'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { UpdateRoutineHabitScheduleSchemaType } from './update-routine-habit-schedule-dialog'
 
 interface HabitPickerProps {
-  control: Control<CreateRoutineSchemaType>
-  index: number;
+  control: Control<UpdateRoutineHabitScheduleSchemaType>
 }
 
-const HabitPicker:React.FC<HabitPickerProps> = ({ control, index }) => {
+const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
   const [open, setOpen] = useState<boolean>(false)
   const { field, formState: { errors } } = useController({
     control: control,
-    name: `habits.${index}.habitId`
+    name: "habit"
   })
 
   const {
@@ -41,40 +40,39 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control, index }) => {
     isError,
     error
   } = useQuery({
-    queryKey: ['habits'],
+    queryKey: ['habits', 'routines'],
     queryFn: () => fetchHabits(),
     staleTime: 1000 * 60,
     retry: 1
   })
 
   const selectedHabit =
-    habits.find(
-      (habit: any) => 
-        habit.id === field.value || ""
-    )
+    habits.find((habit) => habit.id === field.value?.id)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className='flex flex-col justify-start items-start gap-1'>
           <Button
-            role='combobox'
+            role="combobox"
             aria-expanded={open}
-            className={cn("w-full justify-between")}
+            className="w-full justify-between"
             variant="outline"
+            type='button'
           >
-          {selectedHabit ? (
-              <HabitRow habit={selectedHabit} />
+            {selectedHabit ? (
+              <span className="flex items-center gap-2">
+                {selectedHabit.emoji}
+                {selectedHabit.name}
+              </span>
             ) : (
-              <p>
-                Selecione o hábito
-              </p>
+              "Selecione o hábito"
             )}
           </Button>
           <div className="absolute">
-            {errors.habits && errors.habits[index]?.habitId && (
+            {errors.habit && (
               <p className='relative top-16 text-red-500 text-sm'>
-                {errors.habits[index]?.habitId?.message}
+                {typeof errors.habit.message === 'string' ? errors.habit.message : ''}
               </p>
             )}
           </div>
@@ -102,20 +100,26 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control, index }) => {
           </CommandEmpty>
           <CommandGroup>
             <CommandList>
-              {habits && (
-                habits.map((habit) => (
-                  <CommandItem
-                    key={habit.id}
-                    onSelect={() => {
-                      field.onChange(habit.id)
-                      setOpen((prev) => !prev)
-                    }}
-                  >
-                    <HabitRow habit={habit} />
-                    <Check className={cn("mr-2 h-4 w-4 opacity-0")} />
-                  </CommandItem>
-                ))
-              )}
+              {habits.map((habit) => (
+                <CommandItem
+                  key={habit.id}
+                  onSelect={() => {
+                    field.onChange(habit)
+                    setOpen(false)
+                  }}
+                >
+                  <HabitRow habit={habit} />
+
+                  <Check
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      field.value?.id === habit.id
+                        ? "opacity-100"
+                        : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
             </CommandList>
           </CommandGroup>
         </Command>
