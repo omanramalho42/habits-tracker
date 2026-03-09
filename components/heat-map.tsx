@@ -105,6 +105,7 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
       <div className="">
         <HeatMap
           value={valuesSchdules}
+          legendCellSize={0}
           startDate={startDate}
           endDate={endDate || undefined} 
           width={"100%"}
@@ -146,11 +147,11 @@ const HeatMapHabit: React.FC<HeatMapHabitProps> = ({
       {/* --- Legendas --- */}
       <div className="flex justify-start gap-4 text-sm flex-wrap">
         <div className="flex items-center space-x-1">
-          <div className={`w-3 h-3 rounded-sm`} style={{ backgroundColor: COLOR_COMPLETED }} />
+          <div className={`w-3 h-3 rounded-[2px]`} style={{ backgroundColor: COLOR_COMPLETED }} />
           <span>Concluído</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className={`w-3 h-3 rounded-sm`} style={{ backgroundColor: COLOR_SCHEDULED }} />
+          <div className={`w-3 h-3 rounded-[2px]`} style={{ backgroundColor: COLOR_SCHEDULED }} />
           <span>Não Concluído</span>
         </div>
         {/* <div className="flex items-center space-x-1">

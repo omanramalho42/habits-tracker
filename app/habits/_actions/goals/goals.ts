@@ -42,7 +42,7 @@ export async function CreateGoal(form: CreateGoalSchemaType) {
       name,
       userId: userDb.id,
       description: description || "",
-      emoji: emoji || ""
+      emoji: emoji || "",
     }
   })
 }

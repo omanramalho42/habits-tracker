@@ -17,3 +17,13 @@ export function toSafeDate(dateStr?: string | null) {
   // meio-dia local (anti-timezone bug)
   return new Date(year, month - 1, day, 12, 0, 0)
 }
+
+export function createRange<T = number>(
+  length: number,
+  initializer: (index: number) => T = ((index) => index as T)
+): T[] {
+  if (!Number.isInteger(length) || length < 0) {
+    throw new RangeError(`Invalid range length: ${length}`)
+  }
+  return Array.from({ length }, (_, index) => initializer(index))
+}

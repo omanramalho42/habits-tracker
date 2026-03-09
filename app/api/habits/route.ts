@@ -48,13 +48,17 @@ export async function GET(request: Request) {
 
     if (queryParams.success) {
       if(queryParams.data) {
+        console.log(habits, "habits");
+
         const activeHabits: any[] = habits.filter((habit: any) =>
           isHabitActiveOnDate(habit, new Date(queryParams.data))
         )
-
+        console.log(activeHabits, "achtive")
+        
         return NextResponse.json(activeHabits)
       }
     }
+
     return NextResponse.json(habits)
   } catch (error) {
     if (error instanceof Error) {

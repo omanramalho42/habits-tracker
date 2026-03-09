@@ -7,7 +7,9 @@ export async function GET() {
     const { userId } = await auth()
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
     }
 
     const user = await prisma.user.findFirst({
@@ -17,10 +19,13 @@ export async function GET() {
     })
 
     if(!user) {
-      return NextResponse.json({ error: "Error find user on db"}, { status: 400 })
+      return NextResponse.json({
+        error: "Error find user on db"
+      }, { status: 400 })
     }
   
-    const userSettings = await prisma.userSettings.findUnique({
+    const userSettings =
+      await prisma.userSettings.findUnique({
       where: {
         userId: user.id
       }
@@ -30,7 +35,9 @@ export async function GET() {
   } catch (error) {
     if (error instanceof Error) {
       console.log("error", error.message);
-      NextResponse.json({ error: error.message}, { status: 500 })
+      NextResponse.json({
+        error: error.message
+      }, { status: 500 })
     }
   }
 }
@@ -64,8 +71,6 @@ export async function PATCH(request: Request) {
       theme,
       isTravelling
     } = await request.json()
-
-    console.log({email}, {allow_notifications}, "new info")
 
     const existUserSettings = await prisma.userSettings.findUnique({
       where: {

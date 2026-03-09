@@ -51,9 +51,46 @@ const HeaderSection:React.FC = () => {
             timezone={'America/Sao_paulo'}
           />
         </h1>
+        <div className="flex gap-3">
+          <CreateHabitDialog
+            trigger={
+              <Button
+                aria-label="Criar hábito"
+                title="Criar hábito"
+                size="icon"
+                disabled={loading}
+                className="rounded-full p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus className="h-7 w-7" />
+              </Button>    
+            }
+          />
+          <CreateCheckPointDialog
+            trigger={
+              <Button
+                size="icon"
+                disabled={loading}
+                className="rounded-full p-0 bg-linear-to-r from-primary to-red-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus className="h-7 w-7" />
+              </Button>
+            }
+          />
+          <CreateRoutineDialog
+            trigger={
+              <Button
+                size="icon"
+                disabled={loading}
+                className="rounded-full p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus className="h-7 w-7" />
+              </Button>
+            }
+          />
+        </div>  
       </div>
 
-      <div className="flex items-center flex-wrap gap-3">
+      <div className="flex items-center flex-wrap gap-2">
       {/* CONFIGURAÇÕES */}
         <SettingsDialog
           trigger={
@@ -76,39 +113,7 @@ const HeaderSection:React.FC = () => {
         >
           <ListIcon className="h-6 w-6" />
         </Button>
-        <CreateHabitDialog
-          trigger={
-            <Button
-              size="icon"
-              disabled={loading}
-              className="rounded-full p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-            >
-              <Plus className="h-7 w-7" />
-            </Button>    
-          }
-        />
-        {/* <CreateCheckPointDialog
-          trigger={
-            <Button
-              size="icon"
-              disabled={loading}
-              className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-red-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-            >
-              <Plus className="h-7 w-7" />
-            </Button>
-          }
-        /> */}
-        {/* <CreateRoutineDialog
-          trigger={
-            <Button
-              size="icon"
-              disabled={loading}
-              className="rounded-full h-16 w-16 p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-            >
-              <Plus className="h-7 w-7" />
-            </Button>
-          }
-        /> */}
+
         <SignOutButton
           children={
             <Button
@@ -122,7 +127,6 @@ const HeaderSection:React.FC = () => {
         />
         {/* ADICIONAR SELECT LANGUAGE */}
       </div>
-
     </div>
   )
 }

@@ -48,7 +48,7 @@ export default function page() {
     staleTime: 1000 * 60,
   })
 
-  console.log(habits, "habits")
+  console.log(habits, "habits ! ")
 
   const queryClient = useQueryClient()
 
@@ -206,6 +206,8 @@ export default function page() {
                   <CreateHabitDialog
                     trigger={
                       <Button
+                        aria-label="Criar hábito"
+                        title="Criar hábito"
                         size="lg"
                         className="bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg"
                       >
