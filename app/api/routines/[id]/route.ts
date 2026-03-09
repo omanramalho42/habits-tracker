@@ -47,6 +47,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const newRoutine = await prisma.routine.update({
       where: {
         id,
+        userId: userDb.id
       },
       data: {
         habitSchedules: {
@@ -59,16 +60,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(newRoutine)
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error routine habits:", error)
-      return NextResponse.json({
-        error: "Failed to create new routine"
-      }, { status: 500 })
-    }
+    console.error("Error updating routine:", error)
+    return NextResponse.json({
+      error: "Failed to update routine"
+    }, { status: 500 })
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth()
 
@@ -89,22 +88,14 @@ export async function PATCH(request: NextRequest) {
         error: "user not find on db"
       }, { status: 401 })
     }
-    
+
+    const { id: routineId } = await params
     const body = await request.json()
     const parsedBody = updateRoutineSchema.safeParse(body)
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
-    const {
-      name,
-      emoji,
-      dateRange,
-      habits,
-      cron,
-      description,
-      frequency,
-      id
-    } = parsedBody.data
+    const { name, emoji, dateRange, habits, cron, description, frequency } = parsedBody.data
 
     console.log(habits, "habits")
     
@@ -117,7 +108,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const newRoutine = await prisma.routine.update({
-      where: { id },
+      where: { id: routineId, userId: userDb.id },
       data: {
         userId: userDb.id,
         emoji,
@@ -150,33 +141,43 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth()
+  try {
+    const { userId } = await auth()
 
-  if (!userId) {
-    return NextResponse.json({
-      error: "Unauthorized"
-    }, { status: 401 })
+    if (!userId) {
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
+    }
+
+    const userDb = await prisma.user.findFirst({
+      where: {
+        clerkUserId: userId
+      }
+    })
+
+    if (!userDb) {
+      return NextResponse.json({
+        error: "user not find on db"
+      }, { status: 401 })
+    }
+
+    const { id } = await params
+
+    await prisma.routine.delete({
+      where: {
+        id,
+        userId: userDb.id
+      }
+    })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error routine habits:", error)
+      return NextResponse.json({
+        error: "Failed to delete routine"
+      }, { status: 500 })
+    }
   }
 
-  const userDb = await prisma.user.findFirst({
-    where: {
-      clerkUserId: userId
-    }
-  })
-
-  if (!userDb) {
-    return NextResponse.json({
-      error: "user not find on db"
-    }, { status: 401 })
-  }
-
-  const { id } = await params
-
-  await prisma.routine.delete({
-    where: {
-      id,
-      userId: userDb.id
-    }
-  })
-  return NextResponse.json({ success: true })
 }

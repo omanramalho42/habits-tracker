@@ -40,7 +40,21 @@ export async function PATCH(request: NextRequest) {
       clock,
       id
     } = parsedBody.data
+    // Verify the habitSchedule belongs to the user
+    const existingSchedule = await prisma.habitSchedule.findFirst({
+      where: {
+        id,
+        routine: {
+          userId: userDb.id
+        }
+      }
+    })
 
+    if (!existingSchedule) {
+      return NextResponse.json({
+        error: "Schedule not found or access denied"
+      }, { status: 404 })
+    }
     const newHabitSchedule = await prisma.habitSchedule.update({
       where: { id },
       data: {

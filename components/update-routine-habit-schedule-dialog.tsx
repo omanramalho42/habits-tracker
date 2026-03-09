@@ -168,6 +168,7 @@ const UpdateRoutineHabitSchedule = ({
             <form className="flex flex-col gap-3">
               <div className='flex flex-row gap-3 justify-between'>
                 <FormField
+                  control={control}
                   name="clock"
                   rules={{ required: true }}
                   render={({ field, fieldState }) => (
@@ -210,6 +211,7 @@ const UpdateRoutineHabitSchedule = ({
                   )}
                 />
                 <FormField
+                  control={control}
                   name="duration"
                   rules={{ required: true }}
                   render={({ field, fieldState }) => (
