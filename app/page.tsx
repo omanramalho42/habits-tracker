@@ -186,12 +186,10 @@ export default function Home() {
             onSuccessCallback={setSelectedDate}
           />
 
-          <div className="flex flex-col gap-4 max-h-[400px] overflow-auto pr-3 scroll-container">
-
-            <p className="text-sm">
-              Rotinas do dia
-            </p>
-
+          <p className="text-sm">
+            Rotinas do dia
+          </p>
+          <div className="flex flex-col gap-4 max-h-100 overflow-auto scroll-container">
             {routines.length > 0 ? (
               routines.map((routine, index) => (
                 <div
@@ -203,9 +201,14 @@ export default function Home() {
                   <div className="flex flex-col items-start gap-2 justify-start w-full my-2">
                     <div className="flex flex-row items-center justify-between w-full">
 
-                      <p className="text-sm font-bold text-foreground">
-                        {routine.name}
-                      </p>
+                      <div className="flex flex-col justify-start items-start">
+                        <p className="text-sm font-bold text-foreground">
+                          {routine.emoji} - {routine.name}
+                        </p>
+                        {/* <p className="text-sm font-medium text-foreground">
+                          {routine.updatedAt}
+                        </p> */}
+                      </div>
 
                       <div className="flex flex-row gap-2">
                         <UpdateRoutineDialog
@@ -223,7 +226,11 @@ export default function Home() {
                         <DeleteRoutineDialog
                           routineId={routine.id}
                           trigger={
-                            <Button variant="ghost" type="button" size="icon">
+                            <Button
+                              variant="ghost"
+                              type="button"
+                              size="icon-sm"
+                            >
                               <Trash className="w-3 h-3" />
                             </Button>
                           }
@@ -251,10 +258,13 @@ export default function Home() {
                         <Filter />
                       </Button>
                     </div>
-                    </div>
+                  </div>
 
                   {/* ROUTINES LIST */}
-                  <div className="flex flex-col gap-3 max-h-75 overflow-auto pr-3 scroll-container" aria-selected={false}>
+                  <div
+                    className="flex flex-col gap-3 max-h-75 overflow-auto scroll-container"
+                    aria-selected={false}
+                  >
                     {routine.habitSchedules && routine?.habitSchedules?.length > 0 
                       ? routine.habitSchedules?.map((item) => (
                       <Card
@@ -265,7 +275,9 @@ export default function Home() {
 
                           {/* ICON */}
                           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
-                            <span className="text-lg">{item?.habit?.emoji}</span>
+                            <span className="text-lg">
+                              {item?.habit?.emoji}
+                            </span>
                           </div>
 
                           {/* CONTENT */}
@@ -306,85 +318,90 @@ export default function Home() {
                             </div>
 
                             {/* TITLE */}
-                            <p
-                              className={`text-sm font-medium ${
-                                completedToday
-                                  ? "line-through text-muted-foreground opacity-60"
-                                  : "text-foreground"
-                              }`}
-                            >
-                              {item?.habit?.name}
-                            </p>
 
-                          </div>
-                          <Progress
-                            className="w-10 rounded-full max-w-sm"
-                            value={30
-                              // item.habit?.limitCounter > 0
-                              //   ? Math.min(item.habit? / item.habit?.limitCounter) * 100
-                              //   : 0
-                            }
-                          />
-                          <Button
-                            variant={completedToday ? "default" : "outline"}
-                            size="icon"
-                            disabled
-                            // disabled={isLoading || !item.habit?.id}
-                            onClick={() => item.habit?.id && handleToggleHabit(item.habit.id, selectedDate)}
-                            className={cn(
-                              "relative w-7 h-7 rounded-full flex items-center justify-center transition",
-                              completedToday
-                                ? `bg-primary text-white`
-                                : "bg-background border border-border"
-                            )}
-                          >
-                            {completedToday && <Check className="w-5 h-5" />}
-                          </Button>
+                            <div className="flex flex-row justify-between gap-2 items-center">
+                              <p
+                                className={`text-sm font-medium ${
+                                  completedToday
+                                    ? "line-through text-muted-foreground opacity-60"
+                                    : "text-foreground"
+                                }`}
+                              >
+                                {item?.habit?.name}
+                              </p>
+                              <div className="flex flex-row items-center gap-1">
+                                <Button
+                                  variant={completedToday ? "default" : "outline"}
+                                  size="icon-sm"
+                                  disabled={isLoading || !item.habit?.id}
+                                  onClick={() => item.habit?.id && handleToggleHabit(item.habit.id, selectedDate)}
+                                  className={cn(
+                                    "relative w-5 h-5 rounded-full flex items-center justify-center transition",
+                                    completedToday
+                                      ? `bg-primary text-white`
+                                      : "bg-background border border-border"
+                                  )}
+                                >
+                                  {completedToday && <Check className="w-5 h-5" />}
+                                </Button>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" type="button" size="icon">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                              <DropdownMenuGroup>
-                                <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                <RemoveHabitRoutineDialog
-                                  habitScheduleId={item.id}
-                                  routineId={routine.id}
-                                  trigger={
-                                    <DropdownMenuItem
-                                      onSelect={(e) => e.preventDefault()}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      type="button"
+                                      size="icon-sm"
                                     >
-                                      <Button variant="ghost" type="button" size="icon">
-                                        <Trash className="h-3 w-3" />
-                                      </Button>
-                                      Remover
-                                    </DropdownMenuItem>
-                                  }
-                                />
-                                {item.habit && (
-                                  <UpdateRoutineHabitSchedule
-                                    habit={item.habit}
-                                    schedule={item}
-                                    trigger={
-                                      <DropdownMenuItem
-                                        onSelect={(e) => e.preventDefault()}
-                                      >
-                                        <Button disabled variant="ghost" type="button" size="icon">
-                                          <Pencil className="h-3 w-3" />
-                                        </Button>
-                                        Editar
-                                      </DropdownMenuItem>
-                                    }
-                                  />
-                                )}
-                              </DropdownMenuGroup>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem disabled>API</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                      <MoreHorizontal className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent>
+                                    <DropdownMenuGroup>
+                                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                      <RemoveHabitRoutineDialog
+                                        habitScheduleId={item.id}
+                                        routineId={routine.id}
+                                        trigger={
+                                          <DropdownMenuItem
+                                            onSelect={(e) => e.preventDefault()}
+                                          >
+                                            <Button variant="ghost" type="button" size="icon">
+                                              <Trash className="h-3 w-3" />
+                                            </Button>
+                                            Remover
+                                          </DropdownMenuItem>
+                                        }
+                                      />
+                                      {item.habit && (
+                                        <UpdateRoutineHabitSchedule
+                                          habit={item.habit}
+                                          schedule={item}
+                                          trigger={
+                                            <DropdownMenuItem
+                                              onSelect={(e) => e.preventDefault()}
+                                            >
+                                              <Button
+                                                disabled
+                                                variant="ghost"
+                                                type="button"
+                                                size="icon-sm"
+                                              >
+                                                <Pencil className="h-3 w-3" />
+                                              </Button>
+                                              Editar
+                                            </DropdownMenuItem>
+                                          }
+                                        />
+                                      )}
+                                    </DropdownMenuGroup>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem disabled>API</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+                          </div>
+                          
                         </div>
                       </Card>
                     )) : (

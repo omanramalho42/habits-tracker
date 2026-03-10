@@ -154,29 +154,29 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       )}      
       
       {/* HABITS */}
-      <div className="flex mt-10 flex-col gap-2 px-2 max-h-[450px] overflow-auto pr-3 scroll-container" aria-selected={false}>
-        <div className="flex flex-row justify-between gap-2 items-center w-full">
-          <p className="text-sm font-bold text-foreground">
-            Hábitos
-          </p>
-          <div className="flex flex-row gap-2 w-full items-center justify-center">
-            <Input
-              type="text"
-              placeholder="pesquise pelo nome."
-              value={filter}
-              onChange={(event) => {
-                handleFilterHabits(event.target.value)
-              }}
-            />
-          </div>
-          <Button
-            variant="outline"
-            type="button"
-            size="icon-lg"
-          >
-            <Filter />
-          </Button>
+      <div className="flex flex-row justify-between gap-2 items-center w-full">
+        <p className="text-sm font-bold text-foreground">
+          Hábitos
+        </p>
+        <div className="flex flex-row gap-2 w-full items-center justify-center">
+          <Input
+            type="text"
+            placeholder="pesquise pelo nome."
+            value={filter}
+            onChange={(event) => {
+              handleFilterHabits(event.target.value)
+            }}
+          />
         </div>
+        <Button
+          variant="outline"
+          type="button"
+          size="icon-lg"
+        >
+          <Filter />
+        </Button>
+      </div>
+      <div className="flex mt-10 flex-col gap-2 px-2 max-h-112.5 overflow-auto pr-3 scroll-container" aria-selected={false}>
         
         {/* EMPRT ARRAY */}
         <div className="my-4">

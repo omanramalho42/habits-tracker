@@ -2,13 +2,22 @@
 
 import React, { useState } from 'react'
 
+import { z } from 'zod'
+
+import { SubmitHandler, useForm } from 'react-hook-form'
+
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { toast } from 'sonner'
+
+import { updateRoutineHabitSchedule } from '@/services/routines'
+
 import HabitPicker from '@/components/habit-picker'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardFooter
 } from '@/components/ui/card'
 import {
   FormField,
@@ -27,32 +36,16 @@ import {
   DialogFooter,
   DialogHeader
 } from '@/components/ui/dialog'
-import {
-  TooltipTrigger, 
-  TooltipContent,
-  Tooltip
-} from '@/components/ui/tooltip'
+import { Label } from '@/components/ui/label'
+
+import type { Habit, HabitSchedule } from '@prisma/client'
 
 import { cn } from '@/lib/utils'
 
 import {
   AlarmClock,
   Clock8Icon,
-  Trash,
-  Edit,
-  PlusSquare,
-  BotOff,
-  PowerOff
 } from 'lucide-react'
-import { Label } from './ui/label'
-import { z } from 'zod'
-import { SubmitHandler, useForm } from 'react-hook-form'
-import { HabitWithStats } from '@/lib/types'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { updateRoutineHabitSchedule } from '@/services/routines'
-import { Habit, HabitSchedule } from '@prisma/client'
-import axios from 'axios'
 
 interface UpdateRoutineHabitScheduleProps {
   trigger?: React.ReactNode;
@@ -125,17 +118,18 @@ const UpdateRoutineHabitSchedule = ({
     },
   })
 
-  const onSubmit: SubmitHandler<UpdateRoutineHabitScheduleSchemaType> = async (data: UpdateRoutineHabitScheduleSchemaType) => {
-    console.log(data, "data!")
+  const onSubmit: SubmitHandler<UpdateRoutineHabitScheduleSchemaType> =
+    async (data: UpdateRoutineHabitScheduleSchemaType) => {
+      console.log(data, "data!")
 
-    mutate({
-      id: data.id,
-      clock: data.clock,
-      duration: data.duration,
-      habit: data.habit
-    })
+      mutate({
+        id: data.id,
+        clock: data.clock,
+        duration: data.duration,
+        habit: data.habit
+      })
 
-    setOpen(prev => !prev)
+      setOpen(prev => !prev)
   }
 
   return (
