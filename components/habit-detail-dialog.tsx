@@ -223,7 +223,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
         )}
       </DialogTrigger>
       <DialogContent
-        className="max-w-lg max-h-[90vh] overflow-y-auto bg-card border-border"
+        className="max-w-lg max-h-[95vh] overflow-y-auto bg-card border-border scroll-container"
       >
         <DialogHeader>
           <DialogTitle className="text-foreground flex items-center gap-2">

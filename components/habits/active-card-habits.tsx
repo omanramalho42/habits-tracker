@@ -35,6 +35,7 @@ import { DndContext } from "@dnd-kit/core"
 import { Input } from "../ui/input"
 import { Card } from "../ui/card"
 import { Checkbox } from "../ui/checkbox"
+import confetti from "canvas-confetti"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -94,9 +95,10 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       habitId: string
       date: string
     }) => {
-      const response = await axios.post(`/api/habits/${habitId}/toggle`, {
-        date,
-      })
+      const response =
+        await axios.post(`/api/habits/${habitId}/toggle`, {
+          date,
+        })
       return response.data
     },
 
@@ -108,6 +110,13 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
 
       await queryClient.invalidateQueries({
         queryKey: ["habits"]
+      })
+
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
       })
     },
 
@@ -141,7 +150,8 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
   }
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col">
+{/* 
       {completedToday > 0 && habits.length > 0 && (
         <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-xl p-8 text-center shadow-sm">
           <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
@@ -151,7 +161,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
             Hábitos completos hoje
           </p>
         </div>
-      )}      
+      )}       */}
       
       {/* HABITS */}
       <div className="flex flex-row justify-between gap-2 items-center w-full">

@@ -30,14 +30,14 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 import { Check } from "lucide-react"
-import { CreateRoutineSchemaType } from '@/lib/schema/routine'
+import { CreateRoutineSchemaType, UpdateRoutineSchemaType } from '@/lib/schema/routine'
 import { CreateHabitDialog } from './create-habit-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { Habit, HabitWithStats } from '@/lib/types'
 import { fetchHabits } from '@/services/habits'
 
 interface MultiHabitsPickerProps {
-  control: Control<CreateRoutineSchemaType>
+  control: Control<CreateRoutineSchemaType | UpdateRoutineSchemaType>
 }
 
 const MultiHabitsPicker:React.FC<MultiHabitsPickerProps> = ({ control }) => {

@@ -84,8 +84,6 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
   const today = new Date()
   today.setHours(0,0,0,0)
 
-  console.log(routine, "routine")
-
   const form = useForm<UpdateRoutineSchemaType>({
     defaultValues: {
       id: routine.id,
@@ -104,7 +102,6 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
   
   const {
     handleSubmit,
-    reset,
     control,
     watch,
     formState: {

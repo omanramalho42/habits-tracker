@@ -14,7 +14,7 @@ export const createRoutineSchema = z.object({
 })
 
 export const updateRoutineSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   name: z.string(),
   description: z.string().optional(),
   emoji: z.string().optional(),

@@ -229,9 +229,9 @@ model HabitSchedule {
 }
 
 model HabitCompletion {
-  id      String @id @default(uuid())
+  id            String @id @default(uuid())
 
-  habitId String @map("habit_id")
+  habitId       String @map("habit_id")
 
   completedDate DateTime? @map("completed_date")
   counter       Int? @default(0)            // null = conta apenas 1 vez
