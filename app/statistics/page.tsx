@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic'
 import { useQuery } from '@tanstack/react-query'
-import { fetchHabits } from '@/services/habits'
 
 import { useMemo, useState } from 'react'
 import {
@@ -26,12 +25,18 @@ import Footer from '@/components/habits/footer'
 
 import type { HabitWithStats } from '@/lib/types'
 import { HeatMapRange } from '@/components/heat-map-v2'
-import { Annotations, Categories, Goals, Routine, Task } from '@prisma/client'
-import { fetchRoutines } from '@/services/routines'
-import { fetchAnnotations } from '@/services/annotations'
-import { fetchGoals, GoalsDTO } from '@/services/goals'
-import { CategoriesDTO, fetchCategories } from '@/services/categories'
-import { fetchTasks } from '@/services/tasks'
+import {
+  fetchHabits,
+  fetchRoutines,
+  fetchTasks,
+  fetchAnnotations,
+  fetchGoals,
+  fetchCategories
+} from "@/services"
+import { Annotations, Routine, Task } from '@prisma/client'
+import { GoalsDTO } from '@/services/goals'
+import { CategoriesDTO } from '@/services/categories'
+
 
 const HeatMap =
   dynamic(async () => await import("@/components/heat-map-v2"), {
@@ -50,10 +55,6 @@ export default function Statistics() {
 
   const {
     data: habits = [],
-    isLoading,
-    isFetching,
-    isError,
-    error,
   } = useQuery<HabitWithStats[]>({
     queryKey: ["habits"],
     queryFn: () => fetchHabits(),

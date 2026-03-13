@@ -16,11 +16,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Loader, Target, Trash } from 'lucide-react'
+import { Bell, Crown, Loader, Target, Trash, User } from 'lucide-react'
 import { HabitWithStats } from '@/lib/types'
 import { useQuery } from '@tanstack/react-query'
-import { fetchHabits } from '@/services/habits'
-
+import {
+  fetchHabits,
+  fetchRoutines,
+  fetchTasks,
+  fetchAnnotations,
+  fetchGoals,
+  fetchCategories
+} from "@/services"
+import { Annotations, Routine, Task, UserSettings } from '@prisma/client'
+import { GoalsDTO } from '@/services/goals'
+import { CategoriesDTO } from '@/services/categories'
 const HeaderSection =
   dynamic(() => import("@/components/habits/header-section"), {
     loading: () => <Loader className='animated-spin' />
@@ -28,18 +37,69 @@ const HeaderSection =
 
 import Footer from '@/components/habits/footer'
 import dynamic from 'next/dynamic'
+import { Card, CardContent } from '@/components/ui/card'
+import UpdateUserSettingsDialog from '@/components/update-user-settings-dialog'
+import { fetchUserSettings } from '@/services/settings'
+import { Badge } from '@/components/ui/badge'
 
 export default function Settings() {
   const {
+    data: userSettings,
+  } = useQuery<UserSettings>({
+    queryKey: ["user-settings"],
+    queryFn: () => fetchUserSettings(),
+  })
+  const {
     data: habits = [],
-    isLoading,
-    isFetching,
-    isError,
-    error,
   } = useQuery<HabitWithStats[]>({
     queryKey: ["habits"],
     queryFn: () => fetchHabits(),
     staleTime: 1000 * 60,
+  })
+
+  const {
+    data: routines = [],
+  } = useQuery<Routine[]>({
+    queryKey: ["routines"],
+    queryFn: () => fetchRoutines(),
+    staleTime: 1000 * 60,
+    retry: 1,
+  })
+
+  const {
+    data: tasks = [],
+  } = useQuery<Task[]>({
+    queryKey: ["tasks"],
+    queryFn: () => fetchTasks(),
+    staleTime: 1000 * 60,
+    retry: 1,
+  })
+
+  const {
+    data: annotations = [],
+  } = useQuery<Annotations[]>({
+    queryKey: ["annotations"],
+    queryFn: () => fetchAnnotations(),
+    staleTime: 1000 * 60,
+    retry: 1,
+  })
+
+  const {
+    data: goals = [],
+  } = useQuery<GoalsDTO[]>({
+    queryKey: ["goals"],
+    queryFn: () => fetchGoals(),
+    staleTime: 1000 * 60,
+    retry: 1,
+  })
+
+  const {
+    data: categories = [],
+  } = useQuery<CategoriesDTO[]>({
+    queryKey: ["categories"],
+    queryFn: () => fetchCategories(),
+    staleTime: 1000 * 60,
+    retry: 1,
   })
   const [filters, setFilters] = useState<any>()
   const [showResetDialog, setShowResetDialog] = useState(false)
@@ -60,6 +120,54 @@ export default function Settings() {
         {/* <AppHeader title="Ajustes" showSearch={false} showAdd={false} /> */}
 
         <div className="flex-1 px-4 pb-20 space-y-6">
+          {/* ====================================================== */}
+          {/* CONTA */}
+          {/* ====================================================== */}
+
+          <section className="space-y-3">
+
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase">
+              Conta
+            </h2>
+
+            <Card>
+
+              <CardContent className="p-6 flex items-center justify-between">
+
+                <div className="flex items-center gap-4">
+
+                  <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
+                    <User className="text-primary-foreground"/>
+                  </div>
+
+                  <div>
+
+                    <p className="font-semibold">
+                      Configurações da conta
+                    </p>
+
+                    <p className="text-sm text-muted-foreground">
+                      Nome, email e preferências do usuário
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <UpdateUserSettingsDialog
+                  trigger={
+                    <Button disabled variant="outline" className="text-sm text-primary">
+                      Editar
+                    </Button>
+                  }
+                  userSettings={userSettings ?? null}
+                />
+
+              </CardContent>
+
+            </Card>
+
+          </section>
           {/* Display Settings */}
           <section>
             <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
@@ -104,25 +212,136 @@ export default function Settings() {
             </div>
           </section>
 
-          {/* Statistics Summary */}
-          <section>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
-              Resumo
+          {/* ====================================================== */}
+          {/* NOTIFICAÇÕES */}
+          {/* ====================================================== */}
+
+          <section className="space-y-3">
+
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase">
+              Notificações
             </h2>
-            <div className="bg-card border border-border rounded-xl divide-y divide-border">
-              <div className="flex items-center justify-between p-4">
-                <span className="text-sm">Total de Hábitos</span>
-                <span className="font-medium">{habits.length}</span>
+
+            <Card>
+
+              <CardContent className="p-6 flex items-center justify-between">
+
+                <div className="flex items-center gap-3">
+
+                  <Bell className="size-4"/>
+
+                  <div>
+
+                    <p className="font-medium">
+                      Central de notificações
+                    </p>
+
+                    <p className="text-sm text-muted-foreground">
+                      Receber alertas e lembretes
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <Switch
+                  disabled
+                  // checked={notifications}
+                  // onCheckedChange={setNotifications}
+                />
+
+              </CardContent>
+
+            </Card>
+
+          </section>
+
+          {/* PLANO */}
+
+          <section>
+
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
+              Plano
+            </h2>
+
+            <div className="bg-card border rounded-xl p-6 flex items-center justify-between">
+
+              <div className="flex items-center gap-4">
+
+                <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
+                  <Crown className="text-primary-foreground"/>
+                </div>
+
+                <div>
+
+                  <p className="font-semibold">
+                    Plano Gratuito
+                  </p>
+
+                  <p className="text-sm text-muted-foreground">
+                    Upgrade para desbloquear recursos
+                  </p>
+
+                </div>
+
               </div>
-              <div className="flex items-center justify-between p-4">
-                <span className="text-sm">Hábitos Ativos</span>
-                <span className="font-medium">{habits.filter((h) => h.status === "ARCHIVED").length}</span>
-              </div>
-              <div className="flex items-center justify-between p-4">
-                <span className="text-sm">Hábitos Arquivados</span>
-                <span className="font-medium">{archivedCount}</span>
-              </div>
+
+              <Badge>FREE</Badge>
+
             </div>
+
+            <Button disabled className="w-full mt-4">
+              <p className='text-surface'>
+                Upgrade para PRO
+              </p>
+            </Button>
+
+          </section>
+
+          {/* ====================================================== */}
+          {/* RESUMO DA CONTA */}
+          {/* ====================================================== */}
+
+          <section className="space-y-3">
+
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase">
+              Resumo da conta
+            </h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+
+              <StatCard
+                label="Hábitos"
+                value={habits.length}
+              />
+
+              <StatCard
+                label="Rotinas"
+                value={routines.length}
+              />
+
+              <StatCard
+                label="Tarefas"
+                value={tasks.length}
+              />
+
+              <StatCard
+                label="Objetivos"
+                value={goals.length}
+              />
+
+              <StatCard
+                label="Categorias"
+                value={categories.length}
+              />
+
+              <StatCard
+                label="Anotações"
+                value={annotations.length}
+              />
+
+            </div>
+
           </section>
 
           {/* Danger Zone */}
@@ -139,6 +358,7 @@ export default function Settings() {
                   </p>
                 </div>
                 <Button
+                  disabled
                   variant="destructive"
                   onClick={() => setShowResetDialog(true)}
                 >
@@ -172,4 +392,38 @@ export default function Settings() {
       </div>
     </main>
   )
+}
+
+/* ====================================================== */
+/* STAT CARD */
+/* ====================================================== */
+
+function StatCard({
+  label,
+  value
+}:{
+  label:string
+  value:number
+}){
+
+  return (
+
+    <Card>
+
+      <CardContent className="p-4 text-center">
+
+        <p className="text-2xl font-bold">
+          {value}
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          {label}
+        </p>
+
+      </CardContent>
+
+    </Card>
+
+  )
+
 }
