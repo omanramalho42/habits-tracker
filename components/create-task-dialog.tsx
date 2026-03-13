@@ -14,8 +14,6 @@ import { toast } from 'sonner'
 import Picker from "@emoji-mart/react"
 import data from "@emoji-mart/data"
 
-import { CreateHabit } from "@/app/habits/_actions/habits/habits"
-
 import GoalPicker from "@/components/goal-picker"
 
 import {
@@ -31,7 +29,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
@@ -51,34 +48,28 @@ import {
   PlusSquare
 } from "lucide-react"
 
-import type { CreateHabitSchemaType } from "@/lib/schema/habit"
+import type { CreateTaskSchemaType } from "@/lib/schema/task"
+import { createTask } from "@/services/tasks"
 
-interface CreateHabitDialogProps {
+interface CreateTaskDialogProps {
   trigger?: React.ReactNode
-  onSuccessCallback?: (data: CreateHabitSchemaType) => void
+  onSuccessCallback?: (data: CreateTaskSchemaType) => void
 }
 
-export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
+const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
   const [open, setOpen] = useState<boolean>(false)
   const [color, setColor] = useState<boolean>(false)
 
   const today = new Date()
   today.setHours(0,0,0,0)
 
-  const form = useForm<CreateHabitSchemaType>({
+  const form = useForm<CreateTaskSchemaType>({
     defaultValues: {
       name: "",
       goal: "",
-      clock: "",
-      frequency: ["S","M","T","W","TH","F","SA",],
-      color: "",
       emoji: "",
       limitCounter: 1,
-      custom_field: "",
-      duration: "",
-      endDate: null,
-      reminder: false,
-      startDate: today
+      custom_field: ""
     }
   })
 
@@ -96,33 +87,26 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
   const queryClient = useQueryClient()
   
   const { mutate, isPending } = useMutation({
-    mutationFn: async (values: CreateHabitSchemaType) => {
+    mutationFn: async (values: CreateTaskSchemaType) => {
       console.log(values, "values")
-      return await CreateHabit(values)
+      return await createTask(values)
     },
     onSuccess: async () => {
-      toast.success("Habito criado com sucesso! 🎉", {
-        id: "create-habit"
+      toast.success("Tarefa criada com sucesso! 🎉", {
+        id: "create-task"
       })
 
       reset({
-        color: "",
         emoji: "",
-        endDate: null,
-        frequency: [],
         goal: "",
-        clock: "",
         name: "",
         limitCounter: 1,
-        reminder: false,
-        custom_field: "",
-        duration: "",
-        startDate: today,
+        custom_field: ""
       })
 
       await queryClient.invalidateQueries({
         queryKey: [
-          "habits"
+          "tasks"
         ]
       })
 
@@ -130,15 +114,15 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
     },
     onError: () => {
       toast.error("Aconteceu algo errado", {
-        id: "create-habit",
+        id: "create-task",
       })
     },
   })
 
-  const onSubmit = useCallback((values: CreateHabitSchemaType) => {
+  const onSubmit = useCallback((values: CreateTaskSchemaType) => {
     console.log(values, 'values')
     toast.loading("Criando hábito....", {
-      id: "create-habit"
+      id: "create-task"
     })
 
     mutate(values)
@@ -158,7 +142,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
             className='flex border-separate items-center justify-start rounded-none border-b px-3 py-3 text-muted-foreground'
           >
             <PlusSquare className="mr-2 h-4 w-4" />
-            Criar novo
+            Criar nova
           </Button>
         )}
       </DialogTrigger>
@@ -166,8 +150,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
       <DialogContent className="max-w-[90vw]">
         <DialogHeader>
           <DialogTitle className="flex flex-row items-center justify-start gap-3 text-2xl">
-            <p>Criar um novo</p>
-            <p style={{ color: watch('color') }}>hábito</p>
+            <p>Criar uma nova tarefa</p>
           </DialogTitle>
         </DialogHeader>
 
@@ -257,7 +240,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                           htmlFor="name"
                           className="text-sm font-semibold"
                         >
-                          Nome do hábito
+                          Nome da tarefa
                         </Label>
                       </FormLabel>
                       <FormControl>
@@ -266,11 +249,15 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                           id="name"
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="Acordar cedo pelas manhãs.."
+                          placeholder="Anotar atividade de sala.."
                           className="truncate"
                         />
                       </FormControl>
-                      {errors.name && (<span className="text-sm text-red-500">{errors.name?.message}</span>)}
+                      {errors.name && (
+                        <span className="text-sm text-red-500">
+                          {errors.name?.message}
+                        </span>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -282,77 +269,11 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                   </Label>
                   <GoalPicker
                     control={control}
-                    onSuccessCallback={() => {}}
                   />
                 </div>
               </div>
             </div>
             
-            {/* <div className="flex flex-row justify-between gap-3">
-              <FormField
-                name="clock"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>
-                      <Label
-                        htmlFor="clock"
-                        className="text-sm font-semibold"
-                      >
-                        Horario
-                      </Label>
-                    </FormLabel>
-                    <FormControl>
-                      <div className='relative'>
-                        <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
-                          <Clock8Icon className='size-4' />
-                        </div>
-                        <Input
-                          type='time'
-                          id='time-picker'
-                          step='1'
-                          className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-                          onChange={field.onChange}
-                          value={field.value}
-                        />
-                      </div>
-                    </FormControl>
-                    {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="duration"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>
-                      <Label
-                        htmlFor="duration"
-                        className="text-sm font-semibold"
-                      >
-                        Duração
-                      </Label>
-                    </FormLabel>
-                    <FormControl>
-                      <div className='relative'>
-                        <div className='text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-3 peer-disabled:opacity-50'>
-                          <Clock8Icon className='size-4' />
-                        </div>
-                        <Input
-                          type='time'
-                          id='time-picker'
-                          step='1'
-                          className='peer bg-background appearance-none pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-                          onChange={field.onChange}
-                          value={field.value}
-                        />
-                      </div>
-                    </FormControl>
-                    {errors.clock && (<span className="text-sm text-red-500">{errors.clock?.message}</span>)}
-                  </FormItem>
-                )}
-              />
-            </div> */}
-
             <div className="flex justify-between gap-4 items-center">
               <FormField
                 name="custom_field"
@@ -375,7 +296,11 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                         type="text"
                       />
                     </FormControl>
-                    {errors.custom_field && (<span className="text-sm text-red-500">{errors.custom_field.message}</span>)}
+                    {errors.custom_field && (
+                      <span className="text-sm text-red-500">
+                        {errors.custom_field.message}
+                      </span>
+                    )}
                   </FormItem>
                 )}
               />
@@ -411,149 +336,6 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                 )}
               />
             </div>
-
-            {/* DATA INICIAL */}
-            {/* <div>
-              <Label className="text-sm font-semibold mb-1.5 block">Data inicial</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !watch('startDate') && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {watch('startDate') ? format(watch('startDate'), "PPP") : <span>Escolha a data</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <FormField
-                    name="startDate"
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Calendar
-                            {...field}
-                            mode="single"
-                            selected={new Date(field.value)}
-                            onSelect={field.onChange}
-                          />
-                        </FormControl>
-                        {errors.startDate && (<span className="text-sm text-red-500">{errors.startDate?.message}</span>)}
-                      </FormItem>
-                    )}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div> */}
-            
-            {/* REMINDER */}
-            {/* <div className="flex flex-col gap-2 justify-between items-start">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <FormField
-                    control={control}
-                    name="reminder"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          <Label
-                            htmlFor="reminder"
-                            className="text-sm text-muted-foreground cursor-pointer"
-                          >
-                            Terminar
-                          </Label>
-                        </FormLabel>
-                        <FormControl>
-                          <Switch
-                            id="reminder"
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              
-              {watch('reminder') && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn("w-full justify-start text-left font-normal", !watch('endDate') && "text-muted-foreground")}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {watch("endDate") ? format(watch('endDate')!, "PPP") : <span>Escolhe data final</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                  <FormField
-                    name="endDate"
-                    rules={{ required: !watch('reminder') }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Calendar
-                            {...field}
-                            mode="single"
-                            selected={new Date(field.value)}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < (watch('startDate') ? new Date(watch('startDate')) : new Date()) || isSubmitting}
-                          />
-                        </FormControl>
-                        {watch('reminder') && errors.endDate && (<span className="text-sm text-red-500">{errors.endDate?.message}</span>)}
-                      </FormItem>
-                    )}
-                  />
-                  </PopoverContent>
-                </Popover>
-              )}
-            </div> */}
-            
-            {/* alldays */}
-            {/* <div className="flex flex-col justify-start gap-1">
-              <Label htmlFor="allDays" className="text-sm font-semibold">
-                Todos os dias
-              </Label>
-              <Switch
-                id="allDays"
-                checked={watch("frequency").length === WEEKDAYS.length}
-                onCheckedChange={() => {
-                  const allDays: string[] =
-                    WEEKDAYS.map((day) => day.label)
-                  
-                  if (watch("frequency").length === allDays.length) {
-                    return form.setValue("frequency", [])
-                  }
-
-                  form.setValue("frequency", allDays)
-                }}
-              />
-            </div> */}
-
-            {/* <Controller
-              name="frequency"
-              render={({ field }) => (
-                <ToggleGroup
-                  type="multiple"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  className="flex w-full gap-2"
-                >
-                  {WEEKDAYS.map((day) => (
-                    <ToggleGroupItem
-                      key={day.key}
-                      value={day.label}
-                      className="flex-1"
-                    >
-                      {day.keyPtBr}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              )}
-            /> */}
 
             {/* COLOR PICKER */}
             <Dialog open={color} onOpenChange={setColor}>
@@ -622,7 +404,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                 disabled={isSubmitting}
                 onClick={handleSubmit(onSubmit)}
               >
-                {isSubmitting ? "Criando..." : "Criar hábito"}
+                {isSubmitting ? "Criando..." : "Criar tarefa"}
               </Button>
             </DialogFooter>
           </form>
@@ -632,3 +414,5 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
     </Dialog>
   )
 }
+
+export default CreateTaskDialog

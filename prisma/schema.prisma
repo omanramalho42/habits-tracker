@@ -28,7 +28,14 @@ model User {
 
   settings     UserSettings?
   habits       Habit[]
-  moodEntry   MoodEntry[]
+  tasks        Task[]
+  moodEntry    MoodEntry[]
+
+  // routines     Routine[]
+
+  // goals Goals[]
+
+  categories Categories[]
 }
 
 model UserSettings {
@@ -96,24 +103,28 @@ model Habit {
 }
 
 model Task {
-  id           String  @id @default(uuid())
-  userId       String  @map("user_id")
+  id            String      @id @default(uuid())
+  userId        String @map("user_id")
 
-  name        String     @db.VarChar(100)
-  description String?    @db.VarChar(255)
+  user User @relation(fields: [userId], references: [id])
 
-  startDate   DateTime   @default(now()) @map("start_date")
-  endDate     DateTime?  @map("end_date")
+  name          String      @db.VarChar(100)
+  description   String?     @db.VarChar(255)
+  emoji         String?     @db.VarChar(10)
 
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime?  @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @map("deleted_at")
+  customField   String?     @map("custom_field") @db.VarChar(12)
+  limitCounter  Int?        @default(1)
 
-  status      HabitStatus     @default(ACTIVE)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime?   @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at")
+
+  status      HabitStatus   @default(ACTIVE)
 
   schedules   TaskSchedule[]
   completions TaskCompletion[]
   goals       Goals[]
+  categories  Categories[]
 
   checkpointId  String?  @map("checkpoint_id")
   checkpoints   CheckPoint[]
@@ -161,7 +172,9 @@ model TaskCompletion {
 
 model Routine {
   id          String    @id @default(uuid())
-  userId      String    @map("user_id")
+  userId        String @map("user_id")
+
+  // user User @relation(fields: [userId], references: [id])
 
   name        String
   description String?
@@ -268,7 +281,9 @@ model MoodEntry {
 
 model Goals {
   id            String  @id @default(uuid())
-  userId        String  @map("user_id")
+  userId        String @map("user_id")
+
+  // user          User @relation(fields: [userId], references: [id])
 
   name          String
   description   String?
@@ -287,7 +302,9 @@ model Goals {
 
 model Categories {
   id            String  @id @default(uuid())
-  userId        String  @map("user_id")
+  userId        String @map("user_id")
+
+  user User @relation(fields: [userId], references: [id])
 
   name          String
   description   String?
@@ -298,6 +315,7 @@ model Categories {
   updatedAt     DateTime? @updatedAt      @map("updated_at")
 
   habits        Habit[]
+  tasks         Task[]
 
   status        HabitStatus? @default(ACTIVE)
   @@map("categories")
@@ -305,6 +323,9 @@ model Categories {
 
 model Annotations {
   id            String  @id @default(uuid())
+  // userId        String @map("user_id")
+
+  // user User @relation(fields: [userId], references: [id])
 
   name         String
   content      String?

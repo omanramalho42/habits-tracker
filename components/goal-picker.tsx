@@ -29,13 +29,14 @@ import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 
 import type { CreateHabitSchemaType, UpdateHabitSchemaType } from '@/lib/schema/habit'
+import { CreateTaskSchemaType, UpdateTaskSchemaType } from '@/lib/schema/task'
 
 interface GoalPickerProps {
-  control: Control<CreateHabitSchemaType | UpdateHabitSchemaType>
+  control: Control<any>
   onSuccessCallback?: (value: string) => void
 }
 
-const GoalPicker:React.FC<GoalPickerProps> = ({ onSuccessCallback, control }) => {
+const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const { field } = useController({

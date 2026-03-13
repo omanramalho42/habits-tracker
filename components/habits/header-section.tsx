@@ -29,6 +29,8 @@ import {
 import CreateCheckPointDialog from '../create-checkpoint-dialog'
 import CreateRoutineDialog from '../create-routine-dialog'
 import dynamic from 'next/dynamic'
+import CreateTaskDialog from '../create-task-dialog'
+import CreateCategorieDialog from '../create-categorie-dialog'
 
 const HeaderSection:React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
@@ -83,6 +85,28 @@ const HeaderSection:React.FC = () => {
             }
           />
           <CreateRoutineDialog
+            trigger={
+              <Button
+                size="icon"
+                disabled={loading}
+                className="rounded-full p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus className="h-7 w-7" />
+              </Button>
+            }
+          />
+          <CreateTaskDialog
+            trigger={
+              <Button
+                size="icon"
+                disabled={loading}
+                className="rounded-full p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus className="h-7 w-7" />
+              </Button>
+            }
+          />
+          <CreateCategorieDialog
             trigger={
               <Button
                 size="icon"
