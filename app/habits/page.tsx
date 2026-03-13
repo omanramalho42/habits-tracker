@@ -3,11 +3,6 @@
 import Link from "next/link"
 import React, { useCallback, useState } from 'react'
 
-import { toast } from 'sonner'
-
-import { deleteHabit, fetchHabits, updateHabit } from "@/services/habits"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-
 import { HabitCard } from '@/components/habit-card'
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
@@ -31,7 +26,8 @@ import { Input } from "@/components/ui/input"
 import type { HabitWithStats } from '@/lib/types'
 
 import { Loader, Plus } from "lucide-react"
-import { UpdateHabitSchemaType } from "@/lib/schema/habit"
+import { useQuery } from "@tanstack/react-query"
+import { fetchHabits } from "@/services"
 
 export default function page() {
   const [search, setSearch] = useState<string>("")
@@ -46,72 +42,6 @@ export default function page() {
     queryKey: ["habits"],
     queryFn: () => fetchHabits(),
     staleTime: 1000 * 60,
-  })
-
-  const queryClient = useQueryClient()
-
-  const handleUpdateHabit = useCallback((data: UpdateHabitSchemaType) => {
-    updateHabitMutation.mutate(data)
-  }, [])
-
-  const updateHabitMutation = useMutation({
-    mutationFn: updateHabit,
-    onMutate: () => {
-      return toast.loading(
-        "Atualizando hábito...",
-        { id: "update-habit" }
-      )
-    },
-    onSuccess: (_, __, toastId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["habits"],
-        exact: false,
-      })
-
-      toast.success(
-        "Hábito atualizado com sucesso.",
-        { id: toastId }
-      )
-    },
-    onError: (error: any, _, toastId) => {
-      toast.error(
-        error?.message ?? "Erro ao atualizar hábito",
-        { id: toastId }
-      )
-    },
-  })
-
-  const handleDeleteHabit = useCallback((habitId: string) => {
-    deleteHabitMutation.mutate(habitId)
-  }, [])
-
-  const deleteHabitMutation = useMutation({
-    mutationFn: deleteHabit,
-    onMutate: () => {
-      return toast.loading(
-        "Deletando hábito...",
-        { id: "delete-habit" }
-      )
-    },
-    onSuccess: (_, __, toastId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["habits"],
-        exact: false,
-      })
-
-      setSearch("")
-
-      toast.success(
-        "Hábito deletado com sucesso.",
-        { id: toastId }
-      )
-    },
-    onError: (error: any, _, toastId) => {
-      toast.error(
-        error?.message ?? "Erro ao deletar hábito",
-        { id: toastId }
-      )
-    },
   })
 
   return (
@@ -186,8 +116,6 @@ export default function page() {
                     loading={isFetching}
                     selectedDate={new Date()}
                     habit={habit}
-                    onDelete={handleDeleteHabit}
-                    onEdit={handleUpdateHabit}
                   />
                 </div>
               )) : (

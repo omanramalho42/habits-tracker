@@ -253,7 +253,7 @@ function SortableHabit({
       <Button
         disabled={isPending}
         variant="outline"
-        size="icon"
+        size="icon-sm"
         {...attributes}
         {...listeners}
         className="
@@ -269,7 +269,7 @@ function SortableHabit({
           z-10
         "
       >
-        <ArrowUpDownIcon size={18} />
+        <ArrowUpDownIcon  />
       </Button>
 
       <HabitCard

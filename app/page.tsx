@@ -175,15 +175,12 @@ export default function Home() {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
   }
 
-  console.log(routines, "ROUTINES (!)")
-  console.log(habits, "HABITS (!)")
-
   return (
     <>
       {/* <MoodWizard /> */}
 
       <main className="min-h-screen bg-background">
-        <div className="flex flex-col space-y-6 max-w-5xl mx-auto px-4 py-8">
+        <div className="flex flex-col space-y-2 max-w-5xl mx-auto px-4 py-1">
 
           {/* HEADER + ACTIONS BUTTONS */}
           <HeaderSection />

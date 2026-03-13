@@ -1,11 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
-
-import { toast } from "react-toastify"
+import React, { useCallback, useState } from "react"
 
 import DeleteHabitDialog from "@/components/delete-habit-dialog"
-import HeatMapHabit from "@/components/heat-map"
+
 import {
   UpdateHabitDialog,
 } from "@/components/update-habit-dialog"
@@ -13,11 +11,7 @@ import { HabitDetailDialog } from "@/components/habit-detail-dialog"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -27,23 +21,34 @@ import { cn } from "@/lib/utils"
 import { WEEKDAYS, WEEKDAY_MAP } from "@/lib/habit-utils"
 
 import {
-  X,
   Pencil,
   Trash2,
   TrendingUp,
-  Eye,
   Check,
   EyeIcon,
   Clock10Icon,
   Repeat,
   TimerIcon,
   PlayCircle,
+  MoreVertical,
+  File,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
 import CreateAnnotationDialog from "./create-annotation-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "./ui/dropdown-menu"
+
+import { deleteHabit, updateHabit } from "@/services/habits"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 const WEEKDAY_TO_FREQUENCY: Record<number, string> = {
   0: 'S',   // Sunday
@@ -236,6 +241,40 @@ export function HabitCard({
       onToggle(habit.id)
   }
 
+
+  const queryClient = useQueryClient()
+
+  const handleUpdateHabit = useCallback((data: UpdateHabitSchemaType) => {
+    updateHabitMutation.mutate(data)
+  }, [])
+
+  const updateHabitMutation = useMutation({
+    mutationFn: updateHabit,
+    onMutate: () => {
+      return toast.loading(
+        "Atualizando hábito...",
+        { id: "update-habit" }
+      )
+    },
+    onSuccess: (_, __, toastId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["habits"],
+        exact: false,
+      })
+
+      toast.success(
+        "Hábito atualizado com sucesso.",
+        { id: toastId }
+      )
+    },
+    onError: (error: any, _, toastId) => {
+      toast.error(
+        error?.message ?? "Erro ao atualizar hábito",
+        { id: toastId }
+      )
+    },
+  })
+
   const now = timeToSeconds(getCurrentTimeHHMMSS(selectedDate))
 
   const start = habit.clock
@@ -310,31 +349,6 @@ export function HabitCard({
                   <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
                     {habit.name}
                   </h3>
-                
-                  <div className="flex items-center gap-1 ">
-                    <HabitDetailDialog
-                      currentDate={selectedDate || new Date()}
-                      habit={habit}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          disabled={loading}
-                          size="icon"
-                          aria-label="Ver detalhes do hábito"
-                          title="Ver detalhes do hábito"
-                          className="flex items-center bg-transparent"
-                        >
-                          <EyeIcon className="h-4 w-4" />
-                        </Button>
-                      }
-                    /> 
-                    {/* ANNOTATION */}
-                    {isCompleted && !!todayCompletion?.id && (!todayCompletion.annotations) && (
-                      <CreateAnnotationDialog
-                        completionId={todayCompletion.id}
-                      />
-                    )}
-                  </div>
 
                   {habit.goals && habit.goals.length > 0 && (
                     <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -363,23 +377,25 @@ export function HabitCard({
                     className="flex flex-row gap-2 text-sm text-foreground mb-3"
                   >
                     <Repeat className="text-sm" />
-                    {counter || 0}/{habit?.limitCounter} {" "} {habit?.customField}
+                    <p className="text-sm">
+                      {counter || 0}/{habit?.limitCounter} {" "} {habit?.customField}
+                    </p>
                   </Badge>
                 )}
                 {habit.clock && (
-                <Badge
-                  variant="default"
-                  className={
-                    cn(
-                      "text-sm flex flex-row gap-2 text-foreground mb-3",
-                       isActiveHour && 'bg-yellow-500/60',
-                       isOutHour && 'bg-red-500/60',
-                       isCompleted && 'bg-green-500/60'
-                    )
-                  }
-                >
-                  <Clock10Icon /> {habit?.clock}
-                </Badge>
+                  <Badge
+                    variant="default"
+                    className={
+                      cn(
+                        "text-sm flex flex-row gap-2 text-foreground mb-3",
+                        isActiveHour && 'bg-yellow-500/60',
+                        isOutHour && 'bg-red-500/60',
+                        isCompleted && 'bg-green-500/60'
+                      )
+                    }
+                  >
+                    <Clock10Icon /> {habit?.clock}
+                  </Badge>
                 )}
                 {habit.duration && (
                   <Badge
@@ -411,7 +427,7 @@ export function HabitCard({
                       <div
                         key={day.key}
                         className={cn(
-                          'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
+                          'w-5.75 h-5.75 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
                           isActive
                             ? "bg-success text-success-foreground"
                             :  WEEKDAY_TO_FREQUENCY[today.getDay()] === day.key
@@ -468,7 +484,7 @@ export function HabitCard({
                   {Array.from({ length: 7 }).map((_, i) => (
                     <Skeleton
                       key={i}
-                      className="w-7 h-7 rounded-lg"
+                      className="w-6 h-6 rounded-lg"
                     />
                   ))}
                 </div>
@@ -487,46 +503,92 @@ export function HabitCard({
         {!loading ?(
           <div
             className={cn(
-              "flex items-center gap-1.5 transition-opacity",
-              // "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+              "flex justify-center items-center gap-1 transition-opacity",
+              "opacity-100 md:opacity-0 md:group-hover:opacity-100",
             )}
           >
-            {onEdit && (
-              <UpdateHabitDialog
-                habit={habit}
-                onSuccessCallback={onEdit ? (data) => onEdit(data) : undefined}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    disabled={!onEdit}
-                    aria-label="Editar hábito"
-                    title="Editar hábito"
-                    size="icon"
-                    className="h-9 w-9 hover:bg-muted"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                }
-              />
-            )}
+            <DropdownMenu>
 
-            {onDelete && (
-              <DeleteHabitDialog
-                habitId={habit.id}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    disabled={!onDelete}
-                    size="icon"
-                    aria-label="Deletar hábito"
-                    title="Deletar hábito"
-                    className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                }
-              />
-            )}
+                  <DropdownMenuTrigger asChild>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-44">
+
+                    {/* EDIT */}
+
+                    <UpdateHabitDialog
+                      habit={habit}
+                      onSuccessCallback={handleUpdateHabit}
+                      trigger={
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          className="cursor-pointer"
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                      }
+                    />
+
+                    <DropdownMenuSeparator />
+
+                    {/* DELETE */}
+
+                    <DeleteHabitDialog
+                      habitId={habit.id}
+                      trigger={
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          className="text-destructive focus:text-destructive cursor-pointer"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Deletar
+                        </DropdownMenuItem>
+                      }
+                    />
+
+                    <HabitDetailDialog
+                      currentDate={selectedDate || new Date()}
+                      habit={habit}
+                      trigger={
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          disabled={loading}
+                        >
+                          <EyeIcon className="mr-2 h-4 w-4" />
+                          Detalhes
+                        </DropdownMenuItem>
+                      }
+                    /> 
+                    {/* ANNOTATION */}
+                    {isCompleted && !!todayCompletion?.id && (!todayCompletion.annotations) && (
+                      <CreateAnnotationDialog
+                        completionId={todayCompletion.id}
+                        trigger={
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            disabled={loading}
+                          >
+                            <File className="mr-2 h-4 w-4" />
+                            Anotação
+                          </DropdownMenuItem>
+                        }
+                        
+                      />
+                    )}
+
+                  </DropdownMenuContent>
+
+            </DropdownMenu>
 
             {/* COUNTER CHECKBOX */}
             {onToggle && (
@@ -541,7 +603,7 @@ export function HabitCard({
                   disabled={loading}
                   onClick={handleToggleClick}
                   className={cn(
-                    "relative w-7 h-7 rounded-full flex items-center justify-center transition",
+                    "relative w-6 h-6 rounded-full flex items-center justify-center transition",
                     isCompleted
                       ? `bg-primary text-white`
                       : "bg-background border border-border"
@@ -574,42 +636,6 @@ export function HabitCard({
           </div>
         )}
       </div>
-      
-      {/* COLLAPSIBLE SHOW HEATMAP */}
-      {onEdit && (
-        <Collapsible
-          open={show}
-          onOpenChange={setShow}
-          className="flex w-full flex-col"
-        >
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="outline"
-              className="flex flex-row gap-2 items-center w-full"
-            >
-              <Eye className="text-sm text-muted-foreground" />
-              <p className="text-sm">
-                Visualizar gráfico de atividade
-              </p>
-            </Button>
-          </CollapsibleTrigger>
-
-          <CollapsibleContent className="flex items-center justify-between">
-            <div className="overflow-x-auto">
-              <div className="w-full">
-                <HeatMapHabit
-                  counter={counter}
-                  endDate={habit.endDate ? new Date(habit.endDate) : null}
-                  habitColor={habit.color || "green"}
-                  startDate={new Date(habit.startDate)}
-                  completions={habit.completions}
-                />
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
-
     </Card>
   )
 }

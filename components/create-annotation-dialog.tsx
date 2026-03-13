@@ -44,9 +44,10 @@ import type { CreateAnnotationSchemaType } from '@/lib/schema/annotations'
 
 interface CreateAnnotationDialogProps {
   completionId: string
+  trigger?: React.ReactNode
 }
 
-const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completionId }) => {
+const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completionId, trigger }) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const form = useForm<CreateAnnotationSchemaType>({
@@ -120,13 +121,15 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
       <TooltipTrigger asChild>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-full"
-            >
-              <File className="h-4 w-4" />
-            </Button>
+            {trigger || (
+              <Button
+                size="icon"
+                variant="outline"
+                className="rounded-full"
+              >
+                <File className="h-4 w-4" />
+              </Button>
+            )}
           </DialogTrigger>
           <DialogContent>
             <DialogHeader className='text-start'>

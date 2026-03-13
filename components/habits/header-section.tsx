@@ -22,6 +22,7 @@ import {
   Home,
   ListIcon,
   LogOut,
+  LucideNewspaper,
   Plus,
   Settings
 } from 'lucide-react'
@@ -143,6 +144,17 @@ const HeaderSection:React.FC = () => {
           </Link>
         </Button>
         <Button
+          type='button'
+          variant="outline"
+          className='rounded-full p-0 border-border/50 hover:bg-muted'
+          disabled={loading}
+          size="icon"
+        >
+          <Link href="/news">
+            <LucideNewspaper className='w-3 h-3'/>
+          </Link>
+        </Button>
+        {/* <Button
           onClick={() => redirect("/habits")}
           size="icon"
           variant="outline"
@@ -150,7 +162,7 @@ const HeaderSection:React.FC = () => {
           className="rounded-full p-0 border-border/50 hover:bg-muted"
         >
           <ListIcon className="h-6 w-6" />
-        </Button>
+        </Button> */}
 
         <SignOutButton
           children={
