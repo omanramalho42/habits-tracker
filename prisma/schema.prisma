@@ -104,9 +104,9 @@ model Habit {
 
 model Task {
   id            String      @id @default(uuid())
-  userId        String @map("user_id")
+  userId        String      @map("user_id")
 
-  user User @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
 
   name          String      @db.VarChar(100)
   description   String?     @db.VarChar(255)
@@ -119,15 +119,20 @@ model Task {
   updatedAt     DateTime?   @updatedAt @map("updated_at")
   deletedAt     DateTime?   @map("deleted_at")
 
-  status      HabitStatus   @default(ACTIVE)
+  indexPos      Int?
+  status        HabitStatus   @default(ACTIVE)
 
-  schedules   TaskSchedule[]
-  completions TaskCompletion[]
-  goals       Goals[]
-  categories  Categories[]
+  schedules     TaskSchedule[]
+  completions   TaskCompletion[]
+  goals         Goals[]
+  categories    Categories[]
 
   checkpointId  String?  @map("checkpoint_id")
   checkpoints   CheckPoint[]
+
+  @@index([indexPos])
+  @@index([userId])
+  @@map("task")
 }
 
 model CheckPoint {

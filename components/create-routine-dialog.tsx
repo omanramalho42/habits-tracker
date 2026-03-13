@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react'
 
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
-import Picker from "@emoji-mart/react"
-import data from "@emoji-mart/data"
+import { EmojiPicker } from "frimousse"
 
 import { format } from "date-fns"
 import { toast } from 'sonner'
@@ -71,68 +70,11 @@ interface CreateRoutineDialogProps {
 }
 
 const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => {
-  // const [openModal, setOpenModal] =
-  //   useState<boolean>(false)
-
   const crons = [
     {value:"semanalmente", label:"semanalmente"},
     {value:"mensalmente", label: "mensalmente"},
     {value: "diariamente", label: "diariamente"},
   ]
-
-  // const handleAdd = async () => {
-  //   const isValidHabitId =
-  //     await triggerRHF(`habits.${fields.length}.habitId`)
-  //   const isValidHabitClock = 
-  //     await triggerRHF(`habits.${fields.length}.clock`)
-  //   const isValidHabitDuration = 
-  //     await triggerRHF(`habits.${fields.length}.duration`)
-    
-  //   const isValid = 
-  //     isValidHabitId && 
-  //     isValidHabitClock && 
-  //     isValidHabitDuration
-    
-  //   if(!isValid) {
-  //     if(!isValidHabitId) {
-  //       setError(
-  //         `habits.${fields.length}.habitId`,
-  //         { message: "Vincule pelo menos 1 hábito" })
-  //     }
-  //     if(!isValidHabitClock) {
-  //       setError(
-  //         `habits.${fields.length}.clock`,
-  //         { message: "Campo requerido" })
-  //     }
-
-  //     if(!isValidHabitDuration) {
-  //       setError(
-  //         `habits.${fields.length}.duration`,
-  //         { message: "Campo requerido" })
-  //     }
-
-  //     return
-  //   }
-
-  //   const currentHabits =
-  //     form.getValues("habits")
-
-  //   // console.log(currentHabits, "current habits")
-  //   append({
-  //     habitId: currentHabits[fields.length].habitId,
-  //     clock: currentHabits[fields.length].clock,
-  //     duration: currentHabits[fields.length].duration
-  //   })
-  // }
-
-  // const handleRemove = (habitId: string) => {
-  //   const currentHabits = form.getValues("habits")
-
-  //   form.setValue(
-  //     "habits",
-  //     currentHabits?.filter(h => h.habitId !== habitId)
-  //   )
-  // }
 
   const [open, setOpen] = useState<boolean>(false)
   const today = new Date()
@@ -319,69 +261,79 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
               <FormField
                 control={control}
                 name="emoji"
-                disabled={isPending}
-                render={({ field }) => (
-                  <FormItem className="grid-cols-1">
-                    <FormLabel htmlFor="icon" className='mb-1'>
-                      Icone
-                    </FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Card
-                            className="w-full h-full"
-                          >
-                            {field.value ? (
-                              <div className="flex flex-col items-center justify-center gap-1">
-                                <span className="text-3xl" role="img">
-                                  {field.value}
-                                </span>
-                                <p className="text-xs text-muted-foreground text-center">
-                                  Toque para trocar
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col items-center justify-center gap-1">
-                                <CircleOff className="h-6 w-6 text-muted-foreground" />
-                                <p className="text-xs text-muted-foreground text-center">
-                                  Toque para selecionar
-                                </p>
-                              </div>
-                            )}
-                          </Card>
-                        </PopoverTrigger>
+                render={() => (
+                  <FormField
+                    control={control}
+                    name="emoji"
+                    render={({ field }) => (
+                      <FormItem className="grid-cols-1 gap-3">
+                        <FormLabel htmlFor="icon">
+                          Icone
+                        </FormLabel>
 
-                        <PopoverContent
-                          side="bottom"
-                          align="center"
-                          className="
-                            bg-transparent
-                            border-none
-                            w-[90vw] max-w-sm
-                            sm:w-105
-                            p-0
-                            max-h-[80vh]
-                            overflow-hidden
-                          "
-                        >
-                          <div className="">
-                            <Picker
-                              data={data}
-                              theme="dark"
-                              disabled={isSubmitting}
-                              navPosition="bottom"
-                              previewPosition="top"
-                              searchPosition="sticky"
-                              skinTonePosition="preview"
-                              onEmojiSelect={(emoji: { native: string }) => {
-                                field.onChange(emoji.native)
-                              }}
-                            />
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                  </FormItem>
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Card className="w-full h-full cursor-pointer">
+                                {field.value ? (
+                                  <div className="flex flex-col items-center justify-center gap-1 px-2">
+                                    <span className="text-3xl" role="img">
+                                      {field.value}
+                                    </span>
+
+                                    <p className="text-xs text-muted-foreground">
+                                      Toque para trocar
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center gap-1 py-4">
+                                    <CircleOff className="h-6 w-6 text-muted-foreground" />
+
+                                    <p className="text-xs text-muted-foreground text-center">
+                                      Toque para selecionar
+                                    </p>
+                                  </div>
+                                )}
+                              </Card>
+                            </PopoverTrigger>
+
+                            <PopoverContent
+                              side="bottom"
+                              align="end"
+                              className="
+                                scroll-container
+                                w-full
+                                p-3
+                                max-h-[70vh]
+                                overflow-hidden
+                              "
+                            >
+                              <EmojiPicker.Root
+                                className="flex flex-col gap-2"
+                                onEmojiSelect={(emoji: any) => {
+                                  field.onChange(emoji.emoji)
+                                }}
+                              >
+                                <EmojiPicker.Search className="w-full" />
+
+                                <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                                  <EmojiPicker.Loading>
+                                    Carregando…
+                                  </EmojiPicker.Loading>
+
+                                  <EmojiPicker.Empty>
+                                    Nenhum emoji encontrado
+                                  </EmojiPicker.Empty>
+
+                                  <EmojiPicker.List />
+                                </EmojiPicker.Viewport>
+                              </EmojiPicker.Root>
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 )}
               />
             </div>

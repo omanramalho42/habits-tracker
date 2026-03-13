@@ -1,21 +1,49 @@
 import React, { useState } from 'react'
 
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
-import { Button } from './ui/button'
+import { format } from 'date-fns'
 
-import { CalendarIcon, CircleOff, PlusSquare } from 'lucide-react'
+import { EmojiPicker } from "frimousse"
+
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
-import Picker from "@emoji-mart/react"
-import data from "@emoji-mart/data"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { Card } from '@/components/ui/card'
+
+
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
-import { Calendar } from './ui/calendar'
+
+import { 
+  CalendarIcon,
+  CircleOff,
+  PlusSquare
+} from 'lucide-react'
 
 interface CreateCheckpointDialogProps {
   trigger: React.ReactNode;
@@ -159,73 +187,6 @@ const CreateCheckPointDialog:React.FC<CreateCheckpointDialogProps> = ({ trigger 
                 </FormItem>
               )}
             />
-            {/* ICONE */}
-            <FormField
-              control={control}
-              name="emoji"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Icone
-                  </FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full min-h-16 sm:min-h-25"
-                        >
-                          {field.value ? (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <span className="text-3xl" role="img">
-                                {field.value}
-                              </span>
-                              <p className="text-xs text-muted-foreground">
-                                Toque para trocar
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <CircleOff className="h-8 w-8 text-muted-foreground" />
-                              <p className="text-xs text-muted-foreground">
-                                Toque para selecionar
-                              </p>
-                            </div>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent
-                        side="bottom"
-                        align="center"
-                        className="
-                          w-[90vw] max-w-sm
-                          sm:w-105
-                          p-0
-                          max-h-[80vh]
-                          overflow-hidden
-                        "
-                      >
-                        <div className="max-h-[70vh]">
-                          <Picker
-                            data={data}
-                            theme="dark"
-                            disabled={isSubmitting}
-                            navPosition="bottom"
-                            previewPosition="top"
-                            searchPosition="sticky"
-                            skinTonePosition="preview"
-                            onEmojiSelect={(emoji: { native: string }) => {
-                              field.onChange(emoji.native)
-                            }}
-                          />
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
 
             {/* START DATE */}
             <div>
@@ -295,6 +256,86 @@ const CreateCheckPointDialog:React.FC<CreateCheckpointDialogProps> = ({ trigger 
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* ICONE */}
+            <FormField
+              control={control}
+              name="emoji"
+              render={() => (
+                <FormField
+                  control={control}
+                  name="emoji"
+                  render={({ field }) => (
+                    <FormItem className="grid-cols-1 gap-3">
+                      <FormLabel htmlFor="icon">
+                        Icone
+                      </FormLabel>
+
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Card className="w-full p-2 h-full cursor-pointer">
+                              {field.value ? (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <span className="text-3xl" role="img">
+                                    {field.value}
+                                  </span>
+
+                                  <p className="text-xs text-muted-foreground">
+                                    Toque para trocar
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
+
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Toque para selecionar
+                                  </p>
+                                </div>
+                              )}
+                            </Card>
+                          </PopoverTrigger>
+
+                          <PopoverContent
+                            side="bottom"
+                            align="center"
+                            className="
+                              scroll-container
+                              w-full
+                              p-3
+                              max-h-[70vh]
+                              overflow-hidden
+                            "
+                          >
+                            <EmojiPicker.Root
+                              className="flex flex-col gap-2"
+                              onEmojiSelect={(emoji: any) => {
+                                field.onChange(emoji.emoji)
+                              }}
+                            >
+                              <EmojiPicker.Search className="w-full" />
+
+                              <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                                <EmojiPicker.Loading>
+                                  Carregando…
+                                </EmojiPicker.Loading>
+
+                                <EmojiPicker.Empty>
+                                  Nenhum emoji encontrado
+                                </EmojiPicker.Empty>
+
+                                <EmojiPicker.List />
+                              </EmojiPicker.Viewport>
+                            </EmojiPicker.Root>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
+            />
 
           </form>
         </Form>

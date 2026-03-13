@@ -18,6 +18,21 @@ export function toSafeDate(dateStr?: string | null) {
   return new Date(year, month - 1, day, 12, 0, 0)
 }
 
+export const formatDateBR = (date: Date) => {
+  const parts = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date)
+
+  const day = parts.find(p => p.type === "day")?.value
+  const month = parts.find(p => p.type === "month")?.value
+  const year = parts.find(p => p.type === "year")?.value
+
+  return `${year}-${month}-${day}`
+}
+
 export function getTodayDay() {
   const now = new Date()
 

@@ -28,9 +28,6 @@ import { cn } from '@/lib/utils'
 
 import { Check } from 'lucide-react'
 
-import type { CreateHabitSchemaType, UpdateHabitSchemaType } from '@/lib/schema/habit'
-import { CreateTaskSchemaType, UpdateTaskSchemaType } from '@/lib/schema/task'
-
 interface GoalPickerProps {
   control: Control<any>
   onSuccessCallback?: (value: string) => void

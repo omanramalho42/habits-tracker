@@ -69,6 +69,7 @@
     "express": "latest",
     "fastify": "latest",
     "framer-motion": "12.24.12",
+    "frimousse": "^0.3.0",
     "h3": "latest",
     "hono": "latest",
     "inngest": "^3.30.0",

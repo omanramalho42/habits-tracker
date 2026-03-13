@@ -1,12 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {  useState } from "react"
+
+import { toast } from "sonner"
+import dynamic from "next/dynamic"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { fetchHabits } from "@/services/habits"
 
-// import { MoodWizard } from "@/components/mood-wizard"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,35 +18,61 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
 import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
+
 const HeaderSection =
   dynamic(() => import("@/components/habits/header-section"), {
     loading: () => <Skeleton />
   })
-  
-import type { HabitWithStats } from "@/lib/types"
-// import { DndContext, useDraggable } from "@dnd-kit/core"
-import Footer from "@/components/habits/footer"
+
+import axios from "axios"
+import type {
+  Habit,
+  HabitSchedule,
+  Routine
+} from "@prisma/client"
 import { fetchRoutines } from "@/services/routines"
-import { Habit, HabitSchedule, Routine } from "@prisma/client"
+
+import Footer from "@/components/habits/footer"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { AlarmClock, AppWindowIcon, Check, Clock, Clock10, CodeIcon, Edit, Filter, MoreHorizontal, Pencil, Plus, Trash } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Card } from "@/components/ui/card"
 import CreateRoutineDialog from "@/components/create-routine-dialog"
 import RemoveHabitRoutineDialog from "@/components/remove-habit-routine-dialog"
 import UpdateRoutineDialog from "@/components/update-routine-dialog"
 import DeleteRoutineDialog from "@/components/delete-routine-dialog"
 import UpdateRoutineHabitSchedule from "@/components/update-routine-habit-schedule-dialog"
-import axios from "axios"
-import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import dynamic from "next/dynamic"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs"
+
 import { Skeleton } from "@/components/ui/skeleton"
+
+import {
+  AlarmClock,
+  AppWindowIcon,
+  Check,
+  Clock,
+  Clock10,
+  CodeIcon,
+  Edit,
+  Filter,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  TargetIcon,
+  Trash
+} from "lucide-react"
+
+import type { HabitWithStats } from "@/lib/types"
+
+import { cn, formatDateBR } from "@/lib/utils"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
@@ -56,17 +84,10 @@ export default function Home() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // const newToday = new Intl.DateTimeFormat('pt-BR', {
-  //   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  //   year: 'numeric',
-  //   month: '2-digit',
-  //   day: '2-digit'
-  // }).format(today)
-  
-  const [selectedDate, setSelectedDate] = useState(today)
-
+  const [selectedDate, setSelectedDate] =
+    useState(today)
   const selectedDateStr =
-    selectedDate.toISOString().split("T")[0]
+    formatDateBR(selectedDate)
 
   const {
     data: habits = [],
@@ -199,6 +220,10 @@ export default function Home() {
               <TabsTrigger value="habits">
                 <CodeIcon />
                 Hábitos
+              </TabsTrigger>
+              <TabsTrigger disabled value="tasks">
+                <TargetIcon />
+                Tarefas
               </TabsTrigger>
             </TabsList>
             <TabsContent value="routines">

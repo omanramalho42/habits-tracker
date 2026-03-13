@@ -4,22 +4,18 @@ import { useCallback, useState } from "react"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
-  Controller,
   useForm
 } from "react-hook-form"
 
-import { HexColorPicker } from "react-colorful"
 import { toast } from 'sonner'
 
-import Picker from "@emoji-mart/react"
-import data from "@emoji-mart/data"
+import { EmojiPicker } from "frimousse"
 
 import GoalPicker from "@/components/goal-picker"
 
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -160,73 +156,84 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
             <div className="grid grid-cols-3 justify-start items-start gap-3">
               {/* ICONE */}
               <div className="flex flex-col">
-                <FormField
-                  control={control}
-                  name="emoji"
-                  render={({ field }) => (
-                    <FormItem className="grid-cols-1 gap-3">
-                      <FormLabel htmlFor="icon">
-                        Icone
-                      </FormLabel>
-                      <FormControl>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Card
-                              className="w-full h-full"
-                            >
-                              {field.value ? (
-                                <div className="flex flex-col items-center justify-center gap-1">
-                                  <span className="text-3xl" role="img">
-                                    {field.value}
-                                  </span>
-                                  <p className="text-xs text-muted-foreground">
-                                    Toque para trocar
-                                  </p>
-                                </div>
-                              ) : (
-                                <div className="flex flex-col items-center justify-center gap-1">
-                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
-                                  <p className="text-xs text-muted-foreground text-center">
-                                    Toque para selecionar
-                                  </p>
-                                </div>
-                              )}
-                            </Card>
-                          </PopoverTrigger>
+              <FormField
+                control={control}
+                name="emoji"
+                render={() => (
+                  <FormField
+                    control={control}
+                    name="emoji"
+                    render={({ field }) => (
+                      <FormItem className="grid-cols-1 gap-3">
+                        <FormLabel htmlFor="icon">
+                          Icone
+                        </FormLabel>
 
-                          <PopoverContent
-                            side="bottom"
-                            align="center"
-                            className="
-                              bg-transparent
-                              border-none
-                              w-[90vw] max-w-sm
-                              sm:w-105
-                              p-0
-                              max-h-[80vh]
-                              overflow-hidden
-                            "
-                          >
-                            <div className="">
-                              <Picker
-                                data={data}
-                                theme="dark"
-                                disabled={isSubmitting}
-                                navPosition="bottom"
-                                previewPosition="top"
-                                searchPosition="sticky"
-                                skinTonePosition="preview"
-                                onEmojiSelect={(emoji: { native: string }) => {
-                                  field.onChange(emoji.native)
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Card className="w-full h-full cursor-pointer">
+                                {field.value ? (
+                                  <div className="flex flex-col items-center justify-center gap-1 py-4">
+                                    <span className="text-3xl" role="img">
+                                      {field.value}
+                                    </span>
+
+                                    <p className="text-xs text-muted-foreground">
+                                      Toque para trocar
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center gap-1 py-4">
+                                    <CircleOff className="h-6 w-6 text-muted-foreground" />
+
+                                    <p className="text-xs text-muted-foreground text-center">
+                                      Toque para selecionar
+                                    </p>
+                                  </div>
+                                )}
+                              </Card>
+                            </PopoverTrigger>
+
+                            <PopoverContent
+                              side="right"
+                              align="start"
+                              className="
+                                scroll-container
+                                w-full
+                                p-3
+                                max-h-[70vh]
+                                overflow-hidden
+                              "
+                            >
+                              <EmojiPicker.Root
+                                className="flex flex-col gap-2"
+                                onEmojiSelect={(emoji: any) => {
+                                  field.onChange(emoji.emoji)
                                 }}
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                              >
+                                <EmojiPicker.Search className="w-full" />
+
+                                <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                                  <EmojiPicker.Loading>
+                                    Carregando…
+                                  </EmojiPicker.Loading>
+
+                                  <EmojiPicker.Empty>
+                                    Nenhum emoji encontrado
+                                  </EmojiPicker.Empty>
+
+                                  <EmojiPicker.List />
+                                </EmojiPicker.Viewport>
+                              </EmojiPicker.Root>
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
+              />
               </div>
 
               <div className="w-full col-span-2 flex flex-col gap-3 justify-start items-start">
@@ -338,7 +345,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
             </div>
 
             {/* COLOR PICKER */}
-            <Dialog open={color} onOpenChange={setColor}>
+            {/* <Dialog open={color} onOpenChange={setColor}>
               <DialogTrigger asChild>
                 <Button
                   className="w-full"
@@ -383,7 +390,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            
+             */}
             <DialogFooter className="flex gap-3 pt-4">
               <DialogClose asChild>
                 <Button

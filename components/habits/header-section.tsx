@@ -9,8 +9,15 @@ import { SignOutButton, useUser } from '@clerk/nextjs'
 import { Skeleton } from '../ui/skeleton'
 
 const Clock = dynamic(async () => await import('react-live-clock'), { loading: () => <Skeleton className='w-10 h-4' />})
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu"
 
-import { SettingsDialog } from '@/components/settings-dialog'
 import {
   CreateHabitDialog
 } from '@/components/create-habit-dialog'
@@ -24,7 +31,12 @@ import {
   LogOut,
   LucideNewspaper,
   Plus,
-  Settings
+  Settings,
+  Target,
+  CheckCircle,
+  Repeat,
+  ListTodo,
+  Tag 
 } from 'lucide-react'
 import CreateCheckPointDialog from '../create-checkpoint-dialog'
 import CreateRoutineDialog from '../create-routine-dialog'
@@ -59,65 +71,7 @@ const HeaderSection:React.FC = () => {
             timezone={'America/Sao_paulo'}
           />
         </h1>
-        <div className="flex gap-3">
-          <CreateHabitDialog
-            trigger={
-              <Button
-                aria-label="Criar hábito"
-                title="Criar hábito"
-                size="icon"
-                disabled={loading}
-                className="rounded-full p-0 bg-linear-to-r from-primary to-blue-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>    
-            }
-          />
-          <CreateCheckPointDialog
-            trigger={
-              <Button
-                size="icon"
-                disabled={loading}
-                className="rounded-full p-0 bg-linear-to-r from-primary to-red-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>
-            }
-          />
-          <CreateRoutineDialog
-            trigger={
-              <Button
-                size="icon"
-                disabled={loading}
-                className="rounded-full p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>
-            }
-          />
-          <CreateTaskDialog
-            trigger={
-              <Button
-                size="icon"
-                disabled={loading}
-                className="rounded-full p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>
-            }
-          />
-          <CreateCategorieDialog
-            trigger={
-              <Button
-                size="icon"
-                disabled={loading}
-                className="rounded-full p-0 bg-linear-to-r from-primary to-purple-600 hover:opacity-90 shadow-lg hover:shadow-xl transition-all"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>
-            }
-          />
-        </div>  
+
       </div>
 
       <div className="flex items-center flex-wrap gap-2">
@@ -134,6 +88,105 @@ const HeaderSection:React.FC = () => {
             </Button>
           }
         /> */}
+        <div className="flex gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type='button'
+                variant="outline"
+                disabled={loading}
+                size="icon"
+                aria-label="Criar"
+                title="Criar"
+                className="
+                  rounded-full
+                  p-0
+                  bg-linear-to-r
+                  from-primary
+                  to-blue-600
+                  hover:opacity-90
+                  shadow-lg
+                  hover:shadow-xl
+                  transition-all
+                  border-border/50 hover:bg-muted
+                "
+              >
+                <Plus className="h-7 w-7" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              className="w-56"
+            >
+              <DropdownMenuLabel>
+                Criar novo
+              </DropdownMenuLabel>
+
+              <DropdownMenuSeparator />
+
+              <CreateHabitDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <Target className="h-4 w-4" />
+                    Hábito
+                  </DropdownMenuItem>
+                }
+              />
+
+              <CreateCheckPointDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Checkpoint
+                  </DropdownMenuItem>
+                }
+              />
+
+              <CreateRoutineDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <Repeat className="h-4 w-4" />
+                    Rotina
+                  </DropdownMenuItem>
+                }
+              />
+
+              <CreateTaskDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <ListTodo className="h-4 w-4" />
+                    Tarefa
+                  </DropdownMenuItem>
+                }
+              />
+
+              <CreateCategorieDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <Tag className="h-4 w-4" />
+                    Categoria
+                  </DropdownMenuItem>
+                }
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <Button
           type='button'
           variant="outline"

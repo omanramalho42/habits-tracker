@@ -48,7 +48,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
 }) => {
   const queryClient = useQueryClient()
 
-  const [habitsState, setHabitsState] = useState<HabitWithStats[]>([])
+  const [habitsState, setHabitsState] = useState<HabitWithStats[]>(habits || [])
 
   // useEffect(() => {
   //   setHabitsState(habits)
@@ -174,11 +174,14 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           <Filter />
         </Button>
       </div>
-      <div className="flex mt-10 flex-col gap-2 px-2 max-h-112.5 overflow-auto pr-3 scroll-container" aria-selected={false}>
+      <div
+        className="flex mt-10 flex-col gap-2 px-2 max-h-112.5 overflow-auto pr-3 scroll-container"
+        aria-selected={false}
+      >
         
         {/* EMPRT ARRAY */}
         <div className="my-4">
-          {habits.length === 0 ? (
+          {habitsState.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-7xl mb-6">🎯</div>
 
@@ -202,11 +205,11 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           ) : (
             <DndContext onDragEnd={handleDragEnd}>
               <SortableContext
-                items={habits.map((h) => h.id)}
+                items={habitsState.map((h) => h.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-4">
-                  {habits.map((habit) => habit.name.toLowerCase().trim().includes(
+                  {habitsState.map((habit) => habit.name.toLowerCase().trim().includes(
                     filter.toLowerCase().trim()
                   ) && (
                     <SortableHabit

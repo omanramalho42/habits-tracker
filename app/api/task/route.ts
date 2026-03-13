@@ -88,14 +88,15 @@ export async function POST(request: NextRequest) {
     const newTask = await prisma.task.create({
       data: {
         userId: userDb.id,
+        emoji,
         name,
-        // customField: custom_field,
-        // limitCounter: Number(limitCounter) || 1,
-        // ...(goal  && {goals: {
-        //   connect: {
-        //     id: goal
-        //   }
-        // }}),
+        customField: custom_field,
+        limitCounter: Number(limitCounter) || 1,
+        ...(goal  && {goals: {
+          connect: {
+            id: goal
+          }
+        }}),
       },
       include: {
         completions: true,
