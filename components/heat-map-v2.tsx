@@ -96,16 +96,20 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
 
     start.setHours(0,0,0,0)
     end.setHours(0,0,0,0)
+    if (range === "week") {
 
-    if (range === 'week') {
+      // dia inicial da semana
+      const startDay = (selectedWeek - 1) * 7 + 1
 
-      const firstDayMonth = new Date(selectedYear, selectedMonth, 1)
+      const startWeek = new Date(selectedYear, selectedMonth, startDay)
 
-      const startWeek = new Date(firstDayMonth)
-      startWeek.setDate(firstDayMonth.getDate() + (selectedWeek - 1) * 7)
+      // último dia do mês
+      const lastDayMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
 
-      const endWeek = new Date(startWeek)
-      endWeek.setDate(startWeek.getDate() + 6)
+      // dia final da semana
+      const endDay = Math.min(startDay + 6, lastDayMonth)
+
+      const endWeek = new Date(selectedYear, selectedMonth, endDay)
 
       return {
         startDate: formatLocalDate(startWeek),
@@ -201,6 +205,17 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
 
   }, [habits, habitId, startDate, endDate])
 
+  const weeksInMonth = useMemo(() => {
+
+    const first = new Date(selectedYear, selectedMonth, 1)
+    const last = new Date(selectedYear, selectedMonth + 1, 0)
+
+    const used = first.getDay() + last.getDate()
+
+    return Math.ceil(used / 7)
+
+  }, [selectedMonth, selectedYear])
+
   return (
     <div className="bg-card border border-border rounded-xl p-6">
 
@@ -213,7 +228,7 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
           value={range}
           onValueChange={(value) => setRange(value as HeatMapRange)}
         >
-          <SelectTrigger className="w-[130px]">
+          <SelectTrigger className="w-32.5">
             <SelectValue placeholder="Intervalo" />
           </SelectTrigger>
 
@@ -232,12 +247,12 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
             value={String(selectedWeek)}
             onValueChange={(value) => setSelectedWeek(Number(value))}
           >
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-32.5">
               <SelectValue placeholder="Semana" />
             </SelectTrigger>
 
             <SelectContent>
-              {[1,2,3,4].map((w) => (
+              {Array.from({ length: weeksInMonth }, (_, i) => i + 1).map((w) => (
                 <SelectItem key={w} value={String(w)}>
                   Semana {w}
                 </SelectItem>
@@ -254,7 +269,7 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
             value={String(selectedMonth)}
             onValueChange={(value) => setSelectedMonth(Number(value))}
           >
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-32.5">
               <SelectValue placeholder="Mês" />
             </SelectTrigger>
 
@@ -278,7 +293,7 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
           value={String(selectedYear)}
           onValueChange={(value) => setSelectedYear(Number(value))}
         >
-          <SelectTrigger className="w-[130px]">
+          <SelectTrigger className="w-32.5">
             <SelectValue placeholder="Ano" />
           </SelectTrigger>
 
@@ -319,7 +334,6 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
             rx: 3,
             ry: 3
           }}
-
           monthLabels={[
             "Jan","Fev","Mar","Abr","Mai","Jun",
             "Jul","Ago","Set","Out","Nov","Dez"

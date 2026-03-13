@@ -207,15 +207,17 @@ export default function Statistics() {
         </Tabs>
 
         <Tabs defaultValue="habits" className="w-full">
-
-          <TabsList className="grid grid-cols-6 w-full bg-transparent">
-            <TabsTrigger value="habits">Hábitos</TabsTrigger>
-            <TabsTrigger value="tasks">Tarefas</TabsTrigger>
-            <TabsTrigger value="routines">Rotinas</TabsTrigger>
-            <TabsTrigger value="categories">Categorias</TabsTrigger>
-            <TabsTrigger value="goals">Objetivos</TabsTrigger>
-            <TabsTrigger value="notes">Anotações</TabsTrigger>
-          </TabsList>
+          <div className='flex flex-row max-w-full overflox-x-auto scroll-container'>
+            <TabsList className="bg-transparent gap-2">
+              <TabsTrigger value="habits">Hábitos</TabsTrigger>
+              <TabsTrigger value="tasks">Tarefas</TabsTrigger>
+              <TabsTrigger value="routines">Rotinas</TabsTrigger>
+              <TabsTrigger value="categories">Categorias</TabsTrigger>
+              <TabsTrigger value="goals">Objetivos</TabsTrigger>
+              <TabsTrigger value="notes">Anotações</TabsTrigger>
+            </TabsList>
+          </div>
+          
           <TabsContent value="habits" className='flex flex-col gap-6'>
             {/* Overall Stats */}
             <div className="grid grid-cols-2 gap-3">
