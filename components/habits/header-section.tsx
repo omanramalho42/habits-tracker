@@ -1,12 +1,14 @@
 "use client"
 
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { redirect } from 'next/navigation'
 
 import { SignOutButton, useUser } from '@clerk/nextjs'
+import { Skeleton } from '../ui/skeleton'
 
-import Clock from 'react-live-clock'
+const Clock = dynamic(async () => await import('react-live-clock'), { loading: () => <Skeleton className='w-10 h-4' />})
 
 import { SettingsDialog } from '@/components/settings-dialog'
 import {
@@ -21,12 +23,11 @@ import {
   ListIcon,
   LogOut,
   Plus,
-  Settings,
-  SquareDashedKanbanIcon
+  Settings
 } from 'lucide-react'
 import CreateCheckPointDialog from '../create-checkpoint-dialog'
 import CreateRoutineDialog from '../create-routine-dialog'
-import Link from 'next/link'
+import dynamic from 'next/dynamic'
 
 const HeaderSection:React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
@@ -108,17 +109,35 @@ const HeaderSection:React.FC = () => {
             </Button>
           }
         /> */}
-        <Button type='button' variant="outline" size="icon">
+        <Button
+          type='button'
+          variant="outline"
+          className='rounded-full p-0 border-border/50 hover:bg-muted'
+          disabled={loading}
+          size="icon"
+        >
           <Link href="/settings">
             <Settings className='w-3 h-3'/>
           </Link>
         </Button>
-        <Button type='button' variant="outline" size="icon">
+        <Button
+          type='button'
+          variant="outline"
+          className='rounded-full p-0 border-border/50 hover:bg-muted'
+          disabled={loading}
+          size="icon"
+        >
           <Link href="/statistics">
             <ChartArea className='w-3 h-3'/>
           </Link>
         </Button>
-        <Button type='button' variant="outline" size="icon">
+        <Button
+          type='button'
+          variant="outline"
+          className='rounded-full p-0 border-border/50 hover:bg-muted'
+          disabled={loading}
+          size="icon"
+        >
           <Link href="/">
             <Home className='w-3 h-3'/>
           </Link>

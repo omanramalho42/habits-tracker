@@ -1,170 +1,370 @@
 'use client'
 
-import { useMemo } from 'react'
-import { cn } from '@/lib/utils'
+import { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { HabitWithStats } from '@/lib/types'
 import { fetchHabits } from '@/services/habits'
-
-const DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
-const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+import HeatMap from '@uiw/react-heat-map'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+export type HeatMapRange = 'week' | 'month' | 'year'
 
 interface HeatMapProps {
   habitId?: string
-  weeks?: number
+  view?: HeatMapRange
 }
 
-export function HeatMap({ habitId, weeks = 12 }: HeatMapProps) {
-  const {
-    data: habits = [],
-    isLoading,
-    isFetching,
-    isError,
-    error,
-  } = useQuery<HabitWithStats[]>({
-    queryKey: ["habits"],
+function formatLocalDate(date: Date | string) {
+  const d = new Date(date)
+
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
+
+  const [range, setRange] = useState<HeatMapRange>(view)
+  const [selectedWeek, setSelectedWeek] = useState(1)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+
+  const { data: habits = [] } = useQuery<HabitWithStats[]>({
+    queryKey: ['habits'],
     queryFn: () => fetchHabits(),
     staleTime: 1000 * 60,
   })
 
-  const heatMapData = useMemo(() => {
-    const today = new Date()
-    const data: { date: string; level: number; count: number }[][] = []
-    
-    // Calculate start date (weeks ago, aligned to Sunday)
-    const startDate = new Date(today)
-    startDate.setDate(startDate.getDate() - (weeks * 7) - today.getDay())
-    
-    const activeHabits = habits.filter((h) => h.status === "ARCHIVED")
-    const maxPossible = habitId ? 1 : activeHabits.length
+  useEffect(() => {
+    setRange(view)
+  }, [view])
+  /**
+   * todos os anos que possuem registros
+   */
+
+  const availableYears = useMemo(() => {
+
+    const years = new Set<number>()
+
+    habits.forEach(h => {
+      h.completions.forEach(c => {
+        if (!c.completedDate) return
+        years.add(new Date(c.completedDate).getFullYear())
+      })
+    })
+
+    return Array.from(years).sort()
+
+  }, [habits])
+
+  /**
+   * primeira completion
+   */
+
+  const firstCompletionDate = useMemo(() => {
 
     const completions = habits.flatMap(h => h.completions)
 
-    for (let week = 0; week <= weeks; week++) {
-      const weekData: { date: string; level: number; count: number }[] = []
-      
-      for (let day = 0; day < 7; day++) {
-        const date = new Date(startDate)
-        date.setDate(startDate.getDate() + week * 7 + day)
-        const dateStr = date.toISOString().split('T')[0]
-        
-        let count = 0
-        if (habitId) {
-          count = completions.some(
-            c =>
-              c.habitId === habitId &&
-              c.completedDate && c.completedDate.startsWith(dateStr)
-          )
-            ? 1
-            : 0
-        } else {
-          count = completions.filter(c =>
-             c.completedDate && c.completedDate.toString().startsWith(dateStr)
-          ).length
-        }
+    if (!completions.length) return null
 
-        // Calculate level (0-4) based on completion
-        let level = 0
-        if (maxPossible > 0 && count > 0) {
-          const rate = count / maxPossible
-          if (rate <= 0.25) level = 1
-          else if (rate <= 0.5) level = 2
-          else if (rate <= 0.75) level = 3
-          else level = 4
-        }
+    const dates = completions
+      .filter(c => c.completedDate)
+      .map(c => new Date(c.completedDate))
 
-        weekData.push({ date: dateStr, level, count })
+    if (!dates.length) return null
+
+    return new Date(Math.min(...dates.map(d => d.getTime())))
+
+  }, [habits])
+
+  /**
+   * intervalo do heatmap
+   */
+
+  const { startDate, endDate } = useMemo(() => {
+
+    const start = new Date()
+    const end = new Date()
+
+    start.setHours(0,0,0,0)
+    end.setHours(0,0,0,0)
+
+    if (range === 'week') {
+
+      const firstDayMonth = new Date(selectedYear, selectedMonth, 1)
+
+      const startWeek = new Date(firstDayMonth)
+      startWeek.setDate(firstDayMonth.getDate() + (selectedWeek - 1) * 7)
+
+      const endWeek = new Date(startWeek)
+      endWeek.setDate(startWeek.getDate() + 6)
+
+      return {
+        startDate: formatLocalDate(startWeek),
+        endDate: formatLocalDate(endWeek)
       }
-      
-      data.push(weekData)
+
     }
 
-    return data
-  }, [habits, habitId, weeks])
+    if (range === 'month') {
 
-  // Get month labels
-  const monthLabels = useMemo(() => {
-    const labels: { month: string; weekIndex: number }[] = []
-    let lastMonth = -1
+      const startMonth = new Date(selectedYear, selectedMonth, 1)
+      const endMonth = new Date(selectedYear, selectedMonth + 1, 0)
 
-    heatMapData.forEach((week, weekIndex) => {
-      const firstDayOfWeek = new Date(week[0].date)
-      const month = firstDayOfWeek.getMonth()
-      
-      if (month !== lastMonth) {
-        labels.push({ month: MONTHS[month], weekIndex })
-        lastMonth = month
+      return {
+        startDate: formatLocalDate(startMonth),
+        endDate: formatLocalDate(endMonth)
       }
+
+    }
+
+    if (range === 'year') {
+
+      if (firstCompletionDate) {
+
+        const startFromFirst = new Date(firstCompletionDate)
+
+        const endFromFirst = new Date(startFromFirst)
+        endFromFirst.setFullYear(endFromFirst.getFullYear() + 1)
+
+        return {
+          startDate: formatLocalDate(startFromFirst),
+          endDate: formatLocalDate(endFromFirst)
+        }
+
+      }
+
+      start.setFullYear(end.getFullYear() - 1)
+
+    }
+
+    return {
+      startDate: formatLocalDate(start),
+      endDate: formatLocalDate(end)
+    }
+
+  }, [
+    range,
+    selectedWeek,
+    selectedMonth,
+    selectedYear,
+    firstCompletionDate,
+    view
+  ])
+
+  /**
+   * valores heatmap
+   */
+
+  const values = useMemo(() => {
+
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    const activeHabits = habits.filter(h => h.status === 'ACTIVE')
+
+    const completions = activeHabits.flatMap(h => h.completions)
+
+    const map = new Map<string, number>()
+
+    completions.forEach(c => {
+
+      if (!c.completedDate) return
+
+      if (habitId && c.habitId !== habitId) return
+
+      const date = new Date(c.completedDate)
+
+      if (date < start || date > end) return
+
+      const formatted = formatLocalDate(date)
+
+      map.set(
+        formatted,
+        (map.get(formatted) || 0) + 1
+      )
+
     })
 
-    return labels
-  }, [heatMapData])
+    return Array.from(map.entries()).map(([date, count]) => ({
+      date,
+      count
+    }))
+
+  }, [habits, habitId, startDate, endDate])
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 overflow-x-auto scroll-container">
-      {/* Month labels */}
-      <div className="flex mb-2 ml-6">
-        {monthLabels.map((label, i) => (
-          <div
-            key={i}
-            className="text-xs text-muted-foreground"
-            style={{
-              position: 'relative',
-              left: `${label.weekIndex * 14}px`,
-              marginRight: i < monthLabels.length - 1 ? '0' : 'auto',
-            }}
+    <div className="bg-card border border-border rounded-xl p-6">
+
+      {/* filtros */}
+      <div className="flex gap-3 mb-6 flex-wrap">
+
+        {/* RANGE */}
+
+        <Select
+          value={range}
+          onValueChange={(value) => setRange(value as HeatMapRange)}
+        >
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Intervalo" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="week">Semana</SelectItem>
+            <SelectItem value="month">Mês</SelectItem>
+            <SelectItem value="year">Ano</SelectItem>
+          </SelectContent>
+        </Select>
+
+
+        {/* SEMANA */}
+
+        {range === "week" && (
+          <Select
+            value={String(selectedWeek)}
+            onValueChange={(value) => setSelectedWeek(Number(value))}
           >
-            {label.month}
-          </div>
-        ))}
-      </div>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Semana" />
+            </SelectTrigger>
 
-      <div className="flex gap-0.5">
-        {/* Day labels */}
-        <div className="flex flex-col gap-0.5 mr-1">
-          {DAYS.map((day, i) => (
-            <div
-              key={i}
-              className="text-[10px] text-muted-foreground h-3 flex items-center justify-end pr-1"
-            >
-              {i % 2 === 1 ? day : ''}
-            </div>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div className="flex gap-0.5">
-          {heatMapData.map((week, weekIndex) => (
-            <div key={weekIndex} className="flex flex-col gap-0.5">
-              {week.map((day, dayIndex) => (
-                <div
-                  key={`${weekIndex}-${dayIndex}`}
-                  className={cn(
-                    'size-3 rounded-sm transition-colors',
-                    day.level === 0 && 'bg-secondary',
-                    day.level === 1 && 'bg-chart-1/30',
-                    day.level === 2 && 'bg-chart-1/50',
-                    day.level === 3 && 'bg-chart-1/75',
-                    day.level === 4 && 'bg-chart-1'
-                  )}
-                  title={`${day.date}: ${day.count} conclusões`}
-                />
+            <SelectContent>
+              {[1,2,3,4].map((w) => (
+                <SelectItem key={w} value={String(w)}>
+                  Semana {w}
+                </SelectItem>
               ))}
-            </div>
-          ))}
-        </div>
+            </SelectContent>
+          </Select>
+        )}
+
+
+        {/* MÊS */}
+
+        {(range === "week" || range === "month") && (
+          <Select
+            value={String(selectedMonth)}
+            onValueChange={(value) => setSelectedMonth(Number(value))}
+          >
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Mês" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {[
+                "Jan","Fev","Mar","Abr","Mai","Jun",
+                "Jul","Ago","Set","Out","Nov","Dez"
+              ].map((m, i) => (
+                <SelectItem key={i} value={String(i)}>
+                  {m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+
+        {/* ANO */}
+
+        <Select
+          value={String(selectedYear)}
+          onValueChange={(value) => setSelectedYear(Number(value))}
+        >
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {availableYears.map((year) => (
+              <SelectItem key={year} value={String(year)}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-end gap-1 mt-3 text-xs text-muted-foreground">
-        <span>Menos</span>
-        <div className="size-3 rounded-sm bg-secondary" />
-        <div className="size-3 rounded-sm bg-chart-1/30" />
-        <div className="size-3 rounded-sm bg-chart-1/50" />
-        <div className="size-3 rounded-sm bg-chart-1/75" />
-        <div className="size-3 rounded-sm bg-chart-1" />
-        <span>Mais</span>
+      <div className="overflow-x-auto scroll-container">
+
+        <HeatMap
+          value={values}
+          startDate={new Date(startDate)}
+          endDate={new Date(endDate)}
+          width={900}
+          rectSize={12}
+          space={4}
+          style={{
+            width: "100%",
+            color: "hsl(var(--muted-foreground))",
+          }}
+
+          panelColors={{
+            0: "#1f2937",
+            1: "#1d4ed8",
+            2: "#2563eb",
+            3: "#3b82f6",
+            4: "#60a5fa",
+          }}
+
+          rectProps={{
+            rx: 3,
+            ry: 3
+          }}
+
+          monthLabels={[
+            "Jan","Fev","Mar","Abr","Mai","Jun",
+            "Jul","Ago","Set","Out","Nov","Dez"
+          ]}
+
+          weekLabels={[
+            "Dom","Seg","Ter","Qua","Qui","Sex","Sab"
+          ]}
+
+          rectRender={(props, data) => (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <rect {...props}/>
+              </TooltipTrigger>
+
+              <TooltipContent>
+                <div className="text-xs">
+                  <strong>{data.count || 0}</strong> conclusões
+                  <br/>
+                  {data.date}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          legendRender={() => (
+            <div className="flex items-center gap-1 text-xs mt-3 text-muted-foreground">
+              <span>Menos</span>
+
+              <div className="w-3 h-3 rounded-sm bg-[#1f2937]" />
+              <div className="w-3 h-3 rounded-sm bg-[#1d4ed8]" />
+              <div className="w-3 h-3 rounded-sm bg-[#2563eb]" />
+              <div className="w-3 h-3 rounded-sm bg-[#3b82f6]" />
+              <div className="w-3 h-3 rounded-sm bg-[#60a5fa]" />
+
+              <span>Mais</span>
+            </div>
+          )}
+
+        />
+
       </div>
+
     </div>
   )
 }
+
+export default HeatMapHabit

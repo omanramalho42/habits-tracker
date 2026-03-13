@@ -1,14 +1,17 @@
 'use client'
 
+import dynamic from 'next/dynamic'
+import { useQuery } from '@tanstack/react-query'
+import { fetchHabits } from '@/services/habits'
+
 import { useMemo, useState } from 'react'
-import { cn } from '@/lib/utils'
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent
 } from '@/components/ui/tabs'
-import { HeatMap } from '@/components/heat-map-v2'
+
 import {
   Select,
   SelectContent,
@@ -16,26 +19,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useQuery } from '@tanstack/react-query'
-import { HabitWithStats } from '@/lib/types'
-import { fetchHabits } from '@/services/habits'
-import Footer from '@/components/habits/footer'
-import dynamic from 'next/dynamic'
-import { Loader } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
-const HeaderSection =
-  dynamic(() => import("@/components/habits/header-section"), {
-    loading: () => <Skeleton />
-  })
+import { cn } from '@/lib/utils'
+import Footer from '@/components/habits/footer'
 
-type ViewMode = "" | ""
+import type { HabitWithStats } from '@/lib/types'
+import { HeatMapRange } from '@/components/heat-map-v2'
+
+const HeatMap =
+  dynamic(async () => await import("@/components/heat-map-v2"), {
+    loading: () => <Skeleton className='w-full h-64' />
+  });
+const HeaderSection =
+  dynamic(async () => await import("@/components/habits/header-section"), {
+    loading: () => <Skeleton />
+  });
 
 export default function Statistics() {
   const [selectedHabitId, setSelectedHabitId] =
     useState<string>('all')
 
-  const [viewMode, setViewMode] = useState<string>("")
+  const [viewMode, setViewMode] = useState<HeatMapRange>("week")
 
   const {
     data: habits = [],
@@ -141,7 +146,7 @@ export default function Statistics() {
         <HeaderSection />
         
         {/* View Mode Tabs */}
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as HeatMapRange)}>
           <TabsList className="w-full">
             <TabsTrigger value="week" className="flex-1">Semana</TabsTrigger>
             <TabsTrigger value="month" className="flex-1">Mês</TabsTrigger>
@@ -225,15 +230,15 @@ export default function Statistics() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Hábitos</SelectItem>
-                {habits.map((h) => (
+                {habits.length > 0 ? habits.map((h) => (
                   <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
-                ))}
+                )) : <p>Nenhum hábito encontrado.</p>}
               </SelectContent>
             </Select>
           </div>
           <HeatMap
+            view={viewMode}
             habitId={selectedHabitId === 'all' ? undefined : selectedHabitId}
-            weeks={viewMode === 'week' ? 8 : viewMode === 'month' ? 16 : 52}
           />
         </div>
 

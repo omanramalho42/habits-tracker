@@ -22,6 +22,7 @@ const HeaderSection =
   dynamic(() => import("@/components/habits/header-section"), {
     loading: () => <Skeleton />
   })
+  
 import type { HabitWithStats } from "@/lib/types"
 // import { DndContext, useDraggable } from "@dnd-kit/core"
 import Footer from "@/components/habits/footer"

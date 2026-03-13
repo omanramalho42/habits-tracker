@@ -151,18 +151,6 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
 
   return (
     <div className="flex flex-col">
-{/* 
-      {completedToday > 0 && habits.length > 0 && (
-        <div className="bg-linear-to-r from-primary/10 to-blue-600/10 border border-primary/20 rounded-xl p-8 text-center shadow-sm">
-          <p className="text-4xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
-            {completedToday}/{habits.length}
-          </p>
-          <p className="text-sm text-muted-foreground font-medium">
-            Hábitos completos hoje
-          </p>
-        </div>
-      )}       */}
-      
       {/* HABITS */}
       <div className="flex flex-row justify-between gap-2 items-center w-full">
         <p className="text-sm font-bold text-foreground">
