@@ -18,8 +18,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
-import HeaderSection from "@/components/habits/header-section"
-
+const HeaderSection =
+  dynamic(() => import("@/components/habits/header-section"), {
+    loading: () => <Skeleton />
+  })
 import type { HabitWithStats } from "@/lib/types"
 // import { DndContext, useDraggable } from "@dnd-kit/core"
 import Footer from "@/components/habits/footer"
@@ -40,6 +42,8 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import dynamic from "next/dynamic"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
