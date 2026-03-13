@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import { Annotations } from "@prisma/client"
 import { NextResponse } from "next/server"
-import z from "zod"
 
 export async function GET(request: Request) {
   try {
@@ -24,24 +24,21 @@ export async function GET(request: Request) {
         error: "user not find on db"
       }, { status: 401 })
     }
-    
-    const goals = await prisma.goals.findMany({
+
+    const annotations = await prisma.annotations.findMany({
       where: {
-        userId: userDb.id,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-      include: {
-        habits: true,
-        checkpoints: true
+        completion: {
+          habit: {
+            userId: userDb.id
+          }
+        }
       }
     })
 
-    return NextResponse.json(goals)
+    return NextResponse.json(annotations)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error fetching goals:", error.message)
+      console.error("Error fetching annotations:", error.message)
       return NextResponse.json({
         error: error.message
       }, { status: 500 })

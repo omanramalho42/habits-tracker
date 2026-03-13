@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import z from "zod"
 
 export async function GET(request: Request) {
   try {
@@ -25,7 +24,7 @@ export async function GET(request: Request) {
       }, { status: 401 })
     }
     
-    const goals = await prisma.goals.findMany({
+    const tasks = await prisma.task.findMany({
       where: {
         userId: userDb.id,
       },
@@ -33,15 +32,14 @@ export async function GET(request: Request) {
         createdAt: "asc",
       },
       include: {
-        habits: true,
         checkpoints: true
       }
     })
 
-    return NextResponse.json(goals)
+    return NextResponse.json(tasks)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error fetching goals:", error.message)
+      console.error("Error fetching tasks:", error.message)
       return NextResponse.json({
         error: error.message
       }, { status: 500 })

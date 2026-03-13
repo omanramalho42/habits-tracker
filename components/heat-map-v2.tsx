@@ -345,8 +345,8 @@ const HeatMapHabit = ({ habitId, view = 'year' }: HeatMapProps) => {
             </Tooltip>
           )}
 
-          legendRender={() => (
-            <div className="flex items-center gap-1 text-xs mt-3 text-muted-foreground">
+          legendRender={(index) => (
+            <div key={index.key} className="flex items-center gap-1 text-xs mt-3 text-muted-foreground">
               <span>Menos</span>
 
               <div className="w-3 h-3 rounded-sm bg-[#1f2937]" />
