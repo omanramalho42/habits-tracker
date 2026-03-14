@@ -33,7 +33,10 @@ export async function GET(request: Request) {
         createdAt: "asc",
       },
       include: {
-        checkpoints: true
+        checkpoints: true,
+        completions: true,
+        goals: true,
+        categories: true
       }
     })
 

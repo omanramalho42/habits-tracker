@@ -29,7 +29,6 @@ import {
   Clock10Icon,
   Repeat,
   TimerIcon,
-  PlayCircle,
   MoreVertical,
   File,
 } from "lucide-react"
@@ -607,9 +606,6 @@ export function HabitCard({
         ) : (
           <div className="flex items-center gap-1.5">
             <Skeleton className="h-6 w-6 rounded-md" />
-            <Skeleton className="h-6 w-6 rounded-md" />
-            <Skeleton className="h-6 w-6 rounded-md" />
-            {/* <Skeleton className="h-6 w-6 rounded-full" /> */}
           </div>
         )}
       </div>

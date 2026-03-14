@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma"
 import {
   UpdateHabitSchema
 } from "@/lib/schema/habit"
+import { UpdateTaskSchema } from "@/lib/schema/task"
 
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -33,7 +34,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }, { status: 401 })
     }
 
-    await prisma.habit.delete({
+    await prisma.task.delete({
       where: {
         id,
         userId: userDb.id
@@ -41,10 +42,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         schedules:  true
       }
     })
-    return NextResponse.json({ success: true })
+  
+    return NextResponse.json({
+      success: true
+    })
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error deleting habit:", error.message)
+      console.error("Error deleting task:", error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }
@@ -76,19 +80,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const body = await request.json()
 
-    const parsedBody = UpdateHabitSchema.safeParse(body)
+    const parsedBody = UpdateTaskSchema.safeParse(body)
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
     const {
       name,
       emoji,
-      endDate,
-      startDate,
-      reminder, 
-      frequency,
-      color,
-      clock,
       limitCounter,
       goals,
       categories
@@ -101,7 +99,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     })
 
     if(existingGoal) {
-      await prisma.habit.update({
+      await prisma.task.update({
         where: {
           id,
           userId: userDb.id
@@ -123,7 +121,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     })
 
     if(existingCategorie) {
-      await prisma.habit.update({
+      await prisma.task.update({
         where: {
           id,
           userId: userDb.id
@@ -138,20 +136,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       })
     }
 
-    //QUANDO ATUALIZAR UM HÁBITO, EU DEVO PERCORRER MEUS COMPLETIONS DO HABITO E ATUALIZAR O LIMIT COUNTER
-    const newStartdate = new Date(startDate)
-      newStartdate.setHours(0,0,0,0)
-
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const newEnddate = 
-      endDate ? new Date(endDate) : null
-    if(newEnddate) {
-      newEnddate.setHours(0,0,0,0)
-    }
-
-    const newHabit = await prisma.habit.update({
+    const newTask = await prisma.task.update({
       where: {
         id
       },
@@ -159,11 +147,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         userId: userDb.id,
         name,
         emoji,
-        startDate: newStartdate,
-        endDate: newEnddate,
-        reminder,
-        frequency, // Json
-        color,
         limitCounter,
         updatedAt: today,
         ...(goals  && {goals: {
@@ -175,18 +158,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           connect: {
             id: categories
           }
-        }}),
-        clock
+        }})
       },
       include: {
         completions: true,
       },
     })
 
-    return NextResponse.json(newHabit)
+    return NextResponse.json(newTask)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error updating habit:", error.message)
+      console.error("Error updating task:", error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }

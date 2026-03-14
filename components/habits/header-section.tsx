@@ -41,7 +41,7 @@ import {
 import CreateCheckPointDialog from '../create-checkpoint-dialog'
 import CreateRoutineDialog from '../create-routine-dialog'
 import dynamic from 'next/dynamic'
-import CreateTaskDialog from '../create-task-dialog'
+import CreateTaskDialog from '../tasks/create-task-dialog'
 import CreateCategorieDialog from '../create-categorie-dialog'
 import CreateGoalDialog from '../create-goal-dialog'
 

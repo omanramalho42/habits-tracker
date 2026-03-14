@@ -47,10 +47,10 @@ export const updateTask = async (
 ======================= */
 
 export const deleteTask = async (
-  habitId: string
+  taskId: string
 ) => {
   const response = await axios.delete(
-    `/api/task/${habitId}`
+    `/api/task/${taskId}`
   )
 
   return response.data

@@ -37,7 +37,7 @@ import {
   FormItem,
   FormLabel
 } from "@/components/ui/form"
-import { Card } from "./ui/card"
+import { Card } from "../ui/card"
 
 import {
   CircleOff,
@@ -117,7 +117,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
 
   const onSubmit = useCallback((values: CreateTaskSchemaType) => {
     console.log(values, 'values')
-    toast.loading("Criando hábito....", {
+    toast.loading("Criando tarefa....", {
       id: "create-task"
     })
 
@@ -180,7 +180,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                                       <span className="text-3xl" role="img">
                                         {field.value}
                                       </span>
-                                      <p className="text-xs text-muted-foreground">
+                                      <p className="text-xs text-center text-muted-foreground">
                                         Toque para trocar
                                       </p>
                                     </div>

@@ -4,6 +4,7 @@ export const CreateTaskSchema = z.object({
   name: z.string(),
   emoji: z.string().optional(),
   goal: z.string().optional(),
+  categorie: z.string().optional(),
   custom_field: z.string().max(12, "O maximo de caracteres permitidos é 12").optional(),
   limitCounter: z.coerce.number(),
 })
@@ -14,7 +15,8 @@ export const UpdateTaskSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
   emoji: z.string().optional(),
-  goal: z.string().optional(),
+  goals: z.string().optional(),
+  categories: z.string().optional(),
   custom_field: z.string().max(12, "O maximo de caracteres permitidos é 12").optional(),
   status: z.enum(["ACTIVE", "ARCHIVED", "PAUSED"]).optional(),
   counter: z.coerce.number()
