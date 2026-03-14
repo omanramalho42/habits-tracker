@@ -286,7 +286,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                                     </p>
                                   </div>
                                 ) : (
-                                  <div className="flex flex-col items-center justify-center gap-1 py-4">
+                                  <div className="flex flex-col items-center justify-center gap-1 px-2">
                                     <CircleOff className="h-6 w-6 text-muted-foreground" />
 
                                     <p className="text-xs text-muted-foreground text-center">

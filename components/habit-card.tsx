@@ -102,8 +102,6 @@ function getCurrentTimeHHMMSS(date: Date) {
 export function HabitCard({
   habit,
   onToggle,
-  onEdit,
-  onDelete,
   onClick,
   selectedDate,
   onError,
@@ -176,7 +174,7 @@ export function HabitCard({
   // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
     const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
-
+    console.log({completionDate}, {todayStr}, 'is completion today')
     const limit = habit.limitCounter || 1
     const counter = c.counter || 0
 

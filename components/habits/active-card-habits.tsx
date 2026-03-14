@@ -13,10 +13,7 @@ import { CreateHabitDialog } from "@/components/create-habit-dialog"
 import { Button } from "@/components/ui/button"
 
 import {
-  AlarmClock,
   ArrowUpDownIcon,
-  Clock,
-  Clock10,
   Filter,
   Plus,
 } from "lucide-react"
@@ -26,16 +23,15 @@ import type { HabitWithStats } from "@/lib/types"
 import {
   SortableContext,
   useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
+  verticalListSortingStrategy
 } from "@dnd-kit/sortable"
 
 import { CSS } from "@dnd-kit/utilities"
 import { DndContext } from "@dnd-kit/core"
 import { Input } from "../ui/input"
-import { Card } from "../ui/card"
-import { Checkbox } from "../ui/checkbox"
 import confetti from "canvas-confetti"
+
+import { formatDateBR } from "@/lib/utils"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -48,7 +44,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
 }) => {
   const queryClient = useQueryClient()
 
-  const [habitsState, setHabitsState] = useState<HabitWithStats[]>(habits || [])
+  // const [habitsState, setHabitsState] = useState<HabitWithStats[]>(habits || [])
 
   // useEffect(() => {
   //   setHabitsState(habits)
@@ -61,16 +57,6 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
   // CRIAR ELEMENTO POSITITON (INDEX) EM HABITS
   // CRIAR ROTA PATCH PARA UPDATE DE POSITION APÓS DRAG AND DROP (REORDER)
 
-  const completedToday = habits.reduce((total, habit) => {
-    const completed = habit.completions?.some(
-      (c) =>
-        new Date(c.completedDate).toISOString().split("T")[0] ===
-        new Date(selectedDate).toISOString().split("T")[0]
-    )
-
-    return completed ? total + 1 : total
-  }, 0)
-
   const handleHabitError = (message: string) => {
     toast.error(message)
   }
@@ -80,7 +66,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       "Alterando status do hábito...", {
         id: `toggle-habit`,
     })
-    date.setHours(0,0,0,0)
+    // date.setHours(0,0,0,0)
     mutate({
       habitId,
       date: date.toISOString(),
@@ -102,22 +88,30 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       return response.data
     },
 
-    onSuccess: async () => {
+    onSuccess: async (values) => {
       toast.success(
         "status do hábito alterado com sucesso.", {
           id: `toggle-habit`,
       })
 
+      const selectedDateStr =
+        formatDateBR(selectedDate)
+
       await queryClient.invalidateQueries({
-        queryKey: ["habits"]
+        queryKey: ["habits", selectedDateStr],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["routines", selectedDateStr],
       })
 
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
-      })
+      if(values.completed) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
+        })
+      }
     },
 
     onError: (error: any) => {
@@ -132,16 +126,16 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
 
     if (!over || active.id === over.id) return
 
-    setHabitsState((items) => {
-      const oldIndex = items.findIndex((i) => i.id === active.id)
-      const newIndex = items.findIndex((i) => i.id === over.id)
+    // setHabitsState((items) => {
+    //   const oldIndex = items.findIndex((i) => i.id === active.id)
+    //   const newIndex = items.findIndex((i) => i.id === over.id)
 
-      if (oldIndex < 0 || newIndex < 0) {
-        return items
-      }
+    //   if (oldIndex < 0 || newIndex < 0) {
+    //     return items
+    //   }
 
-      return arrayMove(items, oldIndex, newIndex)
-    })
+    //   return arrayMove(items, oldIndex, newIndex)
+    // })
   }
 
   const [filter, setFilter] = useState<string>("")
@@ -181,7 +175,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
         
         {/* EMPRT ARRAY */}
         <div className="my-4">
-          {habitsState.length === 0 ? (
+          {habits.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-7xl mb-6">🎯</div>
 
@@ -205,11 +199,11 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           ) : (
             <DndContext onDragEnd={handleDragEnd}>
               <SortableContext
-                items={habitsState.map((h) => h.id)}
+                items={habits.map((h) => h.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-4">
-                  {habitsState.map((habit) => habit.name.toLowerCase().trim().includes(
+                  {habits.map((habit) => habit.name.toLowerCase().trim().includes(
                     filter.toLowerCase().trim()
                   ) && (
                     <SortableHabit
@@ -254,7 +248,8 @@ function SortableHabit({
     <div ref={setNodeRef} style={style} className="relative">
       {/* DRAG HANDLE */}
       <Button
-        disabled={isPending}
+        // disabled={isPending}
+        disabled
         variant="outline"
         size="icon-sm"
         {...attributes}
