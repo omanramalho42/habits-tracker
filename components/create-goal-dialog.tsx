@@ -235,14 +235,14 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
                           </PopoverTrigger>
 
                           <PopoverContent
-                            side="right"
-                            align="start"
+                            side="bottom"
+                            align="center"
                             className="
                               scroll-container
                               w-full
                               p-3
                               max-h-[70vh]
-                              overflow-hidden
+                              overflow-y-visible
                             "
                           >
                             <EmojiPicker.Root

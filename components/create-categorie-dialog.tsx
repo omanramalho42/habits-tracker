@@ -5,12 +5,13 @@ import React, { useCallback, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import Picker from "@emoji-mart/react"
-import data from "@emoji-mart/data"
 import { toast } from 'sonner'
+
+import { EmojiPicker } from "frimousse"
 
 import { CreateGoal } from '@/app/habits/_actions/goals/goals'
 
+import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogClose,
@@ -40,6 +41,7 @@ import {
 import { CircleOff, PlusSquare } from 'lucide-react'
 
 import type { CreateCategorieSchemaType } from '@/lib/schema/categorie'
+import { CreateCategorie } from '@/app/habits/_actions/categories/categories'
 
 interface CreateCategorieDialogProps {
   trigger?: React.ReactNode
@@ -73,10 +75,10 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: CreateCategorieSchemaType) => {
       console.log(values, "values")
-      return await CreateGoal(values)
+      return await CreateCategorie(values)
     },
     onSuccess: async () => {
-      toast.success("Categoria criado com sucesso! 🎉", {
+      toast.success("Categoria criada com sucesso! 🎉", {
         id: "create-categorie"
       })
       reset({
@@ -202,67 +204,79 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
             <FormField
               control={control}
               name="emoji"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Icone
-                  </FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full min-h-16 sm:min-h-25"
-                        >
-                          {field.value ? (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <span className="text-3xl" role="img">
-                                {field.value}
-                              </span>
-                              <p className="text-xs text-muted-foreground">
-                                Toque para trocar
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center gap-1">
-                              <CircleOff className="h-8 w-8 text-muted-foreground" />
-                              <p className="text-xs text-muted-foreground">
-                                Toque para selecionar
-                              </p>
-                            </div>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
+              render={() => (
+                <FormField
+                  control={control}
+                  name="emoji"
+                  render={({ field }) => (
+                    <FormItem className="grid-cols-1 gap-3">
+                      <FormLabel htmlFor="icon">
+                        Icone
+                      </FormLabel>
 
-                      <PopoverContent
-                        side="bottom"
-                        align="center"
-                        className="
-                          w-[90vw] max-w-sm
-                          sm:w-105
-                          p-0
-                          max-h-[80vh]
-                          overflow-hidden
-                        "
-                      >
-                        <div className="max-h-[70vh]">
-                          <Picker
-                            data={data}
-                            theme="dark"
-                            disabled={isSubmitting}
-                            navPosition="bottom"
-                            previewPosition="top"
-                            searchPosition="sticky"
-                            skinTonePosition="preview"
-                            onEmojiSelect={(emoji: { native: string }) => {
-                              field.onChange(emoji.native)
-                            }}
-                          />
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                </FormItem>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Card className="w-full p-2 h-full cursor-pointer">
+                              {field.value ? (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <span className="text-3xl" role="img">
+                                    {field.value}
+                                  </span>
+
+                                  <p className="text-xs text-muted-foreground">
+                                    Toque para trocar
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
+
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Toque para selecionar
+                                  </p>
+                                </div>
+                              )}
+                            </Card>
+                          </PopoverTrigger>
+
+                          <PopoverContent
+                            side="bottom"
+                            align="center"
+                            className="
+                              scroll-container
+                              w-full
+                              p-3
+                              max-h-[70vh]
+                              overflow-y-visible
+                            "
+                          >
+                            <EmojiPicker.Root
+                              className="flex flex-col gap-2"
+                              onEmojiSelect={(emoji: any) => {
+                                field.onChange(emoji.emoji)
+                              }}
+                            >
+                              <EmojiPicker.Search className="w-full" />
+
+                              <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                                <EmojiPicker.Loading>
+                                  Carregando…
+                                </EmojiPicker.Loading>
+
+                                <EmojiPicker.Empty>
+                                  Nenhum emoji encontrado
+                                </EmojiPicker.Empty>
+
+                                <EmojiPicker.List />
+                              </EmojiPicker.Viewport>
+                            </EmojiPicker.Root>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               )}
             />
 

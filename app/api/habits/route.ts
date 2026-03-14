@@ -46,6 +46,8 @@ export async function GET(request: Request) {
       },
       include: {
         completions: true,
+        categories: true,
+        goals: true,
         schedules: true,
       }
     })

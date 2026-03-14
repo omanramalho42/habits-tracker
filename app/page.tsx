@@ -20,7 +20,8 @@ const HeaderSection =
 import type {
   Habit,
   HabitSchedule,
-  Routine
+  Routine,
+  Task
 } from "@prisma/client"
 
 import Footer from "@/components/habits/footer"
@@ -55,6 +56,8 @@ import type { HabitWithStats } from "@/lib/types"
 
 import { formatDateBR } from "@/lib/utils"
 import HabitCardRoutine from "@/components/habits/habit-card-routine"
+import ActiveTaskCard from "@/components/tasks/active-task-card"
+import { fetchTasks } from "@/services"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
@@ -79,6 +82,15 @@ export default function Home() {
   } = useQuery<HabitWithStats[]>({
     queryKey: ["habits", selectedDateStr],
     queryFn: () => fetchHabits(selectedDateStr),
+    staleTime: 1000 * 60,
+    retry: 1,
+  })
+
+  const {
+    data: tasks = [],
+  } = useQuery<Task[]>({
+    queryKey: ["tasks", selectedDateStr],
+    queryFn: () => fetchTasks(selectedDateStr),
     staleTime: 1000 * 60,
     retry: 1,
   })
@@ -138,7 +150,7 @@ export default function Home() {
                 <CodeIcon />
                 Hábitos
               </TabsTrigger>
-              <TabsTrigger disabled value="tasks">
+              <TabsTrigger value="tasks">
                 <TargetIcon />
                 Tarefas
               </TabsTrigger>
@@ -279,11 +291,46 @@ export default function Home() {
                   </p>
                 </div>
               ) : (
-                <ActiveCardHabits
-                  habits={habits}
-                  selectedDate={selectedDate}
-                />
+                <div className="w-full flex flex-col">
+                  <div className="flex flex-row justify-between gap-2 items-center w-full">
+                    <p className="text-sm font-bold text-foreground">
+                      Hábitos
+                    </p>
+                    <div className="flex flex-row gap-2 w-full items-center justify-center">
+                      <Input
+                        type="text"
+                        placeholder="pesquise pelo nome."
+                        value={filter}
+                        onChange={(event) => {
+                          handleFilterHabits(event.target.value)
+                        }}
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      size="icon-lg"
+                    >
+                      <Filter />
+                    </Button>
+                  </div>
+                  <ActiveCardHabits
+                    habits={habits.filter((habit) => habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))}
+                    selectedDate={selectedDate}
+                  />
+                </div>
               )}
+            </TabsContent>
+            <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-48">
+              {tasks.map((task) => {
+                return (
+                  <ActiveTaskCard
+                    key={task.id}
+                    task={task}
+                    selectedDate={selectedDate}
+                  />
+                )
+              })}
             </TabsContent>
           </Tabs>
         </div>

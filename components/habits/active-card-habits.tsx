@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 
 import {
   ArrowUpDownIcon,
-  Filter,
   Plus,
 } from "lucide-react"
 
@@ -36,11 +35,12 @@ import { formatDateBR } from "@/lib/utils"
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
   selectedDate: Date
+  filter?: string
 }
 
 const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
   habits,
-  selectedDate,
+  selectedDate
 }) => {
   const queryClient = useQueryClient()
 
@@ -138,41 +138,13 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     // })
   }
 
-  const [filter, setFilter] = useState<string>("")
-  const handleFilterHabits = (value: string) => {
-    setFilter(value)
-  }
-
   return (
     <div className="flex flex-col">
       {/* HABITS */}
-      <div className="flex flex-row justify-between gap-2 items-center w-full">
-        <p className="text-sm font-bold text-foreground">
-          Hábitos
-        </p>
-        <div className="flex flex-row gap-2 w-full items-center justify-center">
-          <Input
-            type="text"
-            placeholder="pesquise pelo nome."
-            value={filter}
-            onChange={(event) => {
-              handleFilterHabits(event.target.value)
-            }}
-          />
-        </div>
-        <Button
-          variant="outline"
-          type="button"
-          size="icon-lg"
-        >
-          <Filter />
-        </Button>
-      </div>
       <div
         className="flex mt-10 flex-col gap-2 px-2 max-h-112.5 overflow-auto pr-3 scroll-container"
         aria-selected={false}
       >
-        
         {/* EMPRT ARRAY */}
         <div className="my-4">
           {habits.length === 0 ? (
@@ -202,10 +174,8 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
                 items={habits.map((h) => h.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="space-y-4">
-                  {habits.map((habit) => habit.name.toLowerCase().trim().includes(
-                    filter.toLowerCase().trim()
-                  ) && (
+                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2 space-y-4">
+                  {habits.map((habit) => (
                     <SortableHabit
                       key={habit.id}
                       habit={habit}
@@ -256,13 +226,13 @@ function SortableHabit({
         {...listeners}
         className="
           absolute 
-          top-20
-          right-4
+          top-13 sm:top-15
+          right-5
           cursor-grab
           active:cursor-grabbing
           text-muted-foreground
           rounded-md
-          p-1
+          mt-1
           transition
           z-10
         "

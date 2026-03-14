@@ -265,25 +265,44 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
           </div>
         </div>
 
-        {habit.goals && habit.goals?.length > 0 && (
-          <div className="mt-2">
-            <p className="text-xs text-muted-foreground mb-1">
-              Objetivos vinculados
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {habit.goals.map((g) => (
-                <span
-                  key={g.id}
-                  className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-xs font-medium"
-                >
-                  🎯 {g.name}
-                </span>
-              ))}
+        <div className="flex flex-row justify-around">
+          {habit.goals && habit.goals?.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground mb-1">
+                Objetivos vinculados
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {habit.goals.map((g) => (
+                  <span
+                    key={g.id}
+                    className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-xs font-medium"
+                  >
+                    {g.emoji} {g.name}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+          {habit.categories && habit.categories?.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground mb-1">
+                Categorias vinculadas
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {habit.categories.map((g) => (
+                  <span
+                    key={g.id}
+                    className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-xs font-medium"
+                  >
+                    {g.emoji} {g.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
-        <div className="mt-1">
+        {/* <div className="mt-1">
           <p className="text-xs text-muted-foreground mb-1">
             Frequência: semanalmente
           </p>
@@ -311,7 +330,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
               )
             })}
           </div>
-        </div>
+        </div> */}
 
         <Tabs defaultValue="heatmap" className="mt-1">
 

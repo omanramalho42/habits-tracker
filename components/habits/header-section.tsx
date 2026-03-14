@@ -43,6 +43,7 @@ import CreateRoutineDialog from '../create-routine-dialog'
 import dynamic from 'next/dynamic'
 import CreateTaskDialog from '../create-task-dialog'
 import CreateCategorieDialog from '../create-categorie-dialog'
+import CreateGoalDialog from '../create-goal-dialog'
 
 const HeaderSection:React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
@@ -181,6 +182,18 @@ const HeaderSection:React.FC = () => {
                   >
                     <Tag className="h-4 w-4" />
                     Categoria
+                  </DropdownMenuItem>
+                }
+              />
+
+              <CreateGoalDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <Target className="h-4 w-4" />
+                    Objetivo
                   </DropdownMenuItem>
                 }
               />

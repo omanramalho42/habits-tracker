@@ -5,8 +5,6 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Control, useController } from 'react-hook-form'
 
-import { fetchGoals, GoalsDTO } from '@/services/goals'
-
 import CreateGoalDialog from '@/components/create-goal-dialog'
 
 import {
@@ -27,39 +25,41 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 import { Check } from 'lucide-react'
-import { Goals } from '@prisma/client'
+import { CategoriesDTO, fetchCategories } from '@/services/categories'
+import { Categories } from '@prisma/client'
+import CreateCategorieDialog from './create-categorie-dialog'
 
-interface GoalPickerProps {
+interface CategoriePickerProps {
   control: Control<any>
   onSuccessCallback?: (value: string) => void
 }
 
-const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
+const CategoriePicker:React.FC<CategoriePickerProps> = ({ control }) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const { field } = useController({
     control: control,
-    name: 'goals'
+    name: 'categories'
   })
 
   // REALIZAR UMA QUERY PARA OBJETIVOS
   const {
-    data: goals = [],
+    data: categories = [],
     isLoading,
     isFetching,
     isError,
     error
-  } = useQuery<GoalsDTO[]>({
-    queryKey: ["goals"],
-    queryFn: () => fetchGoals(),
+  } = useQuery<Categories[]>({
+    queryKey: ["categories"],
+    queryFn: () => fetchCategories(),
     staleTime: 1000 * 60,
     retry: 1,
   })
 
-  const selectedGoal =
-    goals.find(
-      (goal: Goals) => 
-        goal.id === field.value || ""
+  const selectedCategorie =
+    categories.find(
+      (categorie: Categories) => 
+        categorie.id === field.value || ""
     )
   
   return (
@@ -71,10 +71,10 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
           className="w-full justify-between"
           variant="outline"
         >
-        {selectedGoal ? (
-            <GoalRow goal={selectedGoal} />
+        {selectedCategorie ? (
+            <CategorieRow categorie={selectedCategorie} />
           ) : (
-            'Selecione o objetivo'
+            'Selecione a categoria'
           )}
         </Button>
       </PopoverTrigger>
@@ -86,31 +86,31 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
         >
           <CommandInput
             disabled={isLoading || isFetching}
-            placeholder="Pesquise o objetivo..."
+            placeholder="Pesquise a categoria..."
           />
-          <CreateGoalDialog
+          <CreateCategorieDialog
             // onSuccessCallback={() => {}}
           />
           <CommandEmpty className='p-2'>
             <p className='text-sm'>
-              Objetivo não encontrado
+              Categoria não encontrado
             </p>
             <p className="text-xs text-muted-foreground">
-              Criar novo objetivo
+              Criar nova categoria
             </p>
           </CommandEmpty>
           <CommandGroup>
             <CommandList>
-              {goals && (
-                goals.map((goal) => (
+              {categories && (
+                categories.map((categorie) => (
                   <CommandItem
-                    key={goal.id}
+                    key={categorie.id}
                     onSelect={() => {
-                      field.onChange(goal.id)
+                      field.onChange(categorie.id)
                       setOpen((prev) => !prev)
                     }}
                   >
-                    <GoalRow goal={goal} />
+                    <CategorieRow categorie={categorie} />
                     <Check className={cn("mr-2 h-4 w-4 opacity-0")} />
                   </CommandItem>
                 ))
@@ -123,13 +123,13 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
   )
 }
 
-function GoalRow({ goal }: { goal: any }) {
+function CategorieRow({ categorie }: { categorie: any }) {
   return (
     <div className="flex items-center gap-2 sm:w-full w-40">
-      <span role="img">{goal.emoji}</span>
-      <span className='truncate sm:max-w-auto'>{goal.name}</span>
+      <span role="img">{categorie.emoji}</span>
+      <span className='truncate sm:max-w-auto'>{categorie.name}</span>
     </div>
   )
 }
 
-export default GoalPicker
+export default CategoriePicker

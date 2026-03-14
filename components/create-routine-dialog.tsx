@@ -305,7 +305,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                                 w-full
                                 p-3
                                 max-h-[70vh]
-                                overflow-hidden
+                                overflow-y-visible
                               "
                             >
                               <EmojiPicker.Root

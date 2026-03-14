@@ -156,84 +156,84 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
             <div className="grid grid-cols-3 justify-start items-start gap-3">
               {/* ICONE */}
               <div className="flex flex-col">
-              <FormField
-                control={control}
-                name="emoji"
-                render={() => (
-                  <FormField
-                    control={control}
-                    name="emoji"
-                    render={({ field }) => (
-                      <FormItem className="grid-cols-1 gap-3">
-                        <FormLabel htmlFor="icon">
-                          Icone
-                        </FormLabel>
+                <FormField
+                  control={control}
+                  name="emoji"
+                  render={() => (
+                    <FormField
+                      control={control}
+                      name="emoji"
+                      render={({ field }) => (
+                        <FormItem className="grid-cols-1 gap-3">
+                          <FormLabel htmlFor="icon">
+                            Icone
+                          </FormLabel>
 
-                        <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Card className="w-full h-full cursor-pointer">
-                                {field.value ? (
-                                  <div className="flex flex-col items-center justify-center gap-1 py-4">
-                                    <span className="text-3xl" role="img">
-                                      {field.value}
-                                    </span>
+                          <FormControl>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Card
+                                  className="w-full h-full"
+                                >
+                                  {field.value ? (
+                                    <div className="flex flex-col items-center justify-center gap-1">
+                                      <span className="text-3xl" role="img">
+                                        {field.value}
+                                      </span>
+                                      <p className="text-xs text-muted-foreground">
+                                        Toque para trocar
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col items-center justify-center gap-1">
+                                      <CircleOff className="h-6 w-6 text-muted-foreground" />
+                                      <p className="text-xs text-muted-foreground text-center">
+                                        Toque para selecionar
+                                      </p>
+                                    </div>
+                                  )}
+                                </Card>
+                              </PopoverTrigger>
 
-                                    <p className="text-xs text-muted-foreground">
-                                      Toque para trocar
-                                    </p>
-                                  </div>
-                                ) : (
-                                  <div className="flex flex-col items-center justify-center gap-1 py-4">
-                                    <CircleOff className="h-6 w-6 text-muted-foreground" />
-
-                                    <p className="text-xs text-muted-foreground text-center">
-                                      Toque para selecionar
-                                    </p>
-                                  </div>
-                                )}
-                              </Card>
-                            </PopoverTrigger>
-
-                            <PopoverContent
-                              side="right"
-                              align="start"
-                              className="
-                                scroll-container
-                                w-full
-                                p-3
-                                max-h-[70vh]
-                                overflow-hidden
-                              "
-                            >
-                              <EmojiPicker.Root
-                                className="flex flex-col gap-2"
-                                onEmojiSelect={(emoji: any) => {
-                                  field.onChange(emoji.emoji)
-                                }}
+                              <PopoverContent
+                                side="right"
+                                align="start"
+                                className="
+                                  scroll-container
+                                  w-full
+                                  p-3
+                                  max-h-[70vh]
+                                  overflow-y-visible
+                                "
                               >
-                                <EmojiPicker.Search className="w-full" />
+                                <EmojiPicker.Root
+                                  className="flex flex-col gap-2"
+                                  onEmojiSelect={(emoji: any) => {
+                                    field.onChange(emoji.emoji)
+                                  }}
+                                >
+                                  <EmojiPicker.Search className="w-full" />
 
-                                <EmojiPicker.Viewport className="h-72 overflow-y-auto">
-                                  <EmojiPicker.Loading>
-                                    Carregando…
-                                  </EmojiPicker.Loading>
+                                  <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                                    <EmojiPicker.Loading>
+                                      Carregando…
+                                    </EmojiPicker.Loading>
 
-                                  <EmojiPicker.Empty>
-                                    Nenhum emoji encontrado
-                                  </EmojiPicker.Empty>
+                                    <EmojiPicker.Empty>
+                                      Nenhum emoji encontrado
+                                    </EmojiPicker.Empty>
 
-                                  <EmojiPicker.List />
-                                </EmojiPicker.Viewport>
-                              </EmojiPicker.Root>
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                )}
-              />
+                                    <EmojiPicker.List />
+                                  </EmojiPicker.Viewport>
+                                </EmojiPicker.Root>
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                />
               </div>
 
               <div className="w-full col-span-2 flex flex-col gap-3 justify-start items-start">

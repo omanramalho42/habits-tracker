@@ -1,10 +1,11 @@
-import { Annotations, Goals, HabitStatus } from "@prisma/client"
+import { Annotations, Categories, Goals, HabitStatus } from "@prisma/client"
 
 export interface Habit {
   id: string
   name: string
   emoji?: string
   goals?: Goals[]
+  categories: Categories[]
   clock?: string
   limitCounter?: number
   customField?: string
@@ -52,6 +53,8 @@ export interface HabitWithStats extends Habit {
   longest_streak: number
   completion_rate: number
   completions: HabitCompletion[]
+  categories: Categories[]
+  goals: Goals[]
   is_completed_today: boolean
 }
 

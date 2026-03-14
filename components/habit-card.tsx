@@ -305,13 +305,16 @@ export function HabitCard({
 
   return (
     <Card
-      className={`group p-5 bg-linear-to-br transition-all hover:shadow-lg cursor-pointer ${
+      className={`group p-5 bg-linear-to-br transition-colors hover:shadow-lg cursor-pointer min-h-44 ${
         isCompletedToday && onToggle
           ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
-          : isActiveHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
-          ? "from-yellow-500/60 to-yellow-700/10 border-yellow-700/30 hover:border-yellow-500/30"
-          : isOutHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
-          ? "from-red-500/60 to-red-700/10 border-red-700/30 hover:border-red-500/30"
+          // : isActiveHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
+          // ? "from-yellow-500/60 to-yellow-700/10 border-yellow-700/30 hover:border-yellow-500/30"
+          // : isOutHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
+          // ? "from-red-500/60 to-red-700/10 border-red-700/30 hover:border-red-500/30"
+          : todayCompletion?.counter && todayCompletion?.counter >= 1 &&
+            habit.limitCounter && habit.limitCounter > 1
+             && onToggle ? "from-blue-500/20 to-purple-700/5 border-purple-700/30 hover:border-purple-500/30"
           : "from-card-800 to-card/50 border-border/50 hover:border-card-700"
       } ${loading && 'opacity-50'}`}
       onClick={(e) => {
@@ -322,21 +325,28 @@ export function HabitCard({
     >
       {/* INFO */}
       <div aria-selected={false} className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4 flex-1 min-w-0">
-          <div
-            className="flex items-center justify-center w-8 h-8 rounded-2xl text-3xl shrink-0 shadow-sm"
-            style={{ backgroundColor: `${habit.color}20` }}
-          >
-            {loading ? (
-              <Skeleton className="w-12 h-12 rounded-2xl shrink-0" />
-            ) : (
-              <p className="text-[22px]">{habit.emoji}</p>
-            )}
-          </div>
+        <div className="flex items-start gap-4">
+          {/* COUNTER CHECKBOX */}
+          {onToggle && (
+            <Button
+              variant={isCompleted ? "default" : "outline"}
+              size="icon"
+              disabled={loading}
+              onClick={handleToggleClick}
+              className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center transition",
+                isCompleted
+                  ? `bg-primary text-white`
+                  : "bg-background border border-border"
+              )}
+            >
+              {isCompleted && <Check className="w-5 h-5" />}
+            </Button>
+          )}
           
           {/* DETAIL SECTION */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="h-full">
+            <div className="mb-1">
               {loading ? (
                 <div className="flex w-full justify-between gap-2">
                   <Skeleton className="h-5 w-40" />
@@ -344,15 +354,22 @@ export function HabitCard({
                 </div>
               ) : (
                 <div className="flex items-center w-full space-x-2">
-                  <h3 className="font-bold w-full sm:text-lg text-md text-foreground">
-                    {habit.name}
-                  </h3>
-
-                  {habit.goals && habit.goals.length > 0 && (
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      🎯 {habit.goals.map((g) => g.name).join(", ")}
-                    </p>
-                  )}
+                  <div className="flex flex-row gap-1 items-center">
+                    {/* EMOJI */}
+                    <div
+                      className="flex items-center justify-center w-8 h-8 rounded-2xl text-3xl shrink-0 shadow-sm"
+                      style={{ backgroundColor: `${habit.color}20` }}
+                    >
+                      {loading ? (
+                        <Skeleton className="w-12 h-12 rounded-2xl shrink-0" />
+                      ) : (
+                        <p className="text-sm">{habit.emoji}</p>
+                      )}
+                    </div>
+                    <h3 className="font-bold w-full truncate tracking-tighter sm:text-lg text-md text-foreground">
+                      {habit.name}
+                    </h3>
+                  </div>
 
                   {/* {habit.updatedAt && <Button variant="outline" size="icon"> <Calendar1 className="text-sm" /></Button>} */}
                   {/* badge streak */}
@@ -368,18 +385,30 @@ export function HabitCard({
             
             {/* BADGES (COUNTER, CLOCK) */}
             {!loading ? (
-              <div className="relative flex flex-wrap gap-1 items-center">
+              <div className="flex flex-wrap gap-2 my-2 items-start">
                 {habit.limitCounter && habit.limitCounter > 1 && (
                   <Badge
                     variant="default"
-                    className="flex flex-row gap-2 text-sm text-foreground mb-3"
+                    className="flex w-auto h-4 flex-row gap-2 text-sm text-foreground mb-3"
                   >
                     <Repeat className="text-sm" />
-                    <p className="text-sm">
+                    <p className="text-sm tracking-tight">
                       {counter || 0}/{habit?.limitCounter} {" "} {habit?.customField}
                     </p>
                   </Badge>
                 )}
+                <div>
+                  {habit.goals && habit.goals.length > 0 && (
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      ✨ {habit.goals.map((g) => g.name).join(", ")}
+                    </p>
+                  )}
+                  {habit.categories && habit.categories.length > 0 && (
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      🎯 {habit.categories.map((g) => g.name).join(", ")}
+                    </p>
+                  )}
+                </div>
                 {habit.clock && (
                   <Badge
                     variant="default"
@@ -470,11 +499,6 @@ export function HabitCard({
                     )}
                   </span>
                 </div>
-
-                <Progress
-                  className="w-full gradient-progress h-1 mt-1 bg-gray-800 transition-all duration-500"
-                  value={progress}
-                />
               </div>
             ) : (
               <div className="flex flex-col">
@@ -493,7 +517,10 @@ export function HabitCard({
                 </div>
               </div>
             )}
-            
+            <Progress
+              className="w-full gradient-progress h-1 mt-1 bg-gray-800 transition-all duration-500"
+              value={progress}
+            />
           </div>
         </div>
         
@@ -506,124 +533,76 @@ export function HabitCard({
             )}
           >
             <DropdownMenu>
-
-                  <DropdownMenuTrigger asChild>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent align="end" className="w-44">
-
-                    {/* EDIT */}
-
-                    <UpdateHabitDialog
-                      habit={habit}
-                      onSuccessCallback={handleUpdateHabit}
-                      trigger={
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          className="cursor-pointer"
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                      }
-                    />
-
-                    <DropdownMenuSeparator />
-
-                    {/* DELETE */}
-
-                    <DeleteHabitDialog
-                      habitId={habit.id}
-                      trigger={
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          className="text-destructive focus:text-destructive cursor-pointer"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Deletar
-                        </DropdownMenuItem>
-                      }
-                    />
-
-                    <HabitDetailDialog
-                      currentDate={selectedDate || new Date()}
-                      habit={habit}
-                      trigger={
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          disabled={loading}
-                        >
-                          <EyeIcon className="mr-2 h-4 w-4" />
-                          Detalhes
-                        </DropdownMenuItem>
-                      }
-                    /> 
-                    {/* ANNOTATION */}
-                    {isCompleted && !!todayCompletion?.id && (!todayCompletion.annotations) && (
-                      <CreateAnnotationDialog
-                        completionId={todayCompletion.id}
-                        trigger={
-                          <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}
-                            disabled={loading}
-                          >
-                            <File className="mr-2 h-4 w-4" />
-                            Anotação
-                          </DropdownMenuItem>
-                        }
-                        
-                      />
-                    )}
-
-                  </DropdownMenuContent>
-
-            </DropdownMenu>
-
-            {/* COUNTER CHECKBOX */}
-            {onToggle && (
-              <div className="flex flex-col items-center gap-2">
-                <Progress
-                  className="w-full rounded-full max-w-sm"
-                  value={completedProgress}
-                />
+              <DropdownMenuTrigger asChild>
                 <Button
-                  variant={isCompleted ? "default" : "outline"}
+                  variant="ghost"
                   size="icon"
-                  disabled={loading}
-                  onClick={handleToggleClick}
-                  className={cn(
-                    "relative w-6 h-6 rounded-full flex items-center justify-center transition",
-                    isCompleted
-                      ? `bg-primary text-white`
-                      : "bg-background border border-border"
-                  )}
+                  className="h-8 w-8"
                 >
-                  {isCompleted && <Check className="w-5 h-5" />}
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
-
-                <div className="relative top-5">
-                  {isActiveHour && !isOutHour && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      disabled
-                      // onClick={}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                {/* EDIT */}
+                <UpdateHabitDialog
+                  habit={habit}
+                  onSuccessCallback={handleUpdateHabit}
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="cursor-pointer"
                     >
-                      <PlayCircle className="text-sm" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                  }
+                />
+                <DropdownMenuSeparator />
+                {/* DELETE */}
+                <DeleteHabitDialog
+                  habitId={habit.id}
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Deletar
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <HabitDetailDialog
+                  currentDate={selectedDate || new Date()}
+                  habit={habit}
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      disabled={loading}
+                    >
+                      <EyeIcon className="mr-2 h-4 w-4" />
+                      Detalhes
+                    </DropdownMenuItem>
+                  }
+                /> 
+                {/* ANNOTATION */}
+                {isCompleted && !!todayCompletion?.id && (!todayCompletion.annotations) && (
+                  <CreateAnnotationDialog
+                    completionId={todayCompletion.id}
+                    trigger={
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        disabled={loading}
+                      >
+                        <File className="mr-2 h-4 w-4" />
+                        Anotação
+                      </DropdownMenuItem>
+                    }
+                    
+                  />
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ) : (
           <div className="flex items-center gap-1.5">

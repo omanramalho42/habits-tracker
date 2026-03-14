@@ -88,12 +88,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       color,
       clock,
       limitCounter,
-      goal
+      goals,
+      categories
     } = parsedBody.data
 
     const existingGoal = await prisma.goals.findFirst({
       where: {
-        id: goal
+        id: goals
       }
     })
 
@@ -107,6 +108,28 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           goals: {
             disconnect: {
               id: existingGoal.id
+            }
+          }
+        }
+      })
+    }
+
+    const existingCategorie = await prisma.categories.findFirst({
+      where: {
+        id: categories
+      }
+    })
+
+    if(existingCategorie) {
+      await prisma.habit.update({
+        where: {
+          id,
+          userId: userDb.id
+        },
+        data: {
+          categories: {
+            disconnect: {
+              id: existingCategorie.id
             }
           }
         }
@@ -141,9 +164,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         color,
         limitCounter,
         updatedAt: today,
-        ...(goal  && {goals: {
+        ...(goals  && {goals: {
           connect: {
-            id: goal
+            id: goals
+          }
+        }}),
+        ...(categories  && {categories: {
+          connect: {
+            id: categories
           }
         }}),
         clock
