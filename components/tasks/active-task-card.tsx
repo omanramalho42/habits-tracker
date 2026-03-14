@@ -1,18 +1,40 @@
-import React from 'react'
 
 import { Card } from '@/components/ui/card'
 
-import type { Categories, Goals, Task, TaskCompletion } from '@prisma/client'
-import { Button } from '../ui/button'
-import { Check, File, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import type {
+  Categories,
+  Goals,
+  Task,
+  TaskCompletion
+} from '@prisma/client'
+
+import CreateAnnotationDialog from '@/components/create-annotation-dialog'
+import DeleteTaskDialog from '@/components/tasks/delete-task-dialog'
+import UpdateTaskDialog from '@/components/tasks/update-task-dialog'
+
+import { Button } from '@/components/ui/button'
+import {
+  Check,
+  File,
+  MoreVertical,
+  Pencil,
+  Trash2
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import CreateAnnotationDialog from '../create-annotation-dialog'
-import DeleteTaskDialog from './delete-task-dialog'
-import UpdateTaskDialog from './update-task-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 
 interface ActiveTaskCardProps {
-  task: Task & { completions?: TaskCompletion[], goals: Goals[], categories: Categories[] }
+  task: Task & {
+    completions?: TaskCompletion[],
+    goals?: Goals[],
+    categories?: Categories[]
+  }
   selectedDate?: Date
 }
 
@@ -50,7 +72,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       <div
         className={cn(
           "flex justify-center items-center gap-1 transition-opacity",
-          "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+          // "opacity-100 md:opacity-0 md:group-hover:opacity-100",
         )}
       >
         <DropdownMenu>

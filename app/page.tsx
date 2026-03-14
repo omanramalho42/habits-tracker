@@ -24,13 +24,19 @@ import type {
   Task
 } from "@prisma/client"
 
+import { fetchTasks } from "@/services"
+import CreateRoutineDialog from "@/components/create-routine-dialog"
+import UpdateRoutineDialog from "@/components/update-routine-dialog"
+import DeleteRoutineDialog from "@/components/delete-routine-dialog"
+import HabitCardRoutine from "@/components/habits/habit-card-routine"
+import CreateTaskDialog from "@/components/tasks/create-task-dialog"
+
+import ActiveTaskCard from "@/components/tasks/active-task-card"
+
 import Footer from "@/components/habits/footer"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import CreateRoutineDialog from "@/components/create-routine-dialog"
-import UpdateRoutineDialog from "@/components/update-routine-dialog"
-import DeleteRoutineDialog from "@/components/delete-routine-dialog"
 
 import {
   Tabs,
@@ -41,10 +47,11 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { formatDateBR } from "@/lib/utils"
+
 import {
   AppWindowIcon,
   CodeIcon,
-  Edit,
   Filter,
   Pencil,
   Plus,
@@ -54,10 +61,6 @@ import {
 
 import type { HabitWithStats } from "@/lib/types"
 
-import { formatDateBR } from "@/lib/utils"
-import HabitCardRoutine from "@/components/habits/habit-card-routine"
-import ActiveTaskCard from "@/components/tasks/active-task-card"
-import { fetchTasks } from "@/services"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
@@ -243,25 +246,28 @@ export default function Home() {
                               schedule={schedule}
                             />
                         )) : (
-                          <Card className="flex flex-row justify-center gap-4 items-center">
-                            <Edit className="w-8 h-8" />
-                            <p>
-                              Editar hábito
-                            </p>
-                          </Card>
+                          <UpdateRoutineDialog
+                            trigger={
+                              <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
+                                <p className="text-sm text-center tracking-tight">
+                                  Adicione hábitos a sua rotina e faça a magia acontecer 🪄
+                                </p>
+                              </Card>
+                            }
+                            routine={routine}
+                          />
                         )}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-20">
-
-                    <div className="text-7xl mb-6">🎯</div>
-
-                    <h2 className="text-2xl font-bold mb-3 text-foreground">
-                      Comece sua jornada
-                    </h2>
-
+                  <Card className="flex flex-col gap-1 px-4">
+                    <div className="flex flex-col text-center text-4xl">
+                      🎯
+                      <h2 className="text-center text-xl font-bold mb-3 text-foreground">
+                        Comece sua jornada
+                      </h2>
+                    </div>
                     <CreateRoutineDialog
                       trigger={
                         <Button
@@ -274,8 +280,7 @@ export default function Home() {
                         </Button>
                       }
                     />
-
-                  </div>
+                  </Card>
                 )}
 
               </div>
@@ -322,7 +327,7 @@ export default function Home() {
               )}
             </TabsContent>
             <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-48">
-              {tasks.map((task) => {
+              {tasks.length > 0 ? tasks.map((task) => {
                 return (
                   <ActiveTaskCard
                     key={task.id}
@@ -330,7 +335,28 @@ export default function Home() {
                     selectedDate={selectedDate}
                   />
                 )
-              })}
+              }) : (
+                <Card className="flex flex-col gap-1 px-4">
+                  <div className="flex flex-col text-center text-4xl">
+                    🎯
+                    <h2 className="text-center text-xl font-bold mb-3 text-foreground">
+                      Comece sua jornada
+                    </h2>
+                  </div>
+                  <CreateTaskDialog
+                    trigger={
+                      <Button
+                        aria-label="Criar rotina"
+                        title="Criar rotina"
+                        size="lg"
+                      >
+                        <Plus className="h-5 w-5 mr-2" />
+                        Criar tarefa
+                      </Button>
+                    }
+                  />
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </div>

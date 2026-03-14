@@ -116,7 +116,9 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
           "tasks"
         ]
       })
-
+      await queryClient.invalidateQueries({
+        queryKey: ['routines'],
+      })
       setOpen(prev => !prev)
     },
     onError: () => {

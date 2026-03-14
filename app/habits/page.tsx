@@ -119,11 +119,13 @@ export default function page() {
                   />
                 </div>
               )) : (
-                <div className="text-center py-20">
-                  <div className="text-7xl mb-6">🎯</div>
-                  <h2 className="text-2xl font-bold mb-3 text-foreground">
-                    {habits.length === 0 ? "Comece sua jornada" : "Nenhum hábito encontrado para este dia"}
-                  </h2>
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-col text-center text-4xl">
+                    🎯
+                    <h2 className="text-center text-xl font-bold mb-3 text-foreground">
+                      {habits.length === 0 ? "Comece sua jornada" : "Nenhum hábito encontrado para este dia"}
+                    </h2>
+                  </div>
                   <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                     {habits.length === 0
                       ? "Crie seu primeiro hábito e comece a construir melhor a sua rotina"

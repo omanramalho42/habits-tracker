@@ -45,8 +45,14 @@ export async function GET(request: Request) {
       },
       include: {
         habitSchedules: {
+          where: {
+            status: 'ACTIVE'
+          },
           include: {
             habit: {
+              // where: {
+              //   status: 'ACTIVE'
+              // },
               include: {
                 completions: true
               }
@@ -60,7 +66,7 @@ export async function GET(request: Request) {
     return NextResponse.json(routines)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error fetching habits:", error.message)
+      console.error("Error fetching routines:", error.message)
       return NextResponse.json({
         error: error.message
       }, { status: 500 })
@@ -124,11 +130,13 @@ export async function POST(request: NextRequest) {
         cron,
         name,
         description,
-
         ...(habits?.length && {
           habitSchedules: {
             connectOrCreate: habits.map((habitId) => ({
-              where: { id: habitId },
+              where: {
+                id: habitId,
+                status: 'ACTIVE'
+              },
               create: {
                 habitId: habitId,
               }

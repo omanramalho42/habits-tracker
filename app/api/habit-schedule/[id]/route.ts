@@ -46,7 +46,8 @@ export async function PATCH(request: NextRequest) {
         id,
         routine: {
           userId: userDb.id
-        }
+        },
+        status: 'ACTIVE'
       }
     })
 

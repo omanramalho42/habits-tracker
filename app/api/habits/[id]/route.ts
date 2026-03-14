@@ -33,14 +33,15 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }, { status: 401 })
     }
 
-    await prisma.habit.delete({
-      where: {
-        id,
-        userId: userDb.id
-      }, include: {
-        schedules:  true
-      }
-    })
+    await prisma.$transaction([
+      prisma.habitSchedule.deleteMany({
+        where: { habitId: id }
+      }),
+      prisma.habit.delete({
+        where: { id }
+      })
+    ])
+    
     return NextResponse.json({ success: true })
   } catch (error) {
     if (error instanceof Error) {

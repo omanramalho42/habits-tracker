@@ -4,8 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
 
-import { DeleteHabit } from '@/app/habits/_actions/habits/habits'
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +44,9 @@ function DeleteTaskDialog({
       await queryClient.invalidateQueries({
         queryKey: ['tasks'],
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['routines'],
+      })
     },
     onError: () => {
       toast.error('Aconteceu algo de errado', {
@@ -74,7 +75,7 @@ function DeleteTaskDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             Está ação não poderá ser desfeita. Isso vai exlcuir permanentemente
-            seu hábito e poderá causar efeitos em rotinas.
+            sua tarefa e poderá causar efeitos em rotinas.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

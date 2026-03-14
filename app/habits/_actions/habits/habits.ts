@@ -103,17 +103,23 @@ export async function DeleteHabit(habitId: string) {
   }
 
   const modifiedAt = new Date()
-  modifiedAt.setHours(0,0,0,0)
 
-  return await prisma.habit.update({
-    where: {
-      id: habitId,
-      userId: userDb.id
-    },
-    data: {
-      status: 'ARCHIVED',
-      deletedAt: modifiedAt.toISOString(),
-      updatedAt:  modifiedAt.toISOString(),
-    }
-  })
+  return await prisma.$transaction([
+    prisma.habitSchedule.updateMany({
+      where: { habitId: habitId },
+      data: {
+        status: 'ARCHIVED',
+        // deletedAt: modifiedAt.toISOString().split("T")[0],
+        updatedAt:  modifiedAt,
+      }
+    }),
+    prisma.habit.update({
+      where: { id: habitId },
+      data: {
+        status: 'ARCHIVED',
+        deletedAt: modifiedAt,
+        updatedAt:  modifiedAt,
+      }
+    })
+  ])
 }

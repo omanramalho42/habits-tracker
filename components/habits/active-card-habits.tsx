@@ -1,16 +1,29 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import axios from "axios"
 import { toast } from "sonner"
 
+import { CSS } from "@dnd-kit/utilities"
+import { DndContext } from "@dnd-kit/core"
+import confetti from "canvas-confetti"
+
 import { HabitCard } from "@/components/habit-card"
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable"
+
+import { formatDateBR } from "@/lib/utils"
 
 import {
   ArrowUpDownIcon,
@@ -19,18 +32,6 @@ import {
 
 import type { HabitWithStats } from "@/lib/types"
 
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy
-} from "@dnd-kit/sortable"
-
-import { CSS } from "@dnd-kit/utilities"
-import { DndContext } from "@dnd-kit/core"
-import { Input } from "../ui/input"
-import confetti from "canvas-confetti"
-
-import { formatDateBR } from "@/lib/utils"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
@@ -145,19 +146,21 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
         className="flex mt-10 flex-col gap-2 px-2 max-h-112.5 overflow-auto pr-3 scroll-container"
         aria-selected={false}
       >
-        {/* EMPRT ARRAY */}
-        <div className="my-4">
+        {/* EMPTY ARRAY */}
+        <div>
           {habits.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-7xl mb-6">🎯</div>
-
-              <h2 className="text-2xl font-bold mb-3 text-foreground">
-                Comece sua jornada
-              </h2>
+            <Card className="flex flex-col px-4 gap-1">
+              <div className="flex flex-col text-center text-4xl">
+                🎯
+                <h2 className="text-center text-xl font-bold mb-3 text-foreground">
+                  Comece sua jornada
+                </h2>
+              </div>
 
               <CreateHabitDialog
                 trigger={
                   <Button
+                    className="mx-auto"
                     aria-label="Criar hábito"
                     title="Criar hábito"
                     size="lg"
@@ -167,7 +170,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
                   </Button>
                 }
               />
-            </div>
+            </Card>
           ) : (
             <DndContext onDragEnd={handleDragEnd}>
               <SortableContext

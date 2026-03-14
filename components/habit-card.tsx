@@ -258,7 +258,9 @@ export function HabitCard({
         queryKey: ["habits"],
         exact: false,
       })
-
+      queryClient.invalidateQueries({
+        queryKey: ['routines'],
+      })
       toast.success(
         "Hábito atualizado com sucesso.",
         { id: toastId }

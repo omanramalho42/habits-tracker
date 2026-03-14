@@ -44,6 +44,9 @@ function DeleteHabitDialog({
       await queryClient.invalidateQueries({
         queryKey: ['habits'],
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['routines'],
+      })
     },
     onError: () => {
       toast.error('Aconteceu algo de errado', {
