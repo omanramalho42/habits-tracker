@@ -226,8 +226,15 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
                                   }}
                                 >
                                   <EmojiPicker.Search className="w-full" />
-
-                                  <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                                  <EmojiPicker.Viewport
+                                    className="
+                                      h-[50vh]
+                                      overflow-y-auto
+                                      overscroll-contain
+                                      touch-pan-y
+                                    "
+                                    style={{ WebkitOverflowScrolling: 'touch' }}
+                                  >
                                     <EmojiPicker.Loading>
                                       Carregando…
                                     </EmojiPicker.Loading>

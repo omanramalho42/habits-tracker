@@ -211,9 +211,9 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
                       <FormControl>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Card className="w-full h-full cursor-pointer">
+                            <Card className="w-full p-2 h-full cursor-pointer">
                               {field.value ? (
-                                <div className="flex flex-col items-center justify-center gap-1 py-4">
+                                <div className="flex flex-col items-center justify-center gap-1">
                                   <span className="text-3xl" role="img">
                                     {field.value}
                                   </span>
@@ -223,7 +223,7 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
                                   </p>
                                 </div>
                               ) : (
-                                <div className="flex flex-col items-center justify-center gap-1 py-4">
+                                <div className="flex flex-col items-center justify-center gap-1">
                                   <CircleOff className="h-6 w-6 text-muted-foreground" />
 
                                   <p className="text-xs text-muted-foreground text-center">
@@ -253,7 +253,15 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
                             >
                               <EmojiPicker.Search className="w-full" />
 
-                              <EmojiPicker.Viewport className="h-72 overflow-y-auto">
+                              <EmojiPicker.Viewport
+                                className="
+                                  h-[50vh]
+                                  overflow-y-auto
+                                  overscroll-contain
+                                  touch-pan-y
+                                "
+                                style={{ WebkitOverflowScrolling: 'touch' }}
+                              >
                                 <EmojiPicker.Loading>
                                   Carregando…
                                 </EmojiPicker.Loading>

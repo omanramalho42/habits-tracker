@@ -443,41 +443,41 @@ export function HabitCard({
             {/* FREQUENCY */}
             {!loading ? (
               <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {WEEKDAYS.map((day) => {
                     const isActive = frequency.includes(day.key)
 
-                    // ✅ agora olha para TODAS as conclusões da semana
                     const isCompletedThisWeekday =
                       completionFrequency.includes(day.key)
-                    
+
                     return (
                       <div
                         key={day.key}
-                        className={cn(
-                          'w-5.75 h-5.75 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
-                          isActive
-                            ? "bg-success text-success-foreground"
-                            :  WEEKDAY_TO_FREQUENCY[today.getDay()] === day.key
-                            ? "bg-primary/30 text-primary ring-1 ring-primary"
-                            : "bg-muted/50 text-muted-foreground"
-                        )}
-                        style={
-                          isActive
-                            ? {
-                                backgroundColor: 
-                                  isCompletedThisWeekday 
-                                  ? "#32CD32"        // 🟢 completado
-                                  : "#B22222"      // 🔵 ativo (schedule)
-                              }
-                            : {}
-                        }
+                        className="flex flex-col items-center gap-1"
                       >
-                        {
-                          !isActive ? day.keyPtBr 
-                          : isCompletedThisWeekday && isCompleted ? <Check /> 
-                          : day.keyPtBr
-                        }
+                        {/* CIRCULO */}
+                        <div
+                          className={cn(
+                            "w-5.5 h-5.5 rounded-full border border-gray-800 flex items-center justify-center text-sm font-bold transition-colors",
+                            !isActive && "bg-zinc-800 text-zinc-400",
+                            isActive && !isCompletedThisWeekday && "bg-red-500 text-white",
+                            isActive && isCompletedThisWeekday && "bg-green-500 text-white"
+                          )}
+                        >
+                          <p className="text-sm tracking-tight">
+                            {day.keyPtBr}
+                          </p>
+                        </div>
+
+                        {/* DOT */}
+                        <div
+                          className={cn(
+                            "w-1 h-1 rounded-full",
+                            !isActive && "bg-zinc-700",
+                            isActive && !isCompletedThisWeekday && "bg-red-500",
+                            isActive && isCompletedThisWeekday && "bg-green-500"
+                          )}
+                        />
                       </div>
                     )
                   })}
