@@ -28,6 +28,7 @@ import type { HabitWithStats } from '@/lib/types'
 import { Loader, Plus } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { fetchHabits } from "@/services"
+import { Card } from "@/components/ui/card"
 
 export default function page() {
   const [search, setSearch] = useState<string>("")
@@ -119,7 +120,7 @@ export default function page() {
                   />
                 </div>
               )) : (
-                <div className="flex flex-col gap-1">
+                <Card className="flex flex-col px-4 gap-1">
                   <div className="flex flex-col text-center text-4xl">
                     🎯
                     <h2 className="text-center text-xl font-bold mb-3 text-foreground">
@@ -144,7 +145,7 @@ export default function page() {
                       </Button>   
                     }
                   />
-                </div>
+                </Card>
               )}
             </>
           )}

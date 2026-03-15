@@ -306,7 +306,7 @@ export function HabitCard({
 
   return (
     <Card
-      className={`group p-5 bg-linear-to-br transition-colors hover:shadow-lg cursor-pointer min-h-44 ${
+      className={`group p-5 bg-linear-to-br transition-colors hover:shadow-lg cursor-pointer h-full ${
         isCompletedToday && onToggle
           ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
           // : isActiveHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
@@ -367,30 +367,29 @@ export function HabitCard({
                         <p className="text-sm">{habit.emoji}</p>
                       )}
                     </div>
-                    <h3 className="font-bold w-full truncate tracking-tighter sm:text-lg text-md text-foreground">
+                    <h3 className="font-bold w-full max-w-54 truncate tracking-tighter text-foreground">
                       {habit.name}
                     </h3>
+                    {/* badge streak */}
+                    {habit.current_streak > 0 && (
+                      <span className="px-2 tracking-tight py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3" />
+                        {habit.current_streak}
+                      </span>
+                    )}
                   </div>
-
+ 
                   {/* {habit.updatedAt && <Button variant="outline" size="icon"> <Calendar1 className="text-sm" /></Button>} */}
-                  {/* badge streak */}
-                  {habit.current_streak > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3" />
-                      {habit.current_streak}
-                    </span>
-                  )}
                   </div>
               )}
             </div>
             
             {/* BADGES (COUNTER, CLOCK) */}
             {!loading ? (
-              <div className="flex flex-wrap gap-2 my-2 items-start">
+              <div className="flex flex-col gap-2">
                 {habit.limitCounter && habit.limitCounter > 1 && (
                   <Badge
-                    variant="default"
-                    className="flex w-auto h-4 flex-row gap-2 text-sm text-foreground mb-3"
+                    variant="outline"
                   >
                     <Repeat className="text-sm" />
                     <p className="text-sm tracking-tight">
@@ -398,42 +397,44 @@ export function HabitCard({
                     </p>
                   </Badge>
                 )}
-                <div>
-                  {habit.goals && habit.goals.length > 0 && (
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      ✨ {habit.goals.map((g) => g.name).join(", ")}
-                    </p>
+                
+                {habit.goals && habit.goals.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground truncate max-w-54">
+                    {habit.goals.map((g) => g.emoji + " " + g.name).join(", ")}
+                  </p>
+                )}
+                {habit.categories && habit.categories.length > 0 && (
+                  <p className="text-[10px] max-w-36 text-muted-foreground truncate">
+                    {habit.categories.map((g) => g.emoji + " " + g.name).join(", ")}
+                  </p>
+                )}
+
+                <div className="flex flex-row gap-2 mt-2">
+                  {habit.clock && (
+                    <Badge
+                      variant="default"
+                      className={
+                        cn(
+                          "text-sm flex flex-row gap-2 text-foreground mb-3",
+                          isActiveHour && 'bg-yellow-500/60',
+                          isOutHour && 'bg-red-500/60',
+                          isCompleted && 'bg-green-500/60'
+                        )
+                      }
+                    >
+                      <Clock10Icon /> {habit?.clock}
+                    </Badge>
                   )}
-                  {habit.categories && habit.categories.length > 0 && (
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      🎯 {habit.categories.map((g) => g.name).join(", ")}
-                    </p>
+                  {habit.duration && (
+                    <Badge
+                      variant="secondary"
+                      className="text-sm flex flex-row gap-2 text-foreground mb-3"
+                    >
+                      <TimerIcon />
+                      {habit.duration}
+                    </Badge>
                   )}
                 </div>
-                {habit.clock && (
-                  <Badge
-                    variant="default"
-                    className={
-                      cn(
-                        "text-sm flex flex-row gap-2 text-foreground mb-3",
-                        isActiveHour && 'bg-yellow-500/60',
-                        isOutHour && 'bg-red-500/60',
-                        isCompleted && 'bg-green-500/60'
-                      )
-                    }
-                  >
-                    <Clock10Icon /> {habit?.clock}
-                  </Badge>
-                )}
-                {habit.duration && (
-                  <Badge
-                    variant="secondary"
-                    className="text-sm flex flex-row gap-2 text-foreground mb-3"
-                  >
-                    <TimerIcon />
-                    {habit.duration}
-                  </Badge>
-                )}
 
               </div>
             ) : (
@@ -512,16 +513,18 @@ export function HabitCard({
                   ))}
                 </div>
                 {/* Progress text + bar */}
-                <div className="flex items-center justify-between gap-2 w-full">
-                  <Skeleton className="h-3 w-26" />
+                <div className="flex flex-col items-start justify-between gap-2 w-full">
+                  <Skeleton className="h-3 w-22" />
                   <Skeleton className="h-1 w-full rounded-full" />
                 </div>
               </div>
             )}
-            <Progress
-              className="w-full gradient-progress h-1 mt-1 bg-gray-800 transition-all duration-500"
-              value={progress}
-            />
+            {!loading && (
+              <Progress
+                className="w-full gradient-progress h-1 mt-1 bg-gray-800 transition-all duration-500"
+                value={progress}
+              />
+            )}
           </div>
         </div>
         

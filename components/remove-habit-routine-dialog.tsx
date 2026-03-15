@@ -6,6 +6,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
 
+import { removeHabitSchedule } from '@/services/habit-schedules'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +19,9 @@ import {
   AlertDialogCancel,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+
 import { Trash2 } from 'lucide-react'
-import { Button } from './ui/button'
-import { removeHabitFromRoutine } from '@/services/routines'
 
 interface RemoveHabitFromRoutineProps {
   routineId: string;
@@ -42,7 +44,7 @@ function RemoveHabitFromRoutine({
       routineId: string;
       habitScheduleId: string
     }) => {
-      return await removeHabitFromRoutine(
+      return await removeHabitSchedule(
         routineId,
         habitScheduleId
       )

@@ -56,6 +56,7 @@ export async function PATCH(request: NextRequest) {
         error: "Schedule not found or access denied"
       }, { status: 404 })
     }
+
     const newHabitSchedule = await prisma.habitSchedule.update({
       where: { id },
       data: {
@@ -70,12 +71,13 @@ export async function PATCH(request: NextRequest) {
       }
     })
     
+    console.log(newHabitSchedule, "new habit scdule")
     return NextResponse.json(newHabitSchedule)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error routine habits:", error)
+      console.error("Error habit Scheduke:", error)
       return NextResponse.json({
-        error: "Failed to create new routine"
+        error: "Failed to create new habit scjefule"
       }, { status: 500 })
     }
   }

@@ -287,7 +287,7 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="habits">
               {isError ? (
-                <div className="text-center py-20">
+                <div className="text-center py-10">
                   <h2 className="text-2xl font-bold mb-3 text-foreground">
                     Não foi possível carregar hábitos
                   </h2>
@@ -297,28 +297,30 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="w-full flex flex-col">
-                  <div className="flex flex-row justify-between gap-2 items-center w-full">
-                    <p className="text-sm font-bold text-foreground">
-                      Hábitos
-                    </p>
-                    <div className="flex flex-row gap-2 w-full items-center justify-center">
-                      <Input
-                        type="text"
-                        placeholder="pesquise pelo nome."
-                        value={filter}
-                        onChange={(event) => {
-                          handleFilterHabits(event.target.value)
-                        }}
-                      />
+                  {habits.length > 0 && (
+                    <div className="flex flex-row justify-between gap-2 items-center w-full">
+                      <p className="text-sm font-bold text-foreground">
+                        Hábitos
+                      </p>
+                      <div className="flex flex-row gap-2 w-full items-center justify-center">
+                        <Input
+                          type="text"
+                          placeholder="pesquise pelo nome."
+                          value={filter}
+                          onChange={(event) => {
+                            handleFilterHabits(event.target.value)
+                          }}
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        size="icon-lg"
+                      >
+                        <Filter />
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      type="button"
-                      size="icon-lg"
-                    >
-                      <Filter />
-                    </Button>
-                  </div>
+                  )}
                   <ActiveCardHabits
                     habits={habits.filter((habit) => habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))}
                     selectedDate={selectedDate}
@@ -346,8 +348,8 @@ export default function Home() {
                   <CreateTaskDialog
                     trigger={
                       <Button
-                        aria-label="Criar rotina"
-                        title="Criar rotina"
+                        aria-label="Criar tarefa"
+                        title="Criar tarefa"
                         size="lg"
                       >
                         <Plus className="h-5 w-5 mr-2" />

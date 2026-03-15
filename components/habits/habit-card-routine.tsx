@@ -31,6 +31,7 @@ import {
   Clock10,
   MoreHorizontal,
   Pencil,
+  Repeat,
   Trash
 } from "lucide-react"
 
@@ -158,32 +159,32 @@ const HabitCardRoutine = ({
           {/* TIME INFO */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
 
-            {schedule.habit?.clock && (
+            {schedule?.clock && (
               <div className="flex flex-row items-center gap-3">
                 <div className="flex items-center gap-1">
                   <Clock10 className="w-3.5 h-3.5" />
-                  <span>{schedule.habit.clock.slice(0,5)}</span>
+                  <span>{schedule.clock.slice(0,5)}</span>
                 </div>
 
                 <span className="opacity-40">+</span>
               </div>
             )}
 
-            {schedule.habit?.duration && (
+            {schedule?.duration && (
               <div className="flex flex-row items-center gap-3">
                 <div className="flex items-center gap-1">
                   <AlarmClock className="w-3.5 h-3.5" />
-                  <span>{schedule.habit.duration.slice(0,5)}</span>
+                  <span>{schedule.duration.slice(0,5)}</span>
                 </div>
 
                 <span className="opacity-40">→</span>
               </div>
             )}
 
-            {schedule.habit?.clock && schedule.habit?.duration && sumTime(schedule.habit?.clock, schedule.habit?.duration) && (
+            {schedule?.clock && schedule?.duration && (
               <div className="flex text-orange-400 items-center gap-1 font-medium">
                 <Clock className="w-3.5 h-3.5" />
-                <span>{sumTime(schedule.habit?.clock, schedule.habit?.duration)}</span>
+                <span>{sumTime(schedule.clock, schedule.duration)}</span>
               </div>
             )}
 
@@ -191,21 +192,24 @@ const HabitCardRoutine = ({
 
           {/* TITLE */}
           <div className="flex flex-row justify-between gap-2 items-center">
-            <p
-              className={`text-sm font-medium ${
-                completionToday
-                  ? "line-through text-muted-foreground opacity-60"
-                  : "text-foreground"
-              }`}
-            >
-              {schedule.habit?.name}
-            </p>
-            <div className="flex flex-row items-center gap-1">
+            <div className="flex flex-row items-center gap-2">
+              <p
+                className={`text-sm font-medium ${
+                  completionToday
+                    ? "line-through text-muted-foreground opacity-60"
+                    : "text-foreground"
+                }`}
+              >
+                {schedule.habit?.name}
+              </p>
               {schedule.habit?.limitCounter && schedule.habit?.limitCounter > 1 && (
-                <Badge>
+                <Badge variant="outline">
+                  <Repeat />
                   {currentCounter}x{schedule.habit?.limitCounter}
                 </Badge>
               )}
+            </div>
+            <div className="flex flex-row items-center gap-1">
               <Button
                 variant={completionToday ? "default" : "outline"}
                 size="icon-sm"
@@ -242,7 +246,12 @@ const HabitCardRoutine = ({
                         <DropdownMenuItem
                           onSelect={(e) => e.preventDefault()}
                         >
-                          <Button disabled={isPending} variant="ghost" type="button" size="icon">
+                          <Button
+                            disabled={isPending}
+                            variant="ghost"
+                            type="button"
+                            size="icon"
+                          >
                             <Trash className="h-3 w-3" />
                           </Button>
                           Remover
@@ -272,7 +281,7 @@ const HabitCardRoutine = ({
                     )}
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem disabled>API</DropdownMenuItem>
+                  {/* <DropdownMenuItem disabled>API</DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

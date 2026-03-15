@@ -2,15 +2,13 @@
 
 import React, { useState } from 'react'
 
-import { z } from 'zod'
-
 import { SubmitHandler, useForm } from 'react-hook-form'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
 
-import { updateRoutineHabitSchedule } from '@/services/routines'
+import { updateHabitSchedule } from '@/services/habit-schedules'
 
 import HabitPicker from '@/components/habit-picker'
 
@@ -39,6 +37,7 @@ import {
 import { Label } from '@/components/ui/label'
 
 import type { Habit, HabitSchedule } from '@prisma/client'
+import { UpdateHabitScheduleSchemaType } from '@/lib/schema/habit-schedule'
 
 import { cn } from '@/lib/utils'
 
@@ -53,22 +52,14 @@ interface UpdateRoutineHabitScheduleProps {
   schedule: HabitSchedule;
 }
 
-const updateRoutineHabitScheduleSchema = z.object({
-  id: z.string(),
-  duration: z.string(),
-  clock:    z.string(),
-  habit:    z.any({})
-})
-
-export type UpdateRoutineHabitScheduleSchemaType = z.infer<typeof updateRoutineHabitScheduleSchema>
-
 const UpdateRoutineHabitSchedule = ({
   trigger,
   schedule,
   habit,
 }: UpdateRoutineHabitScheduleProps) => {
-  
-  const form = useForm<UpdateRoutineHabitScheduleSchemaType>({
+  console.log(schedule, "schedule");
+
+  const form = useForm<UpdateHabitScheduleSchemaType>({
     defaultValues: {
       id: schedule.id,
       clock: schedule?.clock || "",
@@ -92,7 +83,7 @@ const UpdateRoutineHabitSchedule = ({
   const queryClient = useQueryClient()
   
   const { mutate } = useMutation({
-    mutationFn: updateRoutineHabitSchedule,
+    mutationFn: updateHabitSchedule,
     onMutate: () => {
       return toast.loading(
         "Atualizando hábito da rotina...",
@@ -118,8 +109,8 @@ const UpdateRoutineHabitSchedule = ({
     },
   })
 
-  const onSubmit: SubmitHandler<UpdateRoutineHabitScheduleSchemaType> =
-    async (data: UpdateRoutineHabitScheduleSchemaType) => {
+  const onSubmit: SubmitHandler<UpdateHabitScheduleSchemaType> =
+    async (data: UpdateHabitScheduleSchemaType) => {
       console.log(data, "data!")
 
       mutate({

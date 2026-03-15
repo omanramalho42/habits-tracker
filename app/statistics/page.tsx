@@ -37,7 +37,6 @@ import { Annotations, Routine, Task } from '@prisma/client'
 import { GoalsDTO } from '@/services/goals'
 import { CategoriesDTO } from '@/services/categories'
 
-
 const HeatMap =
   dynamic(async () => await import("@/components/heat-map-v2"), {
     loading: () => <Skeleton className='w-full h-64' />
@@ -105,6 +104,8 @@ export default function Statistics() {
     staleTime: 1000 * 60,
     retry: 1,
   })
+
+  console.log(categories, goals, annotations, tasks, routines, habits, "ALL DATA Info")
 
   const overallStats = useMemo(() => {
     const today = new Date()
@@ -400,7 +401,7 @@ export default function Statistics() {
                 </p>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-4">
+              {/* <div className="bg-card border border-border rounded-xl p-4">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
                   <span className="text-xs">Com Prazo</span>
                 </div>
@@ -410,9 +411,9 @@ export default function Statistics() {
                 <p className="text-xs text-muted-foreground mt-1">
                   possuem data final
                 </p>
-              </div>
+              </div> */}
 
-              <div className="bg-card border border-border rounded-xl p-4">
+              {/* <div className="bg-card border border-border rounded-xl p-4">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
                   <span className="text-xs">Sem Prazo</span>
                 </div>
@@ -422,7 +423,7 @@ export default function Statistics() {
                 <p className="text-xs text-muted-foreground mt-1">
                   contínuas
                 </p>
-              </div>
+              </div> */}
 
             </div>
 
@@ -522,12 +523,12 @@ export default function Statistics() {
                         </p>
                       )}
 
-                      <p className="text-xs text-muted-foreground">
+                      {/* <p className="text-xs text-muted-foreground">
                         início: {new Date(task.startDate).toLocaleDateString("pt-BR")}
                         {task.endDate && (
                           <> • fim: {new Date(task.endDate).toLocaleDateString("pt-BR")}</>
                         )}
-                      </p>
+                      </p> */}
 
                     </div>
 

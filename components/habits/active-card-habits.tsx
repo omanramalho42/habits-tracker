@@ -160,7 +160,6 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
               <CreateHabitDialog
                 trigger={
                   <Button
-                    className="mx-auto"
                     aria-label="Criar hábito"
                     title="Criar hábito"
                     size="lg"
