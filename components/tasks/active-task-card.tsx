@@ -8,19 +8,21 @@ import type {
   TaskCompletion
 } from '@prisma/client'
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import axios from 'axios'
+
+import { CSS } from "@dnd-kit/utilities"
+import { DndContext } from "@dnd-kit/core"
+import { useSortable } from '@dnd-kit/sortable'
+
+import confetti from "canvas-confetti"
+
 import CreateAnnotationDialog from '@/components/create-annotation-dialog'
 import DeleteTaskDialog from '@/components/tasks/delete-task-dialog'
 import UpdateTaskDialog from '@/components/tasks/update-task-dialog'
 
 import { Button } from '@/components/ui/button'
-import {
-  Check,
-  File,
-  MoreVertical,
-  Pencil,
-  Trash2
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +30,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+
+import { cn } from '@/lib/utils'
+
+import {
+  ArrowUpDownIcon,
+  Check,
+  File,
+  MoreVertical,
+  Pencil,
+  Trash2
+} from 'lucide-react'
 
 interface ActiveTaskCardProps {
   task: Task & {
@@ -44,6 +57,64 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       c.completedDate === selectedDate && c.id
     || null
   )
+
+  const queryClient = useQueryClient()
+  const { mutate, data, isPending } = useMutation({
+    mutationFn: async ({
+      taskId,
+      date
+    }: {
+      taskId: string
+      date: string
+    }) => {
+      const response =
+        await axios.put(`/api/task/${taskId}`, {
+          date,
+        })
+      return response.data
+    },
+    onSuccess: async (values) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["tasks"],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["routines"],
+      })
+
+      if(values.completed) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
+        })
+      }
+
+      toast.success(
+        "Sucesso ao alterar o status da tarefa...",
+        { id: 'toggle-task' }
+      )
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Erro ao alterar status do hábito", {
+        id: "toggle-task",
+      })
+    },
+  })
+
+  const handleToggleTask = (taskId: string, date: Date) => {
+    toast.loading(
+      "Alterando status da terafa...", {
+        id: `toggle-task`,
+    })
+    // date.setHours(0,0,0,0)
+    mutate({
+      taskId,
+      date: date.toISOString(),
+    })
+  }
+
+  console.log(task, "task");
 
   return (
     <Card className='flex flex-row justify-between items-center px-2'>
@@ -150,14 +221,20 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           size="icon"
           variant="outline"
           type='button'
+          onClick={() => handleToggleTask(task.id, selectedDate || new Date())}
         >
-          <Check className='w-2 h-2' />
+          {task.completions?.some((c) => 
+            String(c.completedDate).split("T")[0].slice(0,10) ===
+            new Date().toISOString().split("T")[0].slice(0,10)
+          ) && (
+            <Check className='w-2 h-2' />
+          )}
         </Button>
       </div>
-    
-      
+
     </Card>
   )
 }
 
 export default ActiveTaskCard
+

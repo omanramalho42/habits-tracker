@@ -162,6 +162,7 @@ model TaskCompletion {
   deletedAt     DateTime? @map("deleted_at")
 
   completedDate DateTime  @map("completed_date")
+  counter       Int? @default(0)// null = conta apenas 1 vez
   isCompleted   Boolean?  @default(false) @map("is_completed")
   
   taskId        String    @map("task_id")

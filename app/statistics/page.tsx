@@ -36,6 +36,13 @@ import {
 import { Annotations, Routine, Task } from '@prisma/client'
 import { GoalsDTO } from '@/services/goals'
 import { CategoriesDTO } from '@/services/categories'
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import UpdateTaskDialog from '@/components/tasks/update-task-dialog'
+import DeleteTaskDialog from '@/components/tasks/delete-task-dialog'
+import UpdateCategorieDialog from '@/components/categories/update-categorie-dialog'
+import DeleteCategorieDialog from '@/components/categories/delete-categorie-dialog'
 
 const HeatMap =
   dynamic(async () => await import("@/components/heat-map-v2"), {
@@ -440,8 +447,8 @@ export default function Statistics() {
 
                   const latest = [...tasks].sort(
                     (a, b) =>
-                      new Date(b.created_at).getTime() -
-                      new Date(a.created_at).getTime()
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime()
                   )[0]
 
                   return (
@@ -465,7 +472,7 @@ export default function Statistics() {
 
                         <p className="text-xs text-muted-foreground mt-1">
                           criada em{" "}
-                          {new Date(latest.created_at).toLocaleDateString("pt-BR")}
+                          {new Date(latest.createdAt).toLocaleDateString("pt-BR")}
                         </p>
 
                       </div>
@@ -487,14 +494,11 @@ export default function Statistics() {
               </h3>
 
               <div className="space-y-3">
-
                 {tasks.map((task, index) => (
-
                   <div
                     key={task.id}
                     className="flex items-center gap-3"
                   >
-
                     <span
                       className={cn(
                         "size-6 rounded-full flex items-center justify-center text-xs font-bold",
@@ -531,20 +535,19 @@ export default function Statistics() {
                       </p> */}
 
                     </div>
-
-                    <span
-                      className={cn(
-                        "text-xs font-semibold",
-                        task.status === "ACTIVE"
+                    <div className='flex flex-row items-center gap-2'>
+                      <span
+                        className={cn(
+                          "text-xs font-semibold",
+                          task.status === "ACTIVE"
                           ? "text-green-500"
                           : "text-muted-foreground"
-                      )}
-                    >
-                      {task.status}
-                    </span>
-
+                        )}
+                      >
+                        {task.status}
+                      </span>
+                    </div>
                   </div>
-
                 ))}
 
               </div>
@@ -787,20 +790,16 @@ export default function Statistics() {
 
             {/* Lista de Categorias */}
             <div className="bg-card border border-border rounded-xl p-4">
-
               <h3 className="font-semibold mb-4">
                 Lista de Categorias
               </h3>
 
               <div className="space-y-3">
-
                 {categories.map((category, index) => (
-
                   <div
                     key={category.id}
                     className="flex items-center gap-3"
                   >
-
                     <span
                       className={cn(
                         "size-6 rounded-full flex items-center justify-center text-xs font-bold",
@@ -839,24 +838,86 @@ export default function Statistics() {
                       </p>
 
                     </div>
+                    
+                    <div className='flex flex-row items-center gap-2'>
+                      <span
+                        className={cn(
+                          "text-xs font-semibold",
+                          category.status === "ACTIVE"
+                            ? "text-green-500"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {category.status}
+                      </span>
+                      <div
+                        className={cn(
+                          "flex justify-center items-center gap-1 transition-opacity",
+                          // "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+                        )}
+                      >
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type='button'
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            {/* EDIT */}
+                            <UpdateCategorieDialog
+                              categorie={category}
+                              trigger={
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="cursor-pointer"
+                                >
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                              }
+                            />
+                            <DropdownMenuSeparator />
+                            {/* DELETE */}
+                            <DeleteCategorieDialog
+                              categorieId={category.id}
+                              trigger={
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="text-destructive focus:text-destructive cursor-pointer"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              }
+                            />
 
-                    <span
-                      className={cn(
-                        "text-xs font-semibold",
-                        category.status === "ACTIVE"
-                          ? "text-green-500"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {category.status}
-                    </span>
-
+                            {/* <TaskDetailDialog
+                              currentDate={selectedDate || new Date()}
+                              habit={habit}
+                              trigger={
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  disabled={loading}
+                                >
+                                  <EyeIcon className="mr-2 h-4 w-4" />
+                                  Detalhes
+                                </DropdownMenuItem>
+                              }
+                            />  */}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+ 
+                      </div>
+                    </div>
                   </div>
-
                 ))}
 
               </div>
-
             </div>
 
           </TabsContent>

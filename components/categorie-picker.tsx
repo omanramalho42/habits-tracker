@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { CategoriesDTO, fetchCategories } from '@/services/categories'
 import { Categories } from '@prisma/client'
-import CreateCategorieDialog from './create-categorie-dialog'
+import CreateCategorieDialog from './categories/create-categorie-dialog'
 
 interface CategoriePickerProps {
   control: Control<any>

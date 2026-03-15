@@ -12,3 +12,13 @@ export const CreateCategorieSchema = z.object({
 })
 
 export type CreateCategorieSchemaType = z.infer<typeof CreateCategorieSchema>
+
+export const UpdateCategorieSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  description: z.string().optional(),
+  emoji: z.string().optional(),
+  status: z.enum(['ACTIVE', 'PAUSED', 'ARCHIVED']).default("ACTIVE").optional(),
+})
+
+export type UpdateCategorieSchemaType = z.infer<typeof UpdateCategorieSchema>

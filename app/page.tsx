@@ -159,107 +159,110 @@ export default function Home() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="routines">
-              <p className="text-sm">
-                Rotinas do dia
-              </p>
+
               <div className="flex flex-col gap-4 max-h-100 overflow-auto scroll-container">
                 {routines.length > 0 ? (
-                  routines.map((routine, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col gap-4 px-2"
-                    >
-
-                      {/* HEADER */}
-                      <div className="flex flex-col items-start gap-2 justify-start w-full my-2">
-                        <div className="flex flex-row items-center justify-between w-full">
-
-                          <div className="flex flex-col justify-start items-start">
-                            <p className="text-sm font-bold text-foreground">
-                              {routine.emoji} - {routine.name}
-                            </p>
-                            {/* <p className="text-sm font-medium text-foreground">
-                              {routine.updatedAt}
-                            </p> */}
-                          </div>
-
-                          <div className="flex flex-row gap-2">
-                            <UpdateRoutineDialog
-                              routine={routine}
-                              trigger={
-                                <Button
-                                  variant="ghost"
-                                  type="button"
-                                  size="icon"
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </Button>
-                              }
-                            />
-                            <DeleteRoutineDialog
-                              routineId={routine.id}
-                              trigger={
-                                <Button
-                                  variant="ghost"
-                                  type="button"
-                                  size="icon-sm"
-                                >
-                                  <Trash className="w-3 h-3" />
-                                </Button>
-                              }
-                            />
-                          </div>
-
-                        </div>
-
-                        <div className="flex w-full flex-row justify-between gap-2">
-                          <Input
-                            className="w-full"
-                            type="text"
-                            placeholder="Pesquise pelo nome..."
-                            value={filter}
-                            onChange={(event) =>
-                              handleFilterHabits(event.target.value)
-                            }
-                          />
-
-                          <Button
-                            variant="outline"
-                            type="button"
-                            size="icon-lg"
-                          >
-                            <Filter />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* ROUTINES LIST */}
+                  <div>
+                    <p className="text-sm">
+                      Rotinas do dia
+                    </p>
+                    {routines.map((routine, index) => (
                       <div
-                        className="flex flex-col gap-3 max-h-75 overflow-auto scroll-container"
-                        aria-selected={false}
+                        key={index}
+                        className="flex flex-col gap-4 px-2"
                       >
-                        {routine.habitSchedules && routine?.habitSchedules?.length > 0 
-                          ? routine.habitSchedules?.map((schedule) => (
-                            <HabitCardRoutine
-                              key={schedule.id}
-                              selectedDate={selectedDate}
-                              schedule={schedule}
+  
+                        {/* HEADER */}
+                        <div className="flex flex-col items-start gap-2 justify-start w-full my-2">
+                          <div className="flex flex-row items-center justify-between w-full">
+  
+                            <div className="flex flex-col justify-start items-start">
+                              <p className="text-sm font-bold text-foreground">
+                                {routine.emoji} - {routine.name}
+                              </p>
+                              {/* <p className="text-sm font-medium text-foreground">
+                                {routine.updatedAt}
+                              </p> */}
+                            </div>
+  
+                            <div className="flex flex-row gap-2">
+                              <UpdateRoutineDialog
+                                routine={routine}
+                                trigger={
+                                  <Button
+                                    variant="ghost"
+                                    type="button"
+                                    size="icon"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                  </Button>
+                                }
+                              />
+                              <DeleteRoutineDialog
+                                routineId={routine.id}
+                                trigger={
+                                  <Button
+                                    variant="ghost"
+                                    type="button"
+                                    size="icon-sm"
+                                  >
+                                    <Trash className="w-3 h-3" />
+                                  </Button>
+                                }
+                              />
+                            </div>
+  
+                          </div>
+  
+                          <div className="flex w-full flex-row justify-between gap-2">
+                            <Input
+                              className="w-full"
+                              type="text"
+                              placeholder="Pesquise pelo nome..."
+                              value={filter}
+                              onChange={(event) =>
+                                handleFilterHabits(event.target.value)
+                              }
                             />
-                        )) : (
-                          <UpdateRoutineDialog
-                            trigger={
-                              <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
-                                <p className="text-sm text-center tracking-tight">
-                                  Adicione hábitos a sua rotina e faça a magia acontecer 🪄
-                                </p>
-                              </Card>
-                            }
-                            routine={routine}
-                          />
-                        )}
+  
+                            <Button
+                              variant="outline"
+                              type="button"
+                              size="icon-lg"
+                            >
+                              <Filter />
+                            </Button>
+                          </div>
+                        </div>
+  
+                        {/* ROUTINES LIST */}
+                        <div
+                          className="flex flex-col gap-3 max-h-75 overflow-auto scroll-container"
+                          aria-selected={false}
+                        >
+                          {routine.habitSchedules && routine?.habitSchedules?.length > 0 
+                            ? routine.habitSchedules?.map((schedule) => (
+                              <HabitCardRoutine
+                                key={schedule.id}
+                                selectedDate={selectedDate}
+                                schedule={schedule}
+                              />
+                          )) : (
+                            <UpdateRoutineDialog
+                              trigger={
+                                <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
+                                  <p className="text-sm text-center tracking-tight">
+                                    Adicione hábitos a sua rotina e faça a magia acontecer 🪄
+                                  </p>
+                                </Card>
+                              }
+                              routine={routine}
+                            />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 ) : (
                   <Card className="flex flex-col gap-1 px-4">
                     <div className="flex flex-col text-center text-4xl">
