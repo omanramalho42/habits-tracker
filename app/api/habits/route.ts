@@ -46,8 +46,16 @@ export async function GET(request: Request) {
       },
       include: {
         completions: true,
-        categories: true,
-        goals: true,
+        categories: {
+          where: {
+            status: 'ACTIVE'
+          }
+        },
+        goals: {
+          where: {
+            status: "ACTIVE"
+          }
+        },
         schedules: true,
       }
     })

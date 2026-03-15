@@ -210,7 +210,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const completedDate =
       new Date(bodyParams.data)
 
-    // completedDate.setHours(0, 0, 0, 0)
+    completedDate.setHours(0, 0, 0, 0)
     // console.log(new Date(completedDate), "completedDate");
     
     // 1️⃣ Busca a completion do dia

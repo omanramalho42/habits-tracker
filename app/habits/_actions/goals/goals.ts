@@ -5,11 +5,10 @@ import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
 
 import { prisma } from "@/lib/prisma"
-
-import { GoalSchema, type CreateGoalSchemaType } from "@/lib/schema/goal"
+import { CreateGoalSchemaType, CreateGoalSchema } from "@/lib/schema/goal"
 
 export async function CreateGoal(form: CreateGoalSchemaType) {
-  const parsedBody = GoalSchema.safeParse(form)
+  const parsedBody = CreateGoalSchema.safeParse(form)
 
   if(!parsedBody.success) {
     throw new Error(parsedBody.error.message)

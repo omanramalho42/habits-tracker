@@ -28,15 +28,24 @@ export async function GET(request: Request) {
     const tasks = await prisma.task.findMany({
       where: {
         userId: userDb.id,
+        status: 'ACTIVE'
       },
       orderBy: {
         createdAt: "asc",
       },
       include: {
-        checkpoints: true,
         completions: true,
-        goals: true,
-        categories: true
+        categories: {
+          where: {
+            status: 'ACTIVE'
+          }
+        },
+        goals: {
+          where: {
+            status: "ACTIVE"
+          }
+        },
+        schedules: true,
       }
     })
 

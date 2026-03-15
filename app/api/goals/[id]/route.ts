@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { UpdateCategorieSchema } from "@/lib/schema/categorie"
+import { UpdateGoalSchema } from "@/lib/schema/goal"
 import { auth } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -27,7 +28,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }, { status: 401 })
     }
 
-    await prisma.categories.update({
+    await prisma.goals.update({
       where: {
         id
       },
@@ -40,7 +41,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ success: true })
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error deleting categorie:", error.message)
+      console.error("Error deleting goals:", error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }
@@ -48,7 +49,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id: categorieId } = await params
+    const { id: goalId } = await params
     const { userId } = await auth()
 
     if (!userId) {
@@ -71,7 +72,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const body = await request.json()
 
-    const parsedBody = UpdateCategorieSchema.safeParse(body)
+    const parsedBody = UpdateGoalSchema.safeParse(body)
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
@@ -82,9 +83,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       description,
     } = parsedBody.data
 
-    const updatedCategorie = await prisma.categories.update({
+    const updatedGoal = await prisma.goals.update({
       where: {
-        id: categorieId,
+        id: goalId,
         userId: userDb.id
       },
       data: {
@@ -95,7 +96,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       },
     })
 
-    return NextResponse.json(updatedCategorie)
+    return NextResponse.json(updatedGoal)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error updating categorie:", error.message)

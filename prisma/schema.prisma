@@ -93,6 +93,7 @@ model Habit {
 
   schedules   HabitSchedule[]
   completions HabitCompletion[]
+
   goals       Goals[]
   categories  Categories[]
 
@@ -298,6 +299,7 @@ model Goals {
   updatedAt     DateTime? @updatedAt      @map("updated_at")
 
   habits        Habit[]
+
   tasks         Task[]
   checkpoints   CheckPoint[]
 

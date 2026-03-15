@@ -20,25 +20,25 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import axios from 'axios'
 
-interface DeleteCategorieDialogProps {
-  categorieId: string
+interface DeleteGoalDialogProps {
+  goalId: string
   trigger?: React.ReactNode
 }
 
-function DeleteCategorieDialog({
-  categorieId,
+function DeleteGoalDialog({
+  goalId,
   trigger
-}: DeleteCategorieDialogProps) {
+}: DeleteGoalDialogProps) {
   const [open, setOpen] = useState<boolean>(false)
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
     mutationFn: async (values: string) => {
-      return await axios.delete(`/api/categories/${values}`)
+      return await axios.delete(`/api/goals/${values}`)
     },
     onSuccess: async () => {
-      toast.success('Categoria deletada com sucesso! 🎉', {
-        id: categorieId,
+      toast.success('Objetivo deletado com sucesso...', {
+        id: goalId,
       })
 
       await queryClient.invalidateQueries({
@@ -48,12 +48,12 @@ function DeleteCategorieDialog({
         queryKey: ['routines'],
       })
       await queryClient.invalidateQueries({
-        queryKey: ['categories'],
+        queryKey: ['goals'],
       })
     },
     onError: () => {
       toast.error('Aconteceu algo de errado', {
-        id: categorieId,
+        id: goalId,
       })
     },
   })
@@ -78,7 +78,7 @@ function DeleteCategorieDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             Está ação não poderá ser desfeita. Isso vai exlcuir permanentemente
-            sua categoria.
+            seu objetivo.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -87,10 +87,10 @@ function DeleteCategorieDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              toast.loading('Deletando categoria...', {
-                id: categorieId,
+              toast.loading('Deletando objetivo...', {
+                id: goalId,
               })
-              deleteMutation.mutate(categorieId)
+              deleteMutation.mutate(goalId)
             }}
           >
             Continuar
@@ -101,4 +101,4 @@ function DeleteCategorieDialog({
   )
 }
 
-export default DeleteCategorieDialog
+export default DeleteGoalDialog

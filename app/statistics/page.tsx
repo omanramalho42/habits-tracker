@@ -43,6 +43,8 @@ import UpdateTaskDialog from '@/components/tasks/update-task-dialog'
 import DeleteTaskDialog from '@/components/tasks/delete-task-dialog'
 import UpdateCategorieDialog from '@/components/categories/update-categorie-dialog'
 import DeleteCategorieDialog from '@/components/categories/delete-categorie-dialog'
+import DeleteGoalDialog from '@/components/goals/delete-goal-dialog'
+import UpdateGoalDialog from '@/components/goals/update.goal-dialog'
 
 const HeatMap =
   dynamic(async () => await import("@/components/heat-map-v2"), {
@@ -850,6 +852,7 @@ export default function Statistics() {
                       >
                         {category.status}
                       </span>
+                      {/* ACTIONS */}
                       <div
                         className={cn(
                           "flex justify-center items-center gap-1 transition-opacity",
@@ -911,7 +914,6 @@ export default function Statistics() {
                             />  */}
                           </DropdownMenuContent>
                         </DropdownMenu>
- 
                       </div>
                     </div>
                   </div>
@@ -1031,20 +1033,15 @@ export default function Statistics() {
 
             {/* Lista de Goals */}
             <div className="bg-card border border-border rounded-xl p-4">
-
               <h3 className="font-semibold mb-4">
                 Lista de Objetivos
               </h3>
-
               <div className="space-y-3">
-
                 {goals.map((goal, index) => (
-
                   <div
                     key={goal.id}
                     className="flex items-center gap-3"
                   >
-
                     <span
                       className={cn(
                         "size-6 rounded-full flex items-center justify-center text-xs font-bold",
@@ -1062,7 +1059,6 @@ export default function Statistics() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-
                       <p className="text-sm font-medium truncate">
                         {goal.name}
                       </p>
@@ -1078,20 +1074,69 @@ export default function Statistics() {
                       </p>
 
                     </div>
+                    
+                    <div className="flex flex-row items-center gap-2">
 
-                    <span
-                      className={cn(
-                        "text-xs font-semibold",
-                        goal.status === "ACTIVE"
-                          ? "text-green-500"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {goal.status}
-                    </span>
-
+                      <span
+                        className={cn(
+                          "text-xs font-semibold",
+                          goal.status === "ACTIVE"
+                            ? "text-green-500"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {goal.status}
+                      </span>
+                      <div
+                        className={cn(
+                          "flex justify-center items-center gap-1 transition-opacity",
+                          // "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+                        )}
+                      >
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type='button'
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            {/* EDIT */}
+                            <UpdateGoalDialog
+                              goal={goal}
+                              trigger={
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="cursor-pointer"
+                                >
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                              }
+                            />
+                            <DropdownMenuSeparator />
+                            {/* DELETE */}
+                            <DeleteGoalDialog
+                              goalId={goal.id}
+                              trigger={
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="text-destructive focus:text-destructive cursor-pointer"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              }
+                            />
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
                   </div>
-
                 ))}
 
               </div>
