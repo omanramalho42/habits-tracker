@@ -231,7 +231,7 @@ model Annotations {
 }
 
 model Task {
-  id               String             @id
+  id               String             @id @default(uuid())
   user_id          String
   name             String             @db.VarChar(100)
   description      String?            @db.VarChar(255)
