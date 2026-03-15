@@ -440,8 +440,8 @@ export default function Statistics() {
 
                   const latest = [...tasks].sort(
                     (a, b) =>
-                      new Date(b.createdAt).getTime() -
-                      new Date(a.createdAt).getTime()
+                      new Date(b.created_at).getTime() -
+                      new Date(a.created_at).getTime()
                   )[0]
 
                   return (
@@ -465,7 +465,7 @@ export default function Statistics() {
 
                         <p className="text-xs text-muted-foreground mt-1">
                           criada em{" "}
-                          {new Date(latest.createdAt).toLocaleDateString("pt-BR")}
+                          {new Date(latest.created_at).toLocaleDateString("pt-BR")}
                         </p>
 
                       </div>
