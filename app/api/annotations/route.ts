@@ -29,7 +29,8 @@ export async function GET(request: Request) {
       where: {
         completion: {
           habit: {
-            userId: userDb.id
+            userId: userDb.id,
+            status: 'ACTIVE'
           }
         }
       }

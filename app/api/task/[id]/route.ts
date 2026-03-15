@@ -33,12 +33,22 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }, { status: 401 })
     }
 
-    await prisma.task.delete({
+    // await prisma.task.delete({
+    //   where: {
+    //     id,
+    //     userId: userDb.id
+    //   }, include: {
+    //     schedules:  true
+    //   }
+    // })
+    await prisma.task.update({
       where: {
         id,
         userId: userDb.id
-      }, include: {
-        schedules:  true
+      },
+      data: {
+        status: 'ARCHIVED',
+        updatedAt: new Date()
       }
     })
   

@@ -3,7 +3,8 @@ import { z } from "zod"
 export const CreateHabitSchema = z.object({
   name: z.string(),
   emoji: z.string().optional(),
-  goal: z.string().optional(),
+  goals: z.string().optional(),
+  categories: z.string().optional(),
   clock: z.string().optional(),
   custom_field: z.string().max(12, "O maximo de caracteres permitidos é 12").optional(),
   duration: z.string().optional(),

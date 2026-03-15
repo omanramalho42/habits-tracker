@@ -42,7 +42,8 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
     endDate,
     clock,
     limitCounter,
-    goal,
+    goals,
+    categories,
     custom_field,
     duration
   } = parsedBody.data
@@ -68,9 +69,14 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
       frequency, // Json
       color,
       limitCounter: Number(limitCounter) || 1,
-      ...(goal  && {goals: {
+      ...(goals  && {goals: {
         connect: {
-          id: goal
+          id: goals
+        }
+      }}),
+      ...(categories  && {categories: {
+        connect: {
+          id: categories
         }
       }}),
       clock

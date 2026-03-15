@@ -1,7 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import React, { useCallback, useState } from 'react'
+
+import React, { useState } from 'react'
+
+import { useQuery } from "@tanstack/react-query"
+
+import { fetchHabits } from "@/services"
 
 import { HabitCard } from '@/components/habit-card'
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
@@ -22,13 +27,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Card } from "@/components/ui/card"
 
 import type { HabitWithStats } from '@/lib/types'
 
 import { Loader, Plus } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-import { fetchHabits } from "@/services"
-import { Card } from "@/components/ui/card"
 
 export default function page() {
   const [search, setSearch] = useState<string>("")

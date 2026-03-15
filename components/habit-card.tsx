@@ -36,7 +36,7 @@ import {
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
-import CreateAnnotationDialog from "./create-annotation-dialog"
+import CreateAnnotationDialog from "./annotations/create-annotation-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +45,7 @@ import {
   DropdownMenuTrigger
 } from "./ui/dropdown-menu"
 
-import { deleteHabit, updateHabit } from "@/services/habits"
+import { updateHabit } from "@/services/habits"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -117,8 +117,7 @@ export function HabitCard({
   // Ele vai armazenar as datas únicas em que o hábito foi concluído na semana
   const completionSet = new Set(
     // Filtra apenas conclusões válidas dentro da semana atual
-    habit.completions
-    .filter(c => {
+    habit?.completions?.filter(c => {
       if (!c.completedDate) return false
       // Converte a data de conclusão em Date
       const d = new Date(c.completedDate)
@@ -205,7 +204,7 @@ export function HabitCard({
   const canToggle = isActiveToday && !isFutureDate
 
   const counter = 
-    habit.completions.find(
+    habit?.completions?.find(
       (c) => 
         new Date(c.completedDate).toISOString().split("T")[0] === 
        currentDate.toISOString().split("T")[0]
@@ -291,14 +290,14 @@ export function HabitCard({
   const isOutHour =
     start !== null && now > start + duration
 
-  const completedDays = habit.completions.length
+  const completedDays = habit.completions?.length || 0
   const totalDays = habit.endDate?.length ?? 365
 
   const progress =
     totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0
 
   const todayCompletion =
-    habit.completions.find(
+    habit.completions?.find(
       c =>
         new Date(c.completedDate).toISOString().split("T")[0] ===
         selectedDate.toISOString().split("T")[0]
@@ -444,41 +443,41 @@ export function HabitCard({
             {/* FREQUENCY */}
             {!loading ? (
               <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {WEEKDAYS.map((day) => {
                     const isActive = frequency.includes(day.key)
 
-                    // ✅ agora olha para TODAS as conclusões da semana
                     const isCompletedThisWeekday =
                       completionFrequency.includes(day.key)
-                    
+
                     return (
                       <div
                         key={day.key}
-                        className={cn(
-                          'w-5.75 h-5.75 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
-                          isActive
-                            ? "bg-success text-success-foreground"
-                            :  WEEKDAY_TO_FREQUENCY[today.getDay()] === day.key
-                            ? "bg-primary/30 text-primary ring-1 ring-primary"
-                            : "bg-muted/50 text-muted-foreground"
-                        )}
-                        style={
-                          isActive
-                            ? {
-                                backgroundColor: 
-                                  isCompletedThisWeekday 
-                                  ? "#32CD32"        // 🟢 completado
-                                  : "#B22222"      // 🔵 ativo (schedule)
-                              }
-                            : {}
-                        }
+                        className="flex flex-col items-center gap-1"
                       >
-                        {
-                          !isActive ? day.keyPtBr 
-                          : isCompletedThisWeekday && isCompleted ? <Check /> 
-                          : day.keyPtBr
-                        }
+                        {/* CIRCULO */}
+                        <div
+                          className={cn(
+                            "w-5.5 h-5.5 rounded-full border border-gray-800 flex items-center justify-center text-sm font-bold transition-colors",
+                            !isActive && "bg-zinc-800 text-zinc-400",
+                            isActive && !isCompletedThisWeekday && "bg-red-500 text-white",
+                            isActive && isCompletedThisWeekday && "bg-green-500 text-white"
+                          )}
+                        >
+                          <p className="text-sm tracking-tight">
+                            {day.keyPtBr}
+                          </p>
+                        </div>
+
+                        {/* DOT */}
+                        <div
+                          className={cn(
+                            "w-1 h-1 rounded-full",
+                            !isActive && "bg-zinc-700",
+                            isActive && !isCompletedThisWeekday && "bg-red-500",
+                            isActive && isCompletedThisWeekday && "bg-green-500"
+                          )}
+                        />
                       </div>
                     )
                   })}
@@ -486,15 +485,15 @@ export function HabitCard({
                 
                 <div className="flex items-center justify-between gap-2 w-full">
                   <span className="w-full text-xs text-muted-foreground font-medium">
-                    {habit.completions.length > 0 && habit.endDate ? (
+                    {habit.completions?.length || 0 > 0 && habit.endDate ? (
                       <p className="">
-                        {habit.completions.length} de {habit.endDate?.length} dias
+                        {habit.completions?.length} de {habit.endDate?.length} dias
                       </p>
-                    ) : habit.completions.length === 0 ? (
+                    ) : habit.completions?.length === 0 ? (
                       <p className="text-muted-foreground">Comece hoje</p>
                     ) : !habit.endDate ? (
                       <p className="">
-                        {habit.completions.length} concluídos
+                        {habit.completions?.length} concluídos
                       </p>
                     ) : (
                       <p className="">Nenhum dia ainda</p>

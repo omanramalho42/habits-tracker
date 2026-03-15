@@ -122,7 +122,8 @@ export async function POST(request: NextRequest) {
       limitCounter,
       custom_field,
       duration,
-      goal
+      goals,
+      categories
     } = parsedBody.data
 
     const newStartdate = new Date(startDate)
@@ -146,9 +147,14 @@ export async function POST(request: NextRequest) {
         customField: custom_field,
         duration,
         limitCounter: Number(limitCounter) || 1,
-        ...(goal  && {goals: {
+        ...(goals  && {goals: {
           connect: {
-            id: goal
+            id: goals
+          }
+        }}),
+        ...(categories  && {categories: {
+          connect: {
+            id: categories
           }
         }}),
         clock

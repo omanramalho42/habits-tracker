@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 
 import { createAnnotation } from '@/app/habits/_actions/annotations/annotations'
 
-
 import {
   Tooltip,
   TooltipContent,
@@ -40,22 +39,25 @@ import { Button } from '@/components/ui/button'
 
 import { File } from "lucide-react"
 
-import type { CreateAnnotationSchemaType } from '@/lib/schema/annotations'
+import type { UpdateAnnotationSchemaType } from '@/lib/schema/annotations'
+import { Annotations } from '@prisma/client'
+import axios from 'axios'
 
-interface CreateAnnotationDialogProps {
-  completionId: string
+interface UpdateAnnotationDialogProps {
+  annotation: Annotations
   trigger?: React.ReactNode
 }
 
-const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completionId, trigger }) => {
+const UpdateAnnotationDialog:React.FC<UpdateAnnotationDialogProps> = ({ annotation, trigger }) => {
   const [open, setOpen] = useState<boolean>(false)
 
-  const form = useForm<CreateAnnotationSchemaType>({
+  const form = useForm<UpdateAnnotationSchemaType>({
     defaultValues: {
-      name: "",
-      summary: "",
+      id: annotation.id,
+      name: annotation.name || "",
+      summary: annotation.summary || "",
+      completionId: annotation.completionId,
       files: [],
-      completionId
     }
   })
 
@@ -67,30 +69,31 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
       { errors }
   } = form
 
-  const onSubmit = (values: CreateAnnotationSchemaType) => {
+  const onSubmit = (values: UpdateAnnotationSchemaType) => {
     console.log(values, "values")
     mutate({
-      completionId,
+      id: values.id,
       name: values.name,
       files: values.files,
-      summary: values.summary
+      summary: values.summary,
+      completionId: values.completionId
     })
   }
 
   const queryClient = useQueryClient()
 
   const { mutate } = useMutation({
-    mutationFn: async (values: CreateAnnotationSchemaType) => {
-      toast.loading("Criando anotação...", {
-        id: 'create-annotation'
+    mutationFn: async (values: UpdateAnnotationSchemaType) => {
+      toast.loading("Atualizando anotação...", {
+        id: 'update-annotation'
       })
       
-      return await createAnnotation(values)
+      return await axios.patch(`/api/annotations/${values.id}`, values)
     },
     onSuccess: async () => {
       toast.success(
-        "Sucesso ao criar anotação. 🎉", 
-        { id: "create-annotation" }
+        "Sucesso ao atualizazr anotação. 🎉", 
+        { id: "update-annotation" }
       )
 
       reset({
@@ -102,6 +105,11 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
 
       await queryClient.invalidateQueries({
         queryKey: [
+          "annotations"
+        ]
+      })
+      await queryClient.invalidateQueries({
+        queryKey: [
           "habits"
         ]
       })
@@ -110,8 +118,8 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
     },
     onError: () => {
       toast.error(
-        "Erro ao criar anotação...", 
-        { id: "create-annotation" }
+        "Erro ao atualizar anotação...", 
+        { id: "update-annotation" }
       )
     }
   })
@@ -238,4 +246,4 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
   )
 }
 
-export default CreateAnnotationDialog
+export default UpdateAnnotationDialog
