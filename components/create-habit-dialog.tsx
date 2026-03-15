@@ -238,13 +238,9 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                                   <EmojiPicker.Search className="w-full" />
 
                                   <EmojiPicker.Viewport
-                                    className="
-                                      h-[50vh]
-                                      overflow-y-auto
-                                      overscroll-contain
-                                      touch-pan-y
-                                    "
-                                    style={{ WebkitOverflowScrolling: 'touch' }}
+                                    className="h-[50vh] overflow-y-auto"
+                                    style={{ WebkitOverflowScrolling: "touch" }}
+                                    onWheel={(e) => e.stopPropagation()}
                                   >
                                     <EmojiPicker.Loading>
                                       Carregando…

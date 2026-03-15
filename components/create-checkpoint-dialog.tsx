@@ -316,13 +316,9 @@ const CreateCheckPointDialog:React.FC<CreateCheckpointDialogProps> = ({ trigger 
                               <EmojiPicker.Search className="w-full" />
 
                               <EmojiPicker.Viewport
-                                className="
-                                  h-[50vh]
-                                  overflow-y-auto
-                                  overscroll-contain
-                                  touch-pan-y
-                                "
-                                style={{ WebkitOverflowScrolling: 'touch' }}
+                                className="h-72 overflow-y-auto"
+                                style={{ WebkitOverflowScrolling: "touch" }}
+                                onWheel={(e) => e.stopPropagation()}
                               >
                                 <EmojiPicker.Loading>
                                   Carregando…

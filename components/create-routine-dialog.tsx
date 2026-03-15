@@ -317,13 +317,9 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                                 <EmojiPicker.Search className="w-full" />
 
                                 <EmojiPicker.Viewport
-                                  className="
-                                    h-[40vh]
-                                    overflow-y-auto
-                                    overscroll-contain
-                                    touch-pan-y
-                                  "
-                                  style={{ WebkitOverflowScrolling: 'touch' }}
+                                  className="h-[45vh] overflow-y-auto"
+                                  style={{ WebkitOverflowScrolling: "touch" }}
+                                  onWheel={(e) => e.stopPropagation()}
                                 >
                                   <EmojiPicker.Loading>
                                     Carregando…
