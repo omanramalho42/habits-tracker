@@ -67,7 +67,8 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
   const form = useForm<CreateHabitSchemaType>({
     defaultValues: {
       name: "",
-      goal: "",
+      goals: "",
+      categories: "",
       clock: "",
       frequency: ["S","M","T","W","TH","F","SA",],
       color: "",
@@ -109,7 +110,8 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
         emoji: "",
         endDate: null,
         frequency: [],
-        goal: "",
+        goals: "",
+        categories: "",
         clock: "",
         name: "",
         limitCounter: 1,

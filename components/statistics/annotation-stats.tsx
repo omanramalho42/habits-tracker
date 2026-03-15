@@ -254,6 +254,7 @@ const AnnotationStats: React.FC<AnnotationStatsProps> = ({ annotations, isLoadin
 
                       <DropdownMenuTrigger asChild>
                         <Button
+                          disabled={isLoading}
                           type='button'
                           variant="ghost"
                           size="icon"
