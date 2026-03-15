@@ -36,7 +36,7 @@ import {
 import type { HabitWithStats } from "@/lib/types"
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 
-import CreateAnnotationDialog from "./create-annotation-dialog"
+import CreateAnnotationDialog from "./annotations/create-annotation-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,

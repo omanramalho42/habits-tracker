@@ -18,7 +18,7 @@ import { useSortable } from '@dnd-kit/sortable'
 
 import confetti from "canvas-confetti"
 
-import CreateAnnotationDialog from '@/components/create-annotation-dialog'
+import CreateAnnotationDialog from '@/components/annotations/create-annotation-dialog'
 import DeleteTaskDialog from '@/components/tasks/delete-task-dialog'
 import UpdateTaskDialog from '@/components/tasks/update-task-dialog'
 

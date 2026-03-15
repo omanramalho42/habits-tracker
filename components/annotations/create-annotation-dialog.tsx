@@ -105,6 +105,11 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
           "habits"
         ]
       })
+      await queryClient.invalidateQueries({
+        queryKey: [
+          "annotations"
+        ]
+      })
 
       setOpen(prev => !prev)
     },
