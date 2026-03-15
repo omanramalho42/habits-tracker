@@ -150,7 +150,8 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
         content: "",
         summary,
         imageUrl: uploadedFiles[0].url,
-        completionId
+        completionId,
+        userId: userDb.id,
       }
     })
   } catch (error) {
@@ -158,5 +159,4 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
       console.log(error.message)
     }
   }
-
 }

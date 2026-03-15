@@ -15,7 +15,7 @@ export interface Habit {
   endDate?: string | null
   reminder?: boolean
   frequency?: string[]
-  completions?: HabitCompletion[]
+  completions: HabitCompletion[]
   color?: string
   createdAt: string
   updatedAt?: string
@@ -52,9 +52,6 @@ export interface HabitWithStats extends Habit {
   current_streak: number
   longest_streak: number
   completion_rate: number
-  completions: HabitCompletion[]
-  categories: Categories[]
-  goals: Goals[]
   is_completed_today: boolean
 }
 

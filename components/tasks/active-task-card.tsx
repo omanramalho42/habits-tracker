@@ -34,7 +34,6 @@ import {
 import { cn } from '@/lib/utils'
 
 import {
-  ArrowUpDownIcon,
   Check,
   File,
   MoreVertical,

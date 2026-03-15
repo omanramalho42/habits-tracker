@@ -4,13 +4,25 @@ import { z } from "zod"
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/gif"]
 
-export  const createAnnotationSchema = z.object({
-    name: z.string(),
-    completionId: z.string(),
-    summary: z.string().optional(),
-    files: z
-      .any()
-      .optional().default([]),
-  })
+export const createAnnotationSchema = z.object({
+  name: z.string(),
+  completionId: z.string(),
+  summary: z.string().optional(),
+  files: z
+    .any()
+    .optional().default([]),
+})
+
+export const updateAnnotationSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  completionId: z.string(),
+  summary: z.string().optional(),
+  files: z
+    .any()
+    .optional().default([]),
+})
+
+export type UpdateAnnotationSchemaType = z.infer<typeof updateAnnotationSchema>
 
 export type CreateAnnotationSchemaType = z.infer<typeof createAnnotationSchema>

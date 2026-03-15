@@ -45,7 +45,7 @@ import {
   DropdownMenuTrigger
 } from "./ui/dropdown-menu"
 
-import { deleteHabit, updateHabit } from "@/services/habits"
+import { updateHabit } from "@/services/habits"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -117,8 +117,7 @@ export function HabitCard({
   // Ele vai armazenar as datas únicas em que o hábito foi concluído na semana
   const completionSet = new Set(
     // Filtra apenas conclusões válidas dentro da semana atual
-    habit.completions
-    .filter(c => {
+    habit?.completions?.filter(c => {
       if (!c.completedDate) return false
       // Converte a data de conclusão em Date
       const d = new Date(c.completedDate)
@@ -205,7 +204,7 @@ export function HabitCard({
   const canToggle = isActiveToday && !isFutureDate
 
   const counter = 
-    habit.completions.find(
+    habit?.completions?.find(
       (c) => 
         new Date(c.completedDate).toISOString().split("T")[0] === 
        currentDate.toISOString().split("T")[0]
@@ -291,14 +290,14 @@ export function HabitCard({
   const isOutHour =
     start !== null && now > start + duration
 
-  const completedDays = habit.completions.length
+  const completedDays = habit.completions?.length || 0
   const totalDays = habit.endDate?.length ?? 365
 
   const progress =
     totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0
 
   const todayCompletion =
-    habit.completions.find(
+    habit.completions?.find(
       c =>
         new Date(c.completedDate).toISOString().split("T")[0] ===
         selectedDate.toISOString().split("T")[0]
@@ -486,15 +485,15 @@ export function HabitCard({
                 
                 <div className="flex items-center justify-between gap-2 w-full">
                   <span className="w-full text-xs text-muted-foreground font-medium">
-                    {habit.completions.length > 0 && habit.endDate ? (
+                    {habit.completions?.length || 0 > 0 && habit.endDate ? (
                       <p className="">
-                        {habit.completions.length} de {habit.endDate?.length} dias
+                        {habit.completions?.length} de {habit.endDate?.length} dias
                       </p>
-                    ) : habit.completions.length === 0 ? (
+                    ) : habit.completions?.length === 0 ? (
                       <p className="text-muted-foreground">Comece hoje</p>
                     ) : !habit.endDate ? (
                       <p className="">
-                        {habit.completions.length} concluídos
+                        {habit.completions?.length} concluídos
                       </p>
                     ) : (
                       <p className="">Nenhum dia ainda</p>

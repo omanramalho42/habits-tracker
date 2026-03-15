@@ -3,12 +3,25 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-import { redirect } from 'next/navigation'
-
 import { SignOutButton, useUser } from '@clerk/nextjs'
-import { Skeleton } from '../ui/skeleton'
 
-const Clock = dynamic(async () => await import('react-live-clock'), { loading: () => <Skeleton className='w-10 h-4' />})
+const Clock = dynamic(
+  async () => await import('react-live-clock'),
+  { loading: () => <Skeleton className='w-32 h-10' />}
+)
+
+import {
+  CreateHabitDialog
+} from '@/components/create-habit-dialog'
+import CreateCheckPointDialog from '@/components/create-checkpoint-dialog'
+import CreateRoutineDialog from '@/components/create-routine-dialog'
+import dynamic from 'next/dynamic'
+import CreateTaskDialog from '@/components/tasks/create-task-dialog'
+import CreateCategorieDialog from '@/components/categories/create-categorie-dialog'
+import CreateGoalDialog from '@/components/create-goal-dialog'
+
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,16 +31,10 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 
-import {
-  CreateHabitDialog
-} from '@/components/create-habit-dialog'
-
-import { Button } from '@/components/ui/button'
 
 import {
   ChartArea,
   Home,
-  ListIcon,
   LogOut,
   LucideNewspaper,
   Plus,
@@ -38,12 +45,6 @@ import {
   ListTodo,
   Tag 
 } from 'lucide-react'
-import CreateCheckPointDialog from '../create-checkpoint-dialog'
-import CreateRoutineDialog from '../create-routine-dialog'
-import dynamic from 'next/dynamic'
-import CreateTaskDialog from '../tasks/create-task-dialog'
-import CreateCategorieDialog from '../categories/create-categorie-dialog'
-import CreateGoalDialog from '../create-goal-dialog'
 
 const HeaderSection:React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
