@@ -16,7 +16,7 @@ export const createAnnotationSchema = z.object({
 export const updateAnnotationSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
-  completionId: z.string(),
+  completionId: z.string().optional(),
   summary: z.string().optional(),
   files: z
     .any()

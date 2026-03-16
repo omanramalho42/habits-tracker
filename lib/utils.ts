@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { formatInTimeZone } from "date-fns-tz"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,6 +17,18 @@ export function toSafeDate(dateStr?: string | null) {
 
   // meio-dia local (anti-timezone bug)
   return new Date(year, month - 1, day, 12, 0, 0)
+}
+
+export const formatTimezone = (date: string) => {
+  const formatDate = new Date(date)
+
+  const brDate = formatInTimeZone(
+    formatDate,
+    "America/Sao_Paulo",
+    "dd/MM/yyyy HH:mm"
+  )
+
+  return brDate
 }
 
 export const formatDateBR = (date: Date) => {

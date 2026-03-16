@@ -41,12 +41,12 @@ import type { Habit, HabitCompletion, HabitSchedule } from "@prisma/client"
 
 interface HabitCardRoutineProps {
   schedule: HabitSchedule & { habit?: Habit & { completions?: HabitCompletion[]} }
-  selectedDate?: Date
+  selectedDate: string
 }
 
 const HabitCardRoutine = ({
   schedule,
-  selectedDate = new Date()
+  selectedDate
 }: HabitCardRoutineProps) => {
   
   const sumTime = (clock?: string, duration?: string) => {
@@ -84,13 +84,11 @@ const HabitCardRoutine = ({
           id: `toggle-habit`,
       })
 
-      const selectedDateStr =
-        formatDateBR(selectedDate)
       await queryClient.invalidateQueries({
-        queryKey: ["routines", selectedDateStr],
+        queryKey: ["routines", selectedDate],
       })
       await queryClient.invalidateQueries({
-        queryKey: ["habits", selectedDateStr],
+        queryKey: ["habits", selectedDate],
       })
 
       if(values.completed) {
@@ -112,16 +110,15 @@ const HabitCardRoutine = ({
     },
   })
   
-  const handleToggleHabit = (habitId: string, date: Date) => {
+  const handleToggleHabit = (habitId: string, date: string) => {
     toast.loading(
       "Alterando status do hábito de rotina...", {
         id: `toggle-habit`,
     })
-    date.setHours(0,0,0,0)
 
     mutate({
       habitId,
-      date: date.toISOString(),
+      date: date,
     })
   }
 
@@ -129,7 +126,7 @@ const HabitCardRoutine = ({
     schedule?.habit?.completions?.find((c) =>
       c &&
       String(c.completedDate).slice(0, 10) ===
-        selectedDate.toISOString().slice(0, 10)
+        selectedDate
     )
   const currentCounter = completionToday?.counter ?? 0  
   const limitCounter = schedule?.habit?.limitCounter ?? 1
@@ -214,7 +211,7 @@ const HabitCardRoutine = ({
                 variant={completionToday ? "default" : "outline"}
                 size="icon-sm"
                 disabled={isPending || !schedule.habit?.id}
-                onClick={() => schedule.habit?.id && handleToggleHabit(schedule.habit.id, new Date(selectedDate))}
+                onClick={() => schedule.habit?.id && handleToggleHabit(schedule.habit.id, selectedDate)}
                 className={cn(
                   "relative w-5 h-5 rounded-full flex items-center justify-center transition",
                   completionToday

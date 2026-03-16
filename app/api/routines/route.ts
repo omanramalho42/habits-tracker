@@ -50,16 +50,24 @@ export async function GET(request: Request) {
           },
           include: {
             habit: {
-              // where: {
-              //   status: 'ACTIVE'
-              // },
               include: {
                 completions: true
               }
             }
           }
         },
-        taskSchedules: true
+        taskSchedules: {
+          where: {
+            status: 'ACTIVE'
+          },
+          include: {
+            task: {
+              include: {
+                completions: true
+              }
+            }
+          }
+        }
       }
     })
 

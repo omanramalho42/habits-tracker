@@ -21,10 +21,12 @@ import type {
   Habit,
   HabitSchedule,
   Routine,
-  Task
+  Task,
+  TaskSchedule
 } from "@prisma/client"
 
 import { fetchTasks } from "@/services"
+
 import CreateRoutineDialog from "@/components/create-routine-dialog"
 import UpdateRoutineDialog from "@/components/update-routine-dialog"
 import DeleteRoutineDialog from "@/components/delete-routine-dialog"
@@ -55,12 +57,13 @@ import {
   Filter,
   Pencil,
   Plus,
+  PlusIcon,
   TargetIcon,
   Trash
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
-
+import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
@@ -70,7 +73,6 @@ export default function Home() {
   }
 
   const today = new Date()
-  // today.setHours(0, 0, 0, 0)
 
   const [selectedDate, setSelectedDate] =
     useState(today)
@@ -100,7 +102,10 @@ export default function Home() {
 
   const {
     data: routines = [],
-  } = useQuery<(Routine & { habitSchedules?: (HabitSchedule & { habit?: Habit })[] })[]>({
+  } = useQuery
+  <
+    (Routine & { habitSchedules?: (HabitSchedule & { habit?: Habit })[]; taskSchedules?: (TaskSchedule & { task?: Task })[] })[]>
+  ({
     queryKey: ["routines", selectedDateStr],
     queryFn: () => fetchRoutines(selectedDateStr),
     staleTime: 1000 * 60,
@@ -131,7 +136,6 @@ export default function Home() {
   return (
     <>
       {/* <MoodWizard /> */}
-
       <main className="min-h-screen bg-background">
         <div className="flex flex-col space-y-2 max-w-5xl mx-auto px-4 py-1">
 
@@ -159,7 +163,6 @@ export default function Home() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="routines">
-
               <div className="flex flex-col gap-4 max-h-100 overflow-auto scroll-container">
                 {routines.length > 0 ? (
                   <div>
@@ -181,7 +184,7 @@ export default function Home() {
                                 {routine.emoji} - {routine.name}
                               </p>
                               {/* <p className="text-sm font-medium text-foreground">
-                                {routine.updatedAt}
+                                {(routine?.updatedAt)?.toISOString().split("T")[0]}
                               </p> */}
                             </div>
   
@@ -224,7 +227,7 @@ export default function Home() {
                                 handleFilterHabits(event.target.value)
                               }
                             />
-  
+                            
                             <Button
                               variant="outline"
                               type="button"
@@ -240,11 +243,35 @@ export default function Home() {
                           className="flex flex-col gap-3 max-h-75 overflow-auto scroll-container"
                           aria-selected={false}
                         >
+                          {routine.taskSchedules && routine.taskSchedules.length > 0 ? 
+                            routine.taskSchedules.map((schedule) => {
+                              if (schedule.task) {
+                                return (
+                                  <ActiveTaskCard
+                                    key={schedule.id}
+                                    selectedDate={selectedDate}
+                                    task={schedule.task}
+                                  />
+                                )
+                              } 
+                            }
+                          ) : (
+                            <UpdateRoutineDialog
+                              trigger={
+                                <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
+                                  <p className="text-sm text-center tracking-tight">
+                                    Adicione hábitos a sua rotina e faça a magia acontecer 🪄
+                                  </p>
+                                </Card>
+                              }
+                              routine={routine}
+                            />
+                          )}
                           {routine.habitSchedules && routine?.habitSchedules?.length > 0 
                             ? routine.habitSchedules?.map((schedule) => (
                               <HabitCardRoutine
                                 key={schedule.id}
-                                selectedDate={selectedDate}
+                                selectedDate={selectedDateStr}
                                 schedule={schedule}
                               />
                           )) : (
@@ -301,32 +328,46 @@ export default function Home() {
               ) : (
                 <div className="w-full flex flex-col">
                   {habits.length > 0 && (
-                    <div className="flex flex-row justify-between gap-2 items-center w-full">
-                      <p className="text-sm font-bold text-foreground">
-                        Hábitos
-                      </p>
-                      <div className="flex flex-row gap-2 w-full items-center justify-center">
-                        <Input
-                          type="text"
-                          placeholder="pesquise pelo nome."
-                          value={filter}
-                          onChange={(event) => {
-                            handleFilterHabits(event.target.value)
-                          }}
-                        />
+                    <div className="flex flex-col justify-start gap-2 items-start w-full">
+                      <div className="w-full flex flex-row justify-between items-center">
+                        <p className="text-sm font-bold text-foreground">
+                          Hábitos
+                        </p>
+                        <div className="flex flex-row gap-2 items-center justify-center">
+                          <CreateHabitDialog
+                            trigger={
+                              <Button
+                                variant="outline"
+                                type="button"
+                                size="icon-sm"
+                              >
+                                <PlusIcon />
+                              </Button>                          
+                            }
+                          />
+                          <Button
+                            disabled
+                            variant="outline"
+                            type="button"
+                            size="icon-sm"
+                          >
+                            <Filter />
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        type="button"
-                        size="icon-lg"
-                      >
-                        <Filter />
-                      </Button>
+                      <Input
+                        type="text"
+                        placeholder="pesquise pelo nome..."
+                        value={filter}
+                        onChange={(event) => {
+                          handleFilterHabits(event.target.value)
+                        }}
+                      />
                     </div>
                   )}
                   <ActiveCardHabits
                     habits={habits.filter((habit) => habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))}
-                    selectedDate={selectedDate}
+                    selectedDate={selectedDateStr}
                   />
                 </div>
               )}

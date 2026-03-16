@@ -118,7 +118,7 @@ export default function page() {
                 <div key={habit.id}>
                   <HabitCard
                     loading={isFetching}
-                    selectedDate={new Date()}
+                    selectedDate={new Date().toISOString().split("T")[0]}
                     habit={habit}
                   />
                 </div>

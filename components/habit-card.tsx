@@ -65,7 +65,7 @@ interface HabitCardProps {
   onEdit?: (habit: UpdateHabitSchemaType) => void
   onDelete?: (habitId: string) => void
   onClick?: () => void
-  selectedDate: Date
+  selectedDate: string
   loading: boolean
   onError?: (message: string) => void
 }
@@ -89,7 +89,7 @@ function timeToSeconds(time: string) {
   return h * 3600 + m * 60 + s
 }
 
-function getCurrentTimeHHMMSS(date: Date) {
+function getCurrentTimeHHMMSS(date: string) {
   return new Date(date).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
@@ -106,7 +106,6 @@ export function HabitCard({
   onError,
   loading,
 }: HabitCardProps) {
-  const [show, setShow] = useState<boolean>(false)
   // Calcula o início da semana com base na data selecionada
   // Ex: segunda-feira 00:00:00
   const startOfWeek = getStartOfWeek(selectedDate ? new Date(selectedDate) : new Date())
@@ -163,16 +162,15 @@ export function HabitCard({
     Array.isArray(habit.frequency) ? habit.frequency : []
   // Define a data atual com base na data selecionada
   // Se não existir, usa a data de hoje
-  const currentDate =
-    selectedDate || new Date()
-  // Cria uma string da data atual no formato YYYY-MM-DD
-  // Usada para comparação direta
+  const currentDate:Date =
+    new Date(selectedDate) || new Date()
   const todayStr =
     currentDate.toISOString().split("T")[0]
+  // Cria uma string da data atual no formato YYYY-MM-DD
+  // Usada para comparação direta
   // Verifica se o hábito já foi concluído hoje
   const isCompletedToday = habit.completions?.some((c) => {
     const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
-    console.log({completionDate}, {todayStr}, 'is completion today')
     const limit = habit.limitCounter || 1
     const counter = c.counter || 0
 
@@ -300,12 +298,12 @@ export function HabitCard({
     habit.completions?.find(
       c =>
         new Date(c.completedDate).toISOString().split("T")[0] ===
-        selectedDate.toISOString().split("T")[0]
+        selectedDate
     ) ?? null
 
   return (
     <Card
-      className={`group p-5 bg-linear-to-br transition-colors hover:shadow-lg cursor-pointer h-full ${
+      className={`group p-5 bg-linear-to-br transition-colors hover:shadow-lg cursor-pointer min-h-47.5 ${
         isCompletedToday && onToggle
           ? "from-lime-500/20 to-green-700/5 border-green-700/30 hover:border-green-500/30"
           // : isActiveHour && !isCompleted && onToggle && selectedDate.toISOString().split("T")[0] === today.toISOString().split("T")[0]
@@ -385,7 +383,20 @@ export function HabitCard({
             
             {/* BADGES (COUNTER, CLOCK) */}
             {!loading ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-row gap-6 my-2">
+                <div className="flex flex-col gap-1">
+                  {habit.goals && habit.goals.length > 0 && (
+                    <p className="text-[10px] text-muted-foreground truncate max-w-34">
+                      {habit.goals.map((g) => g.emoji + " " + g.name).join(", ")}
+                    </p>
+                  )}
+                  {habit.categories && habit.categories.length > 0 && (
+                    <p className="text-[10px] max-w-36 text-muted-foreground truncate">
+                      {habit.categories.map((g) => g.emoji + " " + g.name).join(", ")}
+                    </p>
+                  )}
+                </div>
+
                 {habit.limitCounter && habit.limitCounter > 1 && (
                   <Badge
                     variant="outline"
@@ -395,18 +406,7 @@ export function HabitCard({
                       {counter || 0}/{habit?.limitCounter} {" "} {habit?.customField}
                     </p>
                   </Badge>
-                )}
-                
-                {habit.goals && habit.goals.length > 0 && (
-                  <p className="text-[10px] text-muted-foreground truncate max-w-54">
-                    {habit.goals.map((g) => g.emoji + " " + g.name).join(", ")}
-                  </p>
-                )}
-                {habit.categories && habit.categories.length > 0 && (
-                  <p className="text-[10px] max-w-36 text-muted-foreground truncate">
-                    {habit.categories.map((g) => g.emoji + " " + g.name).join(", ")}
-                  </p>
-                )}
+                )}                
 
                 <div className="flex flex-row gap-2 mt-2">
                   {habit.clock && (
@@ -576,7 +576,7 @@ export function HabitCard({
                 />
 
                 <HabitDetailDialog
-                  currentDate={selectedDate || new Date()}
+                  selectedDate={selectedDate}
                   habit={habit}
                   trigger={
                     <DropdownMenuItem

@@ -35,8 +35,10 @@ export async function GET(request: NextRequest) {
 
     const entry = await prisma.moodEntry.findUnique({
       where: {
-        userId: userDb.id,
-        entryDate: today,
+        userId_entryDate: {
+          userId: userDb.id,
+          entryDate: today
+        }
       },
     })
     return NextResponse.json(entry)
@@ -80,8 +82,10 @@ export async function POST(request: NextRequest) {
 
     const entry = await prisma.moodEntry.findUnique({
       where: {
-        userId: user.id,
-        entryDate: newDate,
+        userId_entryDate: {
+          userId: user.id,
+          entryDate: newDate,
+        }
       },
     })
 

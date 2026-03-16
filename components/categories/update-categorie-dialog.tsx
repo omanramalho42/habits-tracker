@@ -230,7 +230,7 @@ const UpdateCategorieDialog:React.FC<UpdateCategoryDialogProps> = ({ trigger, ca
                                     {field.value}
                                   </span>
 
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-center text-muted-foreground">
                                     Toque para trocar
                                   </p>
                                 </div>

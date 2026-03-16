@@ -206,8 +206,8 @@ model Routine {
 model TaskSchedule {
   id            String    @unique @id @default(uuid())
 
-  duration      String    @db.VarChar(20)
-  clock         String    @db.VarChar(20)
+  duration      String?    @db.VarChar(20)
+  clock         String?    @db.VarChar(20)
 
   status        HabitStatus    @default(ACTIVE)
 
@@ -220,7 +220,7 @@ model TaskSchedule {
   taskId        String    @map("task_id")
   task          Task      @relation(fields: [taskId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  @@unique([routineId, clock])
+  // @@unique([routineId, clock])
   @@index([routineId, clock])
   @@map("task_schedule")
 }
@@ -242,7 +242,7 @@ model HabitSchedule {
   habitId       String?    @map("habit_id")
   habit         Habit?     @relation(fields: [habitId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  @@unique([routineId, clock])
+  // @@unique([routineId, clock])
   @@index([routineId, clock])
   @@map("habit_schedule")
 }

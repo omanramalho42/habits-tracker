@@ -95,7 +95,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
-    const { name, emoji, dateRange, habits, cron, description, frequency } = parsedBody.data
+    const { name, emoji, dateRange, habits, tasks, cron, description, frequency } = parsedBody.data
     
     const newStartdate = new Date(dateRange.from)
       newStartdate.setHours(0,0,0,0)
@@ -116,7 +116,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         cron,
         name,
         description,
-
+        taskSchedules: {
+          deleteMany: {},
+          create: tasks?.map((taskId: string) => ({
+            task: {
+              connect: { id: taskId }
+            }
+          }))
+        },
         habitSchedules: {
           deleteMany: {},
           create: habits?.map((habitId: string) => ({

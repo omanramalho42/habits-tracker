@@ -126,7 +126,8 @@ export async function POST(request: NextRequest) {
       categories
     } = parsedBody.data
 
-    const newStartdate = new Date(startDate)
+    const date = startDate ? new Date(startDate) : new Date()
+    const newStartdate = new Date(date)
       newStartdate.setHours(0,0,0,0)
     const newEnddate = 
       endDate ? new Date(endDate) : null
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
         completions: true,
       },
     })
-
+    console.log(newHabit, "new habit")
     return NextResponse.json(newHabit)
   } catch (error) {
     if (error instanceof Error) {

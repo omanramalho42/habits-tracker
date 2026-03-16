@@ -64,6 +64,7 @@ const MultiHabitsPicker:React.FC<MultiHabitsPickerProps> = ({ control }) => {
     control: control,
     name: 'habits'
   })
+
   const habitsListLoaded: any =
     field?.value?.map(item => item) || []
   console.log(habitsListLoaded, "habuts list loaded")
@@ -76,7 +77,7 @@ const MultiHabitsPicker:React.FC<MultiHabitsPickerProps> = ({ control }) => {
           role="combobox"
           aria-expanded={open}
           disabled={isLoading}
-          className="flex flex-wrap flex-row overflow-y-auto scroll-container w-full h-24 justify-between hover:text-foreground"
+          className="flex flex-wrap flex-row overflow-y-auto scroll-container w-full h-15 justify-between hover:text-foreground"
         >
           {habitsListLoaded.length > 0 ? (
             habitsListLoaded.map((habit: HabitWithStats, index: number) => {
