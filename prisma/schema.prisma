@@ -35,6 +35,7 @@ model User {
   routines    Routine[]
   goals       Goals[]
   categories  Categories[]
+  feedbacks   Feedback[]
 }
 
 model UserSettings {
@@ -352,18 +353,45 @@ model Annotations {
   @@map("annotations")
 }
 
-//GOALS
-//  CHECKPOINTS
+model Feedback {
+  id          String   @id @default(uuid())
 
-//TASKS
-//  TASKS: SCHEDULES, COMPLETIONS
+  userId      String?  @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-//HABITS
-//  HABITS: SCHEDULES, COMPLETIONS
+  type        FeedbackType
 
-//ROUTINES
+  title       String
+  description String
 
-//ANNOTATIONS
+  rating      Int?      @default(0)
+
+  page        String?   @db.VarChar(200)
+
+  imageUrl    String?   @db.VarChar(255)
+  videoUrl    String?   @db.VarChar(255)
+
+  status      FeedbackStatus @default(OPEN)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("feedback")
+}
+
+enum FeedbackType {
+  BUG
+  SUGGESTION
+  IMPROVEMENT
+  OTHER
+}
+
+enum FeedbackStatus {
+  OPEN
+  REVIEWING
+  CLOSED
+}
 
 //MOOD
 //SLEEP

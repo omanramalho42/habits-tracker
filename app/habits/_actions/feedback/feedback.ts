@@ -7,13 +7,7 @@ import { currentUser } from '@clerk/nextjs/server'
 import { prisma } from "@/lib/prisma"
 
 import { cloudinary } from "@/lib/cloudinary"
-
-import z from "zod"
-
-import {
-  createAnnotationSchema,
-  type CreateAnnotationSchemaType
-} from "@/lib/schema/annotations"
+import { createFeedbackSchema, CreateFeedbackSchemaType } from "@/lib/schema/feedback"
 
 export async function uploadToCloudinary(file: File) {
   const arrayBuffer = await file.arrayBuffer()
@@ -26,7 +20,7 @@ export async function uploadToCloudinary(file: File) {
     }>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: "annotations",
+          folder: "feedbacks",
           resource_type: "auto", // 👈 detecta imagem / vídeo / pdf
         },
         (error, result) => {
@@ -48,43 +42,8 @@ export async function uploadToCloudinary(file: File) {
   }
 }
 
-export async function fetchAnnotationByCompletion(completionId: string) {
-  const user = await currentUser()
-
-  if (!user) {
-    redirect('/sign-in')
-  }
-
-  // VERIFICAR SE O USUARIO EXISTE NO BD
-  const userDb = await prisma.user.findFirst({
-    where: {
-      clerkUserId: user.id,
-    },
-  })
-
-  if (!userDb) {
-    throw new Error("User not found")
-  }
-
-  const validator = z.string()
-  const parsedBody = validator.safeParse(completionId)
-
-  if(!parsedBody.success) {
-    throw new Error("Error parsing data files")
-  }
-
-  return await prisma.habitCompletion.findUnique({
-    where: {
-      id: completionId
-    },
-    include: {
-      annotations: true
-    }
-  })
-}
-
-export async function createAnnotation(form: CreateAnnotationSchemaType) {
-  const parsedBody =  createAnnotationSchema.safeParse(form)
+export async function createFeedback(form: CreateFeedbackSchemaType) {
+  const parsedBody =  createFeedbackSchema.safeParse(form)
 
   if (!parsedBody.success) throw new Error(parsedBody.error.message)
 
@@ -105,10 +64,12 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
   }
 
   const {
-    name,
-    completionId,
+    description,
+    title,
+    type,
     files,
-    summary
+    page,
+    rating
   } = parsedBody.data
 
   if(!parsedBody.success) {
@@ -127,26 +88,15 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
     }
   }
 
-  const existingAnnotation = await prisma.annotations.findFirst({
-    where: {
-      completion: {
-        id: completionId
-      }
-    }
-  })
-
-  if(existingAnnotation) {
-    throw new Error("already existing anottation vinculed this completion")
-  }
-
   try {
-    return await prisma.annotations.create({
+    return await prisma.feedback.create({
       data: {
-        name,
-        content: "",
-        summary,
+        title,
+        description,
+        type,
+        page,
+        rating,
         imageUrl: uploadedFiles[0] && uploadedFiles[0].url,
-        completionId,
         userId: userDb.id,
       }
     })

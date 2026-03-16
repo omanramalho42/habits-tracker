@@ -5,7 +5,41 @@ import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 
 import { updateAnnotationSchema } from "@/lib/schema/annotations"
-import { uploadToCloudinary } from "@/app/habits/_actions/annotations/annotations"
+import { cloudinary } from "@/lib/cloudinary"
+
+
+export async function uploadToCloudinary(file: File) {
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+
+  try {
+    return new Promise<{
+      url: string
+      resourceType: string
+    }>((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: "feedbacks",
+          resource_type: "auto", // 👈 detecta imagem / vídeo / pdf
+        },
+        (error, result) => {
+          if (error || !result) {
+            return reject(error)
+          }
+  
+          resolve({
+            url: result.secure_url,
+            resourceType: result.resource_type,
+          })
+        }
+      ).end(buffer)
+    })
+  } catch (error) {
+    if(error instanceof Error) {
+      throw new Error(error.message)
+    }
+  }
+}
 
 export async function GET(request: Request) {
     const { userId } = await auth()

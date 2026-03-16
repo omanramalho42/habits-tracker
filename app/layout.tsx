@@ -20,6 +20,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
 import "./globals.css"
+import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
+import { Button } from "@/components/ui/button"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -102,6 +104,18 @@ export default async function RootLayout({
               <main>     
                 <TimezoneWarningBanner />
                 {children}
+                <CreateFeedbackDialog
+                  trigger={
+                    <Button
+                      className="fixed opacity-75 bottom-10 right-10"
+                      variant="default"
+                      type="button"
+                      size="icon-lg"
+                    >
+                      <p>✨</p>
+                    </Button>
+                  }
+                />
               </main>
             {/* </ThemeProvider> */}
             <Analytics />
