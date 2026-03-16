@@ -60,7 +60,6 @@ import {
 
 import type { UpdateHabitSchemaType } from "@/lib/schema/habit"
 import type { Habit } from "@/lib/types"
-// import type { Habit } from "@prisma/client"
 
 interface UpdateHabitDialogProps {
   trigger?: React.ReactNode

@@ -18,8 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import RemoveHabitRoutineDialog from "@/components/remove-habit-routine-dialog"
-import UpdateRoutineHabitSchedule from "@/components/update-routine-habit-schedule-dialog"
+import DeleteHabitScheduleDialog from "@/components/delete-habit-schedule-dialog"
+import UpdateHabitSchedule from "@/components/update-habit-schedule-dialog"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 
@@ -35,7 +35,7 @@ import {
   Trash
 } from "lucide-react"
 
-import { cn, formatDateBR } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import type { Habit, HabitCompletion, HabitSchedule } from "@prisma/client"
 
@@ -236,7 +236,7 @@ const HabitCardRoutine = ({
                 <DropdownMenuContent>
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                    <RemoveHabitRoutineDialog
+                    <DeleteHabitScheduleDialog
                       habitScheduleId={schedule.id}
                       routineId={schedule.routineId!}
                       trigger={
@@ -256,7 +256,7 @@ const HabitCardRoutine = ({
                       }
                     />
                     {schedule.habit && (
-                      <UpdateRoutineHabitSchedule
+                      <UpdateHabitSchedule
                         habit={schedule.habit}
                         schedule={schedule}
                         trigger={

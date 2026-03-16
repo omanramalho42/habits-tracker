@@ -214,11 +214,11 @@ model TaskSchedule {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime? @updatedAt      @map("updated_at")
 
-  routineId     String    @map("routine_id")
-  routine       Routine   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  routineId     String?    @map("routine_id")
+  routine       Routine?   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  taskId        String    @map("task_id")
-  task          Task      @relation(fields: [taskId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  taskId        String?    @map("task_id")
+  task          Task?      @relation(fields: [taskId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   // @@unique([routineId, clock])
   @@index([routineId, clock])

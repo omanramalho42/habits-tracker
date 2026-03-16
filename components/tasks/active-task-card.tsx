@@ -12,10 +12,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import axios from 'axios'
 
-import { CSS } from "@dnd-kit/utilities"
-import { DndContext } from "@dnd-kit/core"
-import { useSortable } from '@dnd-kit/sortable'
-
 import confetti from "canvas-confetti"
 
 import CreateAnnotationDialog from '@/components/annotations/create-annotation-dialog'
@@ -117,7 +113,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
   return (
     <Card className='flex flex-row justify-between items-center px-2'>
-      <div className="flex flex-row gap-2 max-w-[50%]">
+      <div className="flex flex-row gap-2 tracking-tight truncate">
         <p className='text-sm'>
           {task.emoji}
         </p>
@@ -148,6 +144,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              disabled={isPending}
               variant="ghost"
               size="icon"
               className="h-8 w-8"

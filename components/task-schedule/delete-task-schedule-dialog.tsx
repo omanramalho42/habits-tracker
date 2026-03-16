@@ -22,36 +22,37 @@ import {
 import { Button } from '@/components/ui/button'
 
 import { Trash2 } from 'lucide-react'
+import { removeTaskSchedule } from '@/services/task-schedule'
 
-interface RemoveHabitFromRoutineProps {
+interface DeleteTaskScheduleDialogProps {
   routineId: string;
-  habitScheduleId: string;
+  taskScheduleId: string;
   trigger?: React.ReactNode;
 }
 
-function RemoveHabitFromRoutine({
-  habitScheduleId,
+function DeleteTaskScheduleDialog({
+  taskScheduleId,
   routineId,
   trigger
-}: RemoveHabitFromRoutineProps) {
+}: DeleteTaskScheduleDialogProps) {
   const [open, setOpen] =
     useState<boolean>(false)
 
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
-    mutationFn: async ({ routineId, habitScheduleId }: {
+    mutationFn: async ({ routineId, taskScheduleId }: {
       routineId: string;
-      habitScheduleId: string
+      taskScheduleId: string
     }) => {
-      return await removeHabitSchedule(
+      return await removeTaskSchedule(
         routineId,
-        habitScheduleId
+        taskScheduleId
       )
     },
     onSuccess: async () => {
-      toast.success('Hábito removido com sucesso! 🎉', {
-        id: habitScheduleId,
+      toast.success('Tarefa removida com sucesso! 🎉', {
+        id: taskScheduleId,
       })
 
       await queryClient.invalidateQueries({
@@ -62,7 +63,7 @@ function RemoveHabitFromRoutine({
     },
     onError: () => {
       toast.error('Aconteceu algo de errado', {
-        id: habitScheduleId,
+        id: taskScheduleId,
       })
     },
   })
@@ -96,10 +97,13 @@ function RemoveHabitFromRoutine({
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              toast.loading('Removendo hábito da rotina...', {
-                id: habitScheduleId,
+              toast.loading('Removendo tarefa da rotina...', {
+                id: taskScheduleId,
               })
-              deleteMutation.mutate({ routineId, habitScheduleId })
+              deleteMutation.mutate({
+                routineId,
+                taskScheduleId
+              })
             }}
           >
             Continuar
@@ -110,4 +114,4 @@ function RemoveHabitFromRoutine({
   )
 }
 
-export default RemoveHabitFromRoutine
+export default DeleteTaskScheduleDialog

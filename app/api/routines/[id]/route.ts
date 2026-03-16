@@ -33,7 +33,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json()
     
     const zodSchema = z.object({
-      habitScheduleId: z.string(),
+      habitScheduleId: z.string().optional(),
+      taskScheduleId: z.string().optional()
     })
 
     const parsedBody = zodSchema.safeParse(body)
@@ -41,24 +42,44 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
     const {
-      habitScheduleId
+      habitScheduleId,
+      taskScheduleId
     } = parsedBody.data
 
-    const newRoutine = await prisma.routine.update({
-      where: {
-        id,
-        userId: userDb.id
-      },
-      data: {
-        habitSchedules: {
-          disconnect: {
-            id: habitScheduleId
+    if(habitScheduleId) {
+        const newRoutine = await prisma.routine.update({
+          where: {
+            id,
+            userId: userDb.id
+          },
+          data: {
+            habitSchedules: {
+              disconnect: {
+                id: habitScheduleId
+              }
+            }
           }
-        }
-      }
-    })
+        })
 
-    return NextResponse.json(newRoutine)
+        return NextResponse.json(newRoutine)
+    } else if (taskScheduleId) {
+        const newRoutine = await prisma.routine.update({
+          where: {
+            id,
+            userId: userDb.id
+          },
+          data: {
+            taskSchedules: {
+              disconnect: {
+                id: taskScheduleId
+              }
+            }
+          }
+        })
+
+        return NextResponse.json(newRoutine)
+    }
+
   } catch (error) {
     console.error("Error updating routine:", error)
     return NextResponse.json({

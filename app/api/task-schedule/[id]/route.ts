@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 
-import { updateHabitScheduleSchema } from '@/lib/schema/habit-schedule'
+import { updateTaskScheduleSchema } from '@/lib/schema/task-schedule'
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -28,18 +28,18 @@ export async function PATCH(request: NextRequest) {
     }
     
     const body = await request.json()
-    const parsedBody = updateHabitScheduleSchema.safeParse(body)
+    const parsedBody = updateTaskScheduleSchema.safeParse(body)
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
     const {
-      habit,
+      task,
       duration,
       clock,
       id
     } = parsedBody.data
     // Verify the habitSchedule belongs to the user
-    const existingSchedule = await prisma.habitSchedule.findFirst({
+    const existingSchedule = await prisma.taskSchedule.findFirst({
       where: {
         id,
         routine: {
@@ -55,26 +55,26 @@ export async function PATCH(request: NextRequest) {
       }, { status: 404 })
     }
 
-    const newHabitSchedule = await prisma.habitSchedule.update({
+    const newTaskSchedule = await prisma.taskSchedule.update({
       where: { id },
       data: {
         clock,
         duration,
-        habit: {
+        task: {
           connect: {
-            id: habit.id
+            id: task.id
           }
         },
         updatedAt: new Date()
       }
     })
 
-    return NextResponse.json(newHabitSchedule)
+    return NextResponse.json(newTaskSchedule)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error habit Schedule:", error)
+      console.error("Error task Schedule:", error)
       return NextResponse.json({
-        error: "Failed to create new habit schedule"
+        error: "Failed to create new task schedule"
       }, { status: 500 })
     }
   }

@@ -41,7 +41,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     //     schedules:  true
     //   }
     // })
-    await prisma.task.update({
+    const updatedTask = await prisma.task.update({
       where: {
         id,
         userId: userDb.id
@@ -51,6 +51,25 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         updatedAt: new Date()
       }
     })
+
+
+    await prisma.$transaction([
+      prisma.taskSchedule.deleteMany({
+        where: {
+          taskId: updatedTask.id,
+        }
+      }),
+      prisma.task.update({
+        where: {
+          id,
+          userId: userDb.id
+        },
+        data: {
+          status: 'ARCHIVED',
+          updatedAt: new Date()
+        }
+      })
+    ])
   
     return NextResponse.json({
       success: true

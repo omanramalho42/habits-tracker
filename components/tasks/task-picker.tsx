@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Control, useController } from 'react-hook-form'
 
-import { fetchHabits } from '@/services/habits'
+import { fetchTasks } from '@/services'
 
 import { CreateHabitDialog } from '@/components/create-habit-dialog'
 
@@ -24,34 +24,35 @@ import { cn } from '@/lib/utils'
 
 import { Check } from 'lucide-react'
 
-import type { UpdateHabitScheduleSchemaType } from '@/lib/schema/habit-schedule'
+import type { Task } from '@prisma/client'
+import type { UpdateTaskScheduleSchemaType } from '@/lib/schema/task-schedule'
 
-interface HabitPickerProps {
-  control: Control<UpdateHabitScheduleSchemaType>
+interface TaskPickerProps {
+  control: Control<UpdateTaskScheduleSchemaType>
 }
 
-const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
+const TaskPicker:React.FC<TaskPickerProps> = ({ control }) => {
   const [open, setOpen] = useState<boolean>(false)
   const { field, formState: { errors } } = useController({
     control: control,
-    name: "habit"
+    name: "task"
   })
 
   const {
-    data: habits = [],
+    data: tasks = [],
     isLoading,
     isFetching,
     isError,
     error
   } = useQuery({
-    queryKey: ['habits', 'routines'],
-    queryFn: () => fetchHabits(),
+    queryKey: ['tasks', 'routines'],
+    queryFn: () => fetchTasks(),
     staleTime: 1000 * 60,
     retry: 1
   })
 
-  const selectedHabit =
-    habits.find((habit) => habit.id === field.value?.id)
+  const selectedTask =
+    tasks.find((task) => task.id === field.value?.id)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -64,19 +65,19 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
             variant="outline"
             type='button'
           >
-            {selectedHabit ? (
+            {selectedTask ? (
               <span className="flex items-center gap-2">
-                {selectedHabit.emoji}
-                {selectedHabit.name}
+                {selectedTask.emoji}
+                {selectedTask.name}
               </span>
             ) : (
-              "Selecione o hábito"
+              "Selecione a tarefa"
             )}
           </Button>
           <div className="absolute">
-            {errors.habit && (
+            {errors.task && (
               <p className='relative top-16 text-red-500 text-sm'>
-                {typeof errors.habit.message === 'string' ? errors.habit.message : ''}
+                {typeof errors.task.message === 'string' ? errors.task.message : ''}
               </p>
             )}
           </div>
@@ -91,33 +92,33 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
         >
           <CommandInput
             disabled={isLoading || isFetching}
-            placeholder="Pesquise o hábito..."
+            placeholder="Pesquise a tarefa..."
           />
           <CreateHabitDialog />
           <CommandEmpty className='p-2'>
             <p className='text-sm'>
-              Hábito não encontrado
+              Tarefa não encontrado
             </p>
             <p className="text-xs text-muted-foreground">
-              Criar novo Hábito
+              Criar nova tarefa
             </p>
           </CommandEmpty>
           <CommandGroup>
             <CommandList>
-              {habits.map((habit) => (
+              {tasks.map((task) => (
                 <CommandItem
-                  key={habit.id}
+                  key={task.id}
                   onSelect={() => {
-                    field.onChange(habit)
+                    field.onChange(task)
                     setOpen(false)
                   }}
                 >
-                  <HabitRow habit={habit} />
+                  <TaskRow task={task} />
 
                   <Check
                     className={cn(
                       "ml-auto h-4 w-4",
-                      field.value?.id === habit.id
+                      field.value?.id === task.id
                         ? "opacity-100"
                         : "opacity-0"
                     )}
@@ -132,13 +133,13 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
   )
 }
 
-function HabitRow({ habit }: { habit: any }) {
+function TaskRow({ task }: { task: Task }) {
   return (
     <div className="flex items-center gap-3 sm:w-full w-30">
-      <span role="img">{habit.emoji}</span>
-      <span className='truncate sm:max-w-auto'>{habit.name}</span>
+      <span role="img">{task.emoji}</span>
+      <span className='truncate sm:max-w-auto'>{task.name}</span>
     </div>
   )
 }
 
-export default HabitPicker
+export default TaskPicker

@@ -157,7 +157,7 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
                       id="name"
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder='ex: Emagrecer...'    
+                      placeholder='ex: Academia...'    
                     />
                   </FormControl>
                   
@@ -188,7 +188,7 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
                       id="description"
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder='ex: Conquistar o tão sonhado peso...'    
+                      placeholder='Ex: atividades e rotinas sobre academia...'    
                     />
                   </FormControl>
                   

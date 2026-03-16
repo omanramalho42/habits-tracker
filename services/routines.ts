@@ -1,11 +1,21 @@
-import { CreateRoutineSchemaType, UpdateRoutineSchemaType } from "@/lib/schema/routine"
-import { HabitWithStats } from "@/lib/types"
-import { Habit, HabitSchedule, Routine } from "@prisma/client"
+import type {
+  CreateRoutineSchemaType,
+  UpdateRoutineSchemaType
+} from "@/lib/schema/routine"
+
+import type {
+  Habit,
+  HabitSchedule,
+  Routine,
+  Task,
+  TaskSchedule
+} from "@prisma/client"
+
 import axios from "axios"
 
 export const fetchRoutines = async (
   selectedDate?: string
-): Promise<(Routine & { habitSchedules?: (HabitSchedule & { habit?: Habit })[] })[]> => {
+): Promise<(Routine & { habitSchedules?: (HabitSchedule & { habit?: Habit })[] } & { taskSchedules?: (TaskSchedule & { task?: Task })[] })[]> => {
   const { data: routines } = await axios.get(
     `/api/routines${selectedDate ? `?selectedDate=${selectedDate}` : ""}`
   )

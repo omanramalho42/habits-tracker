@@ -46,19 +46,17 @@ import {
   Clock8Icon,
 } from 'lucide-react'
 
-interface UpdateRoutineHabitScheduleProps {
+interface UpdateHabitScheduleDialogProps {
   trigger?: React.ReactNode;
   habit: Habit;
   schedule: HabitSchedule;
 }
 
-const UpdateRoutineHabitSchedule = ({
+const UpdateHabitScheduleDialog = ({
   trigger,
   schedule,
   habit,
-}: UpdateRoutineHabitScheduleProps) => {
-  console.log(schedule, "schedule");
-
+}: UpdateHabitScheduleDialogProps) => {
   const form = useForm<UpdateHabitScheduleSchemaType>({
     defaultValues: {
       id: schedule.id,
@@ -155,7 +153,7 @@ const UpdateRoutineHabitSchedule = ({
                 <FormField
                   control={control}
                   name="clock"
-                  rules={{ required: true }}
+                  rules={{ required: false }}
                   render={({ field, fieldState }) => (
                     <FormItem className="w-full">
                       <FormLabel>
@@ -198,7 +196,7 @@ const UpdateRoutineHabitSchedule = ({
                 <FormField
                   control={control}
                   name="duration"
-                  rules={{ required: true }}
+                  rules={{ required: false }}
                   render={({ field, fieldState }) => (
                     <FormItem className="w-full">
                       <FormLabel>
@@ -277,4 +275,4 @@ const UpdateRoutineHabitSchedule = ({
   )
 }
 
-export default UpdateRoutineHabitSchedule
+export default UpdateHabitScheduleDialog

@@ -2,8 +2,8 @@ import { z } from "zod"
 
 export const updateHabitScheduleSchema = z.object({
   id: z.string(),
-  clock: z.string(),
-  duration: z.string(),
+  clock: z.string().optional(),
+  duration: z.string().optional(),
   habit: z.any(),
 })
 

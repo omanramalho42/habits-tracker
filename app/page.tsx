@@ -33,7 +33,6 @@ import DeleteRoutineDialog from "@/components/delete-routine-dialog"
 import HabitCardRoutine from "@/components/habits/habit-card-routine"
 import CreateTaskDialog from "@/components/tasks/create-task-dialog"
 
-import ActiveTaskCard from "@/components/tasks/active-task-card"
 
 import Footer from "@/components/habits/footer"
 import { Input } from "@/components/ui/input"
@@ -64,6 +63,9 @@ import {
 
 import type { HabitWithStats } from "@/lib/types"
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
+
+import ActiveTaskCard from "@/components/tasks/active-task-card"
+import ActiveTaskScheduleCard from "@/components/tasks/task-routine-card"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
@@ -238,7 +240,7 @@ export default function Home() {
                           </div>
                         </div>
   
-                        {/* ROUTINES LIST */}
+                        {/* TASKS & habits LIST */}
                         <div
                           className="flex flex-col gap-3 max-h-75 overflow-auto scroll-container"
                           aria-selected={false}
@@ -247,10 +249,11 @@ export default function Home() {
                             routine.taskSchedules.map((schedule) => {
                               if (schedule.task) {
                                 return (
-                                  <ActiveTaskCard
+                                  <ActiveTaskScheduleCard
                                     key={schedule.id}
                                     selectedDate={selectedDate}
-                                    task={schedule.task}
+                                    // @ts-ignore
+                                    schedule={schedule}
                                   />
                                 )
                               } 
@@ -260,7 +263,7 @@ export default function Home() {
                               trigger={
                                 <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
                                   <p className="text-sm text-center tracking-tight">
-                                    Adicione hábitos a sua rotina e faça a magia acontecer 🪄
+                                    Adicione tarefas a sua rotina e faça a magia acontecer 🪄
                                   </p>
                                 </Card>
                               }
