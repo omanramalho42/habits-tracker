@@ -13,14 +13,14 @@ export const CreateHabitSchema = z.object({
     .max(10, "O valor máximo a ser selecionado é igual a 10")
     .default(1)
     .optional(),
-  startDate: z.coerce.date(),
+  startDate: z.coerce.date().optional(),
   endDate: z.preprocess(
     (v) => (v === "" || v === null || v === undefined ? null : v),
     z.coerce.date().nullable()
   ).optional(),
   reminder: z.boolean().optional().default(false),
   // z.enum(['M', 'T', 'W', 'TH', 'F', 'SA', 'S'])
-  frequency: z.array(z.string()).default([]),
+  frequency: z.array(z.string()).default([]).optional(),
   color: z.string().optional().default("#3B82F6"),
 })
 

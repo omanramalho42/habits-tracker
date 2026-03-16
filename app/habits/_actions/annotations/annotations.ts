@@ -116,10 +116,9 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
   }
 
   //PROCESSAR O ARQUIVO E DETECTAR SE É VIDEO, PDF, IMAGEM, TEXTO
-  // console.log(files, "files")
+  console.log(files, "files")
 
   const uploadedFiles = []
-
   for (const file of files) {
     const uploaded = await uploadToCloudinary(file)
 
@@ -149,7 +148,7 @@ export async function createAnnotation(form: CreateAnnotationSchemaType) {
         name,
         content: "",
         summary,
-        imageUrl: uploadedFiles[0].url,
+        imageUrl: uploadedFiles[0] && uploadedFiles[0].url,
         completionId,
         userId: userDb.id,
       }

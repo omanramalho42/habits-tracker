@@ -13,6 +13,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { createRoutine } from '@/services/routines'
 
+import MultiHabitsTasksPicker from '@/components/multi-habit-task-picker'
+
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
   Dialog,
   DialogClose,
@@ -31,16 +34,6 @@ import {
   FormLabel
 } from '@/components/ui/form'
 import { Calendar } from '@/components/ui/calendar'
-import MultipleSelector from '@/components/ui/multi-select'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 
 import { Input } from '@/components/ui/input'
@@ -61,8 +54,6 @@ import {
 } from 'lucide-react'
 
 import type { CreateRoutineSchemaType } from '@/lib/schema/routine'
-import MultiHabitsPicker from './multi-habit-picker-dialog'
-import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { WEEKDAYS } from '@/lib/habit-utils'
 
 interface CreateRoutineDialogProps {
@@ -89,7 +80,8 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
       dateRange: {
         from: today
       },
-      habits: []
+      habits: [],
+      tasks: [],
     }
   })
 
@@ -221,7 +213,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                   name='description'
                   control={control}
                   disabled={isPending}
-                  rules={{ required: true, min: 5 }}
+                  rules={{ required: false, min: 5 }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -281,7 +273,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                                       {field.value}
                                     </span>
 
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-center text-muted-foreground">
                                       Toque para trocar
                                     </p>
                                   </div>
@@ -404,7 +396,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
             </div>
 
             {/* CRONOGRAMA */}
-            <div className='flex flex-col gap-2'>
+            {/* <div className='flex flex-col gap-2'>
               <Label>Cronograma</Label>
               <Controller
                 control={control}
@@ -440,7 +432,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                   )
                 }}
               />
-            </div>
+            </div> */}
 
             {/* FREQUENCIA */}
             {/* <div className='flex flex-col gap-2 items-start'>
@@ -500,7 +492,12 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
             />
             
             <Label>Vincular hábitos</Label>
-            <MultiHabitsPicker control={control} />
+            {/* <MultiHabitsPicker
+              control={control}
+            /> */}
+            <MultiHabitsTasksPicker
+              control={control}
+            />
           </form>
         </Form>
 

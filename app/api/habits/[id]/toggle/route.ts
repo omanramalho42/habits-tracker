@@ -34,25 +34,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json()
     const date = body?.date ?? getTodayString()
     
-    const validator = z.string().datetime()
+    const validator = z.string()
     const bodyParams = validator.safeParse(date)
     
     if (!bodyParams.success) {
       throw new Error("Invalid date format")
     }
     
-    const completedDate =
-    new Date(bodyParams.data)
-    completedDate.setHours(0, 0, 0, 0)
+    const newDate =
+      bodyParams.data
+    const completedDate = new Date(newDate)
+    // completedDate.setHours(0, 0, 0, 0)
 
-    console.log(new Date(completedDate), "completedDate");
+    console.log(completedDate, "completedDate")
     
     // 1️⃣ Busca a completion do dia
     const existingCompletion = await prisma.habitCompletion.findUnique({
       where: {
         habitId_completedDate: {
           habitId: id,
-          completedDate: new Date(completedDate),
+          completedDate: completedDate,
         },
       },
       include: {

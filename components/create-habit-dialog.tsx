@@ -51,6 +51,7 @@ import {
 } from "lucide-react"
 
 import type { CreateHabitSchemaType } from "@/lib/schema/habit"
+import axios from "axios"
 
 interface CreateHabitDialogProps {
   trigger?: React.ReactNode
@@ -98,7 +99,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: CreateHabitSchemaType) => {
       console.log(values, "values")
-      return await CreateHabit(values)
+      return await axios.post(`/api/habits`, values)
     },
     onSuccess: async () => {
       toast.success("Habito criado com sucesso! 🎉", {
@@ -201,7 +202,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                                       <span className="text-3xl" role="img">
                                         {field.value}
                                       </span>
-                                      <p className="text-xs text-muted-foreground">
+                                      <p className="text-xs text-center text-muted-foreground">
                                         Toque para trocar
                                       </p>
                                     </div>

@@ -35,7 +35,7 @@ import type { HabitWithStats } from "@/lib/types"
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]
-  selectedDate: Date
+  selectedDate: string
   filter?: string
 }
 
@@ -62,7 +62,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     toast.error(message)
   }
 
-  const handleToggleHabit = (habitId: string, date: Date) => {
+  const handleToggleHabit = (habitId: string, date: string) => {
     toast.loading(
       "Alterando status do hábito...", {
         id: `toggle-habit`,
@@ -70,7 +70,7 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
     // date.setHours(0,0,0,0)
     mutate({
       habitId,
-      date: date.toISOString(),
+      date: date,
     })
   }
 
@@ -95,14 +95,11 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
           id: `toggle-habit`,
       })
 
-      const selectedDateStr =
-        formatDateBR(selectedDate)
-
       await queryClient.invalidateQueries({
-        queryKey: ["habits", selectedDateStr],
+        queryKey: ["habits", selectedDate],
       })
       await queryClient.invalidateQueries({
-        queryKey: ["routines", selectedDateStr],
+        queryKey: ["routines", selectedDate],
       })
 
       if(values.completed) {

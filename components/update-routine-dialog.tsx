@@ -14,6 +14,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { updateRoutine } from '@/services/routines'
 
+import MultiHabitsTasksPicker from '@/components/multi-habit-task-picker'
+
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
   Dialog,
   DialogClose,
@@ -32,15 +35,6 @@ import {
   FormLabel
 } from '@/components/ui/form'
 import { Calendar } from '@/components/ui/calendar'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 
 import { Input } from '@/components/ui/input'
@@ -61,11 +55,7 @@ import {
 } from 'lucide-react'
 
 import type { UpdateRoutineSchemaType } from '@/lib/schema/routine'
-import MultiHabitsPicker from './multi-habit-picker-dialog'
-import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { WEEKDAYS } from '@/lib/habit-utils'
-import { HabitSchedule } from '@prisma/client'
-import { HabitWithStats } from '@/lib/types'
 
 interface UpdateRoutineDialogProps {
   trigger: React.ReactNode
@@ -79,10 +69,12 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
     {value:"mensalmente", label: "mensalmente"},
     {value: "diariamente", label: "diariamente"},
   ]
-
+  
   const [open, setOpen] = useState<boolean>(false)
   const today = new Date()
   today.setHours(0,0,0,0)
+
+  // console.log({ routine }, "🪄!")
 
   const form = useForm<UpdateRoutineSchemaType>({
     defaultValues: {
@@ -96,7 +88,8 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
         from: routine.startDate,
         // to: routine?.endDate || null
       },
-      habits: routine.habitSchedules.map((item: HabitSchedule & { habit: HabitWithStats }) => item.habit) || []
+      habits: routine?.habitSchedules?.map((schedule: any) => schedule?.habit) || [],
+      tasks: routine?.taskSchedules?.map((schedule: any) => schedule?.task) || [],
     }
   })
   
@@ -140,7 +133,7 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
   })
 
   const onSubmit: SubmitHandler<UpdateRoutineSchemaType> = async (data: UpdateRoutineSchemaType) => {
-    console.log(data, "data!")
+    console.log(data, "values")
 
     mutate(data)
 
@@ -395,7 +388,7 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
             </div>
 
             {/* CRONOGRAMA */}
-            <div className='flex flex-col gap-2'>
+            {/* <div className='flex flex-col gap-2'>
               <Label>Cronograma</Label>
               <Controller
                 control={control}
@@ -431,7 +424,7 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
                   )
                 }}
               />
-            </div>
+            </div> */}
 
             {/* FREQUENCIA */}
             {/* <div className='flex flex-col gap-2 items-start'>
@@ -491,7 +484,10 @@ const UpdateRoutineDialog:React.FC<UpdateRoutineDialogProps> = ({ trigger, routi
             />
             
             <Label>Vincular hábitos</Label>
-            <MultiHabitsPicker
+            {/* <MultiHabitsPicker
+              control={control}
+            /> */}
+            <MultiHabitsTasksPicker 
               control={control}
             />
           </form>

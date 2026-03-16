@@ -16,7 +16,11 @@ export const fetchRoutines = async (
 export const createRoutine = async (values: CreateRoutineSchemaType): Promise<Routine[]> => {
   const { data: routines } = await axios.post(
     `/api/routines`,
-    {...values, habits: values.habits?.map((h: any) => h.id ?? h)}
+    {
+      ...values,
+      habits: values.habits?.map((h: any) => h.id ?? h),
+      tasks: values.tasks?.map((t: any) => t.id ?? t)
+    }
   )
 
   return routines
@@ -29,9 +33,14 @@ export const createRoutine = async (values: CreateRoutineSchemaType): Promise<Ro
 export const updateRoutine = async (
   values: UpdateRoutineSchemaType
 ): Promise<Routine> => {
+
   const { data: routines } = await axios.patch(
     `/api/routines/${values.id}`,
-    {...values, habits: values.habits?.map((h: any) => h.id ?? h)}
+    {
+      ...values,
+      habits: values.habits?.map((h: any) => h.id ?? h),
+      tasks: values.tasks?.map((t: any) => t.id ?? t)
+    }
   )
 
   return routines

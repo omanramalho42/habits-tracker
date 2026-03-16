@@ -133,22 +133,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     
     const {
       name,
-      completionId,
       files,
       summary
     } = parsedBody.data
 
     const uploadedFiles = []
-  
-    for (const file of files) {
-      if(file) {
-        const uploaded = await uploadToCloudinary(file)
-  
-        if (uploaded) {
-          uploadedFiles.push({
-            url: uploaded.url,
-            type: uploaded.resourceType, // image | video | raw
-          })
+    
+    if(files.length > 0) {
+      for (const file of files) {
+        if(file) {
+          const uploaded = await uploadToCloudinary(file)
+    
+          if (uploaded) {
+            uploadedFiles.push({
+              url: uploaded.url,
+              type: uploaded.resourceType, // image | video | raw
+            })
+          }
         }
       }
     }

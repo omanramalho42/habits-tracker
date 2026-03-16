@@ -10,7 +10,8 @@ export const createRoutineSchema = z.object({
   }),
   cron: z.string().optional(),
   frequency: z.array(z.string()).default([]),
-  habits: z.array(z.string().min(1)).optional()
+  habits: z.array(z.string().min(1)).optional(),
+  tasks: z.array(z.string().min(1)).optional()
 })
 
 export const updateRoutineSchema = z.object({
@@ -24,7 +25,8 @@ export const updateRoutineSchema = z.object({
   }),
   cron: z.string().optional(),
   frequency: z.array(z.string()).default([]),
-  habits: z.array(z.string().min(1)).optional()
+  habits: z.array(z.string().min(1)).optional(),
+  tasks: z.array(z.string().min(1)).optional()
 })
 
 export type UpdateRoutineSchemaType = z.infer<typeof updateRoutineSchema>

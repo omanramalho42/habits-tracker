@@ -31,7 +31,9 @@ import {
   CartesianGrid
 } from "recharts"
 
-import { formatDate, WEEKDAYS } from "@/lib/habit-utils"
+import { parse } from "date-fns"
+
+import { formatDate } from "@/lib/habit-utils"
 
 import type { HabitWithStats } from "@/lib/types"
 
@@ -41,16 +43,22 @@ import {
   Eye,
 } from "lucide-react"
 import Image from "next/image"
+import { formatDateBR } from "@/lib/utils"
+import UpdateAnnotationDialog from "./annotations/update-annotation-dialog"
+import { Card } from "./ui/card"
 
 interface HabitDetailDialogProps {
   trigger?: React.ReactNode
-  currentDate: Date;
+  selectedDate: string;
   habit: HabitWithStats | null
 }
 
-export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDialogProps) {
-  const [date, setDate] =
-    useState(currentDate)
+export function HabitDetailDialog({ trigger, habit, selectedDate }: HabitDetailDialogProps) {
+  const newDate =
+    parse(selectedDate, "yyyy-MM-dd", new Date())
+
+    const [date, setDate] = useState<Date>(newDate)
+
   const handlePrevMonth = () => {
     setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))
   }
@@ -78,26 +86,13 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
     useState<boolean>(false)
     const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
-    // const habitName = useMemo(() => {
-    //   return habit?.name
-    // }, [habit])
-
-    // const habitCategory = useMemo(() => {
-    //   return habit?.category
-    // }, [habit])
-
   if (!habit) return null
-
-  const frequency =
-    Array.isArray(habit.frequency) 
-      ? habit.frequency 
-      : []
   
   const completion = 
     habit.completions.find(
       (c) => 
         new Date(c.completedDate).toISOString().split("T")[0] === 
-       currentDate.toISOString().split("T")[0]
+       date.toISOString().split("T")[0]
     )
 
   const totalCompleted = useMemo(() => {
@@ -118,45 +113,6 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
 
     return newArrayCompletions;
   }, [habit]);
-
-  // const heatMapData = useMemo(() => {
-  //   if (!habit?.completions) return [];
-
-  //   const weeks: { date: Date; completed: boolean }[][] = [];
-  //   const today = new Date();
-  //   const start = new Date(today);
-
-  //   start.setDate(start.getDate() - 83);
-  //   start.setDate(start.getDate() - start.getDay());
-
-  //   let currentWeek: { date: Date; completed: boolean }[] = [];
-  //   const d = new Date(start);
-
-  //   while (d <= today) {
-  //     const key = formatDate(d);
-
-  //     const completed = habit.completions.some(
-  //       (c) => c.completedDate === key
-  //     );
-
-  //     currentWeek.push({
-  //       date: new Date(d),
-  //       completed,
-  //     });
-
-  //     if (currentWeek.length === 7) {
-  //       weeks.push(currentWeek);
-  //       currentWeek = [];
-  //     }
-
-  //     d.setDate(d.getDate() + 1);
-  //   }
-
-  //   if (currentWeek.length > 0) weeks.push(currentWeek);
-
-  //   return weeks;
-  // }, [habit]);
-  // console.log(heatMapData, "HEAT MAP DATA!")
 
 // Gera os dias do calendário dinamicamente sempre que o mês muda
   const calendarData = useMemo(() => {
@@ -183,7 +139,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
       const key = formatDateKey(cellDate)
 
       const completed = habit.completions.some(
-        (c) => c.completedDate === key
+        (c) => new Date(c.completedDate).toISOString().split("T")[0] === key
       )
 
       cells.push({
@@ -195,12 +151,15 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
     return cells
   }, [habit?.completions, date])
 
+  console.log(calendarData, "calendarData!")
+
   // Verifica se o hábito foi completado naquele dia exato
   const isHabitCompleted = (day: any) => {
     if (!day || !habit?.completions) return false;
     
     return habit.completions.some((completion) => {
       const compDate = new Date(completion.completedDate);
+      // console.log(compDate, "comparasion")
       return (
         compDate.getDate() === day &&
         compDate.getMonth() === date.getMonth() &&
@@ -208,6 +167,8 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
       );
     });
   }
+
+  console.log(selectedDate, "selected date");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -248,7 +209,7 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
             </p>
           </div>
           <div className="bg-secondary rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold" style={{ color: habit.color }}>
+            <p className="text-2xl font-bold" style={{ color: "habit.color" }}>
               {habit.longest_streak}
             </p>
             <p className="text-[10px] text-muted-foreground">
@@ -482,7 +443,6 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
           </TabsContent>
 
           <TabsContent value="calendar" className="mt-1 flex flex-col min-h-68.5">
-            
             {/* Cabeçalho de Navegação */}
             <div className="flex items-center justify-between mb-1 w-full max-w-55 mx-auto">
               <Button
@@ -536,14 +496,12 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
                   <div
                     key={`day-${cell.day}`}
                     onClick={() => setSelectedDay(cell.day)} // Sugestão: talvez você precise passar a data completa aqui futuramente
-                    style={{
-                      backgroundColor: completed ? habit.color : undefined
-                    }}
+                    // style={{
+                    //   backgroundColor: cell.completed ? "green" : undefined
+                    // }}
                     className={`w-8 h-8 rounded-md flex items-center justify-center text-[11px] font-medium cursor-pointer hover:bg-muted transition ${
                       completed
-                        ? `bg-blue-500` // Cor de fallback caso habit.color não exista
-                        : cell.completed // Mantive do seu código original
-                        ? "bg-green-500 text-success-foreground"
+                        ? `bg-green-500` // Cor de fallback caso habit.color não exista
                         : "bg-secondary text-muted-foreground"
                     } ${isToday(cell.day) ? "ring-1 ring-primary" : ""}`}
                   >
@@ -587,12 +545,24 @@ export function HabitDetailDialog({ trigger, habit, currentDate }: HabitDetailDi
                         src={completion.annotations?.imageUrl}
                       />
                     )}
-                    <div
-                      key={i}
-                      className="p-2 rounded-md border text-sm"
-                    >
-                      {completion.annotations?.summary || "Sem anotação"}
-                    </div>
+                    {completion.annotations && !completion.annotations?.summary ? (
+                      <UpdateAnnotationDialog
+                        trigger={
+                          <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
+                            <p className="text-sm text-center tracking-tight">
+                              Adicione conteúdo a suas anotações 🪄
+                            </p>
+                          </Card>
+                        }
+                        annotation={completion.annotations}
+                      />
+                    ): (
+                      <Card className="px-2">
+                        <p className="text-sm font-medium text-foreground">
+                          {completion.annotations?.summary}
+                        </p>
+                      </Card>
+                    )}
                   </div>
                 ))}
 

@@ -224,7 +224,7 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
                                     {field.value}
                                   </span>
 
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-center text-muted-foreground">
                                     Toque para trocar
                                   </p>
                                 </div>

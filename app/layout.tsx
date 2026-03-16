@@ -4,15 +4,22 @@ import type { Metadata } from "next"
 
 import { ClerkProvider } from "@clerk/nextjs"
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google"
+
 import { Analytics } from "@vercel/analytics/next"
 
-import "./globals.css"
 import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
+
 import { Toaster } from "sonner"
+
 import QueryClientProvider from "@/components/providers/query-client-provider"
+import TimezoneWarningBanner from "@/components/banners/timezone-warning-banner"
+
 import { ThemeProvider } from "@/components/theme-provider"
+
 import { cn } from "@/lib/utils"
+
+import "./globals.css"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -92,7 +99,8 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             > */}
-              <main>
+              <main>     
+                <TimezoneWarningBanner />
                 {children}
               </main>
             {/* </ThemeProvider> */}
