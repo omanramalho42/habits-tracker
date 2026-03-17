@@ -1,24 +1,24 @@
 import nodemailer from "nodemailer"
 
-import { WELCOME_EMAIL_TEMPLATE } from "./template"
+import { welcomeEmailTemplate } from "./template"
 import { WelcomeEmailData } from "../types"
 
 export const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: "smtp.hostinger.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.NODEMAILER_EMAIL!,
-    pass: process.env.NODEMAILER_PASSWORD!,
+    user: process.env.NODEMAILER_EMAIL,
+    pass: process.env.NODEMAILER_PASSWORD
   }
 })
 
 export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData) => {
   const htmlTemplate = 
-    WELCOME_EMAIL_TEMPLATE
-      .replace("{{name}}", name)
-      .replace("{{intro}}", intro)
+    welcomeEmailTemplate(name)
 
   const mailOptions = {
-    from: "'Habits tracker <habitsTracker@example.com>'",
+    from: "contato@habits.app.br",
     to: email,
     subject: `Welcome to Habits tracker - your habits toolkit is ready!`,
     text: 'Thanks for joining Habits tracker',
@@ -44,6 +44,7 @@ export async function sendDailyHabitsEmail({
     .join("<br/>")
 
   return transporter.sendMail({
+    from: "contato@habits.app.br",
     to: email,
     subject: "⏰ Seus hábitos de hoje",
     html: `

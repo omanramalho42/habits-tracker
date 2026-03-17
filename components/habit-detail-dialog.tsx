@@ -57,7 +57,7 @@ export function HabitDetailDialog({ trigger, habit, selectedDate }: HabitDetailD
   const newDate =
     parse(selectedDate, "yyyy-MM-dd", new Date())
 
-    const [date, setDate] = useState<Date>(newDate)
+  const [date, setDate] = useState<Date>(newDate)
 
   const handlePrevMonth = () => {
     setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))
@@ -151,24 +151,19 @@ export function HabitDetailDialog({ trigger, habit, selectedDate }: HabitDetailD
     return cells
   }, [habit?.completions, date])
 
-  console.log(calendarData, "calendarData!")
-
   // Verifica se o hábito foi completado naquele dia exato
   const isHabitCompleted = (day: any) => {
     if (!day || !habit?.completions) return false;
     
     return habit.completions.some((completion) => {
-      const compDate = new Date(completion.completedDate);
-      // console.log(compDate, "comparasion")
+      const compDate = new Date(completion.completedDate)
       return (
         compDate.getDate() === day &&
         compDate.getMonth() === date.getMonth() &&
         compDate.getFullYear() === date.getFullYear()
-      );
-    });
+      )
+    })
   }
-
-  console.log(selectedDate, "selected date");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

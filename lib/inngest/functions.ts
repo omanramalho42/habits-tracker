@@ -5,7 +5,6 @@ import { prisma } from "../prisma"
 
 import { PERSONALIZED_WELCOME_EMAIL_PROMPT } from "./prompts"
 
-
 export const sendSignUpEmail = inngest.createFunction(
   { id: 'sign-up-email' },
   { event: 'app/user.created'},
@@ -20,7 +19,9 @@ export const sendSignUpEmail = inngest.createFunction(
       .replace('{{userProfile}}', userProfile)
 
     const response = await step.ai.infer('generate-welcome-intro', {
-      model: step.ai.models.gemini({ model: 'gemini-2.5-flash-lite' }),
+      model: step.ai.models.gemini({
+        model: 'gemini-2.5-flash-lite'
+      }),
       body: {
         contents: [
           {
@@ -31,6 +32,8 @@ export const sendSignUpEmail = inngest.createFunction(
           }]
       }
     })
+
+    console.log(response, "NOTIFICATIONS 🪄")
 
     await step.run('send-welcome-email', async () => {
       const part = response.candidates?.[0]?.content?.parts?.[0];
@@ -54,7 +57,7 @@ export const sendSignUpEmail = inngest.createFunction(
 
 export const sendDailyHabitReminder = inngest.createFunction(
   { id: "daily-habit-reminder" },
-  [{ event: 'app/send.daily.habits' }, { cron: "0 12 * * *" }],
+  [{ event: 'app/send.daily.habits' }, { cron: "*/1 * * * *" }],
 
   async ({ step }) => {
     const users = await step.run("fetch-users-with-habits", async () => {
