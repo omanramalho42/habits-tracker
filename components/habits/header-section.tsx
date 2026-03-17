@@ -18,7 +18,7 @@ import CreateRoutineDialog from '@/components/create-routine-dialog'
 import dynamic from 'next/dynamic'
 import CreateTaskDialog from '@/components/tasks/create-task-dialog'
 import CreateCategorieDialog from '@/components/categories/create-categorie-dialog'
-import CreateGoalDialog from '@/components/create-goal-dialog'
+import CreateGoalDialog from '@/components/goals/create-goal-dialog'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,8 @@ import {
   CheckCircle,
   Repeat,
   ListTodo,
-  Tag 
+  Tag, 
+  ListCollapseIcon
 } from 'lucide-react'
 
 const HeaderSection:React.FC = () => {
@@ -94,38 +95,55 @@ const HeaderSection:React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                type='button'
                 variant="outline"
-                disabled={loading}
                 size="icon"
-                aria-label="Criar"
-                title="Criar"
-                className="
-                  rounded-full
-                  p-0
-                  bg-linear-to-r
-                  from-primary
-                  to-blue-600
-                  hover:opacity-90
-                  shadow-lg
-                  hover:shadow-xl
-                  transition-all
-                  border-border/50 hover:bg-muted
-                "
+                className="rounded-full border-border/50 hover:bg-muted"
               >
-                <Plus className="h-7 w-7" />
+                <ListCollapseIcon className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent
-              align="end"
-              className="w-56"
-            >
-              <DropdownMenuLabel>
-                Criar novo
-              </DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-64">
+              {/* -------- NAV -------- */}
+              <DropdownMenuLabel>Navegação</DropdownMenuLabel>
+
+              <DropdownMenuItem asChild>
+                <Link href="/" className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Home
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Link href="/statistics" className="flex items-center gap-2">
+                  <ChartArea className="h-4 w-4" />
+                  Estatísticas
+                </Link>
+              </DropdownMenuItem>
+             <DropdownMenuItem asChild>
+                <Link href="/habits" className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Hábitos
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/news" className="flex items-center gap-2">
+                  <LucideNewspaper className="h-4 w-4" />
+                  Novidades
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Configurações
+                </Link>
+              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
+
+              {/* -------- CREATE -------- */}
+              <DropdownMenuLabel>Criar</DropdownMenuLabel>
 
               <CreateHabitDialog
                 trigger={
@@ -135,18 +153,6 @@ const HeaderSection:React.FC = () => {
                   >
                     <Target className="h-4 w-4" />
                     Hábito
-                  </DropdownMenuItem>
-                }
-              />
-
-              <CreateCheckPointDialog
-                trigger={
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    className="gap-2"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    Checkpoint
                   </DropdownMenuItem>
                 }
               />
@@ -198,74 +204,34 @@ const HeaderSection:React.FC = () => {
                   </DropdownMenuItem>
                 }
               />
+
+              <CreateCheckPointDialog
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Checkpoint
+                  </DropdownMenuItem>
+                }
+              />
+
+              <DropdownMenuSeparator />
+
+              {/* -------- LOGOUT -------- */}
+              <DropdownMenuItem asChild>
+                <SignOutButton>
+                  <button className="flex items-center gap-2 w-full text-red-500">
+                    <LogOut className="h-4 w-4" />
+                    Sair
+                  </button>
+                </SignOutButton>
+              </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <Button
-          type='button'
-          variant="outline"
-          className='rounded-full p-0 border-border/50 hover:bg-muted'
-          disabled={loading}
-          size="icon"
-        >
-          <Link href="/settings">
-            <Settings className='w-3 h-3'/>
-          </Link>
-        </Button>
-        <Button
-          type='button'
-          variant="outline"
-          className='rounded-full p-0 border-border/50 hover:bg-muted'
-          disabled={loading}
-          size="icon"
-        >
-          <Link href="/statistics">
-            <ChartArea className='w-3 h-3'/>
-          </Link>
-        </Button>
-        <Button
-          type='button'
-          variant="outline"
-          className='rounded-full p-0 border-border/50 hover:bg-muted'
-          disabled={loading}
-          size="icon"
-        >
-          <Link href="/">
-            <Home className='w-3 h-3'/>
-          </Link>
-        </Button>
-        <Button
-          type='button'
-          variant="outline"
-          className='rounded-full p-0 border-border/50 hover:bg-muted'
-          disabled={loading}
-          size="icon"
-        >
-          <Link href="/news">
-            <LucideNewspaper className='w-3 h-3'/>
-          </Link>
-        </Button>
-        {/* <Button
-          onClick={() => redirect("/habits")}
-          size="icon"
-          variant="outline"
-          disabled={loading}
-          className="rounded-full p-0 border-border/50 hover:bg-muted"
-        >
-          <ListIcon className="h-6 w-6" />
-        </Button> */}
-
-        <SignOutButton
-          children={
-            <Button
-              size="icon"
-              variant="ghost"
-              disabled={loading}
-            >
-              <LogOut className='text-red-500 text-md' />
-            </Button>
-          }
-        />
         {/* ADICIONAR SELECT LANGUAGE */}
       </div>
     </div>

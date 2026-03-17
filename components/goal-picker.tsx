@@ -7,7 +7,7 @@ import { Control, useController } from 'react-hook-form'
 
 import { fetchGoals, GoalsDTO } from '@/services/goals'
 
-import CreateGoalDialog from '@/components/create-goal-dialog'
+import CreateGoalDialog from '@/components/goals/create-goal-dialog'
 
 import {
   Popover,

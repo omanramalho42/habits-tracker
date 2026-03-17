@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Control, useController } from 'react-hook-form'
 
-import CreateGoalDialog from '@/components/create-goal-dialog'
+import CreateGoalDialog from '@/components/goals/create-goal-dialog'
 
 import {
   Popover,

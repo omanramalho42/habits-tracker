@@ -4,7 +4,7 @@ import React, { Fragment, useMemo } from "react"
 
 import UpdateGoalDialog from "@/components/goals/update.goal-dialog"
 import DeleteGoalDialog from "@/components/goals/delete-goal-dialog"
-import CreateGoalDialog from "@/components/create-goal-dialog"
+import CreateGoalDialog from "@/components/goals/create-goal-dialog"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

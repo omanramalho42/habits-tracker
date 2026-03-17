@@ -124,7 +124,12 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
 
       await queryClient.invalidateQueries({
         queryKey: [
-          "habits", "routines"
+          "habits"
+        ]
+      })
+      await queryClient.invalidateQueries({
+        queryKey: [
+          "routines"
         ]
       })
 

@@ -29,7 +29,7 @@ import { HabitWithStats } from "@/lib/types"
 
 import { cn } from "@/lib/utils"
 
-import { Check } from "lucide-react"
+import { Check, Loader } from "lucide-react"
 import { Task } from "@prisma/client"
 import { UpdateRoutineSchemaType } from "@/lib/schema/routine"
 
@@ -57,7 +57,7 @@ export default function MultiHabitsTasksPicker({
 
   const {
     data: habits = [],
-    isLoading,
+    isLoading: isLoadingHabits,
     isError,
     error
   } = useQuery<HabitWithStats[]>({
@@ -79,35 +79,46 @@ export default function MultiHabitsTasksPicker({
     retry: 1,
   })
 
+  const isLoading = isLoadingTask || isLoadingHabits
+
   console.log({tasks}, {habits}, "✨")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-
         <Button
+          disabled={isLoading}
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selectedHabits.length > 0
-            ? `${selectedHabits.length + selectedTasks.length}  selecionados`
-            : "Selecione hábitos ou tasks"}
+          {isLoading ? (
+            <div className="flex flex-row gap-4 items-center">
+              <Loader className="animate-spin" />
+              <p className="text-sm">
+                Carregando hábitos e tarefas...
+              </p>
+            </div>
+          ) : ( 
+            selectedHabits.length > 0
+              ? `${selectedHabits.length + selectedTasks.length}  selecionados`
+              : "Selecione hábitos ou tasks"
+          )}
         </Button>
 
       </PopoverTrigger>
 
-      <PopoverContent className="w-87.5 p-0">
+      <PopoverContent
+        className="w-87.5 p-0 overflow-y-visible scroll-container"
+      >
         <Command>
           <CommandInput placeholder="Pesquisar..." />
-
           <CommandEmpty>
             Nenhum item encontrado
           </CommandEmpty>
 
           <CommandList>
-
             {/* HABITS */}
             <CommandGroup heading="Hábitos">
               {habits.map((habit) => (
@@ -131,11 +142,8 @@ export default function MultiHabitsTasksPicker({
                 </CommandItem>
               ))}
             </CommandGroup>
-
           </CommandList>
-
         </Command>
-
       </PopoverContent>
     </Popover>
   )
@@ -150,13 +158,11 @@ const TaskRow = ({
     name: "tasks"
   })
 
-  console.log(field.value, 'field value tasks');
   // return
   const isSelected =
     field.value?.some((i: any) => i && i.id === task?.id) || false
 
   const toggle = () => {
-
     const exists =
       field.value?.find((i: any) => i.id === task.id)
 
@@ -202,13 +208,10 @@ const HabitRow = ({
     control,
     name: "habits"
   })
-
-  console.log(field.value, 'field value habits');
   const isSelected =
     field.value?.some((i: any) => i.id === habit.id)
 
   const toggle = () => {
-
     const exists =
       field.value?.find((i: any) => i.id === habit.id)
 

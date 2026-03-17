@@ -247,7 +247,7 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
                               scroll-container
                               w-full
                               p-3
-                              max-h-[70vh]
+                              max-h-[50vh]
                               overflow-y-visible
                             "
                           >

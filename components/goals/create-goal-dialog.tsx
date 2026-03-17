@@ -7,6 +7,9 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
+import { CreateGoal } from '@/app/habits/_actions/goals/goals'
+import type { CreateGoalSchemaType } from '@/lib/schema/goal'
+
 import { EmojiPicker } from "frimousse"
 
 import {
@@ -34,11 +37,8 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
-import { Card } from './ui/card'
+import { Card } from '@/components/ui/card'
 
-
-import type { CreateGoalSchemaType } from '@/lib/schema/goal'
-import { CreateGoal } from '@/app/habits/_actions/goals/goals'
 import { CircleOff, PlusSquare } from 'lucide-react'
 
 interface CreateGoalDialogProps {
@@ -84,7 +84,6 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
         description: "",
         emoji: "",
       })
-
       await queryClient.invalidateQueries({
         queryKey: [
           "goals"
