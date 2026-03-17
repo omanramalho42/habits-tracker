@@ -29,9 +29,9 @@ export async function GET(request: Request) {
     }
     
     const feedbacks = await prisma.feedback.findMany({
-      where: {
-        userId: userDb.id,
-      },
+      // where: {
+      //   userId: userDb.id,
+      // },
       include: {
         user: {
           include: {
@@ -93,9 +93,7 @@ export async function POST(request: NextRequest) {
       page,
       rating
     } = parsedBody.data
-
-    console.log(parsedBody.data, "data")
-    console.log(files, "files");
+  
     const uploadedFiles = []
     
     if(files.length > 0) {

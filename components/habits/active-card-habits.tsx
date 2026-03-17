@@ -23,15 +23,12 @@ import {
   verticalListSortingStrategy
 } from "@dnd-kit/sortable"
 
-import { formatDateBR } from "@/lib/utils"
-
 import {
   ArrowUpDownIcon,
   Plus,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
-
 
 interface ActiveCardHabitsProps {
   habits: HabitWithStats[]

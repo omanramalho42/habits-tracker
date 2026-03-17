@@ -266,11 +266,11 @@ export default function NewsPage() {
                     </p>
 
                     {/* rating */}
-                    {fb.rating && fb.rating > 0 && (
+                    {/* {fb.rating && fb.rating > 0 && (
                       <div className="text-yellow-400 text-sm">
                         {"★".repeat(fb.rating)}
                       </div>
-                    )}
+                    )} */}
 
                     {/* media */}
                     {fb.imageUrl && (

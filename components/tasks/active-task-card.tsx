@@ -109,8 +109,6 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
     })
   }
 
-  console.log(task, "task");
-
   return (
     <Card className='flex flex-row justify-between items-center px-2'>
       <div className="flex flex-row gap-2 tracking-tight truncate">

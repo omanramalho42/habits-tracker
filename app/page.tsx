@@ -33,7 +33,6 @@ import DeleteRoutineDialog from "@/components/delete-routine-dialog"
 import HabitCardRoutine from "@/components/habits/habit-card-routine"
 import CreateTaskDialog from "@/components/tasks/create-task-dialog"
 
-
 import Footer from "@/components/habits/footer"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -66,6 +65,7 @@ import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 import ActiveTaskCard from "@/components/tasks/active-task-card"
 import ActiveTaskScheduleCard from "@/components/tasks/task-routine-card"
+import HabitCardNew from "@/components/habits/habit-card-v2"
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
@@ -92,6 +92,10 @@ export default function Home() {
     staleTime: 1000 * 60,
     retry: 1,
   })
+
+  const habitsFiltered: HabitWithStats[] =
+    habits.filter((habit) => 
+      habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))
 
   const {
     data: tasks = [],
@@ -368,10 +372,21 @@ export default function Home() {
                       />
                     </div>
                   )}
-                  <ActiveCardHabits
+                  {/* <ActiveCardHabits
                     habits={habits.filter((habit) => habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))}
                     selectedDate={selectedDateStr}
-                  />
+                  /> */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-100 overflow-y-auto scroll-container">
+                    {habitsFiltered.map((habit) => {
+                      return (
+                        <HabitCardNew
+                          selectedDate={selectedDateStr}
+                          key={habit.id}
+                          habit={habit}
+                        />
+                      )
+                    })}
+                  </div>
                 </div>
               )}
             </TabsContent>

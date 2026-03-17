@@ -10,7 +10,6 @@ import { CreateHabitSchema } from '@/lib/schema/habit'
 import { inngest } from '@/lib/inngest/client'
 import { welcomeEmailTemplate } from '@/lib/nodemailer/template'
 import { transporter } from '@/lib/nodemailer'
-import { sendDailyHabitReminder } from '@/lib/inngest/functions'
 
 export async function GET(request: Request) {
   try {
