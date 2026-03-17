@@ -40,6 +40,26 @@ export async function GET(request: Request) {
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
 
+    await inngest.send({
+      name: "app/user.created",
+      data: {
+        email: "contato@habits.app.br",
+        name: "Teste"
+      }
+    })
+    const htmlTemplate = 
+      welcomeEmailTemplate("Oman")
+
+    const mailOptions = {
+      from: "contato@habits.app.br",
+      to: 'omanapple42@hotmail.com',
+      subject: `Seja bem vindo ao ecossitema de hábitos 🪄`,
+      text: 'Obrigado por se juntar ao Habits App',
+      html: htmlTemplate
+    }
+
+    await transporter.sendMail(mailOptions)
+    
     const habits = await prisma.habit.findMany({
       where: {
         userId: userDb.id,

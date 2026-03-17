@@ -6,9 +6,10 @@ import { prisma } from "../prisma"
 import { PERSONALIZED_WELCOME_EMAIL_PROMPT } from "./prompts"
 
 export const sendSignUpEmail = inngest.createFunction(
-  { id: 'sign-up-email' },
-  { event: 'app/user.created'},
-
+  {
+    id: "sign-up-email",
+    triggers: { event: "app/user.created" },
+  },
   async ({ event, step }) => {
     const userProfile = `
       - Nome: ${event.data.name}
@@ -56,9 +57,11 @@ export const sendSignUpEmail = inngest.createFunction(
 )
 
 export const sendDailyHabitReminder = inngest.createFunction(
-  { id: "daily-habit-reminder" },
-  [{ event: 'app/send.daily.habits' }, { cron: "*/1 * * * *" }],
-
+  {
+    id: "daily-habit-reminder",
+    triggers: [{ event: 'app/send.daily.habits' }, { cron: "*/1 * * * *" }],
+ 
+  },
   async ({ step }) => {
     const users = await step.run("fetch-users-with-habits", async () => {
       const today = new Date()

@@ -76,7 +76,7 @@
     "frimousse": "^0.3.0",
     "h3": "latest",
     "hono": "latest",
-    "inngest": "^3.30.0",
+    "inngest": "^4.0.0",
     "input-otp": "1.4.1",
     "koa": "latest",
     "little-date": "^1.2.1",
