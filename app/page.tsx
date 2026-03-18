@@ -66,7 +66,32 @@ import { CreateHabitDialog } from "@/components/create-habit-dialog"
 import ActiveTaskCard from "@/components/tasks/active-task-card"
 import ActiveTaskScheduleCard from "@/components/tasks/task-routine-card"
 import HabitCardNew from "@/components/habits/habit-card-v2"
+import { motion } from 'framer-motion'
 
+const container = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.08, // delay entre itens
+    },
+  },
+}
+const item = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    scale: 0.98,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.35,
+      ease: 'easeOut',
+    },
+  },
+}
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
   
@@ -376,17 +401,31 @@ export default function Home() {
                     habits={habits.filter((habit) => habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))}
                     selectedDate={selectedDateStr}
                   /> */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-100 overflow-y-auto scroll-container">
-                    {habitsFiltered.map((habit) => {
-                      return (
+                  <motion.div
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
+                    className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-100 overflow-y-auto scroll-container"
+                  >
+                    {habitsFiltered.map((habit, index) => (
+                      <motion.div
+                        key={habit.id}
+                        initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{
+                          duration: 0.4,
+                          delay: index * 0.05,
+                          ease: "easeOut",
+                        }}
+                      >
                         <HabitCardNew
                           selectedDate={selectedDateStr}
-                          key={habit.id}
                           habit={habit}
                         />
-                      )
-                    })}
-                  </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </div>
               )}
             </TabsContent>

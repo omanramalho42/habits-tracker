@@ -41,7 +41,10 @@ import {
   Pencil,
   Trash2,
   EyeIcon,
-  File
+  File,
+  CheckCheckIcon,
+  X,
+  CheckCircle2Icon
 } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
@@ -61,7 +64,6 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
   habit,
   selectedDate,
 }) => {
-  const selectedDateStr = new Date(selectedDate)
 
   const queryClient = useQueryClient()
   const { mutate, data, isPending } = useMutation({
@@ -163,6 +165,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
     currentDate.toISOString().split("T")[0]
 
   const limit = habit.limitCounter ?? 1
+  const isMulti = limit > 1
   const counter = 
     habit?.completions?.find(
       (c) => 
@@ -196,7 +199,25 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
   )
 
   return (
-    <Card className='flex flex-col w-full p-4 gap-4 group'>
+    <Card
+      className={cn(
+        'relative flex flex-col w-full p-4 gap-4 rounded-2xl transition-all duration-300',
+
+        // BASE (default)
+        'bg-zinc-900/60 border border-white/5',
+
+        // ATIVO (completado)
+        isCompletedToday &&
+          `
+          border-green-500/40
+          shadow-[0_0_25px_rgba(34,197,94,0.25)]
+          bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.15),transparent_70%)]
+          `,
+          
+        // HOVER (efeito premium)
+        'hover:shadow-lg hover:scale-[1.01]'
+      )}
+    >
 
       {/* HEADER */}
       <div className='flex items-start justify-between gap-3'>
@@ -356,20 +377,33 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
           return (
             <Fragment key={index}>
               <div className='flex flex-col items-center gap-1'>
-                <div
-                  className={
-                    cn(
-                      `cursor-pointer w-7 h-7 flex items-center justify-center rounded-full text-xs`,
-                      isActive 
-                        ? 'bg-red-800 shadow-sm shadow-red-500 text-white'
-                        : 'bg-muted text-muted-foreground',
-                      completed && 'bg-green-600 shadow-green-600',
-                      isToday && 'bg-transparent outline-1 outline-primary font-bold shadow-sm shadow-primary',
-                    )
-                  }
-                >
-                  {day.keyPtBr}
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={
+                        cn(
+                          `cursor-pointer transition-colors delay-100 w-7 h-7 flex items-center justify-center rounded-full text-xs`,
+                          isActive 
+                            ? 'bg-red-800 shadow-sm shadow-red-900 text-white'
+                            : 'bg-muted text-muted-foreground',
+                          completed && 'bg-green-600 shadow-green-600',
+                          isToday && 'bg-transparent outline-1 outline-primary font-bold shadow-sm shadow-green-600',
+                          isToday && completed && 'bg-transparent outline-1 outline-green-500 font-bold shadow-sm shadow-green-600',
+                          isToday && !completed && 'bg-transparent outline-1 outline-red-500 font-bold shadow-sm shadow-green-600',
+                        )
+                      }
+                    >
+                      {day.keyPtBr}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-foreground p-2" color='white'>
+                    {completed ? (
+                      isMulti ? (<CheckCheckIcon className='size-4' />) : (<Check className='size-4'/>)
+                    ) : (
+                      (<X className='size-4'/>)
+                    )}
+                  </TooltipContent>
+                </Tooltip>
 
                 <span
                   className={
@@ -407,8 +441,11 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
 
         <Button
           onClick={() => handleToggleHabit(habit.id, selectedDate)}
-          variant={isCompletedToday ? 'default' : 'outline'}
-          className='rounded-full'
+          variant={isCompletedToday ? 'default' : 'ghost'}
+          className={cn(
+            'rounded-full border border-primary',
+            isCompletedToday && 'border-green-500'
+          )}
           size="icon"
         >
           {isCompletedToday && (
