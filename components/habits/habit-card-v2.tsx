@@ -47,6 +47,8 @@ import {
 import type { HabitWithStats } from '@/lib/types'
 import { UpdateHabitSchemaType } from '@/lib/schema/habit'
 import { updateHabit } from '@/services/habits'
+import { WEEKDAYS } from '@/lib/habit-utils'
+import { cn } from '@/lib/utils'
 
 interface HabitCardProps {
   habit: HabitWithStats
@@ -55,14 +57,12 @@ interface HabitCardProps {
   loading?: boolean
 }
 
-const days = ['D','S','T','Q','Q','S','S']
-
 const HabitCardNew: React.FC<HabitCardProps> = ({
   habit,
   selectedDate,
-  onToggle,
-  loading
 }) => {
+  const selectedDateStr = new Date(selectedDate)
+
   const queryClient = useQueryClient()
   const { mutate, data, isPending } = useMutation({
     mutationFn: async ({
@@ -145,8 +145,11 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       "Alterando status do hábito...", {
         id: `toggle-task`,
     })
-    const newDate= new Date()
-    newDate.setHours(23,59,59,999)
+    const newDate = new Date(date)
+    // HACK
+    newDate.setHours(
+      newDate.getHours()+3
+    )
     mutate({
       habitId,
       date: newDate.toISOString(),
@@ -180,6 +183,17 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
   })
   const completedDays = habit.completions?.length || 0
   const totalDays = habit.endDate?.length ?? 365
+
+  const todayCompletion =
+    habit.completions?.find(
+      c =>
+        new Date(c.completedDate).toISOString().split("T")[0] ===
+        selectedDate
+    ) ?? null
+
+  const completedDaysSet = new Set(
+    habit.completions?.map((c) => new Date(c.completedDate).getDay())
+  )
 
   return (
     <Card className='flex flex-col w-full p-4 gap-4 group'>
@@ -259,7 +273,12 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
           {/* DROPDOWN */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button
+                type='button'
+                disabled={isPending}
+                variant="ghost"
+                size="icon"
+              >
                 <MoreVertical className='w-4 h-4' />
               </Button>
             </DropdownMenuTrigger>
@@ -303,9 +322,9 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
                 }
               />
 
-              {isCompletedToday && (
+              {todayCompletion && (
                 <CreateAnnotationDialog
-                  completionId={habit?.lastCompletionId || ""}
+                  completionId={todayCompletion?.id}
                   trigger={
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                       <File className="mr-2 h-4 w-4" />
@@ -324,21 +343,46 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
 
       {/* FREQUENCY */}
       <div className="flex justify-between">
-        {days.map((day, index) => {
-          const isActive = habit.frequency?.includes(index)
+        {WEEKDAYS.map((day, index) => {
+          const newDate = new Date(selectedDate)
+          newDate.setHours(newDate.getHours() + 3)
+
+          const todayIndex = newDate.getDay()
+          const isToday = index === todayIndex
+
+          const completed = completedDaysSet.has(index)
+          const isActive = habit.frequency?.includes(day.key)
 
           return (
             <Fragment key={index}>
               <div className='flex flex-col items-center gap-1'>
-                <div className={`w-7 h-7 flex items-center justify-center rounded-full text-xs
-                  ${isActive ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}
-                `}>
-                  {day}
+                <div
+                  className={
+                    cn(
+                      `cursor-pointer w-7 h-7 flex items-center justify-center rounded-full text-xs`,
+                      isActive 
+                        ? 'bg-red-800 shadow-sm shadow-red-500 text-white'
+                        : 'bg-muted text-muted-foreground',
+                      completed && 'bg-green-600 shadow-green-600',
+                      isToday && 'bg-transparent outline-1 outline-primary font-bold shadow-sm shadow-primary',
+                    )
+                  }
+                >
+                  {day.keyPtBr}
                 </div>
 
-                <span className={`w-1.5 h-1.5 rounded-full
-                  ${isActive ? 'bg-primary' : 'bg-muted'}
-                `}/>
+                <span
+                  className={
+                    cn(
+                      "w-1.5 h-1.5 rounded-full",
+                      isActive 
+                        ? 'bg-red-800 shadow-sm shadow-red-500 text-white' 
+                        : 'bg-muted text-muted-foreground',
+                      completed && 'bg-green-600 shadow-green-400',
+                      // isToday && 'bg-none outline-1 outline-primary',
+                    )
+                  }
+                />
               </div>
             </Fragment>
           )
@@ -347,9 +391,9 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
 
       {/* PROGRESS */}
       <div className='flex items-center gap-3'>
-        <Progress value={completedProgress} className='h-2' />
+        <Progress value={completedProgress/totalDays} className='h-2' />
         <span className='text-xs text-muted-foreground'>
-          {completedDays}/{habit.limitCounter ?? 0}
+          {completedDays}/{habit.completions.length * totalDays}
         </span>
       </div>
 

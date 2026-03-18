@@ -235,7 +235,6 @@ export function HabitCard({
       onToggle(habit.id)
   }
 
-
   const queryClient = useQueryClient()
 
   const handleUpdateHabit = useCallback((data: UpdateHabitSchemaType) => {
