@@ -9,6 +9,7 @@ import {
 } from "@/lib/schema/habit"
 import { getTodayString } from "@/lib/habit-utils"
 import z from "zod"
+import { HabitCompletion } from "@prisma/client"
 
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -219,10 +220,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }, { status: 401 })
     }
 
+    console.log(id, "id")
+
     const body = await request.json()
     const date = body?.date ?? getTodayString()
     
-    const validator = z.string().datetime()
+    const validator = z.string()
     const bodyParams = validator.safeParse(date)
     
     if (!bodyParams.success) {
@@ -232,24 +235,24 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const completedDate =
       new Date(bodyParams.data)
 
-    completedDate.setHours(0, 0, 0, 0)
-    
+    console.log(completedDate, "completed_date  ")
     // 1️⃣ Busca a completion do dia
-    const existingCompletion = await prisma.habitCompletion.findUnique({
-      where: {
-        habitId_completedDate: {
-          habitId: id,
-          completedDate: new Date(completedDate),
-        },
-      },
-      include: {
-        habit: {
-          select: {
-            limitCounter: true,
+    const existingCompletion =
+      await prisma.habitCompletion.findUnique({
+        where: {
+          habitId_completedDate: {
+            habitId: id,
+            completedDate,
           },
         },
-      },
-    })
+        include: {
+          habit: {
+            select: {
+              limitCounter: true,
+            },
+          },
+        },
+      })
 
     // 2️⃣ NÃO EXISTE → cria
     if (!existingCompletion) {
@@ -273,7 +276,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
       const initialCounter = habit.limitCounter ? 1 : 0
 
-      await prisma.$transaction([
+      const newHabitCompletion = await prisma.$transaction([
         prisma.habitCompletion.create({
           data: {
             habitId: id,
@@ -287,41 +290,46 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ])
 
       return NextResponse.json({
+        completion: newHabitCompletion,
         completed: true,
         counter: habit.limitCounter ? initialCounter : null,
       })
     }
 
     // 3️⃣ EXISTE e NÃO TEM contador → toggle normal
-    if (!existingCompletion.habit.limitCounter) {
-      await prisma.habitCompletion.delete({
-        where: {
-          id: existingCompletion.id,
-        },
-      })
+    // if (!existingCompletion.habit.limitCounter) {
+    //   await prisma.habitCompletion.delete({
+    //     where: {
+    //       id: existingCompletion.id,
+    //     },
+    //   })
 
-      return NextResponse.json({ completed: false })
-    }
+    //   return NextResponse.json({ completed: false })
+    // }
 
     // 4️⃣ EXISTE e TEM contador
-    const currentCounter = existingCompletion.counter ?? 0
-    const limitCounter = existingCompletion.habit.limitCounter ?? 1
+    const currentCounter =
+      existingCompletion.counter ?? 0
+    const limitCounter =
+      existingCompletion.habit.limitCounter ?? 1
 
     // 4.1️⃣ Ainda não chegou no limite → incrementa
     if (currentCounter < limitCounter) {
       const nextCounter = currentCounter + 1
 
-      await prisma.habitCompletion.update({
-        where: {
-          id: existingCompletion.id
-        },
-        data: {
-          counter: nextCounter,
-          updatedAt: new Date()
-        },
-      })
+      const updatedHabitCompletion =
+        await prisma.habitCompletion.update({
+            where: {
+              id: existingCompletion.id
+            },
+            data: {
+              counter: nextCounter,
+              updatedAt: new Date()
+            },
+        })
 
       return NextResponse.json({
+        completion: updatedHabitCompletion,
         completed: true,
         counter: nextCounter,
       })
@@ -334,6 +342,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({
+      completion: existingCompletion,
       completed: false,
       counter: 0,
     })

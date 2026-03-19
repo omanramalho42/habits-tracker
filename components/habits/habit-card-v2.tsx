@@ -44,7 +44,6 @@ import {
   File,
   CheckCheckIcon,
   X,
-  CheckCircle2Icon
 } from 'lucide-react'
 
 import type { HabitWithStats } from '@/lib/types'
@@ -78,6 +77,18 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
         await axios.put(`/api/habits/${habitId}`, {
           date,
         })
+      
+      if(response.data.completion) {
+        const { completion } = response.data
+        console.log({ completion })
+        // console.log(completion.counter, completion.habit.limitCounter)
+        if(completion?.counter !== completion?.habit?.limitCounter) {
+          window.alert("show modal dialog")
+        }
+      }
+
+      console.log(response.data, "response!")
+
       return response.data
     },
     onSuccess: async (values) => {
@@ -88,7 +99,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
         queryKey: ["routines"],
       })
 
-      if(values.completed) {
+      if (values.counter === habit.limitCounter) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -122,6 +133,10 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       )
     },
     onSuccess: (_, __, toastId) => {
+      toast.success(
+        "Hábito atualizado com sucesso.",
+        { id: toastId }
+      )
       queryClient.invalidateQueries({
         queryKey: ["habits"],
         exact: false,
@@ -129,10 +144,6 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       queryClient.invalidateQueries({
         queryKey: ['routines'],
       })
-      toast.success(
-        "Hábito atualizado com sucesso.",
-        { id: toastId }
-      )
     },
     onError: (error: any, _, toastId) => {
       toast.error(
@@ -141,48 +152,41 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       )
     },
   })
-
   const handleToggleHabit = (habitId: string, date: string) => {
     toast.loading(
       "Alterando status do hábito...", {
         id: `toggle-task`,
     })
-    const newDate = new Date(date)
-    // HACK
-    newDate.setHours(
-      newDate.getHours()+3
-    )
+    console.log(date, 'date')
     mutate({
       habitId,
-      date: newDate.toISOString(),
+      date,
     })
   }
-  // Define a data atual com base na data selecionada
-  // Se não existir, usa a data de hoje
-  const currentDate:Date =
-    new Date(selectedDate) || new Date()
-  const todayStr =
-    currentDate.toISOString().split("T")[0]
-
+  
   const limit = habit.limitCounter ?? 1
   const isMulti = limit > 1
   const counter = 
     habit?.completions?.find(
       (c) => 
-        new Date(c.completedDate).toISOString().split("T")[0] === 
-       currentDate.toISOString().split("T")[0]
+        c.completedDate.slice(0,10) === 
+       selectedDate.slice(0,10)
     )?.counter || 0
+
+  const progress = limit > 0 ? counter / limit : 0
+  const isDone = counter === limit
+
   const completedProgress =
     limit > 0
       ? Math.min(counter / limit) * 100
       : 0
   // TOGGLE
   const isCompletedToday = habit.completions?.some((c) => {
-    const completionDate = new Date(c.completedDate).toISOString().split("T")[0]
+    const completionDate = c.completedDate.slice(0,10)
     const limit = habit.limitCounter || 1
     const counter = c.counter || 0
 
-    return completionDate === todayStr && counter === limit
+    return completionDate === selectedDate.slice(0,10) && counter === limit
   })
   const completedDays = habit.completions?.length || 0
   const totalDays = habit.endDate?.length ?? 365
@@ -190,12 +194,17 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
   const todayCompletion =
     habit.completions?.find(
       c =>
-        new Date(c.completedDate).toISOString().split("T")[0] ===
-        selectedDate
+        c.completedDate.slice(0,10) ===
+        selectedDate.slice(0,10)
     ) ?? null
 
+  const getLocalDay = (dateStr: string) => {
+    const [y, m, d] = dateStr.slice(0,10).split("-").map(Number)
+    return new Date(y, m - 1, d).getDay()
+  }
+
   const completedDaysSet = new Set(
-    habit.completions?.map((c) => new Date(c.completedDate).getDay())
+    habit.completions?.map((c) => getLocalDay(c.completedDate))
   )
 
   return (
@@ -389,7 +398,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
                           completed && 'bg-green-600 shadow-green-600',
                           isToday && 'bg-transparent outline-1 outline-primary font-bold shadow-sm shadow-green-600',
                           isToday && completed && 'bg-transparent outline-1 outline-green-500 font-bold shadow-sm shadow-green-600',
-                          isToday && !completed && 'bg-transparent outline-1 outline-red-500 font-bold shadow-sm shadow-green-600',
+                          isToday && !completed && 'bg-transparent outline-1 outline-red-500 font-bold shadow-sm shadow-red-600',
                         )
                       }
                     >
@@ -441,16 +450,34 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
 
         <Button
           onClick={() => handleToggleHabit(habit.id, selectedDate)}
-          variant={isCompletedToday ? 'default' : 'ghost'}
+          variant="ghost"
+          disabled={isPending}
           className={cn(
-            'rounded-full border border-primary',
-            isCompletedToday && 'border-green-500'
+            "relative overflow-hidden rounded-full border border-primary w-10 h-10",
+            isDone && "shadow-[0_0_12px_rgba(34,197,94,0.8)]",
+            isDone && "animate-pulse"
           )}
-          size="icon"
         >
-          {isCompletedToday && (
-            <Check className='w-4 h-4' />
-          )}
+          {/* FUNDO PROGRESSIVO */}
+          <span
+            className="absolute inset-0 bg-green-500 transition-all duration-500 ease-out"
+            style={{
+              transform: `scaleX(${progress})`,
+              transformOrigin: 'left',
+              opacity: progress > 0 ? 1 : 0,
+            }}
+          />
+
+          {/* CONTEÚDO */}
+          <span className="relative z-10 flex items-center justify-center">
+            {isDone ? (
+              <Check className="w-4 h-4 text-white" />
+            ) : (
+              <span className="text-xs font-bold text-white">
+                {counter}/{limit}
+              </span>
+            )}
+          </span>
         </Button>
       </div>
     </Card>
