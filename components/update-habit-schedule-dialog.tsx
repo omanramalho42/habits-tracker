@@ -49,7 +49,7 @@ import {
 interface UpdateHabitScheduleDialogProps {
   trigger?: React.ReactNode;
   habit: Habit;
-  schedule: HabitSchedule;
+  schedule: Partial<HabitSchedule>;
 }
 
 const UpdateHabitScheduleDialog = ({
@@ -80,7 +80,7 @@ const UpdateHabitScheduleDialog = ({
   
   const queryClient = useQueryClient()
   
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: updateHabitSchedule,
     onMutate: () => {
       return toast.loading(

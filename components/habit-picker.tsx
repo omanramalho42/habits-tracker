@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button'
 
 import { cn } from '@/lib/utils'
 
-import { Check } from 'lucide-react'
+import { Check, Loader } from 'lucide-react'
 
 import type { UpdateHabitScheduleSchemaType } from '@/lib/schema/habit-schedule'
 
@@ -58,19 +58,24 @@ const HabitPicker:React.FC<HabitPickerProps> = ({ control }) => {
       <PopoverTrigger asChild>
         <div className='flex flex-col justify-start items-start gap-1'>
           <Button
+            disabled={isLoading}
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between"
             variant="outline"
             type='button'
           >
-            {selectedHabit ? (
-              <span className="flex items-center gap-2">
-                {selectedHabit.emoji}
-                {selectedHabit.name}
-              </span>
-            ) : (
-              "Selecione o hábito"
+            {isLoading ? (
+              <div className="flex flex-row gap-4 items-center">
+                <Loader className="animate-spin" />
+                <p className="text-sm">
+                  Carregando hábitos...
+                </p>
+              </div>
+            ) : ( 
+              selectedHabit
+                ? `${selectedHabit.emoji} ${selectedHabit.name}`
+                : "Selecione hábitos ou tasks"
             )}
           </Button>
           <div className="absolute">

@@ -67,6 +67,7 @@ import ActiveTaskCard from "@/components/tasks/active-task-card"
 import ActiveTaskScheduleCard from "@/components/tasks/task-routine-card"
 import HabitCardNew from "@/components/habits/habit-card-v2"
 import { motion } from 'framer-motion'
+import RoutineCard from "@/components/routines/routine-card-v2"
 
 const container = {
   hidden: {},
@@ -92,6 +93,7 @@ const item = {
     },
   },
 }
+
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
   
@@ -194,133 +196,37 @@ export default function Home() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="routines">
-              <div className="flex flex-col gap-4 max-h-100 overflow-auto scroll-container">
+              <div className="flex flex-col gap-4">
                 {routines.length > 0 ? (
-                  <div>
+                  <div className="">
                     <p className="text-sm">
                       Rotinas do dia
                     </p>
-                    {routines.map((routine, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col gap-4 px-2"
-                      >
-  
-                        {/* HEADER */}
-                        <div className="flex flex-col items-start gap-2 justify-start w-full my-2">
-                          <div className="flex flex-row items-center justify-between w-full">
-  
-                            <div className="flex flex-col justify-start items-start">
-                              <p className="text-sm font-bold text-foreground">
-                                {routine.emoji} - {routine.name}
-                              </p>
-                              {/* <p className="text-sm font-medium text-foreground">
-                                {(routine?.updatedAt)?.toISOString().split("T")[0]}
-                              </p> */}
-                            </div>
-  
-                            <div className="flex flex-row gap-2">
-                              <UpdateRoutineDialog
-                                routine={routine}
-                                trigger={
-                                  <Button
-                                    variant="ghost"
-                                    type="button"
-                                    size="icon"
-                                  >
-                                    <Pencil className="h-3 w-3" />
-                                  </Button>
-                                }
-                              />
-                              <DeleteRoutineDialog
-                                routineId={routine.id}
-                                trigger={
-                                  <Button
-                                    variant="ghost"
-                                    type="button"
-                                    size="icon-sm"
-                                  >
-                                    <Trash className="w-3 h-3" />
-                                  </Button>
-                                }
-                              />
-                            </div>
-  
-                          </div>
-  
-                          <div className="flex w-full flex-row justify-between gap-2">
-                            <Input
-                              className="w-full"
-                              type="text"
-                              placeholder="Pesquise pelo nome..."
-                              value={filter}
-                              onChange={(event) =>
-                                handleFilterHabits(event.target.value)
-                              }
-                            />
-                            
-                            <Button
-                              variant="outline"
-                              type="button"
-                              size="icon-lg"
-                            >
-                              <Filter />
-                            </Button>
-                          </div>
-                        </div>
-  
-                        {/* TASKS & habits LIST */}
-                        <div
-                          className="flex flex-col gap-3 max-h-75 overflow-auto scroll-container"
-                          aria-selected={false}
+                    <motion.div
+                      variants={container}
+                      initial="hidden"
+                      animate="show"
+                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-100 overflow-y-auto scroll-container"
+                    >
+                      {routines.map((routine, index) => (
+                        <motion.div
+                          key={routine.id}
+                          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                          viewport={{ once: true, margin: "-50px" }}
+                          transition={{
+                            duration: 0.4,
+                            delay: index * 0.05,
+                            ease: "easeOut",
+                          }}
                         >
-                          {routine.taskSchedules && routine.taskSchedules.length > 0 ? 
-                            routine.taskSchedules.map((schedule) => {
-                              if (schedule.task) {
-                                return (
-                                  <ActiveTaskScheduleCard
-                                    key={schedule.id}
-                                    selectedDate={selectedDate}
-                                    // @ts-ignore
-                                    schedule={schedule}
-                                  />
-                                )
-                              } 
-                            }
-                          ) : (
-                            <UpdateRoutineDialog
-                              trigger={
-                                <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
-                                  <p className="text-sm text-center tracking-tight">
-                                    Adicione tarefas a sua rotina e faça a magia acontecer 🪄
-                                  </p>
-                                </Card>
-                              }
-                              routine={routine}
-                            />
-                          )}
-                          {routine.habitSchedules && routine?.habitSchedules?.length > 0 
-                            ? routine.habitSchedules?.map((schedule) => (
-                              <HabitCardRoutine
-                                key={schedule.id}
-                                selectedDate={selectedDateStr}
-                                schedule={schedule}
-                              />
-                          )) : (
-                            <UpdateRoutineDialog
-                              trigger={
-                                <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
-                                  <p className="text-sm text-center tracking-tight">
-                                    Adicione hábitos a sua rotina e faça a magia acontecer 🪄
-                                  </p>
-                                </Card>
-                              }
-                              routine={routine}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                          <RoutineCard
+                            routine={routine}
+                            selectedDate={selectedDateStr}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
                   </div>
                 ) : (
                   <Card className="flex flex-col gap-1 px-4">
