@@ -30,7 +30,6 @@ import {
   Pencil,
   Trash2,
   Clock,
-  AlarmClock,
   MoreHorizontal,
   Trash,
   CalendarDays,
@@ -52,24 +51,25 @@ import type {
   Habit,
   TaskSchedule
 } from "@prisma/client"
-import UpdateTaskDialog from "../tasks/update-task-dialog"
+
 import UpdateTaskScheduleDialog from "../task-schedule/update-task-schedule-dialog"
 import DeleteTaskScheduleDialog from "../task-schedule/delete-task-schedule-dialog"
+
 import { Input } from "../ui/input"
 
 interface RoutineCardProps {
-  routine: Routine & {
-    habitSchedules: (HabitSchedule & {
+  routine: (Routine & {
+      habitSchedules?: (HabitSchedule & {
       habit: Habit & {
         completions: HabitCompletion[]
       }
-    })[]
-    taskSchedules: (TaskSchedule & {
-      task: Task & {
-        completions: TaskCompletion[]
-      }
-    })[]
-  }
+      })[];
+      taskSchedules?: (TaskSchedule & {
+        task: Task & {
+          completions: TaskCompletion[]
+        }
+      })[]
+    })
   selectedDate: string
 }
 
@@ -80,7 +80,10 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
   const queryClient = useQueryClient()
 
-  const { mutate, isPending } = useMutation({
+  const {
+    mutate: mutateHabit,
+    isPending: isPendingHabit
+  } = useMutation({
     mutationFn: async ({ habitId }: { habitId: string }) => {
       const res = await axios.put(`/api/habits/${habitId}`, {
         date: selectedDate
@@ -88,8 +91,12 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       return res.data
     },
     onSuccess: async (values) => {
-      await queryClient.invalidateQueries({ queryKey: ["routines"] })
-      await queryClient.invalidateQueries({ queryKey: ["habits"] })
+      await queryClient.invalidateQueries({
+        queryKey: ["routines"]
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["habits"]
+      })
 
       if (values.counter === values?.completion?.habit?.limitCounter) {
         confetti({
@@ -99,16 +106,79 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         })
       }
 
-      toast.success("Hábito atualizado", { id: "toggle-habit" })
+      toast.success("Hábito atualizado", {
+        id: "toggle-habit"
+      })
     },
     onError: () => {
-      toast.error("Erro ao atualizar hábito", { id: "toggle-habit" })
+      toast.error("Erro ao atualizar hábito", {
+        id: "toggle-habit"
+      })
     }
   })
 
   const handleToggleHabit = (habitId: string) => {
-    toast.loading("Atualizando...", { id: "toggle-habit" })
-    mutate({ habitId })
+    toast.loading("Atualizando hábito...", {
+      id: "toggle-habit"
+    })
+    mutateHabit({ habitId })
+  }
+
+  const {
+    mutate: mutateTask,
+    isPending: isPendingTask
+  } = useMutation({
+    mutationFn: async ({
+      taskId,
+      date
+    }: {
+      taskId: string
+      date: string
+    }) => {
+      const response =
+        await axios.put(`/api/task/${taskId}`, {
+          date,
+        })
+      return response.data
+    },
+    onSuccess: async (values) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["tasks"],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["routines"],
+      })
+
+      if(values.completed) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
+        })
+      }
+
+      toast.success(
+        "Sucesso ao alterar o status da tarefa...",
+        { id: 'toggle-task' }
+      )
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Erro ao alterar status do hábito", {
+        id: "toggle-task",
+      })
+    },
+  })
+
+  const handleToggleTask = (taskId: string, date: string) => {
+    toast.loading(
+      "Alterando status da terafa...", {
+        id: `toggle-task`,
+    })
+    mutateTask({
+      taskId,
+      date,
+    })
   }
 
   // 🔥 verifica se todos hábitos estão completos
@@ -126,8 +196,10 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     return counter === limit
   })
 
-  const total = routine.habitSchedules?.length || 1
-  const doneCount =
+  const totalHabits = routine.habitSchedules?.length || 1
+  const totalTasks = routine.taskSchedules?.length || 1
+
+  const doneHabitCount =
     routine.habitSchedules?.filter((hs: any) => {
       const habit = hs.habit
       if (!habit) return false
@@ -142,15 +214,25 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       return counter === limit
     }).length || 0
 
-  const progress = (doneCount / total) * 100
+  const doneTaskCount =
+    routine.taskSchedules?.filter((hs: any) => {
+      const habit = hs.habit
+      if (!habit) return false
 
-  const isTaskDone = (task: Task & { completions: TaskCompletion[] }) => {
-    return task.completions?.some(
-      (c) =>
-        String(c.completedDate).slice(0, 10) === selectedDate.slice(0, 10)
-    )
-  }
+      const limit = habit.limitCounter ?? 1
+      const counter =
+        habit.completions?.find(
+          (c: any) =>
+            c.completedDate.slice(0, 10) === selectedDate.slice(0, 10)
+        )?.counter || 0
 
+      return counter === limit
+    }).length || 0
+
+  const progressTask = (doneTaskCount / totalTasks) * 100
+  const progressHabit = (doneHabitCount / totalHabits) * 100
+  
+  console.log({ routine }, "routine")
   return (
     <Card
       className={cn(
@@ -280,7 +362,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       {/* HABITS */}
       <div className="flex flex-col gap-3 max-h-48 overflow-y-auto scroll-container">
         <p className="text-xs font-semibold text-muted-foreground">
-          Hábitos ({routine.habitSchedules.length}) vinculados
+          Hábitos ({routine.habitSchedules?.length}) vinculados
         </p>
         {routine.habitSchedules?.map((schedule) => {
           const habit = schedule.habit
@@ -312,7 +394,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    disabled={isPending}
+                    disabled={isPendingHabit}
                     variant="ghost"
                     type="button"
                     size="icon-sm"
@@ -331,7 +413,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                           onSelect={(e) => e.preventDefault()}
                         >
                           <Button
-                            disabled={isPending}
+                            disabled={isPendingHabit}
                             variant="ghost"
                             type="button"
                             size="icon"
@@ -350,7 +432,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                           onSelect={(e) => e.preventDefault()}
                         >
                           <Button
-                            disabled={isPending}
+                            disabled={isPendingHabit}
                             variant="ghost"
                             type="button"
                             size="icon-sm"
@@ -368,7 +450,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
               <Button
                 onClick={() => handleToggleHabit(habit.id)}
                 variant="ghost"
-                disabled={isPending}
+                disabled={isPendingHabit}
                 className={cn(
                   "relative overflow-hidden rounded-full border border-primary w-10 h-10",
                   isDone && "shadow-[0_0_12px_rgba(34,197,94,0.8)]",
@@ -396,7 +478,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
             </div>
           )
         })}
-        {routine.habitSchedules.length === 0 && (
+        {routine.habitSchedules?.length === 0 && (
           <UpdateRoutineDialog
             trigger={
               <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
@@ -413,15 +495,22 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       {/* TASKS */}
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold text-muted-foreground">
-          Tarefas ({routine.taskSchedules.length}) vinculadas
+          Tarefas ({routine.taskSchedules?.length}) vinculadas
         </p>
 
         <div className="flex flex-col gap-3 max-h-40 overflow-y-auto scroll-container">
           {routine.taskSchedules?.map((schedule) => {
             const task = schedule.task
             if (!task) return null
+            const limit = task.limitCounter ?? 1
 
-            const done = isTaskDone(task)
+            const counter =
+              task.completions?.find(
+                (c: any) =>
+                  c.completedDate.slice(0, 10) ===
+                  selectedDate.slice(0, 10)
+              )?.counter || 0
+            const done = doneTaskCount
 
             return (
               <div
@@ -434,7 +523,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                   <p className="text-sm truncate tracking-tighter max-w-25">
                     {task.name}
                   </p>
-                  {/* <span>{task?.goals[0]?.emoji || ""}</span> */}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -442,7 +530,12 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                   {/* MENU */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="icon-sm" variant="ghost">
+                      <Button
+                        type="button"
+                        disabled={isPendingTask}
+                        size="icon-sm"
+                        variant="ghost"
+                      >
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -457,7 +550,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                             onSelect={(e) => e.preventDefault()}
                           >
                             <Button
-                              disabled={isPending}  
+                              disabled={isPendingTask}  
                               type="button"
                               variant="ghost"
                             >
@@ -477,7 +570,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                             onSelect={(e) => e.preventDefault()}
                           >
                             <Button
-                              disabled={isPending}
+                              disabled={isPendingTask}
                               type="button"
                               variant="ghost"
                             >
@@ -494,21 +587,39 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
                   {/* TOGGLE */}
                   <Button
-                    variant="outline"
-                    size="icon"
+                    onClick={() => handleToggleTask(task.id, selectedDate)}
+                    variant="ghost"
+                    disabled={isPendingTask}
                     className={cn(
-                      "rounded-full",
-                      done && "bg-green-500 text-white border-green-500"
+                      "relative overflow-hidden rounded-full border border-primary w-10 h-10",
+                      done && "shadow-[0_0_12px_rgba(34,197,94,0.8)]",
+                      done && "animate-pulse"
                     )}
                   >
-                    {done && <Check className="w-4 h-4" />}
+                    <span
+                      className="absolute inset-0 bg-green-500 transition-all duration-500"
+                      style={{
+                        transform: `scaleX(${progressHabit})`,
+                        transformOrigin: "left",
+                      }}
+                    />
+
+                    <span className="relative z-10">
+                      {done ? (
+                        <Check className="w-4 h-4 text-white" />
+                      ) : (
+                        <span className="text-xs text-white">
+                          {counter}/{limit}
+                        </span>
+                      )}
+                    </span>
                   </Button>
 
                 </div>
               </div>
             )
           })}
-          {routine.taskSchedules.length === 0 && (
+          {routine.taskSchedules?.length === 0 && (
             <UpdateRoutineDialog
               trigger={
                 <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
@@ -524,7 +635,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       </div>
 
       {/* PROGRESS */}
-      <Progress value={progress} />
+      <Progress value={progressTask} />
 
       {/* FOOTER */}
       <Button

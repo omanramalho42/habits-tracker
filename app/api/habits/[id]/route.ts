@@ -220,8 +220,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }, { status: 401 })
     }
 
-    console.log(id, "id")
-
     const body = await request.json()
     const date = body?.date ?? getTodayString()
     
@@ -235,7 +233,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const completedDate =
       new Date(bodyParams.data)
 
-    console.log(completedDate, "completed_date  ")
     // 1️⃣ Busca a completion do dia
     const existingCompletion =
       await prisma.habitCompletion.findUnique({

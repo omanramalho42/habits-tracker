@@ -19,9 +19,11 @@ const HeaderSection =
 
 import type {
   Habit,
+  HabitCompletion,
   HabitSchedule,
   Routine,
   Task,
+  TaskCompletion,
   TaskSchedule
 } from "@prisma/client"
 
@@ -137,7 +139,19 @@ export default function Home() {
     data: routines = [],
   } = useQuery
   <
-    (Routine & { habitSchedules?: (HabitSchedule & { habit?: Habit })[]; taskSchedules?: (TaskSchedule & { task?: Task })[] })[]>
+    (Routine & {
+      habitSchedules?: (HabitSchedule & {
+      habit: Habit & {
+        completions: HabitCompletion[]
+      }
+      })[];
+      taskSchedules?: (TaskSchedule & {
+        task: Task & {
+          completions: TaskCompletion[]
+        }
+      })[]
+    })[]
+  >
   ({
     queryKey: ["routines", selectedDateStr],
     queryFn: () => fetchRoutines(selectedDateStr),

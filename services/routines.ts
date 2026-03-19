@@ -5,9 +5,11 @@ import type {
 
 import type {
   Habit,
+  HabitCompletion,
   HabitSchedule,
   Routine,
   Task,
+  TaskCompletion,
   TaskSchedule
 } from "@prisma/client"
 
@@ -15,7 +17,17 @@ import axios from "axios"
 
 export const fetchRoutines = async (
   selectedDate?: string
-): Promise<(Routine & { habitSchedules?: (HabitSchedule & { habit?: Habit })[] } & { taskSchedules?: (TaskSchedule & { task?: Task })[] })[]> => {
+): Promise<(Routine & {
+  habitSchedules?: (HabitSchedule & {
+    habit: Habit & {
+      completions: HabitCompletion[]
+    }
+  })[] } & {
+  taskSchedules?: (TaskSchedule & {
+    task: Task & {
+      completions: TaskCompletion[]
+    }
+  })[]})[]> => {
   const { data: routines } = await axios.get(
     `/api/routines${selectedDate ? `?selectedDate=${selectedDate}` : ""}`
   )

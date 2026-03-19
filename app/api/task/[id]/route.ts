@@ -229,7 +229,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json()
     const date = body?.date ?? getTodayString()
     
-    const validator = z.string().datetime()
+    const validator = z.string()
     const bodyParams = validator.safeParse(date)
     
     if (!bodyParams.success) {
@@ -238,15 +238,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     
     const completedDate =
       new Date(bodyParams.data)
-
-    completedDate.setHours(0, 0, 0, 0)
     
     // 1️⃣ Busca a completion do dia
     const existingCompletion = await prisma.taskCompletion.findUnique({
       where: {
         taskId_completedDate: {
           taskId: id,
-          completedDate: new Date(completedDate),
+          completedDate,
         },
       },
       include: {
@@ -280,7 +278,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
       const initialCounter = task.limitCounter ? 1 : 0
 
-      await prisma.$transaction([
+      const newTaskCompletion = await prisma.$transaction([
         prisma.taskCompletion.create({
           data: {
             taskId: id,
@@ -294,6 +292,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ])
 
       return NextResponse.json({
+        completion: newTaskCompletion,
         completed: true,
         counter: task.limitCounter ? initialCounter : null,
       })
@@ -307,7 +306,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         },
       })
 
-      return NextResponse.json({ completed: false })
+      return NextResponse.json({
+        completed: false
+      })
     }
 
     // 4️⃣ EXISTE e TEM contador
@@ -318,7 +319,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (currentCounter < limitCounter) {
       const nextCounter = currentCounter + 1
 
-      await prisma.taskCompletion.update({
+      const updatedTaskCompletion = await prisma.taskCompletion.update({
         where: {
           id: existingCompletion.id
         },
@@ -329,6 +330,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       })
 
       return NextResponse.json({
+        completion: updatedTaskCompletion,
         completed: true,
         counter: nextCounter,
       })
@@ -341,6 +343,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({
+      completion: existingCompletion,
       completed: false,
       counter: 0,
     })
