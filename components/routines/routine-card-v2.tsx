@@ -32,7 +32,9 @@ import {
   Clock,
   AlarmClock,
   MoreHorizontal,
-  Trash
+  Trash,
+  CalendarDays,
+  Filter
 } from "lucide-react"
 
 import UpdateRoutineDialog from "@/components/update-routine-dialog"
@@ -50,16 +52,23 @@ import type {
   Habit,
   TaskSchedule
 } from "@prisma/client"
+import UpdateTaskDialog from "../tasks/update-task-dialog"
+import UpdateTaskScheduleDialog from "../task-schedule/update-task-schedule-dialog"
+import DeleteTaskScheduleDialog from "../task-schedule/delete-task-schedule-dialog"
+import { Input } from "../ui/input"
 
 interface RoutineCardProps {
   routine: Routine & {
-    habitSchedules: HabitSchedule & {
-      id: string,
-      routineId: string,
+    habitSchedules: (HabitSchedule & {
       habit: Habit & {
         completions: HabitCompletion[]
       }
-    }[]
+    })[]
+    taskSchedules: (TaskSchedule & {
+      task: Task & {
+        completions: TaskCompletion[]
+      }
+    })[]
   }
   selectedDate: string
 }
@@ -135,10 +144,17 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
   const progress = (doneCount / total) * 100
 
+  const isTaskDone = (task: Task & { completions: TaskCompletion[] }) => {
+    return task.completions?.some(
+      (c) =>
+        String(c.completedDate).slice(0, 10) === selectedDate.slice(0, 10)
+    )
+  }
+
   return (
     <Card
       className={cn(
-        "relative flex flex-col p-5 rounded-2xl gap-4 transition-all duration-500 min-h-95 overflow-hidden",
+        "relative flex flex-col justify-between p-5 rounded-2xl gap-4 transition-all duration-500 h-full overflow-hidden",
 
         // BASE
         "bg-zinc-900/60 border border-white/5",
@@ -222,25 +238,50 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       </div>
 
       {/* BADGES (tempo) */}
-      {/* {(routine.clock || routine.duration) && (
+      {(routine.frequency || routine.cron) && (
         <div className="flex gap-2">
-          {routine.clock && (
+          {routine.frequency && (
             <Badge variant="secondary" className="gap-1">
-              <AlarmClock className="w-3 h-3" />
-              {routine.clock}
+              <CalendarDays className="w-3 h-3" />
+              {routine.frequency.toString()}
             </Badge>
           )}
-          {routine.duration && (
+          {routine.cron && (
             <Badge variant="secondary" className="gap-1">
               <Clock className="w-3 h-3" />
-              {routine.duration}
+              {routine.cron}
             </Badge>
           )}
         </div>
-      )} */}
+      )}
+  
+      <div className="flex w-full flex-row justify-between gap-2">
+        <Input
+          disabled
+          className="w-full"
+          type="text"
+          placeholder="Pesquise pelo nome..."
+          // value={filter}
+          // onChange={(event) =>
+          //   handleFilterHabits(event.target.value)
+          // }
+        />
+      
+        <Button
+          disabled
+          variant="outline"
+          type="button"
+          size="icon-lg"
+        >
+          <Filter />
+        </Button>
+      </div>
 
       {/* HABITS */}
       <div className="flex flex-col gap-3 max-h-48 overflow-y-auto scroll-container">
+        <p className="text-xs font-semibold text-muted-foreground">
+          Hábitos ({routine.habitSchedules.length}) vinculados
+        </p>
         {routine.habitSchedules?.map((schedule) => {
           const habit = schedule.habit
           if (!habit) return null
@@ -264,7 +305,9 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
             >
               <div className="flex items-center gap-3">
                 <span>{habit.emoji}</span>
-                <p className="text-sm">{habit.name}</p>
+                <p className="text-sm truncate tracking-tighter max-w-25">
+                  {habit.name}
+                </p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -353,6 +396,131 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
             </div>
           )
         })}
+        {routine.habitSchedules.length === 0 && (
+          <UpdateRoutineDialog
+            trigger={
+              <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
+                <p className="text-sm text-center tracking-tight">
+                  Adicione hábitos a sua rotina e faça a magia acontecer 🪄
+                </p>
+              </Card>
+            }
+            routine={routine}
+          />
+        )}
+      </div>
+
+      {/* TASKS */}
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold text-muted-foreground">
+          Tarefas ({routine.taskSchedules.length}) vinculadas
+        </p>
+
+        <div className="flex flex-col gap-3 max-h-40 overflow-y-auto scroll-container">
+          {routine.taskSchedules?.map((schedule) => {
+            const task = schedule.task
+            if (!task) return null
+
+            const done = isTaskDone(task)
+
+            return (
+              <div
+                key={task.id}
+                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition"
+              >
+                {/* INFO */}
+                <div className="flex items-center gap-3">
+                  <span>{task.emoji}</span>
+                  <p className="text-sm truncate tracking-tighter max-w-25">
+                    {task.name}
+                  </p>
+                  {/* <span>{task?.goals[0]?.emoji || ""}</span> */}
+                </div>
+
+                <div className="flex items-center gap-2">
+
+                  {/* MENU */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon-sm" variant="ghost">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+
+                      <UpdateTaskScheduleDialog
+                        schedule={schedule} 
+                        trigger={
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <Button
+                              disabled={isPending}  
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Pencil className="w-3 h-3" />
+                              <p className="text-sm tracking-tighter">
+                                Editar
+                              </p>
+                            </Button>
+                          </DropdownMenuItem>
+                        }
+                      />
+                      <DeleteTaskScheduleDialog
+                        taskScheduleId={schedule.id}
+                        routineId={routine.id}
+                        trigger={
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <Button
+                              disabled={isPending}
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 className="w-3 h-3 text-destructive" />
+                              <p className="text-destructive text-sm tracking-tighter">
+                                Remover
+                              </p>
+                            </Button>
+                          </DropdownMenuItem>
+                        }
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* TOGGLE */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                      "rounded-full",
+                      done && "bg-green-500 text-white border-green-500"
+                    )}
+                  >
+                    {done && <Check className="w-4 h-4" />}
+                  </Button>
+
+                </div>
+              </div>
+            )
+          })}
+          {routine.taskSchedules.length === 0 && (
+            <UpdateRoutineDialog
+              trigger={
+                <Card className="flex flex-row justify-center gap-4 items-center px-4 cursor-pointer">
+                  <p className="text-sm text-center tracking-tight">
+                    Adicione tarefas a sua rotina e faça a magia acontecer 🪄
+                  </p>
+                </Card>
+              }
+              routine={routine}
+            />
+          )}
+        </div>
       </div>
 
       {/* PROGRESS */}
