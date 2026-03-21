@@ -58,6 +58,9 @@ import UpdateTaskScheduleDialog from "../task-schedule/update-task-schedule-dial
 import DeleteTaskScheduleDialog from "../task-schedule/delete-task-schedule-dialog"
 
 import { Input } from "../ui/input"
+import { WEEKDAYS } from "@/lib/habit-utils"
+import { FloatingActionBar } from "./float-action-bar"
+import { BottomNavigation } from "./bottom-navigation"
 
 interface RoutineCardProps {
   routine: (Routine & {
@@ -278,10 +281,14 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
             {/* UPDATED AT */}
             {routine.updatedAt && (
-              <span className="text-xs text-primary mt-1">
+              <span className="flex flex-row gap-2 items-center text-xs mt-1">
                 atualizado em{" "}
-                {new Date(routine.updatedAt)
-                  .toLocaleDateString("pt-BR")}
+                <p className="text-primary ">
+                  {
+                    new Date(routine.updatedAt)
+                      .toLocaleDateString("pt-BR")
+                  }
+                </p>
               </span>
             )}
           </div>
@@ -326,6 +333,18 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         </DropdownMenu>
 
       </div>
+      
+      {/* PROGRESS */}
+      <div className="flex flex-row items-center gap-2 justify-between">
+        <Progress
+          className="w-full"
+          color="green"
+          value={progressTask + progressHabit}
+        />
+        <p className="text-nowrap text-green-500 text-sm tracking-tighter">
+          {progressHabit+progressTask} % Concluido
+        </p>
+      </div>
 
       {/* BADGES (tempo) */}
       {(routine.frequency || routine.cron) && (
@@ -333,6 +352,13 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
           {routine.frequency && (
             <Badge variant="secondary" className="gap-1">
               <CalendarDays className="w-3 h-3" />
+              {/* {WEEKDAYS.map((day) => {
+                return (
+                  <p className="text-sm">
+
+                  </p>
+                )
+              })} */}
               {routine.frequency.toString()}
             </Badge>
           )}
@@ -344,7 +370,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
           )}
         </div>
       )}
-  
+
+      {/* SEARCH */}
       <div className="flex w-full flex-row justify-between gap-2">
         <Input
           disabled
@@ -742,9 +769,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         </div>
       </div>
 
-      {/* PROGRESS */}
-      <Progress value={progressTask} />
-
       {/* FOOTER */}
       <Button
         disabled={!allDone}
@@ -758,7 +782,9 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       >
         {allDone ? "✔ Concluído hoje" : "Marcar como concluído"}
       </Button>
-
+{/*       
+      <FloatingActionBar /> */}
+      {/* <BottomNavigation /> */}
     </Card>
   )
 }

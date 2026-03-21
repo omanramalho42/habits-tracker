@@ -187,7 +187,7 @@ export default function Home() {
           />
 
           <Tabs defaultValue="habits">
-            <TabsList className="w-full my-10" >
+            <TabsList className="w-full my-5" >
               <TabsTrigger value="routines">
                 <AppWindowIcon />
                 Rotinas
@@ -212,7 +212,7 @@ export default function Home() {
                       variants={container}
                       initial="hidden"
                       animate="show"
-                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-100 overflow-y-auto scroll-container"
+                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-155 overflow-y-auto scroll-container"
                     >
                       {routines.map((routine, index) => (
                         <motion.div

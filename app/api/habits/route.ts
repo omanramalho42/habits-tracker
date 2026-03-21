@@ -46,20 +46,27 @@ export async function GET(request: Request) {
         name: "Teste"
       }
     })
-
+    // new Intl.DateTimeFormat(
+    //  'pt-BR', {
+    //    timeZone: 'America/Sao_Paulo',
+    //    day: 'numeric',
+    //    month: "long",
+    //    year: "numeric",
+    //    weekday: 'short'
+    // }).format(new Date())
     console.log(inggestData, "INNGEST")
-    const htmlTemplate = 
-      welcomeEmailTemplate("Oman")
+    // const htmlTemplate = 
+    //   welcomeEmailTemplate("Oman")
 
-    const mailOptions = {
-      from: "contato@habits.app.br",
-      to: 'omanapple42@hotmail.com',
-      subject: `Seja bem vindo ao ecossitema de hábitos 🪄`,
-      text: 'Obrigado por se juntar ao Habits App',
-      html: htmlTemplate
-    }
+    // const mailOptions = {
+    //   from: "contato@habits.app.br",
+    //   to: 'omanapple42@hotmail.com',
+    //   subject: `Seja bem vindo ao ecossitema de hábitos 🪄`,
+    //   text: 'Obrigado por se juntar ao Habits App',
+    //   html: htmlTemplate
+    // }
 
-    await transporter.sendMail(mailOptions)
+    // await transporter.sendMail(mailOptions)
     
     const habits = await prisma.habit.findMany({
       where: {
