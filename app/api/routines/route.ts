@@ -51,7 +51,14 @@ export async function GET(request: Request) {
           include: {
             habit: {
               include: {
-                completions: true
+                completions: {
+                  where: {
+                    completedDate:
+                      queryParams.success 
+                        ? new Date(queryParams.data) 
+                        : new Date()
+                  }
+                }
               }
             }
           }
@@ -63,7 +70,14 @@ export async function GET(request: Request) {
           include: {
             task: {
               include: {
-                completions: true
+                completions: {
+                  where: {
+                    completedDate:
+                      queryParams.success 
+                        ? new Date(queryParams.data) 
+                        : new Date()
+                  }
+                }
               }
             }
           }

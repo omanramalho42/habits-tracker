@@ -33,7 +33,9 @@ import {
   MoreHorizontal,
   Trash,
   CalendarDays,
-  Filter
+  Filter,
+  Move3D,
+  Move
 } from "lucide-react"
 
 import UpdateRoutineDialog from "@/components/update-routine-dialog"
@@ -247,12 +249,18 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
           border-green-500/40
           shadow-[0_0_40px_rgba(34,197,94,0.25)]
           bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.15),transparent_70%)]
-        `
+          
+          `
       )}
     >
 
       {/* HEADER */}
-      <div className="flex items-start justify-between">
+      <div className={
+          cn(
+            "flex items-start justify-between",          
+          )
+        }
+      >
 
         <div className="flex gap-3">
           <div className="p-2 rounded-xl bg-muted">
@@ -360,7 +368,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       </div>
 
       {/* HABITS */}
-      <div className="flex flex-col gap-3 max-h-48 overflow-y-auto scroll-container">
+      <div className="flex flex-col gap-3 max-h-22 overflow-y-auto scroll-container">
         <p className="text-xs font-semibold text-muted-foreground">
           Hábitos ({routine.habitSchedules?.length}) vinculados
         </p>
@@ -381,13 +389,29 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
           const isDone = counter === limit
 
           return (
-            <div
+            <Card
               key={habit.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5"
+              className={
+                cn(
+                  "flex h-full flex-row items-center justify-between px-3 rounded-xl overflow-hidden transition-all duration-300",
+                  // ATIVO
+                  isDone &&
+                    `
+                    bg-transparent
+                    rounded-sm
+                    border-green-500/30
+                    shadow-[0_0_20px_rgba(34,197,94,0.25)]
+                    bg-[url('/card-active-bg.png')]
+                    bg-size-[110%]
+                    bg-center
+                    bg-no-repeat
+                    `
+                )
+              }
             >
               <div className="flex items-center gap-3">
                 <span>{habit.emoji}</span>
-                <p className="text-sm truncate tracking-tighter max-w-25">
+                <p className="text-sm truncate tracking-tighter max-w-15">
                   {habit.name}
                 </p>
               </div>
@@ -447,35 +471,77 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                 </DropdownMenuContent>
               </DropdownMenu>
               {/* BOTÃO PROGRESSIVO */}
-              <Button
-                onClick={() => handleToggleHabit(habit.id)}
-                variant="ghost"
-                disabled={isPendingHabit}
-                className={cn(
-                  "relative overflow-hidden rounded-full border border-primary w-10 h-10",
-                  isDone && "shadow-[0_0_12px_rgba(34,197,94,0.8)]",
-                  isDone && "animate-pulse"
-                )}
-              >
-                <span
-                  className="absolute inset-0 bg-green-500 transition-all duration-500"
-                  style={{
-                    transform: `scaleX(${progress})`,
-                    transformOrigin: "left",
-                  }}
-                />
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                {/* PROGRESSO CIRCULAR */}
+                <svg className="absolute inset-0 rounded-full w-full h-full -rotate-90">
+                  {/* fundo */}
+                  <circle
+                    cx="50%"
+                    cy="50%"
+                    r="18"
+                    stroke="rgba(255,255,255,0.08)"
+                    strokeWidth="3"
+                    fill="transparent"
+                  />
 
-                <span className="relative z-10">
+                  {/* progresso */}
+                  <circle
+                    cx="50%"
+                    cy="50%"
+                    r="18"
+                    stroke="rgb(34,197,94)"
+                    strokeWidth="3"
+                    fill="transparent"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 18}
+                    strokeDashoffset={2 * Math.PI * 18 * (1 - progress)}
+                    className="transition-all duration-500"
+                    style={{
+                      filter: `drop-shadow(0 0 6px rgba(34,197,94,${progress}))`
+                    }}
+                  />
+
+                </svg>
+
+                {/* BOTÃO */}
+                <Button
+                  onClick={() => handleToggleHabit(habit.id)}
+                  variant="ghost"
+                  disabled={isPendingHabit}
+                  className={cn(
+                    "relative z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all",
+
+                    // base
+                    "bg-white/5 border border-white/10",
+
+                    // progresso parcial
+                    schedule?.habit?.limitCounter !== 1 &&
+                      counter >= 1 &&
+                      !isDone &&
+                      "border-green-500/60",
+
+                    // completo
+                    isDone &&
+                      `
+                      bg-green-500 
+                      text-white 
+                      border-green-500
+                      shadow-[0_0_12px_rgba(34,197,94,0.8)]
+                      scale-110
+                      `
+                  )}
+                >
                   {isDone ? (
-                    <Check className="w-4 h-4 text-white" />
+                    <Check className="w-4 h-4" />
                   ) : (
-                    <span className="text-xs text-white">
-                      {counter}/{limit}
+                    <span className="text-[10px] text-white">
+                      {counter}
                     </span>
                   )}
-                </span>
-              </Button>
-            </div>
+                </Button>
+
+              </div>
+            </Card>
           )
         })}
         {routine.habitSchedules?.length === 0 && (
@@ -502,23 +568,42 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
           {routine.taskSchedules?.map((schedule) => {
             const task = schedule.task
             if (!task) return null
-            const limit = task.limitCounter ?? 1
-
             const counter =
               task.completions?.find(
                 (c: any) =>
                   c.completedDate.slice(0, 10) ===
                   selectedDate.slice(0, 10)
               )?.counter || 0
-            const done = doneTaskCount
+            const limit = task.limitCounter ?? 1
 
+            const progress = limit > 0 ? counter / limit : 0
+            const isDone = counter === limit
             return (
-              <div
+              <Card
                 key={task.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition"
-              >
+                className={
+                cn(
+                  "relative flex h-full flex-row items-center justify-between p-3 rounded-xl overflow-hidden transition-all duration-300",
+                  // ATIVO
+                  isDone &&
+                    `
+                    bg-transparent
+                    rounded-sm
+                    border-green-500/30
+                    shadow-[0_0px_7px_rgba(34,197,94,0.25)]
+                    bg-[url('/card-active-bg.png')]
+                    bg-size-[110%]
+                    bg-center
+                    bg-no-repeat
+                    `
+                )
+              }
+            >
                 {/* INFO */}
                 <div className="flex items-center gap-3">
+                  {/* <Button type="button" disabled variant="ghost" size="icon-sm">
+                    <Move />
+                  </Button> */}
                   <span>{task.emoji}</span>
                   <p className="text-sm truncate tracking-tighter max-w-25">
                     {task.name}
@@ -586,37 +671,60 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                   </DropdownMenu>
 
                   {/* TOGGLE */}
-                  <Button
-                    onClick={() => handleToggleTask(task.id, selectedDate)}
-                    variant="ghost"
-                    disabled={isPendingTask}
-                    className={cn(
-                      "relative overflow-hidden rounded-full border border-primary w-10 h-10",
-                      done && "shadow-[0_0_12px_rgba(34,197,94,0.8)]",
-                      done && "animate-pulse"
-                    )}
-                  >
-                    <span
-                      className="absolute inset-0 bg-green-500 transition-all duration-500"
-                      style={{
-                        transform: `scaleX(${progressHabit})`,
-                        transformOrigin: "left",
-                      }}
-                    />
+                  <div className="relative w-10 h-10 flex items-center justify-center">
+  
+                    {/* CÍRCULO DE PROGRESSO */}
+                    <svg className="absolute inset-0 w-full h-full -rotate-90">
+                      <circle
+                        cx="50%"
+                        cy="50%"
+                        r="18"
+                        stroke="rgba(255,255,255,0.1)"
+                        strokeWidth="3"
+                        fill="transparent"
+                      />
 
-                    <span className="relative z-10">
-                      {done ? (
-                        <Check className="w-4 h-4 text-white" />
+                      <circle
+                        cx="50%"
+                        cy="50%"
+                        r="18"
+                        stroke="rgb(34,197,94)"
+                        strokeWidth="3"
+                        fill="transparent"
+                        strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 18}
+                        strokeDashoffset={
+                          2 * Math.PI * 18 * (1 - progress)
+                        }
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+
+                    {/* BOTÃO */}
+                    <Button
+                      onClick={() => handleToggleTask(task.id, selectedDate)}
+                      variant="ghost"
+                      disabled={isPendingTask}
+                      className={cn(
+                        "relative z-10 rounded-full w-8 h-8 flex items-center justify-center",
+                        
+                        isDone && "bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.8)]",
+                        isDone && "animate-pulse",
+                        !isDone && "bg-white/5"
+                      )}
+                    >
+                      {isDone ? (
+                        <Check className="w-4 h-4" />
                       ) : (
-                        <span className="text-xs text-white">
-                          {counter}/{limit}
+                        <span className="text-[10px]">
+                          {counter}
                         </span>
                       )}
-                    </span>
-                  </Button>
+                    </Button>
 
+                  </div>
                 </div>
-              </div>
+              </Card>
             )
           })}
           {routine.taskSchedules?.length === 0 && (

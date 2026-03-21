@@ -4,12 +4,14 @@ import {  useState } from "react"
 
 import dynamic from "next/dynamic"
 
+import { motion } from 'framer-motion'
+
 import {  useQuery } from "@tanstack/react-query"
 
 import { fetchRoutines } from "@/services/routines"
 import { fetchHabits } from "@/services/habits"
+import { fetchTasks } from "@/services"
 
-import ActiveCardHabits from "@/components/habits/active-card-habits"
 import CurrentSectionDate from "@/components/habits/current-section-date"
 
 const HeaderSection =
@@ -27,13 +29,12 @@ import type {
   TaskSchedule
 } from "@prisma/client"
 
-import { fetchTasks } from "@/services"
-
 import CreateRoutineDialog from "@/components/create-routine-dialog"
-import UpdateRoutineDialog from "@/components/update-routine-dialog"
-import DeleteRoutineDialog from "@/components/delete-routine-dialog"
-import HabitCardRoutine from "@/components/habits/habit-card-routine"
 import CreateTaskDialog from "@/components/tasks/create-task-dialog"
+import { CreateHabitDialog } from "@/components/create-habit-dialog"
+import ActiveTaskCard from "@/components/tasks/active-task-card"
+import HabitCardNew from "@/components/habits/habit-card-v2"
+import RoutineCard from "@/components/routines/routine-card-v2"
 
 import Footer from "@/components/habits/footer"
 import { Input } from "@/components/ui/input"
@@ -55,21 +56,12 @@ import {
   AppWindowIcon,
   CodeIcon,
   Filter,
-  Pencil,
   Plus,
   PlusIcon,
   TargetIcon,
-  Trash
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
-import { CreateHabitDialog } from "@/components/create-habit-dialog"
-
-import ActiveTaskCard from "@/components/tasks/active-task-card"
-import ActiveTaskScheduleCard from "@/components/tasks/task-routine-card"
-import HabitCardNew from "@/components/habits/habit-card-v2"
-import { motion } from 'framer-motion'
-import RoutineCard from "@/components/routines/routine-card-v2"
 
 const container = {
   hidden: {},
@@ -325,7 +317,7 @@ export default function Home() {
                     variants={container}
                     initial="hidden"
                     animate="show"
-                    className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-100 overflow-y-auto scroll-container"
+                    className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-135 overflow-y-auto scroll-container"
                   >
                     {habitsFiltered.map((habit, index) => (
                       <motion.div

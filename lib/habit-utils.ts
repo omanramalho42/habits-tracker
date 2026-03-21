@@ -90,7 +90,7 @@ export function calculateStreak(completions: { completedDate: string }[]): {
 }
 
 export function formatDate(date: Date): string {
-  return date.toISOString().split("T")[0]
+  return date.toISOString().split("T")[0].slice(0,10)
 }
 
 export function getTodayString(): string {

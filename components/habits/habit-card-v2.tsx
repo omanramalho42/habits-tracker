@@ -214,13 +214,13 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
 
         // BASE (default)
         'bg-zinc-900/60 border border-white/5',
-
+        
         // ATIVO (completado)
         isCompletedToday &&
-          `
-          border-green-500/40
-          shadow-[0_0_25px_rgba(34,197,94,0.25)]
-          bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.15),transparent_70%)]
+        `
+        border-green-500/40
+        shadow-[0_0_25px_rgba(34,197,94,0.25)]
+        bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.15),transparent_70%)]
           `,
           
         // HOVER (efeito premium)

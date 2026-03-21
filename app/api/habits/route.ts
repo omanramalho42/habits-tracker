@@ -39,13 +39,15 @@ export async function GET(request: Request) {
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
 
-    await inngest.send({
+    const inggestData = await inngest.send({
       name: "app/user.created",
       data: {
         email: "contato@habits.app.br",
         name: "Teste"
       }
     })
+
+    console.log(inggestData, "INNGEST")
     const htmlTemplate = 
       welcomeEmailTemplate("Oman")
 
