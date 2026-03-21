@@ -4,6 +4,7 @@ import type {
 } from "@/lib/schema/routine"
 
 import type {
+  Categories,
   Habit,
   HabitCompletion,
   HabitSchedule,
@@ -21,11 +22,13 @@ export const fetchRoutines = async (
   habitSchedules?: (HabitSchedule & {
     habit: Habit & {
       completions: HabitCompletion[]
+      categories: Categories[]
     }
   })[] } & {
   taskSchedules?: (TaskSchedule & {
     task: Task & {
       completions: TaskCompletion[]
+      categories: Categories[]
     }
   })[]})[]> => {
   const { data: routines } = await axios.get(

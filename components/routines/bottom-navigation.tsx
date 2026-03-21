@@ -76,7 +76,7 @@ export function BottomNavigation() {
               <DropdownMenuTrigger asChild>
                 <Button
                   size="icon"
-                  className="relative z-10 w-16 h-16 rounded-full bg-green-500 text-white shadow-[0_0_25px_rgba(34,197,94,0.9)] ring-2 ring-green-400/40 hover:scale-105 transition"
+                  className="relative z-10 w-16 h-16 rounded-full hover:bg-lime-500 bg-green-500 text-white shadow-[0_0_25px_rgba(34,197,94,0.9)] ring-2 ring-green-400/40 hover:scale-105 transition"
                 >
                   <Plus className="w-7 h-7" />
                 </Button>

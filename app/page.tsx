@@ -20,6 +20,7 @@ const HeaderSection =
   })
 
 import type {
+  Categories,
   Habit,
   HabitCompletion,
   HabitSchedule,
@@ -134,12 +135,14 @@ export default function Home() {
     (Routine & {
       habitSchedules?: (HabitSchedule & {
       habit: Habit & {
-        completions: HabitCompletion[]
+        completions: HabitCompletion[],
+        categories: Categories[],
       }
       })[];
       taskSchedules?: (TaskSchedule & {
         task: Task & {
-          completions: TaskCompletion[]
+          completions: TaskCompletion[],
+          categories: Categories[],
         }
       })[]
     })[]
