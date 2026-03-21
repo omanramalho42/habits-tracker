@@ -417,7 +417,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       {/* HEADER */}
       <div className={
           cn(
-            "flex items-start justify-between rounded-xl min-h-[120px]",   
+            "flex items-start justify-between rounded-xl",   
             allDone && `bg-[url('/bg-card-active-routine.png')] bg-cover bg-no-repeat`
           )
         }
@@ -433,7 +433,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
               {routine.name}
             </h3>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs tracking-tighter truncate max-w-32 text-muted-foreground">
               {routine.description}
             </p>
 

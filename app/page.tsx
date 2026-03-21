@@ -178,7 +178,7 @@ export default function Home() {
   return (
     <>
       {/* <MoodWizard /> */}
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top">
         <div className="flex flex-col space-y-2 max-w-5xl mx-auto px-4 py-1">
 
           {/* HEADER + ACTIONS BUTTONS */}
@@ -215,7 +215,7 @@ export default function Home() {
                       variants={container}
                       initial="hidden"
                       animate="show"
-                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-155 overflow-y-auto scroll-container"
+                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-160 overflow-y-auto scroll-container"
                     >
                       {routines.map((routine, index) => (
                         <motion.div
