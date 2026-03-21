@@ -178,7 +178,7 @@ export default function Home() {
   return (
     <>
       {/* <MoodWizard /> */}
-      <main className="min-h-screen bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top">
+      <main className="min-h-screen">
         <div className="flex flex-col space-y-2 max-w-5xl mx-auto px-4 py-1">
 
           {/* HEADER + ACTIONS BUTTONS */}
@@ -190,17 +190,28 @@ export default function Home() {
           />
 
           <Tabs defaultValue="habits">
-            <TabsList className="w-full my-5" >
-              <TabsTrigger value="routines">
-                <AppWindowIcon />
+            <TabsList className="bg-background/60 w-full my-5 border-b border-white/10 rounded-none h-auto p-0 justify-start gap-8">
+              <TabsTrigger 
+                value="routines" 
+                className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
+              >
+                <AppWindowIcon className="w-4 h-4" />
                 Rotinas
               </TabsTrigger>
-              <TabsTrigger value="habits">
-                <CodeIcon />
+
+              <TabsTrigger 
+                value="habits" 
+                className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
+              >
+                <CodeIcon className="w-4 h-4" />
                 Hábitos
               </TabsTrigger>
-              <TabsTrigger value="tasks">
-                <TargetIcon />
+
+              <TabsTrigger 
+                value="tasks" 
+                className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
+              >
+                <TargetIcon className="w-4 h-4" />
                 Tarefas
               </TabsTrigger>
             </TabsList>

@@ -102,7 +102,7 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             > */}
-              <main className="bg-linear-to-b from-green-950/50 via-background to-background">     
+              <main className="min-h-screen bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top">     
                 <TimezoneWarningBanner />
                 {children}
                 <CreateFeedbackDialog

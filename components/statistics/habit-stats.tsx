@@ -131,7 +131,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
     <div className='flex flex-col gap-6'>
       {/* Overall Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-primary rounded-xl p-4">
+        <div className="bg-primary/60 rounded-xl p-4">
           <div className="flex items-center gap-2 text-primary-foreground/80 mb-1">
             <LayoutDashboard className='size-4' />
             <span className="text-xs">Taxa Geral</span>
@@ -146,7 +146,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
           <p className="text-xs text-primary-foreground/70 mt-1">últimos 30 dias</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4">
+        <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Flame className="size-4" />
             <span className="text-xs">Melhor Sequência</span>
@@ -161,7 +161,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
           <p className="text-xs text-muted-foreground mt-1">dias ativos</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4">
+        <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Check className="size-4" />
             <span className="text-xs">Conclusões</span>
@@ -176,7 +176,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
           <p className="text-xs text-muted-foreground mt-1">últimos 30 dias</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4">
+        <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Target className="size-4" />
             <span className="text-xs">Hábitos Ativos</span>
@@ -207,7 +207,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
         </div>
       ) : (
         overallStats.bestHabit && (
-          <div className="bg-card border border-border rounded-xl p-4">
+          <div className="bg-card/60 border border-border rounded-xl p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-3">Melhor Desempenho</h3>
             <div className="flex items-center gap-3">
               <div
@@ -281,7 +281,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
           </div>
 
           {/* Monthly History */}
-          <div className="bg-card border border-border rounded-xl p-4">
+          <div className="bg-card/60 border border-border rounded-xl p-4">
             <h3 className="font-semibold mb-4">Histórico Mensal</h3>
             <div className="space-y-3">
               {monthlyHistory.map((month) => (
@@ -307,7 +307,7 @@ const HabitStats: React.FC<HabitStatsProps> = ({
           </div>
 
           {/* Habit Rankings */}
-          <div className="bg-card border border-border rounded-xl p-4">
+          <div className="bg-card/60 border border-border rounded-xl p-4">
             <h3 className="font-semibold mb-4">Ranking de Hábitos</h3>
             <div className="space-y-3">
               {habits.map((stat, index) => {

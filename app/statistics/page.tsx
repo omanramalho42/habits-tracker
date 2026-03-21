@@ -106,7 +106,7 @@ export default function Statistics() {
   // console.log({ categories }, { goals }, { annotations }, { tasks }, { routines }, { habits })
 
   return (
-    <main className='min-h-screen bg-background'>
+    <main className='min-h-screen bg-transparent'>
       <div className="flex flex-col gap-4 max-w-5xl mx-auto px-4 py-8">
         <HeaderSection />
         
