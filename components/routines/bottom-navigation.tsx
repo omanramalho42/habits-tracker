@@ -12,7 +12,11 @@ import {
   Repeat,
   ListTodo,
   Tag,
-  CheckCircle
+  CheckCircle,
+  ChartArea,
+  LucideNewspaper,
+  Settings,
+  LogOut
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -34,6 +38,8 @@ import CreateTaskDialog from "@/components/tasks/create-task-dialog"
 import CreateCategorieDialog from "@/components/categories/create-categorie-dialog"
 import CreateGoalDialog from "@/components/goals/create-goal-dialog"
 import CreateCheckPointDialog from "@/components/create-checkpoint-dialog"
+import { SignOutButton } from "@clerk/nextjs"
+
 export function BottomNavigation() {
   const pathname = usePathname()
 
@@ -57,26 +63,154 @@ export function BottomNavigation() {
         <NavItem
           icon={CalendarPlus}
           label="Rotinas"
-          href="/routines"
-          active={pathname.startsWith("/routines")}
+          href="#routines"
+          active={pathname.startsWith("#routines")}
         />
 
         {/* CENTER BUTTON */}
         <div className="relative -mt-10">
           <div className="absolute inset-0 bg-green-500 blur-2xl opacity-50 rounded-full scale-125" />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                className="relative z-10 w-16 h-16 rounded-full bg-green-500 text-white shadow-[0_0_25px_rgba(34,197,94,0.9)] ring-2 ring-green-400/40 hover:scale-105 transition"
-              >
-                <Plus className="w-7 h-7" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  className="relative z-10 w-16 h-16 rounded-full bg-green-500 text-white shadow-[0_0_25px_rgba(34,197,94,0.9)] ring-2 ring-green-400/40 hover:scale-105 transition"
+                >
+                  <Plus className="w-7 h-7" />
+                </Button>
+              </DropdownMenuTrigger>
 
-            {/* ...menu continua igual */}
-          </DropdownMenu>
+              <DropdownMenuContent align="end" className="w-64">
+                {/* -------- NAV -------- */}
+                <DropdownMenuLabel>Navegação</DropdownMenuLabel>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/" className="flex items-center gap-2">
+                    <Home className="h-4 w-4" />
+                    Home
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/statistics" className="flex items-center gap-2">
+                    <ChartArea className="h-4 w-4" />
+                    Estatísticas
+                  </Link>
+                </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                  <Link href="/habits" className="flex items-center gap-2">
+                    <Home className="h-4 w-4" />
+                    Hábitos
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/news" className="flex items-center gap-2">
+                    <LucideNewspaper className="h-4 w-4" />
+                    Novidades
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configurações
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* -------- CREATE -------- */}
+                <DropdownMenuLabel>Criar</DropdownMenuLabel>
+
+                <CreateHabitDialog
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2"
+                    >
+                      <Target className="h-4 w-4" />
+                      Hábito
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <CreateRoutineDialog
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2"
+                    >
+                      <Repeat className="h-4 w-4" />
+                      Rotina
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <CreateTaskDialog
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2"
+                    >
+                      <ListTodo className="h-4 w-4" />
+                      Tarefa
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <CreateCategorieDialog
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2"
+                    >
+                      <Tag className="h-4 w-4" />
+                      Categoria
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <CreateGoalDialog
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2"
+                    >
+                      <Target className="h-4 w-4" />
+                      Objetivo
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <CreateCheckPointDialog
+                  trigger={
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="gap-2"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Checkpoint
+                    </DropdownMenuItem>
+                  }
+                />
+
+                <DropdownMenuSeparator />
+
+                {/* -------- LOGOUT -------- */}
+                <DropdownMenuItem asChild>
+                  <SignOutButton>
+                    <button className="flex items-center gap-2 w-full text-red-500">
+                      <LogOut className="h-4 w-4" />
+                      Sair
+                    </button>
+                  </SignOutButton>
+                </DropdownMenuItem>
+
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <NavItem
@@ -89,8 +223,8 @@ export function BottomNavigation() {
         <NavItem
           icon={User}
           label="Perfil"
-          href="/profile"
-          active={pathname.startsWith("/profile")}
+          href="/settings"
+          active={pathname.startsWith("/settings")}
         />
 
       </div>

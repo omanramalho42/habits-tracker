@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils"
 import "./globals.css"
 import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
 import { Button } from "@/components/ui/button"
+import { BottomNavigation } from "@/components/routines/bottom-navigation"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -116,6 +117,7 @@ export default async function RootLayout({
                     </Button>
                   }
                 />
+                <BottomNavigation />
               </main>
             {/* </ThemeProvider> */}
             <Analytics />

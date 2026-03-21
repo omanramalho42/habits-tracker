@@ -784,7 +784,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       </Button>
 {/*       
       <FloatingActionBar /> */}
-      {/* <BottomNavigation /> */}
     </Card>
   )
 }
