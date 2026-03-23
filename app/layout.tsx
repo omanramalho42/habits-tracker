@@ -126,7 +126,7 @@ export default async function RootLayout({
               <main
                 className={
                   cn(
-                    `min-h-screen bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
+                    `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
                     userSettings?.bannerUrl ? `bg-[url'${userSettings.bannerUrl}']` : "bg-[url('/bg.png')]"
                   )
                 }

@@ -8,7 +8,7 @@ export const createUserSettingSchema = z.object({
   emailNotifications: z.boolean().default(false),
   smsNotifications: z.boolean().default(false),
   isTravelling: z.boolean().default(false),
-  theme: z.enum(["light", "dark", "system"]).optional(),
+  theme: z.enum(["light", "dark"]).optional(),
   avatarUrl: z.any().optional(),
   bannerUrl: z.any().optional(),
 })
@@ -24,7 +24,7 @@ export const updateUserSettingSchema = z.object({
   emailNotifications: z.boolean().default(false),
   smsNotifications: z.boolean().default(false),
   isTravelling: z.boolean().default(false),
-  theme: z.enum(["light", "dark", "system"]).optional(),
+  theme: z.enum(["light", "dark"]).optional(),
   avatarUrl: z.any().optional(),
   bannerUrl: z.any().optional(),
 })

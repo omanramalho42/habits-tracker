@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from 'next/navigation'
+
 import React, { useState, useRef } from 'react'
 
 import { useForm } from 'react-hook-form'
@@ -41,47 +43,32 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 
 import {
-  Fullscreen,
   PenIcon,
-  PlusSquare,
-  Trash2
+  PlusSquare
 } from 'lucide-react'
 
-import type { UpdateUserSettingSchemaType } from '@/lib/schema/user-settings'
-import type { UserSettings } from '@prisma/client'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import type { CreateUserSettingSchemaType } from '@/lib/schema/user-settings'
 
-interface UpdateUserSettingsDialogProps {
+interface CreateUserSettingsDialogProps {
   trigger: React.ReactNode
-  userSettings: any
 }
 
-const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
+const CreateUserSettingsDialog:React.FC<CreateUserSettingsDialogProps> = ({
   trigger,
-  userSettings
 }) => {
   const [open, setOpen] = useState<boolean>(false)
-
-  const bannerInputRef = useRef<HTMLInputElement | null>(null)  
   const fileInputRef = useRef<HTMLInputElement | null>(null)  
-  
-  const [isPreviewOpen, setIsPreviewOpen] =
-    useState<boolean>(false)
 
-  console.log(userSettings, "settings ⚙️");
-
-  const form = useForm<UpdateUserSettingSchemaType>({
+  const form = useForm<CreateUserSettingSchemaType>({
     defaultValues: {
-      id: userSettings.id,
-      name: userSettings.name,
-      phone: userSettings.phone,
-      email: userSettings.email,
-      allow_notifications: userSettings.notificationsEnabled,
-      emailNotifications: userSettings.emailNotifications,
-      smsNotifications: userSettings.smsNotifications,
+      name: "",
+      phone: "",
+      email: "",
+      allow_notifications: false,
+      emailNotifications: false,
+      smsNotifications: false,
       isTravelling: false,
-      theme: userSettings?.theme,
+      theme: "dark",
       bannerUrl: [],
       avatarUrl: [],
     }
@@ -95,14 +82,11 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
   } = form
 
   const [avatarUrl, setAvatarUrl] =
-    useState<string>(userSettings.avatarUrl)
-  const [bannerPreview, setBannerPreview] =
-    useState<string>(userSettings.bannerUrl);
+    useState<string>("")
 
   const queryClient = useQueryClient()
   const router = useRouter()
-
-  const onSubmit = async (values: UpdateUserSettingSchemaType) => {
+  const onSubmit = async (values: CreateUserSettingSchemaType) => {
     toast.loading(
       "Atualizando configurações do usuário",
       { id: 'update-settings' }
@@ -310,7 +294,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
               />
             </React.Fragment>
 
-            {/* <React.Fragment>
+            <React.Fragment>
               <FormField
                 control={control}
                 name="bannerUrl"
@@ -326,122 +310,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
                   </FormItem>
                 )}
               />
-            </React.Fragment> */}
-            <FormField
-              control={control}
-              name="bannerUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold text-sm">
-                    Imagem de fundo
-                  </FormLabel>
-
-                  <FormControl>
-                    <div className="flex flex-col gap-3 w-full">
-
-                      {/* PREVIEW */}
-                      <div className="w-full h-32 rounded-xl overflow-hidden border border-white/10 bg-muted">
-                        {bannerPreview ? (
-                          <Image
-                            src={bannerPreview}
-                            alt="banner preview"
-                            width={1000}
-                            height={300}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                            Nenhuma imagem selecionada
-                          </div>
-                        )}
-                      </div>
-
-                      {/* ACTIONS */}
-                      <div className="flex items-center gap-2 flex-wrap">
-
-                        {/* EDITAR */}
-                        <Button
-                          type="button"
-                          onClick={() => bannerInputRef.current?.click()}
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2"
-                        >
-                          <PenIcon className="w-4 h-4" />
-                          Alterar
-                        </Button>
-
-                        {/* REMOVER */}
-                        {bannerPreview && (
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              setBannerPreview("")
-                              field.onChange([]) // 🔥 limpa no form
-                            }}
-                            variant="destructive"
-                            size="sm"
-                            className="flex items-center gap-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Remover
-                          </Button>
-                        )}
-
-                        {/* EXPANDIR */}
-                        {bannerPreview && (
-                          <Button
-                            type="button"
-                            onClick={() => setIsPreviewOpen(true)}
-                            variant="secondary"
-                            size="sm"
-                            className="flex items-center gap-2"
-                          >
-                            <Fullscreen className="w-4 h-4" />
-                            Visualizar
-                          </Button>
-                        )}
-
-                      </div>
-
-                      {/* INPUT FILE */}
-                      <Input
-                        ref={bannerInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (!file) return
-
-                          const previewUrl = URL.createObjectURL(file)
-                          setBannerPreview(previewUrl)
-
-                          field.onChange([file])
-                        }}
-                      />
-
-                    </div>
-                  </FormControl>
-
-                  {/* DIALOG PREVIEW */}
-                  <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                    <DialogContent className="max-w-3xl p-0 overflow-hidden">
-                      {bannerPreview && (
-                        <Image
-                          src={bannerPreview}
-                          alt="preview full"
-                          width={1200}
-                          height={600}
-                          className="w-full h-auto object-cover"
-                        />
-                      )}
-                    </DialogContent>
-                  </Dialog>
-
-                </FormItem>
-              )}
-            />
+            </React.Fragment>
 
             <React.Fragment>
               <div className="flex flex-col gap-4 mt-2">
@@ -569,4 +438,4 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
   )
 }
 
-export default UpdateUserSettingsDialog
+export default CreateUserSettingsDialog

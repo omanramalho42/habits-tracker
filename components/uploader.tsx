@@ -54,6 +54,7 @@ export function Uploader({ files, onSuccessCallback }: UploaderProps) {
           </Button>
         </FileUploadTrigger>
       </FileUploadDropzone>
+
       <FileUploadList>
         {files.map((file, index) => (
           <FileUploadItem key={index} value={file}>
@@ -67,6 +68,7 @@ export function Uploader({ files, onSuccessCallback }: UploaderProps) {
           </FileUploadItem>
         ))}
       </FileUploadList>
+
     </FileUpload>
   );
 }
