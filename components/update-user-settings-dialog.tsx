@@ -51,7 +51,7 @@ import { useRouter } from 'next/navigation'
 
 interface UpdateUserSettingsDialogProps {
   trigger: React.ReactNode
-  userSettings: UserSettings | null
+  userSettings: any
 }
 
 const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
@@ -61,18 +61,19 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
   const [open, setOpen] = useState<boolean>(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)  
 
-  console.log(userSettings, "settings!");
+  console.log(userSettings, "settings ⚙️");
 
   const form = useForm<UpdateUserSettingSchemaType>({
     defaultValues: {
-      name: userSettings?.name || "",
-      phone: userSettings?.phone || "",
-      email: userSettings?.email || "",
-      allow_notifications: userSettings?.notificationsEnabled || false,
-      emailNotifications: userSettings?.emailNotifications || false,
-      smsNotifications: userSettings?.smsNotifications || false,
+      id: userSettings.id,
+      name: userSettings.name,
+      phone: userSettings.phone,
+      email: userSettings.email,
+      allow_notifications: userSettings.notificationsEnabled,
+      emailNotifications: userSettings.emailNotifications,
+      smsNotifications: userSettings.smsNotifications,
       isTravelling: false,
-      theme: userSettings?.theme || "dark",
+      theme: userSettings?.theme,
       bannerUrl: [],
       avatarUrl: [],
     }
@@ -86,7 +87,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
   } = form
 
   const [avatarUrl, setAvatarUrl] =
-    useState<string>(userSettings?.avatarUrl || "")
+    useState<string>(userSettings.avatarUrl)
 
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -179,7 +180,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
                         {/* AVATAR */}
                         <Avatar>
                           <AvatarImage
-                            src={avatarUrl || "https://github.com/shadcn.png"}
+                            src={avatarUrl}
                             className=""
                           />
                           <AvatarFallback>CN</AvatarFallback>

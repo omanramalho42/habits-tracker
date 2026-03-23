@@ -67,8 +67,9 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
         </DialogHeader>
 
         <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
+        {userSettings && (
           <UpdateUserSettingsDialog
-            userSettings={userSettings ?? null}
+            userSettings={userSettings}
             trigger={
               <div className="flex flex-row w-full items-center justify-between space-x-3">
                 <Settings className="h-5 w-5 text-primary" />
@@ -88,6 +89,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
               </div>
             }
           />
+        )}
         </div>
 
         <DialogFooter>

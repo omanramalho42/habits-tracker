@@ -53,7 +53,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
   }
 
   const uploadedFiles = []
-  let avatarImage = []
+  let avatarImageUrl = null
 
   for (const file of bannerUrl) {
     const uploaded = await uploadToCloudinary(file)
@@ -66,15 +66,9 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
     }
   }
 
-  if(avatarUrl.length > 0) {
+  if (avatarUrl instanceof File) {
     const uploaded = await uploadToCloudinary(avatarUrl)
-
-    if (uploaded) {
-      avatarImage.push({
-        url: uploaded.url,
-        type: uploaded.resourceType, // image | video | raw
-      })
-    }
+    avatarImageUrl = uploaded?.url
   }
 
   const existUserSettings = await prisma.userSettings.findUnique({
@@ -83,6 +77,8 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
     }
   })
 
+  console.log(avatarImageUrl, "avatar image")
+
   try {
     if(!existUserSettings) {
       const updated = await prisma.userSettings.create({
@@ -90,7 +86,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
           name,
           phone,
           email: email,
-          avatarUrl: avatarImage[0]?.url || "",
+          ...(avatarImageUrl && { avatarUrl: avatarImageUrl }),
           bannerUrl: uploadedFiles[0]?.url || "",
           notificationsEnabled: allow_notifications,
           emailNotifications,
@@ -110,7 +106,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
           phone,
           email,
           notificationsEnabled: allow_notifications,
-          avatarUrl: avatarImage[0]?.url || "",
+          ...(avatarImageUrl && { avatarUrl: avatarImageUrl }),
           bannerUrl: uploadedFiles[0]?.url || "",
           emailNotifications,
           smsNotifications,

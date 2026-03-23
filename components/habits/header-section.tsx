@@ -18,7 +18,7 @@ import { fetchUserSettings } from '@/services/settings'
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage
+  AvatarImage,
 } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -43,18 +43,21 @@ const HeaderSection:React.FC = () => {
     <div className="flex items-start justify-between">
       
       <div className="flex flex-col space-y-2">
-        <Avatar>
-          <AvatarImage
-            src={userSettings?.avatarUrl || "https://github.com/shadcn.png"}
-            alt="@avatar"
-          />
-          <AvatarFallback>
-            {userSettings?.name?.slice(0,2) || user?.fullName?.slice(0,2)}
-          </AvatarFallback>
-        </Avatar>
-        <h1 className="text-1xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
-          Olá, {userSettings?.name || user?.fullName} 👋
-        </h1>
+        <div className='flex flex-row items-baseline gap-2'>
+          <Avatar>
+            <AvatarImage
+              src={userSettings?.avatarUrl || ""}
+              alt="@avatar"
+            />
+            <AvatarFallback>
+              {userSettings?.name?.slice(0,2) || user?.fullName?.slice(0,2)}
+            </AvatarFallback>
+            {/* <AvatarBadge className="bg-green-600 dark:bg-green-800" /> */}
+          </Avatar>
+          <h1 className="text-1xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
+            Olá, {userSettings?.name || user?.fullName} 👋
+          </h1>
+        </div>
         <p className="text-muted-foreground text-base">
           {today}
         </p>

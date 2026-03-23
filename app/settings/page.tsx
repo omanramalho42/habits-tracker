@@ -162,20 +162,21 @@ export default function Settings() {
                     </p>
                   </div>
                 </div>
-
-                <UpdateUserSettingsDialog
-                  trigger={
-                    <Button
-                      role='button'
-                      // disabled={isLoading}
-                      variant="outline"
-                      className="text-sm text-primary"
-                    >
-                      Editar
-                    </Button>
-                  }
-                  userSettings={userSettings ?? null}
-                />
+                {userSettings && (
+                  <UpdateUserSettingsDialog
+                    trigger={
+                      <Button
+                        role='button'
+                        // disabled={isLoading}
+                        variant="outline"
+                        className="text-sm text-primary"
+                      >
+                        Editar
+                      </Button>
+                    }
+                    userSettings={userSettings}
+                  />
+                )}
               </CardContent>
             </Card>
           </section>
