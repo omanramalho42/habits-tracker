@@ -43,6 +43,12 @@ enum THEME {
   dark
 }
 
+//TASK -> RECURRING (COMPLETION + 10) -> HABIT
+//TASK -> TASKGROUPS (CATEGORIES)
+//ROUTINES -> HABITS & TASKS
+//ROUTINE -> GOAL
+
+
 model UserSettings {
   userId String @id @map("user_id")
 
@@ -123,7 +129,11 @@ model Task {
   description   String?     @db.VarChar(255)
   emoji         String?     @db.VarChar(10)
 
+  //multiplos 
+  //customValue String?
   customField   String?     @map("custom_field") @db.VarChar(12)
+  
+  // customFieldCounter
   limitCounter  Int?        @default(1)
 
   createdAt     DateTime    @default(now()) @map("created_at")
@@ -166,6 +176,50 @@ model CheckPoint {
   @@map("checkpoint")
 }
 
+model Counter {
+  id    String @id @default(uuid())
+
+  label String
+  
+  valueNumber Float?
+  valueText   String?
+
+  limit Int
+
+  taskMetric TaskMetric[]
+}
+
+enum MetricType {
+  WATER
+  STEPS
+  WEIGHT
+  MOOD
+}
+
+model TaskMetric {
+  id        String @id @default(uuid())
+
+  field     String? @db.VarChar(20)
+  value     String? @db.VarChar(20) 
+
+  date      DateTime?
+  type      MetricType
+
+  updatedAt DateTime? @updatedAt() @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  counterId String
+  counter   Counter @relation(fields: [counterId], references: [id])
+
+  notes     Annotations[]
+
+  completionId String @map("completion_id")
+  // completion  TaskCompletion @relation(fields: [completionId], references: [id])
+
+  @@index([date])
+  @@map("task_metric")
+}
+
 model TaskCompletion {
   id          String      @id @default(uuid())
 
@@ -181,6 +235,7 @@ model TaskCompletion {
   task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   
   annotations   Annotations[]
+  // metrics       TaskMetric[]
 
   @@unique([taskId, completedDate])
   @@index([completedDate])
@@ -360,6 +415,7 @@ model Annotations {
   completion       HabitCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
 
   tasksCompletions TaskCompletion[]
+  taskMetrics      TaskMetric[]
   @@map("annotations")
 }
 
@@ -402,20 +458,3 @@ enum FeedbackStatus {
   REVIEWING
   CLOSED
 }
-
-//MOOD
-//SLEEP
-
-//EXERCICES
-//METRICS
-
-//DIET
-
-//ACHVIMENTS
-
-//FINANCES
-
-//HEALTHNESS
-
-//THERAPIST
-

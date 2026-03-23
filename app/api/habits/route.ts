@@ -7,7 +7,7 @@ import { auth } from "@clerk/nextjs/server"
 
 import { isHabitActiveOnDate } from '@/lib/habit-utils'
 import { CreateHabitSchema } from '@/lib/schema/habit'
-import { inngest } from '@/lib/inngest/client'
+import { inngest } from '@/src/inngest/client'
 import { welcomeEmailTemplate } from '@/lib/nodemailer/template'
 import { transporter } from '@/lib/nodemailer'
 
@@ -39,13 +39,16 @@ export async function GET(request: Request) {
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
 
-    const inggestData = await inngest.send({
-      name: "app/user.created",
-      data: {
-        email: "contato@habits.app.br",
-        name: "Teste"
-      }
-    })
+    // const inggestData = await inngest.send({
+    //   name: "app/user.created",
+    //   data: {
+    //     email: "contato@habits.app.br",
+    //     name: "Teste"
+    //   }
+    // })
+    // const inggestData2 = await inngest.send({
+    //   name: "app/send.daily.habits",
+    // })
     // new Intl.DateTimeFormat(
     //  'pt-BR', {
     //    timeZone: 'America/Sao_Paulo',
@@ -54,7 +57,8 @@ export async function GET(request: Request) {
     //    year: "numeric",
     //    weekday: 'short'
     // }).format(new Date())
-    console.log(inggestData, "INNGEST")
+    // console.log(inggestData, "INNGEST")
+    // console.log(inggestData2, "INNGEST DATA 2")
     // const htmlTemplate = 
     //   welcomeEmailTemplate("Oman")
 

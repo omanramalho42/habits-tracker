@@ -20,8 +20,8 @@ export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData)
   const mailOptions = {
     from: "contato@habits.app.br",
     to: email,
-    subject: `Welcome to Habits tracker - your habits toolkit is ready!`,
-    text: 'Thanks for joining Habits tracker',
+    subject: `Bem vindo ao laboratório de hábitos aqui você gerencia sua vida!`,
+    text: 'Obrigado por se juntar ao Habits App',
     html: htmlTemplate
   }
 

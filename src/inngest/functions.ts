@@ -1,7 +1,7 @@
 import { inngest } from "./client"
-import { sendDailyHabitsEmail, sendWelcomeEmail } from "../nodemailer"
+import { sendDailyHabitsEmail, sendWelcomeEmail } from "../../lib/nodemailer"
 
-import { prisma } from "../prisma"
+import { prisma } from "../../lib/prisma"
 
 import { PERSONALIZED_WELCOME_EMAIL_PROMPT } from "./prompts"
 
@@ -88,17 +88,13 @@ export const sendDailyHabitReminder = inngest.createFunction(
     })
 
     for (const user of users) {
-      const allHabits = user.habits.filter(
-        (habit) => habit
-      )
-
-      if (allHabits.length === 0) continue
+      if (user.habits.length === 0) continue
 
       await step.run(`send-email-${user.id}`, async () => {
         return sendDailyHabitsEmail({
           email: user.email,
           name: user.firstName || "",
-          habits: allHabits.map(h => ({
+          habits: user.habits.map(h => ({
             name: h.name,
             emoji: h.emoji
           }))

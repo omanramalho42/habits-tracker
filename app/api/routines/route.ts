@@ -35,6 +35,11 @@ export async function GET(request: Request) {
     const validator = z.string()
     const queryParams = validator.safeParse(paramDate)
 
+    const today = queryParams.data 
+      ? new Date(queryParams.data) 
+      : new Date()
+    today.setHours(0, 0 ,0 ,0)
+
     const routines = await prisma.routine.findMany({
       where: {
         userId: userDb.id,
@@ -53,10 +58,11 @@ export async function GET(request: Request) {
               include: {
                 completions: {
                   where: {
-                    completedDate:
-                      queryParams.success 
-                        ? new Date(queryParams.data) 
-                        : new Date()
+                    completedDate:{
+                        gte: queryParams.success 
+                          ? new Date(queryParams.data) 
+                          : new Date()
+                      }
                   }
                 }
               }

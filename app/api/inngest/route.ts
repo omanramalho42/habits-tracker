@@ -1,10 +1,10 @@
 import { serve } from "inngest/next"
-import { inngest } from "@/lib/inngest/client"
+import { inngest } from "@/src/inngest/client"
 
 import {
   sendSignUpEmail,
   sendDailyHabitReminder
-} from "@/lib/inngest/functions"
+} from "@/src/inngest/functions"
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
