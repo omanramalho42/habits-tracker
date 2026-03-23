@@ -117,12 +117,12 @@ export default async function RootLayout({
         <body className={`antialiased`}>
           <Toaster theme="dark" />
           <QueryClientProvider>
-            {/* <ThemeProvider
+            <ThemeProvider
               attribute="class"
               defaultTheme={userSettings?.theme || "system"}
-              enableSystem
-              disableTransitionOnChange
-            > */}
+              // enableSystem
+              // disableTransitionOnChange
+            >
               <main
                 className={
                   cn(
@@ -139,7 +139,7 @@ export default async function RootLayout({
                 <CreateFeedbackDialog
                   trigger={
                     <Button
-                      className="fixed opacity-75 bottom-20 right-10"
+                      className="fixed z-10 opacity-75 bottom-30 right-10"
                       variant="default"
                       type="button"
                       size="icon-lg"
@@ -150,7 +150,7 @@ export default async function RootLayout({
                 />
                 <BottomNavigation />
               </main>
-            {/* </ThemeProvider> */}
+            </ThemeProvider>
             <Analytics />
           </QueryClientProvider>
         </body>

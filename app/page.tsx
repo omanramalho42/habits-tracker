@@ -357,7 +357,7 @@ export default function Home() {
                 </div>
               )}
             </TabsContent>
-            <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-48">
+            <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-120">
               {tasks.length > 0 ? tasks.map((task) => {
                 return (
                   <ActiveTaskCard
