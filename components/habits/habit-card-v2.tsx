@@ -213,7 +213,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
         'relative flex flex-col w-full p-4 gap-4 rounded-2xl transition-all duration-300',
 
         // BASE (default)
-        'bg-zinc-900/60 border border-white/5',
+        'bg-zinc-900/80 border border-white/5',
         
         // ATIVO (completado)
         isCompletedToday &&

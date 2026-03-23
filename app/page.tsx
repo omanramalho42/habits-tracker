@@ -63,6 +63,7 @@ import {
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
+import { useTheme } from "next-themes"
 
 const container = {
   hidden: {},
@@ -91,7 +92,8 @@ const item = {
 
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
-  
+  const { theme, setTheme } = useTheme()
+  console.log({ theme });
   const handleFilterHabits = (value: string) => {
     setFilter(value)
   }
@@ -190,7 +192,7 @@ export default function Home() {
           />
 
           <Tabs defaultValue="habits">
-            <TabsList className="bg-background/60 w-full my-5 border-b border-white/10 rounded-none h-auto p-0 justify-start gap-8">
+            <TabsList className="bg-background/60 w-full my-5 border-b border-white/10 rounded-none h-auto p-0 justify-start gap-8 max-w-full overflow-x-auto scroll-container">
               <TabsTrigger 
                 value="routines" 
                 className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
@@ -292,7 +294,7 @@ export default function Home() {
                           Hábitos
                         </p>
                         <div className="flex flex-row gap-2 items-center justify-center">
-                          <CreateHabitDialog
+                          {/* <CreateHabitDialog
                             trigger={
                               <Button
                                 variant="outline"
@@ -302,7 +304,7 @@ export default function Home() {
                                 <PlusIcon />
                               </Button>                          
                             }
-                          />
+                          /> */}
                           <Button
                             disabled
                             variant="outline"

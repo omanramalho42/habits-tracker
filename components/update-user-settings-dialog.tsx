@@ -1,12 +1,17 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 
 import { useForm } from 'react-hook-form'
 
-import z from 'zod'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
+
+import { udapteUserSettings } from '@/app/habits/_actions/settings/user-settings'
+
+import { Uploader } from '@/components/uploader'
+import ThemePicker from '@/components/theme-picker'
 
 import {
   Dialog,
@@ -26,76 +31,81 @@ import {
   FormItem,
   FormLabel
 } from '@/components/ui/form'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage
+} from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 
 import {
-  BellDot,
-  Mail,
-  MessageSquare,
+  PenIcon,
   PlusSquare
 } from 'lucide-react'
-import axios from 'axios'
 
-import { UserSettings } from '@prisma/client'
-import { useQueryClient } from '@tanstack/react-query'
+import type { UpdateUserSettingSchemaType } from '@/lib/schema/user-settings'
+import type { UserSettings } from '@prisma/client'
+import { useRouter } from 'next/navigation'
 
 interface UpdateUserSettingsDialogProps {
   trigger: React.ReactNode
   userSettings: UserSettings | null
 }
 
-const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trigger, userSettings }) => {
+const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
+  trigger,
+  userSettings
+}) => {
   const [open, setOpen] = useState<boolean>(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)  
 
-  const UpdateUserSettingsSchema = z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    allow_notifications: z.boolean().default(false),
-    isTravelling: z.boolean().default(false),
-    theme: z.enum(["light", "dark", "system"]).optional(),
-  })
+  console.log(userSettings, "settings!");
 
-  type UpdateUserSettingsSchemaType = z.infer<typeof UpdateUserSettingsSchema>
-
-  // console.log(userSettings, "settings");
-
-  const form = useForm<UpdateUserSettingsSchemaType>({
+  const form = useForm<UpdateUserSettingSchemaType>({
     defaultValues: {
-      name: "",
+      name: userSettings?.name || "",
+      phone: userSettings?.phone || "",
       email: userSettings?.email || "",
-      allow_notifications: userSettings?.notificationsEnabled,
-      theme: "dark",
-      isTravelling: false
+      allow_notifications: userSettings?.notificationsEnabled || false,
+      emailNotifications: userSettings?.emailNotifications || false,
+      smsNotifications: userSettings?.smsNotifications || false,
+      isTravelling: false,
+      theme: userSettings?.theme || "dark",
+      bannerUrl: [],
+      avatarUrl: [],
     }
   })
 
   const {
     formState: { errors, isLoading },
     control,
-    reset,
     watch,
     handleSubmit
   } = form
 
-  const queryClient = useQueryClient()
+  const [avatarUrl, setAvatarUrl] =
+    useState<string>(userSettings?.avatarUrl || "")
 
-  const onSubmit = async (values: UpdateUserSettingsSchemaType) => {
-    console.log(values, "values")
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const onSubmit = async (values: UpdateUserSettingSchemaType) => {
     toast.loading(
       "Atualizando configurações do usuário",
       { id: 'update-settings' }
     )
 
     try {
-      const res = 
-        await axios.patch(
-          "/api/settings",
-          values
-        )
+      console.log(values, "values !")
+      const res = await udapteUserSettings(values)
+      // const res = 
+      //   await axios.patch(
+      //     "/api/settings",
+      //     values
+      //   )
   
-      if(res.data) {
+      if(res) {
         toast.success(
           "Configurações do usuário atualizadas com sucesso! 🎉",
           { id: 'update-settings' }
@@ -105,8 +115,11 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
 
         queryClient.invalidateQueries({
           queryKey: ["user-settings"],
-          // exact: false,
+          exact: false,
         })
+
+        router.refresh()
+        
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -149,35 +162,99 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
 
         <Form {...form}>
           <form className='space-y-3'>
-            <FormField
-              control={control}
-              name='name'
-              rules={{ required: true }}
-              render={( { field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      className='font-semibold'
-                      htmlFor='name'
-                    >
-                      Nome
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      id='name'
-                      type='text'
-                      placeholder='ex: John Doe'
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isLoading}
-                      className=''
-                    />
-                  </FormControl>
-                  {errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>}
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-row gap-2 items-baseline">
+
+              <FormField
+                control={control}
+                name="avatarUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-sm">
+                      Avatar
+                    </FormLabel>
+
+                    <FormControl>
+                      <div className="flex items-center gap-3">
+
+                        {/* AVATAR */}
+                        <Avatar>
+                          <AvatarImage
+                            src={avatarUrl || "https://github.com/shadcn.png"}
+                            className=""
+                          />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+
+                        {/* INPUT FILE (hidden) */}
+                        <Input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            const previewUrl = URL.createObjectURL(file)
+                            setAvatarUrl(previewUrl)
+
+                            field.onChange(file)
+                          }}
+                        />
+
+                        {/* BOTÃO */}
+                        <Button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="relative bottom-4 right-4"
+                          variant="ghost"
+                          size="icon-sm"
+                        >
+                          <PenIcon className="w-4 h-4" />
+                        </Button>
+
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name='name'
+                rules={{ required: true, min: 5 }}
+                render={( { field }) => (
+                  <FormItem className='w-full flex flex-col gap-3'>
+                    <FormLabel>
+                      <Label
+                        className='font-semibold'
+                        htmlFor='name'
+                      >
+                        Nome
+                      </Label>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id='name'
+                        type='text'
+                        placeholder='ex: John Doe'
+                        value={field.value}
+                        onChange={field.onChange}
+                        disabled={isLoading}
+                        className=''
+                      />
+                    </FormControl>
+                    {errors.name && (
+                      <span className='text-red-500 text-sm'>
+                        {errors.name.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={control}
               name='email'
@@ -194,6 +271,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
                   </FormLabel>
                   <FormControl>
                     <Input
+                      {...field}
                       id='email'
                       type='email'
                       placeholder='ex: johndoe@example.com'
@@ -202,91 +280,153 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({ trig
                       disabled={isLoading}
                     />
                   </FormControl>
-                  {errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>}
+                  {errors.email && (
+                    <span className='text-red-500 text-sm'>
+                      {errors.email.message}
+                    </span>
+                  )}
                 </FormItem>
               )}
             />
 
-            {/* ALLOW NOTIFICATIONS */}
-            <>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 my-2 px-2">
-                  <FormField
-                    control={control}
-                    name='allow_notifications'
-                    rules={{ required: false }}
-                    render={( { field }) => (
-                      <FormItem className='flex flex-row justify-between w-full items-center'>
-                        <FormLabel>
-                          <BellDot className="h-5 w-5 text-yellow-500" />
-                          <Label htmlFor="allow_notifications" className="text-base font-medium">
-                            Central de notificações
-                          </Label>
-                        </FormLabel>
-                        <FormControl> 
-                          <Switch
-                            id="allow_notifications"
-                            checked={field.value}
-                            disabled
-                            defaultChecked={false}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        {errors.allow_notifications && <span className='text-red-500 text-sm'>{errors.allow_notifications.message}</span>}
-                      </FormItem>
-                    )}
-                  />
-                </div>
+            <React.Fragment>
+              <Label>
+                Tema
+              </Label>
+              <ThemePicker
+                control={control}
+              />
+            </React.Fragment>
+
+            <React.Fragment>
+              <FormField
+                control={control}
+                name="bannerUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Imagem de fundo</FormLabel>
+                    <FormControl>
+                      <Uploader
+                        files={field.value}
+                        onSuccessCallback={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </React.Fragment>
+
+            <React.Fragment>
+              <div className="flex flex-col gap-4 mt-2">
+
+                <Label className="text-sm font-semibold">
+                  Notificações
+                </Label>
+
+                {/* MASTER SWITCH */}
+                <FormField
+                  control={control}
+                  name="allow_notifications"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-xl border border-white/10 bg-black/40 p-3">
+                      
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          Ativar notificações
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Controle geral das notificações
+                        </span>
+                      </div>
+
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+
+                    </FormItem>
+                  )}
+                />
+
+                {/* CHILDREN */}
+                {watch("allow_notifications") && (
+                  <div className="flex flex-col gap-3 pl-2 border-l border-white/10">
+
+                    {/* EMAIL */}
+                    <FormField
+                      control={control}
+                      name="emailNotifications"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between rounded-xl bg-muted/40 p-3">
+                          
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              Email
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Receba lembretes por email
+                            </span>
+                          </div>
+
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* SMS */}
+                    <FormField
+                      control={control}
+                      name="smsNotifications"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between rounded-xl bg-muted/40 p-3">
+                          
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              SMS
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Receba notificações por SMS
+                            </span>
+                          </div>
+
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+
+                        </FormItem>
+                      )}
+                    />
+
+                  </div>
+                )}
+
               </div>
-              {watch("allow_notifications") && (
-                <>
-                  {/* EMAIL */}
-                  <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
-                    <div className="flex items-center space-x-3">
-                      <Mail className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <Label htmlFor="email-notif" className="text-base font-medium">
-                          Notificações de email
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receba notificações diárias
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      disabled
-                    />
-                  </div>
-                  {/* SMS */}
-                  <div className="flex items-center justify-between space-x-4 p-4 rounded-xl bg-muted/50 border border-border/50">
-                    <div className="flex items-center space-x-3">
-                      <MessageSquare className="h-5 w-5 text-green-500" />
-                      <div>
-                        <Label htmlFor="email-notif" className="text-base font-medium">
-                          Notificações de SMS
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receba notificações diárias
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      disabled
-                    />
-                  </div>
-                </>
-              )}
-            </>
+            </React.Fragment>
 
           </form>
         </Form>
 
-        <DialogFooter>
+        <DialogFooter className='flex flex-row-reverse justify-end items-center gap-2'>
           <DialogClose asChild>
             <Button
+              type='button'
+              role='button'
               variant="outline"
             >
-              Cancelar
+              <p className='text-destructive tracking-tighter text-sm'>
+                Cancelar
+              </p>
             </Button>
           </DialogClose>
           <Button

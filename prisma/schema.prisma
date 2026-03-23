@@ -38,18 +38,28 @@ model User {
   feedbacks   Feedback[]
 }
 
+enum THEME {
+  light
+  dark
+}
+
 model UserSettings {
   userId String @id @map("user_id")
 
-  notificationsEnabled Boolean @default(true)  @map("notifications_enabled")
-  emailNotifications   Boolean @default(true)  @map("email_notifications")
-  smsNotifications     Boolean @default(false) @map("sms_notifications")
+  bannerUrl String? @db.VarChar(255) @map("banner_url")
+  avatarUrl String? @db.VarChar(255) @map("avatar_url")
+  theme     THEME?  @default(dark)
 
+  notificationsEnabled Boolean? @default(false)  @map("notifications_enabled")
+  emailNotifications   Boolean? @default(false)  @map("email_notifications")
+  smsNotifications     Boolean? @default(false) @map("sms_notifications")
+
+  name      String?  @db.VarChar(100)
   email     String? @map("email")
   phone     String? @map("phone")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt      @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

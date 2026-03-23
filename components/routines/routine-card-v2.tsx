@@ -401,7 +401,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         "relative flex flex-col justify-between p-5 rounded-2xl gap-4 transition-all duration-500 h-full overflow-hidden",
 
         // BASE
-        "bg-zinc-900/60 border border-white/5",
+        "bg-zinc-900/80 border border-white/5",
 
         // ATIVO (🔥 igual mock)
         allDone &&
@@ -438,17 +438,19 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
             </p>
 
             {/* UPDATED AT */}
-            {routine.updatedAt && (
-              <span className="flex flex-row gap-2 items-center text-xs mt-1">
-                atualizado em{" "}
-                <p className="text-primary ">
+            {/* {routine.updatedAt && (
+              <span className="flex flex-row gap-1 items-center">
+                <p className="text-sm tracking-tighter">
+                  atualizado em{" "}
+                </p>
+                <p className="text-sm text-primary">
                   {
                     new Date(routine.updatedAt)
                       .toLocaleDateString("pt-BR")
                   }
                 </p>
               </span>
-            )}
+            )} */}
           </div>
         </div>
 

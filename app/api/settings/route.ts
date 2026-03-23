@@ -1,33 +1,37 @@
 import { auth } from "@clerk/nextjs/server"
+
 import { prisma } from "@/lib/prisma"
+
 import { NextResponse } from "next/server"
+
+import { updateUserSettingSchema } from "@/lib/schema/user-settings"
 
 export async function GET() {
   try {
     const { userId } = await auth()
-
+    
     if (!userId) {
       return NextResponse.json({
         error: "Unauthorized"
       }, { status: 401 })
     }
-
-    const user = await prisma.user.findFirst({
+    
+    const userDb = await prisma.user.findFirst({
       where: {
         clerkUserId: userId
       }
     })
-
-    if(!user) {
+    
+    if (!userDb) {
       return NextResponse.json({
-        error: "Error find user on db"
-      }, { status: 400 })
+        error: "user not find on db"
+      }, { status: 401 })
     }
   
     const userSettings =
       await prisma.userSettings.findUnique({
       where: {
-        userId: user.id
+        userId: userDb.id
       }
     })
   
@@ -64,13 +68,28 @@ export async function PATCH(request: Request) {
       }, { status: 400 })
     }
 
+    const parsedBody = updateUserSettingSchema.safeParse(request.body)
+
+    if (!parsedBody.success) throw new Error(parsedBody.error.message)
+
     const {
       name,
       email,
-      allow_notifications,
+      phone,
+      avatarUrl,
+      bannerUrl,
       theme,
+      emailNotifications,
+      smsNotifications,
+      allow_notifications,
       isTravelling
-    } = await request.json()
+    } = parsedBody.data
+
+    console.log(parsedBody.data, "data!")
+
+    //CLOUDINARY PARA PROCESSAR IMAGEM AVATAR
+
+    //CLOUDINARY PARA PROCESSAR IMAGEM DE BANNER
 
     const existUserSettings = await prisma.userSettings.findUnique({
       where: {
@@ -81,14 +100,12 @@ export async function PATCH(request: Request) {
     if(!existUserSettings) {
       const updated = await prisma.userSettings.create({
         data: {
-          userId: user.id,
+          phone,
+          email: email,
           notificationsEnabled: allow_notifications,
-          email: email
-          // user: {
-          //   connect: {
-          //     clerkUserId: user.id
-          //   }
-          // }
+          emailNotifications,
+          smsNotifications,
+          userId: user.id,
         }
       })
 
@@ -99,12 +116,15 @@ export async function PATCH(request: Request) {
           userId: existUserSettings.userId
         },
         data: {
+          phone,
+          email,
           notificationsEnabled: allow_notifications,
-          email: email,
+          emailNotifications,
+          smsNotifications,
         }
       })
 
-      // console.log(updated, "updated user settings")
+      console.log(updated, "updated user settings")
       return NextResponse.json(updated)
     }
   } catch (error) {

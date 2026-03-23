@@ -31,14 +31,14 @@ export function Uploader({ files, onSuccessCallback }: UploaderProps) {
 
   return (
     <FileUpload
-      maxFiles={2}
+      maxFiles={1}
       maxSize={5 * 1024 * 1024}
       value={files}
       onValueChange={onSuccessCallback}
       onFileReject={onFileReject}
       multiple
     >
-      <FileUploadDropzone>
+      <FileUploadDropzone className="">
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center justify-center rounded-full border p-2.5">
             <Upload className="size-6 text-muted-foreground" />

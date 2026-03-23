@@ -1,7 +1,31 @@
 'use client'
 
+import dynamic from 'next/dynamic'
+
 import { useState } from 'react'
-// import { AppHeader } from './app-header'
+
+const HeaderSection =
+dynamic(() => import("@/components/habits/header-section"), {
+  loading: () => <Loader className='animated-spin' />
+})
+
+import { useQuery } from '@tanstack/react-query'
+
+import { fetchUserSettings } from '@/services/settings'
+import {
+  fetchHabits,
+  fetchRoutines,
+  fetchTasks,
+  fetchAnnotations,
+  fetchGoals,
+  fetchCategories
+} from "@/services"
+
+import UpdateUserSettingsDialog from '@/components/update-user-settings-dialog'
+import Footer from '@/components/habits/footer'
+
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -16,31 +40,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Bell, Crown, Loader, Target, Trash, User } from 'lucide-react'
-import { HabitWithStats } from '@/lib/types'
-import { useQuery } from '@tanstack/react-query'
-import {
-  fetchHabits,
-  fetchRoutines,
-  fetchTasks,
-  fetchAnnotations,
-  fetchGoals,
-  fetchCategories
-} from "@/services"
-import { Annotations, Routine, Task, UserSettings } from '@prisma/client'
-import { GoalsDTO } from '@/services/goals'
-import { CategoriesDTO } from '@/services/categories'
-const HeaderSection =
-  dynamic(() => import("@/components/habits/header-section"), {
-    loading: () => <Loader className='animated-spin' />
-  })
 
-import Footer from '@/components/habits/footer'
-import dynamic from 'next/dynamic'
-import { Card, CardContent } from '@/components/ui/card'
-import UpdateUserSettingsDialog from '@/components/update-user-settings-dialog'
-import { fetchUserSettings } from '@/services/settings'
-import { Badge } from '@/components/ui/badge'
+import {
+  Bell,
+  Crown,
+  Loader,
+  Pencil,
+  Target,
+  Trash,
+  User
+} from 'lucide-react'
+
+import type { HabitWithStats } from '@/lib/types'
+import type {
+  Annotations,
+  Routine,
+  Task,
+  UserSettings
+} from '@prisma/client'
+import type { GoalsDTO } from '@/services/goals'
+import type { CategoriesDTO } from '@/services/categories'
 
 export default function Settings() {
   const {
@@ -114,7 +133,7 @@ export default function Settings() {
   }
 
   return (
-    <main className='min-h-screen bg-background'>
+    <main className='min-h-screen bg-background/60'>
       <div className="flex flex-col gap-4 max-w-5xl mx-auto px-4 py-8">
         <HeaderSection />
         {/* <AppHeader title="Ajustes" showSearch={false} showAdd={false} /> */}
@@ -123,50 +142,42 @@ export default function Settings() {
           {/* ====================================================== */}
           {/* CONTA */}
           {/* ====================================================== */}
-
           <section className="space-y-3">
-
             <h2 className="text-sm font-semibold text-muted-foreground uppercase">
               Conta
             </h2>
 
             <Card>
-
               <CardContent className="p-6 flex items-center justify-between">
-
                 <div className="flex items-center gap-4">
-
                   <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
                     <User className="text-primary-foreground"/>
                   </div>
-
                   <div>
-
                     <p className="font-semibold">
                       Configurações da conta
                     </p>
-
                     <p className="text-sm text-muted-foreground">
                       Nome, email e preferências do usuário
                     </p>
-
                   </div>
-
                 </div>
 
                 <UpdateUserSettingsDialog
                   trigger={
-                    <Button disabled variant="outline" className="text-sm text-primary">
+                    <Button
+                      role='button'
+                      // disabled={isLoading}
+                      variant="outline"
+                      className="text-sm text-primary"
+                    >
                       Editar
                     </Button>
                   }
                   userSettings={userSettings ?? null}
                 />
-
               </CardContent>
-
             </Card>
-
           </section>
           {/* Display Settings */}
           <section>
@@ -201,8 +212,12 @@ export default function Settings() {
                   <Target className="size-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Habit Tracker</h3>
-                  <p className="text-sm text-muted-foreground">Versão 1.0.0</p>
+                  <h3 className="font-semibold">
+                    Habits App
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Versão 1.0.0 (beta)
+                  </p>
                 </div>
               </div>
               <Separator />
@@ -212,82 +227,76 @@ export default function Settings() {
             </div>
           </section>
 
-          {/* ====================================================== */}
-          {/* NOTIFICAÇÕES */}
-          {/* ====================================================== */}
-
+          {/* NOTIFICAÇOES */}
           <section className="space-y-3">
-
             <h2 className="text-sm font-semibold text-muted-foreground uppercase">
               Notificações
             </h2>
-
             <Card>
-
               <CardContent className="p-6 flex items-center justify-between">
-
                 <div className="flex items-center gap-3">
-
                   <Bell className="size-4"/>
-
                   <div>
-
                     <p className="font-medium">
                       Central de notificações
                     </p>
-
                     <p className="text-sm text-muted-foreground">
                       Receber alertas e lembretes
                     </p>
-
                   </div>
-
                 </div>
-
                 <Switch
                   disabled
                   // checked={notifications}
                   // onCheckedChange={setNotifications}
                 />
-
               </CardContent>
-
             </Card>
+          </section>
 
+
+          {/* THEME */}
+          <section className="space-y-3">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase">
+              Tema
+            </h2>
+            <Card>
+              <CardContent className="p-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Pencil className="size-4"/>
+                  <div>
+                    <p className="font-medium">
+                      Central de temas
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Modificar temas e imagem de fundo
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           {/* PLANO */}
-
           <section>
-
             <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
               Plano
             </h2>
-
             <div className="bg-card border rounded-xl p-6 flex items-center justify-between">
-
               <div className="flex items-center gap-4">
-
                 <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
                   <Crown className="text-primary-foreground"/>
                 </div>
-
                 <div>
-
                   <p className="font-semibold">
                     Plano Gratuito
                   </p>
-
                   <p className="text-sm text-muted-foreground">
                     Upgrade para desbloquear recursos
                   </p>
-
                 </div>
-
               </div>
-
               <Badge>FREE</Badge>
-
             </div>
 
             <Button disabled className="w-full mt-4">
@@ -295,7 +304,6 @@ export default function Settings() {
                 Upgrade para PRO
               </p>
             </Button>
-
           </section>
 
           {/* ====================================================== */}
@@ -303,45 +311,35 @@ export default function Settings() {
           {/* ====================================================== */}
 
           <section className="space-y-3">
-
             <h2 className="text-sm font-semibold text-muted-foreground uppercase">
               Resumo da conta
             </h2>
-
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-
               <StatCard
                 label="Hábitos"
                 value={habits.length}
               />
-
               <StatCard
                 label="Rotinas"
                 value={routines.length}
               />
-
               <StatCard
                 label="Tarefas"
                 value={tasks.length}
               />
-
               <StatCard
                 label="Objetivos"
                 value={goals.length}
               />
-
               <StatCard
                 label="Categorias"
                 value={categories.length}
               />
-
               <StatCard
                 label="Anotações"
                 value={annotations.length}
               />
-
             </div>
-
           </section>
 
           {/* Danger Zone */}
@@ -397,7 +395,6 @@ export default function Settings() {
 /* ====================================================== */
 /* STAT CARD */
 /* ====================================================== */
-
 function StatCard({
   label,
   value
@@ -405,13 +402,9 @@ function StatCard({
   label:string
   value:number
 }){
-
   return (
-
     <Card>
-
       <CardContent className="p-4 text-center">
-
         <p className="text-2xl font-bold">
           {value}
         </p>
@@ -419,11 +412,7 @@ function StatCard({
         <p className="text-xs text-muted-foreground">
           {label}
         </p>
-
       </CardContent>
-
     </Card>
-
   )
-
 }

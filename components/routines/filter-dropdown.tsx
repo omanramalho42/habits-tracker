@@ -96,7 +96,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       >
 
         {/* TIPO */}
-        <DropdownMenuLabel>Tipo</DropdownMenuLabel>
+        {/* <DropdownMenuLabel>Tipo</DropdownMenuLabel> */}
 
         {/* {["habit", "task"].map((type) => (
           <DropdownMenuItem

@@ -23,6 +23,7 @@ import "./globals.css"
 import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
 import { Button } from "@/components/ui/button"
 import { BottomNavigation } from "@/components/routines/bottom-navigation"
+import { prisma } from "@/lib/prisma"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -30,25 +31,25 @@ const spaceGrotesk =
   Space_Grotesk({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Wisey - Habit Tracker",
-  description: "Your personal coach, guiding mindfulness and cognitive growth",
-  generator: "v0.app",
+  title: "Lab Habits - Laboratório de hábitos",
+  description: "Gerêncie seus hábitos e rotinas de forma dinâmica",
+  generator: "Oman Company",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
+        url: "/logo.png",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/icon-dark-32x32.png",
+        url: "/logo.png",
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/icon.svg",
+        url: "/logo.png",
         type: "image/svg+xml",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/logo.png",
   },
 }
 
@@ -58,10 +59,29 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const user = await currentUser()
+
+  const userDb = await prisma.user.findUnique({
+    where: {
+      clerkUserId: user?.id
+    }
+  })
+
+  if(!userDb) {
+    redirect("/login")
+  }
+
+  const userSettings = await prisma.userSettings.findUnique({
+    where: {
+      userId: userDb.id
+    }
+  })
+
+  console.log(userSettings, "APP 🪄");
   
   if (!user) {
     redirect('/sign-in')
   }
+
   return (
     <ClerkProvider
       appearance={{
@@ -84,10 +104,11 @@ export default async function RootLayout({
       }}
     >
       <html
+        suppressHydrationWarning
         lang="pt-BR"
         className={
           cn(
-            "dark",
+            userSettings ? userSettings.theme : "dark",
             // spaceGrotesk.className,
             jetBrainsMono.className
           )
@@ -98,17 +119,27 @@ export default async function RootLayout({
           <QueryClientProvider>
             {/* <ThemeProvider
               attribute="class"
-              defaultTheme="system"
+              defaultTheme={userSettings?.theme || "system"}
               enableSystem
               disableTransitionOnChange
             > */}
-              <main className="min-h-screen bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top">     
+              <main
+                className={
+                  cn(
+                    `min-h-screen bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
+                    userSettings?.bannerUrl ? `bg-[url'${userSettings.bannerUrl}']` : "bg-[url('/bg.png')]"
+                  )
+                }
+                style={{
+                  backgroundImage: userSettings?.bannerUrl ? `url(${userSettings?.bannerUrl})` : `bg-[url('/bg.png')]`
+                }}
+              >     
                 <TimezoneWarningBanner />
                 {children}
                 <CreateFeedbackDialog
                   trigger={
                     <Button
-                      className="fixed opacity-75 bottom-10 right-10"
+                      className="fixed opacity-75 bottom-20 right-10"
                       variant="default"
                       type="button"
                       size="icon-lg"
