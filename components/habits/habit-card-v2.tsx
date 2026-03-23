@@ -51,6 +51,7 @@ import { UpdateHabitSchemaType } from '@/lib/schema/habit'
 import { updateHabit } from '@/services/habits'
 import { WEEKDAYS } from '@/lib/habit-utils'
 import { cn } from '@/lib/utils'
+import { endOfWeek, isWithinInterval, startOfWeek } from 'date-fns'
 
 interface HabitCardProps {
   habit: HabitWithStats
@@ -163,6 +164,18 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       date,
     })
   }
+
+  const start = startOfWeek(selectedDate, { weekStartsOn: 0 }) // domingo
+  const end = endOfWeek(selectedDate, { weekStartsOn: 0 })
+
+  console.log(start, end, "RANGE WEEK")
+
+  const completionsThisWeek = habit.completions?.filter(c =>
+    isWithinInterval(
+      new Date(c.completedDate),
+      { start, end }
+    )
+  )
   
   const limit = habit.limitCounter ?? 1
   const isMulti = limit > 1
@@ -204,7 +217,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
   }
 
   const completedDaysSet = new Set(
-    habit.completions?.map((c) => getLocalDay(c.completedDate))
+    completionsThisWeek?.map((c) => getLocalDay(c.completedDate))
   )
 
   return (
