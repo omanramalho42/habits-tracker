@@ -8,8 +8,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
 
-import { createAnnotation } from '@/app/habits/_actions/annotations/annotations'
-
 import {
   Tooltip,
   TooltipContent,
@@ -50,7 +48,6 @@ interface UpdateAnnotationDialogProps {
 
 const UpdateAnnotationDialog:React.FC<UpdateAnnotationDialogProps> = ({ annotation, trigger }) => {
   const [open, setOpen] = useState<boolean>(false)
-  console.log(annotation, "annotation ")
   const form = useForm<UpdateAnnotationSchemaType>({
     defaultValues: {
       id: annotation.id,
@@ -88,20 +85,15 @@ const UpdateAnnotationDialog:React.FC<UpdateAnnotationDialogProps> = ({ annotati
         id: 'update-annotation'
       })
       
-      return await axios.patch(`/api/annotations/${values.id}`, values)
+      return await axios.patch(
+        `/api/annotations/${values.id}`, values
+      )
     },
     onSuccess: async () => {
       toast.success(
         "Sucesso ao atualizazr anotação. 🎉", 
         { id: "update-annotation" }
       )
-
-      // reset({
-      //   completionId: "",
-      //   files: [],
-      //   name: "",
-      //   summary: ""
-      // })
 
       await queryClient.invalidateQueries({
         queryKey: [

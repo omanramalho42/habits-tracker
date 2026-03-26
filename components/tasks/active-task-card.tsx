@@ -34,10 +34,13 @@ import { cn } from '@/lib/utils'
 import {
   Check,
   File,
+  Image,
   MoreVertical,
   Pencil,
-  Trash2
+  Trash2,
+  Video
 } from 'lucide-react'
+import MediaPreview from '../midia-preview'
 
 interface ActiveTaskCardProps {
   task: Task & {
@@ -171,6 +174,11 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           })}
         </div>
       )}
+      
+      <MediaPreview
+        imageUrl={task.imageUrl}
+        videoUrl={task.videoUrl}
+      />
     
       <div
         className={cn(

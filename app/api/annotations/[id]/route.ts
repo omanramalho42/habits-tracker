@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma"
 import { updateAnnotationSchema } from "@/lib/schema/annotations"
 import { cloudinary } from "@/lib/cloudinary"
 
-
 export async function uploadToCloudinary(file: File) {
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)

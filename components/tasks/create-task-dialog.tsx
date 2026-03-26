@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useRef } from "react"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
 
-import { createTask } from "@/services/tasks"
+// import { createTask } from "@/services/tasks"
 
 import GoalPicker from "@/components/goal-picker"
 import CounterPicker from "@/components/counter/counter-picker"
@@ -58,6 +58,7 @@ import {
 } from "lucide-react"
 
 import type { CreateTaskSchemaType } from "@/lib/schema/task"
+import { createTask } from "@/app/habits/_actions/task/task"
 
 interface CreateTaskDialogProps {
   trigger?: React.ReactNode
@@ -76,8 +77,8 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
     defaultValues: {
       name: "",
       color: "",
-      imageUrl: "",
-      videoUrl: "",
+      imageUrl: null,
+      videoUrl: null,
       categories: "",
       description: "",
       isPLus: true,
@@ -138,7 +139,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
     toast.loading("Criando tarefa....", {
       id: "create-task"
     })
-    
+    // return
     mutate(values)
   },[])
 
@@ -301,7 +302,8 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
 
               </div>
             </div>
-            <div className="flex justify-between gap-4 items-center">
+
+            {/* <div className="flex justify-between gap-4 items-center">
               <FormField
                 name="custom_field"
                 rules={{ max: 12 }}
@@ -362,21 +364,157 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                   </FormItem>
                 )}
               />
-            </div>
+            </div> */}
+
+            {/* <p className="text-sm truncate tracking-tighter">
+              Anexe imagens, video, arquivos para sua tarefa
+            </p> */}
             <div className="grid grid-cols-4 gap-2">
-              <Card>
-                Image
-              </Card>
-              <Card>
-                Video
-              </Card>
-              <Card>
-                File (pdf)
-              </Card>
-              <Card>
-                Audio
-              </Card>
+              {/* VIDEO */}
+              <FormField
+                control={control}
+                name="imageUrl"
+                render={({ field }) => {
+                  const inputRef = useRef<HTMLInputElement | null>(null)
+
+                  return (
+                    <FormItem>
+                      <FormControl>
+                        <div className="cursor-pointer">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            ref={inputRef}
+                            hidden
+                            onChange={(e) => {
+                              console.log(e.target.files?.[0],"files")
+                              const file = e.target.files?.[0]
+                              if (!file) return
+
+                              const url = URL.createObjectURL(file)
+                              field.onChange(file)
+                            }}
+                          />
+                          <Card 
+                            className="p-3 flex flex-col items-center justify-center text-xs"
+                            onClick={() => inputRef.current?.click()}
+                          >
+                            📷 Imagem
+                            {field.value !== null && (
+                              <span className="text-green-500 mt-1">Selecionado</span>
+                            )}
+                          </Card>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )
+                }}
+              />
+
+              {/* VIDEO */}
+              <FormField
+                control={control}
+                name="videoUrl"
+                render={({ field }) => {
+                  const inputRef = useRef<HTMLInputElement | null>(null)
+
+                  return (
+                    <FormItem>
+                      <FormControl>
+                        <div className="cursor-pointer">
+                          <Input
+                            type="file"
+                            accept="video/*"
+                            ref={inputRef}
+                            hidden
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+
+                              const url = URL.createObjectURL(file)
+                              field.onChange(file)
+                            }}
+                          />
+                          <Card 
+                            className="p-3 flex flex-col items-center justify-center text-xs"
+                            onClick={() => inputRef.current?.click()}
+                          >
+                            🎬 Video
+                            {field.value !== null && (
+                              <span className="text-green-500 mt-1">Selecionado</span>
+                            )}
+                          </Card>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )
+                }}
+              />
+
+              {/* AUDIO */}
+              {/* <FormField
+                control={control}
+                name="audioUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            const url = URL.createObjectURL(file)
+                            field.onChange(url)
+                          }}
+                        />
+                        <Card className="p-3 flex flex-col items-center justify-center text-xs">
+                          🎧 Audio
+                          {field.value && (
+                            <span className="text-green-500 mt-1">Selecionado</span>
+                          )}
+                        </Card>
+                      </label>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="fileUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.txt"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            const url = URL.createObjectURL(file)
+                            field.onChange(url)
+                          }}
+                        />
+                        <Card className="p-3 flex flex-col items-center justify-center text-xs">
+                          📄 File
+                          {field.value && (
+                            <span className="text-green-500 mt-1">Selecionado</span>
+                          )}
+                        </Card>
+                      </label>
+                    </FormControl>
+                  </FormItem>
+                )}
+              /> */}
             </div>
+
             {/* SWITCHES */}
             <FieldGroup>
               <FieldLabel>

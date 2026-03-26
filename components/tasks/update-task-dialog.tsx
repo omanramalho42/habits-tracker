@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
@@ -89,15 +89,15 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
       id: task.id,
       name: task.name,
       color: task.color || "",
-      imageUrl: task.imageUrl || "",
-      videoUrl: task.videoUrl || "",
+      imageUrl: task.imageUrl || null,
+      videoUrl: task.videoUrl || null,
       categories: categorieId,
       description: task.description || "",
       isPLus: task.isPlus || true,
       goals: goalId,
       emoji: task.emoji || "",
       limitCounter: task.limitCounter || 1,
-      counterId: task.counterId!,
+      counterId: task.counterId || "",
     }
   })
 
@@ -124,14 +124,14 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
         id: "update-task"
       })
 
-      reset({
-        emoji: "",
-        goals: "",
-        categories: "",
-        name: "",
-        limitCounter: 1,
-        custom_field: ""
-      })
+      // reset({
+      //   emoji: "",
+      //   goals: "",
+      //   categories: "",
+      //   name: "",
+      //   limitCounter: 1,
+      //   custom_field: ""
+      // })
 
       await queryClient.invalidateQueries({
         queryKey: [
@@ -327,6 +327,152 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
               <CategoriePicker
                 control={control}
               />
+            </div>
+
+            <div className="grid grid-cols-4 gap-2">
+              {/* VIDEO */}
+              <FormField
+                control={control}
+                name="imageUrl"
+                render={({ field }) => {
+                  const inputRef = useRef<HTMLInputElement | null>(null)
+
+                  return (
+                    <FormItem>
+                      <FormControl>
+                        <div className="cursor-pointer">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            ref={inputRef}
+                            hidden
+                            onChange={(e) => {
+                              console.log(e.target.files?.[0],"files")
+                              const file = e.target.files?.[0]
+                              if (!file) return
+
+                              const url = URL.createObjectURL(file)
+                              field.onChange(file)
+                            }}
+                          />
+                          <Card 
+                            className="p-3 flex flex-col items-center justify-center text-xs"
+                            onClick={() => inputRef.current?.click()}
+                          >
+                            📷 Imagem
+                            {field.value !== null && (
+                              <span className="text-green-500 mt-1">Selecionado</span>
+                            )}
+                          </Card>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )
+                }}
+              />
+
+              {/* VIDEO */}
+              <FormField
+                control={control}
+                name="videoUrl"
+                render={({ field }) => {
+                  const inputRef = useRef<HTMLInputElement | null>(null)
+
+                  return (
+                    <FormItem>
+                      <FormControl>
+                        <div className="cursor-pointer">
+                          <Input
+                            type="file"
+                            accept="video/*"
+                            ref={inputRef}
+                            hidden
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+
+                              const url = URL.createObjectURL(file)
+                              field.onChange(file)
+                            }}
+                          />
+                          <Card 
+                            className="p-3 flex flex-col items-center justify-center text-xs"
+                            onClick={() => inputRef.current?.click()}
+                          >
+                            🎬 Video
+                            {field.value !== null && (
+                              <span className="text-green-500 mt-1">Selecionado</span>
+                            )}
+                          </Card>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )
+                }}
+              />
+
+              {/* AUDIO */}
+              {/* <FormField
+                control={control}
+                name="audioUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            const url = URL.createObjectURL(file)
+                            field.onChange(url)
+                          }}
+                        />
+                        <Card className="p-3 flex flex-col items-center justify-center text-xs">
+                          🎧 Audio
+                          {field.value && (
+                            <span className="text-green-500 mt-1">Selecionado</span>
+                          )}
+                        </Card>
+                      </label>
+                    </FormControl>
+                  </FormItem>
+                )}
+              /> */}
+
+              {/* <FormField
+                control={control}
+                name="fileUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.txt"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            const url = URL.createObjectURL(file)
+                            field.onChange(url)
+                          }}
+                        />
+                        <Card className="p-3 flex flex-col items-center justify-center text-xs">
+                          📄 File
+                          {field.value && (
+                            <span className="text-green-500 mt-1">Selecionado</span>
+                          )}
+                        </Card>
+                      </label>
+                    </FormControl>
+                  </FormItem>
+                )}
+              /> */}
             </div>
 
             {/* SWITCHES */}

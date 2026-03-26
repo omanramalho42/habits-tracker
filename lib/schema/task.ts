@@ -23,8 +23,10 @@ export const CreateTaskSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   color: z.string().optional(),
-  videoUrl: z.string().optional(),
-  imageUrl: z.string().optional(),
+  
+  videoUrl: z.any().optional().nullable(),
+  imageUrl: z.any().optional().nullable(),
+
   isPLus: z.boolean().default(true).optional(),
   emoji: z.string().optional(),
   goals: z.string().optional(),
@@ -45,8 +47,10 @@ export const UpdateTaskSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   color: z.string().optional(),
-  videoUrl: z.string().optional(),
-  imageUrl: z.string().optional(),
+  
+  videoUrl: z.any().optional().nullable(),
+  imageUrl: z.any().optional().nullable(),
+
   isPLus: z.boolean().default(true).optional(),
   emoji: z.string().optional(),
   goals: z.string().optional(),

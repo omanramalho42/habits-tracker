@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 
 import { UpdateTaskSchema } from "@/lib/schema/task"
 import { getTodayString } from "@/lib/habit-utils"
+import { uploadToCloudinary } from "../route"
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -124,14 +125,32 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       custom_field,
       description,
       status,
-      imageUrl,
       isPLus,
+      imageUrl,
       videoUrl
     } = parsedBody.data
 
+    // ✅ IMAGE
+    let imageUrlUploaded: string | null = null
 
-    //TAREFA SIMPLES (DESCONECTAR COUNTER DE TASK)
-    console.log(limitCounter, counter, counterId, "data");
+    if (imageUrl && imageUrl instanceof File) {
+      const uploaded = await uploadToCloudinary(imageUrl)
+
+      if (uploaded) {
+        imageUrlUploaded = uploaded.url
+      }
+    }
+
+    // ✅ VIDEO
+    let videoUrlUploaded: string | null = null
+
+    if (videoUrl && videoUrl instanceof File) {
+      const uploaded = await uploadToCloudinary(videoUrl)
+
+      if (uploaded) {
+        videoUrlUploaded = uploaded.url
+      }
+    }
 
     const existingGoal = await prisma.goals.findFirst({
       where: {
@@ -194,8 +213,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         } )),
         color,
         description,
-        videoUrl,
-        imageUrl,
+        imageUrl: imageUrlUploaded || null,
+        videoUrl: videoUrlUploaded || null,
         updatedAt: today,
         ...(goals  && {goals: {
           connect: {
