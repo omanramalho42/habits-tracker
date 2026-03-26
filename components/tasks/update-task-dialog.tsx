@@ -10,10 +10,19 @@ import {
 import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
-import { createTask, updateTask } from "@/services/tasks"
+import { updateTask } from "@/services/tasks"
 
 import GoalPicker from "@/components/goal-picker"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field"
 
+import { Switch } from "@/components/ui/switch"
 import {
   Dialog,
   DialogContent,
@@ -46,19 +55,32 @@ import {
 } from "lucide-react"
 
 import type { UpdateTaskSchemaType } from "@/lib/schema/task"
-import { Categories, Goals, Task } from "@prisma/client"
+import type { Categories, Counter, Goals, Task } from "@prisma/client"
 import CategoriePicker from "../categorie-picker"
+<<<<<<< Updated upstream
+=======
+import { HexColorPicker } from "react-colorful"
+import CounterPicker from "../counter/counter-picker"
+>>>>>>> Stashed changes
 
 interface UpdateTaskDialogProps {
   trigger?: React.ReactNode
   onSuccessCallback?: (data: UpdateTaskSchemaType) => void
-  task: Task & { goals?: Goals[], categories?: Categories[] }
+  task: Task & { goals?: Goals[], categories?: Categories[], counter?: Counter }
 }
 
 const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
   const [open, setOpen] = useState<boolean>(false)
+<<<<<<< Updated upstream
   // const [color, setColor] = useState<boolean>(false)
 
+=======
+  const [color, setColor] = useState<boolean>(false)
+  const [isCounterTask, setIsCounterTask] =
+    useState<boolean>(task?.counter ? true : false)
+  console.log(task, "task 🎉")
+  
+>>>>>>> Stashed changes
   const today = new Date()
   today.setHours(0,0,0,0)
 
@@ -70,12 +92,17 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
   const form = useForm<UpdateTaskSchemaType>({
     defaultValues: {
       id: task.id,
-      name: task.name || "",
-      goals: goalId,
+      name: task.name,
+      color: task.color || "",
+      imageUrl: task.imageUrl || "",
+      videoUrl: task.videoUrl || "",
       categories: categorieId,
+      description: task.description || "",
+      isPLus: task.isPlus || true,
+      goals: goalId,
       emoji: task.emoji || "",
       limitCounter: task.limitCounter || 1,
-      custom_field: task.customField || ""
+      counterId: task.counterId!,
     }
   })
 
@@ -370,6 +397,45 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
               />
             </div>
 
+            {/* SWITCHES */}
+            <FieldGroup>
+              <FieldLabel>
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Simples</FieldTitle>
+                    <FieldDescription>Apenas completo</FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    checked={!isCounterTask}
+                    onCheckedChange={() => setIsCounterTask(prev => !prev)}
+                  />
+                </Field>
+              </FieldLabel>
+
+              <FieldLabel>
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Com métricas</FieldTitle>
+                    <FieldDescription>Contadores customizados</FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    checked={isCounterTask}
+                    onCheckedChange={() => setIsCounterTask(prev => !prev)}
+                  />
+                </Field>
+              </FieldLabel>
+            </FieldGroup>
+
+            {isCounterTask && (
+              <div className="transition-all">
+                <CounterPicker
+                  control={control}
+                />
+              </div>
+            )}
+
             {/* COLOR PICKER */}
             {/* <Dialog open={color} onOpenChange={setColor}>
               <DialogTrigger asChild>
@@ -426,7 +492,7 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
                     setOpen
                   }}
                   className="flex-1 bg-transparent"
-                  disabled={!isSubmitting}
+                  disabled={false}
                 >
                   Cancelar
                 </Button>

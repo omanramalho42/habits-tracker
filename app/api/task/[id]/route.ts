@@ -117,8 +117,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       emoji,
       limitCounter,
       goals,
-      categories
+      categories,
+      color,
+      counter,
+      counterId,
+      custom_field,
+      description,
+      status,
+      imageUrl,
+      isPLus,
+      videoUrl
     } = parsedBody.data
+
+
+    //TAREFA SIMPLES (DESCONECTAR COUNTER DE TASK)
+    console.log(limitCounter, counter, counterId, "data");
 
     const existingGoal = await prisma.goals.findFirst({
       where: {
@@ -176,6 +189,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         name,
         emoji,
         limitCounter,
+        ...(counterId && ( {
+          counterId: counterId!
+        } )),
+        color,
+        description,
+        videoUrl,
+        imageUrl,
         updatedAt: today,
         ...(goals  && {goals: {
           connect: {

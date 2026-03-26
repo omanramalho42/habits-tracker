@@ -284,9 +284,11 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                     control={control}
                   />
                 </div>
+
               </div>
             </div>
             
+<<<<<<< Updated upstream
             <div className="flex justify-between gap-4 items-center">
               <FormField
                 name="custom_field"
@@ -349,6 +351,61 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                 )}
               />
             </div>
+=======
+            <div className="grid grid-cols-4 gap-2">
+              <Card>
+                Image
+              </Card>
+              <Card>
+                Video
+              </Card>
+              <Card>
+                File (pdf)
+              </Card>
+              <Card>
+                Audio
+              </Card>
+            </div>
+
+            {/* SWITCHES */}
+            <FieldGroup>
+              <FieldLabel>
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Simples</FieldTitle>
+                    <FieldDescription>Apenas completo</FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    checked={!isCounterTask}
+                    onCheckedChange={() => setIsCounterTask(prev => !prev)}
+                  />
+                </Field>
+              </FieldLabel>
+
+              <FieldLabel>
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Com métricas</FieldTitle>
+                    <FieldDescription>Contadores customizados</FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    checked={isCounterTask}
+                    onCheckedChange={() => setIsCounterTask(prev => !prev)}
+                  />
+                </Field>
+              </FieldLabel>
+            </FieldGroup>
+
+            {isCounterTask && (
+              <div className="transition-all">
+                <CounterPicker
+                  control={control}
+                />
+              </div>
+            )}
+>>>>>>> Stashed changes
 
             {/* COLOR PICKER */}
             {/* <Dialog open={color} onOpenChange={setColor}>
@@ -397,6 +454,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
               </DialogContent>
             </Dialog>
              */}
+
             <DialogFooter className="flex gap-3 pt-4">
               <DialogClose asChild>
                 <Button

@@ -131,6 +131,31 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
              {task.categories.map((c) => c.emoji + " " + c.name).join(", ")}
           </p>
         )}
+<<<<<<< Updated upstream
+=======
+        {task.counter && task.counter.limit > 1 && (
+          <div className="">
+            {task.counter?.taskMetric?.map((metric) => {
+              return (
+                <div
+                  key={metric.id}
+                  className='flex flex-row items-center gap-3 justify-between'
+                >
+                  <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+                    {metric.emoji}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+                    {metric.field}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+                    {metric.value}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        )}
+>>>>>>> Stashed changes
       </div>
       
       <div

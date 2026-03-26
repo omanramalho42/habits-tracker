@@ -199,8 +199,16 @@ enum MetricType {
 model TaskMetric {
   id        String @id @default(uuid())
 
+<<<<<<< Updated upstream
   field     String? @db.VarChar(20)
   value     String? @db.VarChar(20) 
+=======
+  fieldType MetricType? @default(NUMERIC) @map("field_type")
+  emoji     String?     @db.VarChar(20)
+  field     String?     @db.VarChar(20)
+  value     String?     @db.VarChar(20)
+  unit      String?     @db.VarChar(10)
+>>>>>>> Stashed changes
 
   date      DateTime?
   type      MetricType
