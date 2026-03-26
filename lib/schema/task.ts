@@ -1,6 +1,4 @@
 import { z } from "zod"
-<<<<<<< Updated upstream
-=======
 
 export const MetricSchema = z.object({
   id: z.string().optional(),
@@ -20,24 +18,24 @@ export const MetricSchema = z.object({
     z.string()
     .optional(),
 })
->>>>>>> Stashed changes
 
 export const CreateTaskSchema = z.object({
   name: z.string(),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  videoUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  isPLus: z.boolean().default(true).optional(),
   emoji: z.string().optional(),
-  goal: z.string().optional(),
-  categorie: z.string().optional(),
+  goals: z.string().optional(),
+  categories: z.string().optional(),
   custom_field: z.string().max(12, "O maximo de caracteres permitidos é 12").optional(),
-<<<<<<< Updated upstream
-  limitCounter: z.coerce.number(),
-=======
   limitCounter: z.coerce.number()
     .min(0, "O valor minimo a ser selecionado é igual a 1")
     .max(10, "O valor máximo a ser selecionado é igual a 10")
     .default(1)
     .optional(),
   counterId: z.string().optional()
->>>>>>> Stashed changes
 })
 
 export type CreateTaskSchemaType = z.infer<typeof CreateTaskSchema>
@@ -45,6 +43,11 @@ export type CreateTaskSchemaType = z.infer<typeof CreateTaskSchema>
 export const UpdateTaskSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  videoUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  isPLus: z.boolean().default(true).optional(),
   emoji: z.string().optional(),
   goals: z.string().optional(),
   categories: z.string().optional(),

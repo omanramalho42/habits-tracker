@@ -103,7 +103,9 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
   })
 
   const onSubmit = useCallback((values: CreateCategorieSchemaType) => {
-    toast.loading("Criando categoria....", { id: "create-categorie" })
+    toast.loading("Criando categoria....", {
+      id: "create-categorie"
+    })
 
     mutate(values)
   },[])

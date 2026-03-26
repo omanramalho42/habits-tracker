@@ -123,7 +123,6 @@ const CounterPicker:React.FC<CounterPikcerProps> = ({
             placeholder="Pesquise o contador..."
           />
           <CreateCounterDialog />
-
           <CommandEmpty className='p-2'>
             <p className='text-sm'>
               Contador não encontrado

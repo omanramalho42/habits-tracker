@@ -4,6 +4,7 @@ import { useCallback, useState } from "react"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
+  Controller,
   useForm
 } from "react-hook-form"
 
@@ -30,7 +31,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose
+  DialogClose,
+  DialogDescription
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -57,11 +59,9 @@ import {
 import type { UpdateTaskSchemaType } from "@/lib/schema/task"
 import type { Categories, Counter, Goals, Task } from "@prisma/client"
 import CategoriePicker from "../categorie-picker"
-<<<<<<< Updated upstream
-=======
+
 import { HexColorPicker } from "react-colorful"
 import CounterPicker from "../counter/counter-picker"
->>>>>>> Stashed changes
 
 interface UpdateTaskDialogProps {
   trigger?: React.ReactNode
@@ -71,16 +71,11 @@ interface UpdateTaskDialogProps {
 
 const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
   const [open, setOpen] = useState<boolean>(false)
-<<<<<<< Updated upstream
-  // const [color, setColor] = useState<boolean>(false)
-
-=======
   const [color, setColor] = useState<boolean>(false)
   const [isCounterTask, setIsCounterTask] =
     useState<boolean>(task?.counter ? true : false)
   console.log(task, "task 🎉")
   
->>>>>>> Stashed changes
   const today = new Date()
   today.setHours(0,0,0,0)
 
@@ -333,69 +328,6 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
                 control={control}
               />
             </div>
-            
-            <div className="flex justify-between gap-4 items-center">
-              <FormField
-                name="custom_field"
-                rules={{ max: 12 }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <Label
-                        className="text-sm font-semibold"
-                        htmlFor="custom_field"
-                      >
-                        Nome do contador
-                      </Label>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        id="custom_field"
-                        placeholder="ex: Páginas..."
-                        onChange={field.onChange}
-                        type="text"
-                      />
-                    </FormControl>
-                    {errors.custom_field && (
-                      <span className="text-sm text-red-500">
-                        {errors.custom_field.message}
-                      </span>
-                    )}
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="limitCounter"
-                control={control}
-                rules={{ min: 1, max: 10 }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <Label
-                        htmlFor="counter"
-                        className="text-sm font-semibold"
-                      >
-                        Quantidade max
-                      </Label>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        id="limitCounter"
-                        value={field.value}
-                        onChange={field.onChange}
-                        type="number"
-                      />
-                    </FormControl>
-                    {errors.limitCounter && (
-                      <span className="text-sm text-red-500">
-                        {errors.limitCounter?.message}
-                      </span>
-                    )}
-                  </FormItem>
-                )}
-              />
-            </div>
 
             {/* SWITCHES */}
             <FieldGroup>
@@ -437,7 +369,7 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
             )}
 
             {/* COLOR PICKER */}
-            {/* <Dialog open={color} onOpenChange={setColor}>
+            <Dialog open={color} onOpenChange={setColor}>
               <DialogTrigger asChild>
                 <Button
                   className="w-full"
@@ -482,7 +414,7 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-             */}
+            
             <DialogFooter className="flex gap-3 pt-4">
               <DialogClose asChild>
                 <Button

@@ -36,6 +36,7 @@ model User {
   goals       Goals[]
   categories  Categories[]
   feedbacks   Feedback[]
+  posts       Post[]
 }
 
 enum THEME {
@@ -128,17 +129,29 @@ model Task {
   name          String      @db.VarChar(100)
   description   String?     @db.VarChar(255)
   emoji         String?     @db.VarChar(10)
+  color         String?     @db.VarChar(10)
 
-  //multiplos 
-  //customValue String?
+  imageUrl      String?     @db.VarChar(255) @map("image_url")
+  videoUrl      String?     @db.VarChar(255) @map("video_url")
+
+  isPlus        Boolean?    @default(true)
+
   customField   String?     @map("custom_field") @db.VarChar(12)
   
-  // customFieldCounter
-  limitCounter  Int?        @default(1)
+  limitCounter  Int?        @default(1) @map("limit_counter")
 
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime?   @updatedAt @map("updated_at")
   deletedAt     DateTime?   @map("deleted_at")
+
+  counterId     String?
+  counter       Counter? @relation(fields: [counterId], references: [id])
+
+  cronId        String?
+  cron          Cron? @relation(fields: [cronId], references: [id])
+  
+  frequencyId   String?
+  frequency     Frequency? @relation(fields: [frequencyId], references: [id])
 
   indexPos      Int?
   status        HabitStatus   @default(ACTIVE)
@@ -148,7 +161,6 @@ model Task {
   goals         Goals[]
   categories    Categories[]
 
-  checkpointId  String?  @map("checkpoint_id")
   checkpoints   CheckPoint[]
 
   @@index([indexPos])
@@ -177,55 +189,117 @@ model CheckPoint {
 }
 
 model Counter {
-  id    String @id @default(uuid())
+  id          String  @id @default(uuid())
 
-  label String
-  
-  valueNumber Float?
-  valueText   String?
+  label       String  @db.VarChar(20)
+  emoji       String? @db.VarChar(20)
 
-  limit Int
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime?   @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at")
+
+  status HabitStatus  @default(ACTIVE)
+
+  valueNumber Float?@default(0)
+  valueText String?@db.VarChar(20)
+  unit String?
+
+  limit       Int     @default(1)
 
   taskMetric TaskMetric[]
+  task       Task[]
+}
+
+model Frequency {
+  id  String  @id @default(uuid())
+
+  name          String      @db.VarChar(100)
+  description   String?     @db.VarChar(255)
+  emoji         String?     @db.VarChar(10)
+  color         String?     @db.VarChar(10)
+
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime?   @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at")
+
+  value Json
+
+  task Task[]
+  cron Cron[]
+
+  status HabitStatus  @default(ACTIVE)
+  
+  @@map("frequencu")
+}
+
+model Cron {
+  id  String  @id @default(uuid())
+
+  name          String      @db.VarChar(50)
+  description   String?     @db.VarChar(255)
+  emoji         String?     @db.VarChar(10)
+  color         String?     @db.VarChar(10)
+  
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime?   @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at")
+
+  value         String
+
+  task   Task[]
+  status HabitStatus  @default(ACTIVE)
+
+  frequency Frequency[]
+  @@map("cron")
 }
 
 enum MetricType {
-  WATER
-  STEPS
-  WEIGHT
-  MOOD
+  NUMERIC
+  STRING
+  FLOAT
 }
 
 model TaskMetric {
-  id        String @id @default(uuid())
+  id        String      @id @default(uuid())
 
-<<<<<<< Updated upstream
-  field     String? @db.VarChar(20)
-  value     String? @db.VarChar(20) 
-=======
-  fieldType MetricType? @default(NUMERIC) @map("field_type")
   emoji     String?     @db.VarChar(20)
+  fieldType MetricType? @default(NUMERIC) @map("field_type")
   field     String?     @db.VarChar(20)
-  value     String?     @db.VarChar(20)
-  unit      String?     @db.VarChar(10)
->>>>>>> Stashed changes
+  value     String?     @db.VarChar(20) 
 
   date      DateTime?
-  type      MetricType
-
-  updatedAt DateTime? @updatedAt() @map("updated_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  
+  updatedAt DateTime?   @updatedAt() @map("updated_at")
+  createdAt DateTime    @default(now()) @map("created_at")
   
   counterId String
-  counter   Counter @relation(fields: [counterId], references: [id])
+  counter   Counter     @relation(fields: [counterId], references: [id])
 
   notes     Annotations[]
 
-  completionId String @map("completion_id")
-  // completion  TaskCompletion @relation(fields: [completionId], references: [id])
+  completionId String?        @map("completion_id")
+  completion  TaskCompletion? @relation(fields: [completionId], references: [id])
 
   @@index([date])
   @@map("task_metric")
+}
+
+model Post {
+  id          String @id @default(uuid())
+  name        String @db.VarChar(100)
+  description String @db.VarChar(255)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  imageUrl String?  @db.VarChar(255)
+  videoUrl String?  @db.VarChar(255)
+
+  status HabitStatus @default(ACTIVE)
+
+  userId  String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model TaskCompletion {
@@ -236,14 +310,14 @@ model TaskCompletion {
   deletedAt     DateTime? @map("deleted_at")
 
   completedDate DateTime  @map("completed_date")
-  counter       Int? @default(0)// null = conta apenas 1 vez
+  counter       Int?      @default(0)// null = conta apenas 1 vez
   isCompleted   Boolean?  @default(false) @map("is_completed")
   
   taskId        String    @map("task_id")
   task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   
   annotations   Annotations[]
-  // metrics       TaskMetric[]
+  metrics       TaskMetric[]
 
   @@unique([taskId, completedDate])
   @@index([completedDate])
@@ -252,9 +326,9 @@ model TaskCompletion {
 
 model Routine {
   id          String    @id @default(uuid())
-  userId      String @map("user_id")
+  userId      String    @map("user_id")
 
-  user        User @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 
   name        String
   description String?
@@ -267,7 +341,7 @@ model Routine {
 
   cron        String?   @default("")
   frequency   Json?     @default("[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]")
-  emoji       String?    @db.VarChar(10) @default("")
+  emoji       String?   @db.VarChar(10) @default("")
 
   status      HabitStatus    @default(ACTIVE)
 

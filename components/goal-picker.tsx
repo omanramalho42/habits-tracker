@@ -123,7 +123,7 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
   )
 }
 
-function GoalRow({ goal }: { goal: any }) {
+function GoalRow({ goal }: { goal: Goals }) {
   return (
     <div className="flex items-center gap-2 sm:w-full w-40">
       <span role="img">{goal.emoji}</span>

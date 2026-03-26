@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { MetricSchema } from "./task"
+import { MetricSchema } from "@/lib/schema/task"
 
 export const createCounterSchema = z.object({
   label: 
