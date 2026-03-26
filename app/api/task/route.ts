@@ -46,6 +46,11 @@ export async function GET(request: Request) {
           }
         },
         schedules: true,
+        counter: {
+          include: {
+            taskMetric: true
+          }
+        }
       }
     })
 
@@ -93,24 +98,43 @@ export async function POST(request: NextRequest) {
       emoji,
       limitCounter,
       custom_field,
-      goal
+      goals,
+      counterId,
+      categories
     } = parsedBody.data
+
+    console.log(parsedBody.data, "limit ocunter")
 
     const newTask = await prisma.task.create({
       data: {
         userId: userDb.id,
         emoji,
         name,
+        ...(counterId && ( {
+          counterId: counterId!
+        } )),
+        // cronId,
+        // frequencyId,
         customField: custom_field,
         limitCounter: Number(limitCounter) || 1,
-        ...(goal  && {goals: {
+        ...(goals  && {goals: {
           connect: {
-            id: goal
+            id: goals
           }
         }}),
+        ...(categories  && {categories: {
+          connect: {
+            id: categories
+          }
+        }})
       },
       include: {
         completions: true,
+        counter: {
+          include: {
+            taskMetric: true
+          }
+        },
       },
     })
 

@@ -11,8 +11,21 @@ import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
 
-import GoalPicker from "@/components/goal-picker"
+import { createTask } from "@/services/tasks"
 
+import GoalPicker from "@/components/goal-picker"
+import CounterPicker from "@/components/counter/counter-picker"
+
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field"
+
+import { Switch } from "@/components/ui/switch"
 import {
   Dialog,
   DialogContent,
@@ -37,7 +50,7 @@ import {
   FormItem,
   FormLabel
 } from "@/components/ui/form"
-import { Card } from "../ui/card"
+import { Card } from "@/components/ui/card"
 
 import {
   CircleOff,
@@ -45,7 +58,6 @@ import {
 } from "lucide-react"
 
 import type { CreateTaskSchemaType } from "@/lib/schema/task"
-import { createTask } from "@/services/tasks"
 
 interface CreateTaskDialogProps {
   trigger?: React.ReactNode
@@ -54,25 +66,32 @@ interface CreateTaskDialogProps {
 
 const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
   const [open, setOpen] = useState<boolean>(false)
-  const [color, setColor] = useState<boolean>(false)
-
+  const [isCounterTask, setIsCounterTask] =
+    useState<boolean>(false)
+  
   const today = new Date()
   today.setHours(0,0,0,0)
 
   const form = useForm<CreateTaskSchemaType>({
     defaultValues: {
       name: "",
-      goal: "",
+      color: "",
+      imageUrl: "",
+      videoUrl: "",
+      categories: "",
+      description: "",
+      isPLus: true,
+      goals: "",
       emoji: "",
       limitCounter: 1,
-      custom_field: ""
+      counterId: "",
+      custom_field: "",
     }
   })
 
   const {
     control,
     handleSubmit,
-    watch,
     reset,
     formState: {
       errors,
@@ -92,24 +111,23 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
         id: "create-task"
       })
 
-      reset({
-        emoji: "",
-        goal: "",
-        name: "",
-        limitCounter: 1,
-        custom_field: ""
-      })
+      reset()
 
       await queryClient.invalidateQueries({
         queryKey: [
           "tasks"
         ]
       })
+      await queryClient.invalidateQueries({
+        queryKey: [
+          "routines"
+        ]
+      })
 
       setOpen(prev => !prev)
     },
     onError: () => {
-      toast.error("Aconteceu algo errado", {
+      toast.error("Ocorreu um erro ao criar tarefa", {
         id: "create-task",
       })
     },
@@ -120,7 +138,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
     toast.loading("Criando tarefa....", {
       id: "create-task"
     })
-
+    
     mutate(values)
   },[])
 
@@ -159,85 +177,81 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                 <FormField
                   control={control}
                   name="emoji"
-                  render={() => (
-                    <FormField
-                      control={control}
-                      name="emoji"
-                      render={({ field }) => (
-                        <FormItem className="grid-cols-1 gap-3">
-                          <FormLabel htmlFor="icon">
-                            Icone
-                          </FormLabel>
+                  render={({ field }) => (
+                    <FormItem className="grid-cols-1 gap-3">
+                      <FormLabel htmlFor="icon">
+                        Icone
+                      </FormLabel>
 
-                          <FormControl>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Card
-                                  className="w-full h-full"
-                                >
-                                  {field.value ? (
-                                    <div className="flex flex-col items-center justify-center gap-1">
-                                      <span className="text-3xl" role="img">
-                                        {field.value}
-                                      </span>
-                                      <p className="text-xs text-center text-muted-foreground">
-                                        Toque para trocar
-                                      </p>
-                                    </div>
-                                  ) : (
-                                    <div className="flex flex-col items-center justify-center gap-1">
-                                      <CircleOff className="h-6 w-6 text-muted-foreground" />
-                                      <p className="text-xs text-muted-foreground text-center">
-                                        Toque para selecionar
-                                      </p>
-                                    </div>
-                                  )}
-                                </Card>
-                              </PopoverTrigger>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Card
+                              className="w-full h-full"
+                            >
+                              {field.value ? (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <span className="text-3xl" role="img">
+                                    {field.value}
+                                  </span>
+                                  <p className="text-xs text-center text-muted-foreground">
+                                    Toque para trocar
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <CircleOff className="h-6 w-6 text-muted-foreground" />
+                                  <p className="text-xs text-muted-foreground text-center">
+                                    Toque para selecionar
+                                  </p>
+                                </div>
+                              )}
+                            </Card>
+                          </PopoverTrigger>
 
-                              <PopoverContent
-                                side="right"
-                                align="start"
-                                className="
-                                  scroll-container
-                                  w-full
-                                  p-3
-                                  max-h-[70vh]
-                                  max-w-[60vw]
-                                  sm:max-w-full
-                                  overflow-y-visible
-                                "
+                          <PopoverContent
+                            side="right"
+                            align="start"
+                            className="
+                              scroll-container
+                              w-full
+                              p-3
+                              max-h-[70vh]
+                              max-w-[60vw]
+                              sm:max-w-full
+                              overflow-y-visible
+                            "
+                          >
+                            <EmojiPicker.Root
+                              className="flex flex-col gap-2"
+                              onEmojiSelect={(emoji: any) => {
+                                field.onChange(emoji.emoji)
+                              }}
+                            >
+                              <EmojiPicker.Search className="w-full" />
+
+                              <EmojiPicker.Viewport
+                                className="h-[50vh] overflow-y-visisble"
+                                style={{
+                                  WebkitOverflowScrolling: "touch"
+                                }}
+                                onWheel={(e) => e.stopPropagation()}
                               >
-                                <EmojiPicker.Root
-                                  className="flex flex-col gap-2"
-                                  onEmojiSelect={(emoji: any) => {
-                                    field.onChange(emoji.emoji)
-                                  }}
-                                >
-                                  <EmojiPicker.Search className="w-full" />
+                                <EmojiPicker.Loading>
+                                  Carregando…
+                                </EmojiPicker.Loading>
 
-                                  <EmojiPicker.Viewport
-                                    className="h-[50vh] overflow-y-auto"
-                                    style={{ WebkitOverflowScrolling: "touch" }}
-                                    onWheel={(e) => e.stopPropagation()}
-                                  >
-                                    <EmojiPicker.Loading>
-                                      Carregando…
-                                    </EmojiPicker.Loading>
+                                <EmojiPicker.Empty>
+                                  Nenhum emoji encontrado
+                                </EmojiPicker.Empty>
 
-                                    <EmojiPicker.Empty>
-                                      Nenhum emoji encontrado
-                                    </EmojiPicker.Empty>
-
-                                    <EmojiPicker.List />
-                                  </EmojiPicker.Viewport>
-                                </EmojiPicker.Root>
-                              </PopoverContent>
-                            </Popover>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                                <EmojiPicker.List />
+                              </EmojiPicker.Viewport>
+                            </EmojiPicker.Root>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                    </FormItem>
                   )}
                 />
               </div>
@@ -286,69 +300,45 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                 </div>
               </div>
             </div>
-            
-            <div className="flex justify-between gap-4 items-center">
-              <FormField
-                name="custom_field"
-                rules={{ max: 12 }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <Label
-                        className="text-sm font-semibold"
-                        htmlFor="custom_field"
-                      >
-                        Nome do contador
-                      </Label>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        id="custom_field"
-                        placeholder="ex: Páginas..."
-                        onChange={field.onChange}
-                        type="text"
-                      />
-                    </FormControl>
-                    {errors.custom_field && (
-                      <span className="text-sm text-red-500">
-                        {errors.custom_field.message}
-                      </span>
-                    )}
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="limitCounter"
-                control={control}
-                rules={{ min: 1, max: 10 }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <Label
-                        htmlFor="counter"
-                        className="text-sm font-semibold"
-                      >
-                        Quantidade max
-                      </Label>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        id="limitCounter"
-                        value={field.value}
-                        onChange={field.onChange}
-                        type="number"
-                      />
-                    </FormControl>
-                    {errors.limitCounter && (
-                      <span className="text-sm text-red-500">
-                        {errors.limitCounter?.message}
-                      </span>
-                    )}
-                  </FormItem>
-                )}
-              />
-            </div>
+
+            {/* SWITCHES */}
+            <FieldGroup>
+              <FieldLabel>
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Simples</FieldTitle>
+                    <FieldDescription>Apenas completo</FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    checked={!isCounterTask}
+                    onCheckedChange={() => setIsCounterTask(prev => !prev)}
+                  />
+                </Field>
+              </FieldLabel>
+
+              <FieldLabel>
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Com métricas</FieldTitle>
+                    <FieldDescription>Contadores customizados</FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    checked={isCounterTask}
+                    onCheckedChange={() => setIsCounterTask(prev => !prev)}
+                  />
+                </Field>
+              </FieldLabel>
+            </FieldGroup>
+
+            {isCounterTask && (
+              <div className="transition-all">
+                <CounterPicker
+                  control={control}
+                />
+              </div>
+            )}
 
             {/* COLOR PICKER */}
             {/* <Dialog open={color} onOpenChange={setColor}>

@@ -3,9 +3,11 @@ import { Card } from '@/components/ui/card'
 
 import type {
   Categories,
+  Counter,
   Goals,
   Task,
-  TaskCompletion
+  TaskCompletion,
+  TaskMetric
 } from '@prisma/client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -39,9 +41,10 @@ import {
 
 interface ActiveTaskCardProps {
   task: Task & {
-    completions?: TaskCompletion[],
+    completions?: (TaskCompletion & { taskMetric?: TaskMetric[] })[],
     goals?: Goals[],
-    categories?: Categories[]
+    categories?: Categories[],
+    counter?: (Counter & { taskMetric?: TaskMetric[] }),
   }
   selectedDate?: Date
 }
@@ -109,6 +112,8 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
     })
   }
 
+  console.log(task, "task!");
+
   return (
     <Card className='flex flex-row justify-between items-center px-2'>
       <div className="flex flex-row gap-2 tracking-tight truncate">
@@ -129,6 +134,25 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
         {task.categories && task.categories.length > 0 && (
           <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
              {task.categories.map((c) => c.emoji + " " + c.name).join(", ")}
+          </p>
+        )}
+        {task.counter && task.counter.limit > 1 && (
+          <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+            {task.counter?.taskMetric?.map((metric) => {
+              return (
+                <div className='flex flex-row items-center gap-3 justify-between'>
+                  <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+                    {metric.emoji}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+                    {metric.field}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate max-w-25 tracking-tight">
+                    {metric.value}
+                  </p>
+                </div>
+              )
+            })}
           </p>
         )}
       </div>
