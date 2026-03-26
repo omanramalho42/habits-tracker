@@ -2,6 +2,8 @@
 
 import {  useState } from "react"
 
+import { useTheme } from "next-themes"
+
 import dynamic from "next/dynamic"
 
 import { motion } from 'framer-motion'
@@ -32,7 +34,6 @@ import type {
 
 import CreateRoutineDialog from "@/components/create-routine-dialog"
 import CreateTaskDialog from "@/components/tasks/create-task-dialog"
-import { CreateHabitDialog } from "@/components/create-habit-dialog"
 import ActiveTaskCard from "@/components/tasks/active-task-card"
 import HabitCardNew from "@/components/habits/habit-card-v2"
 import RoutineCard from "@/components/routines/routine-card-v2"
@@ -58,12 +59,10 @@ import {
   CodeIcon,
   Filter,
   Plus,
-  PlusIcon,
   TargetIcon,
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
-import { useTheme } from "next-themes"
 
 const container = {
   hidden: {},

@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { formatInTimeZone } from "date-fns-tz"
+import { MetricType } from '@prisma/client'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -55,6 +56,22 @@ export function getTodayDay() {
     month: '2-digit',
     day: '2-digit'
   }).format(now)
+}
+
+
+export const mapType = (type?: string): MetricType => {
+  switch (type) {
+    case "currency":
+      return "FLOAT"
+    case "weight":
+      return "FLOAT"
+    case "distance":
+      return "FLOAT"
+    case "liquid":
+      return "FLOAT"
+    default:
+      return "NUMERIC"
+  }
 }
 
 export function createRange<T = number>(
