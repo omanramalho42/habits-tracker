@@ -12,6 +12,7 @@ import {
 
 import {
   Check,
+  Eye,
   File,
   MoreVertical,
   Pencil,
@@ -31,6 +32,7 @@ import CreateAnnotationDialog from "@/components/annotations/create-annotation-d
 import DeleteTaskDialog from "@/components/tasks/delete-task-dialog"
 import UpdateTaskDialog from "@/components/tasks/update-task-dialog"
 import UpdateCounterDialog from "../counter/update-counter-dialog"
+import { TaskDetailsDialog } from "./task-detail-dialog"
 
 interface ActiveTaskCardProps {
   task: any
@@ -71,7 +73,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
   const handleToggle = () => {
     console.log(selectedDate, "selected Date");
-    
+
     mutate({
       taskId: task.id,
       date: (selectedDate || new Date()).toISOString()
@@ -144,6 +146,16 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                   }
                 />
               )}
+
+              <TaskDetailsDialog
+                task={task}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Detalhes
+                  </DropdownMenuItem>
+                }
+              />
             </DropdownMenuContent>
           </DropdownMenu>
 

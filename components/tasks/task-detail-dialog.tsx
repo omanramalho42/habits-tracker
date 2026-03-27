@@ -1,0 +1,238 @@
+"use client"
+
+import { useMemo, useState } from "react"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog"
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+
+import {
+  LineChart,
+  Line,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip
+} from "recharts"
+
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye
+} from "lucide-react"
+
+import type {
+  Task,
+  TaskCompletion,
+  TaskMetric
+} from "@prisma/client"
+
+interface TaskWithRelations extends Task {
+  completions: (TaskCompletion & {
+    metrics?: TaskMetric[]
+  })[]
+}
+
+interface Props {
+  task: TaskWithRelations
+  trigger?: React.ReactNode
+}
+
+export function TaskDetailsDialog({ task, trigger }: Props) {
+  const [open, setOpen] = useState(false)
+  const [date, setDate] = useState(new Date())
+
+  // 📊 total completions
+  const totalCompleted = useMemo(() => {
+    return task.completions.length
+  }, [task.completions])
+
+  // 📈 gráfico
+  const chartData = useMemo(() => {
+    return task.completions.map((c) => ({
+      date: new Date(c.completedDate).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit"
+      }),
+      value: c.counter ?? 1
+    }))
+  }, [task.completions])
+
+  // 📅 calendário
+  const calendarData = useMemo(() => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1
+
+      const completed = task.completions.some((c) => {
+        const d = new Date(c.completedDate)
+        return (
+          d.getDate() === day &&
+          d.getMonth() === month &&
+          d.getFullYear() === year
+        )
+      })
+
+      return { day, completed }
+    })
+  }, [task.completions, date])
+
+  const handlePrev = () => {
+    setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))
+  }
+
+  const handleNext = () => {
+    setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button size="icon" variant="ghost">
+            <Eye className="w-4 h-4" />
+          </Button>
+        )}
+      </DialogTrigger>
+
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span className="text-xl">{task.emoji}</span>
+            {task.name}
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* 📊 RESUMO */}
+        <div className="grid grid-cols-3 gap-2">
+          <Card className="p-2 text-center">
+            <p className="text-lg font-bold">{totalCompleted}</p>
+            <p className="text-xs text-muted-foreground">Execuções</p>
+          </Card>
+
+          <Card className="p-2 text-center">
+            <p className="text-lg font-bold">
+              {task.limitCounter || 1}
+            </p>
+            <p className="text-xs text-muted-foreground">Meta</p>
+          </Card>
+
+          <Card className="p-2 text-center">
+            <p className="text-lg font-bold text-green-500">
+              {Math.round((totalCompleted / 30) * 100)}%
+            </p>
+            <p className="text-xs text-muted-foreground">30d</p>
+          </Card>
+        </div>
+
+        {/* 📊 TABS */}
+        <Tabs defaultValue="line">
+          <TabsList className="w-full">
+            <TabsTrigger value="line" className="flex-1 text-xs">
+              Linha
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex-1 text-xs">
+              Calendário
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="flex-1 text-xs">
+              Métricas
+            </TabsTrigger>
+          </TabsList>
+
+          {/* 📈 LINE */}
+          <TabsContent value="line">
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chartData}>
+                <XAxis dataKey="date" hide />
+                <YAxis hide />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </TabsContent>
+
+          {/* 📅 CALENDAR */}
+          <TabsContent value="calendar">
+            <div className="flex justify-between items-center mb-2">
+              <Button variant="ghost" size="icon" onClick={handlePrev}>
+                <ChevronLeft />
+              </Button>
+
+              <p className="text-sm">
+                {date.toLocaleDateString("pt-BR", {
+                  month: "long",
+                  year: "numeric"
+                })}
+              </p>
+
+              <Button variant="ghost" size="icon" onClick={handleNext}>
+                <ChevronRight />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1">
+              {calendarData.map((d) => (
+                <div
+                  key={d.day}
+                  className={`h-8 flex items-center justify-center rounded text-xs ${
+                    d.completed
+                      ? "bg-green-500 text-white"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {d.day}
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* 📊 METRICS */}
+          <TabsContent value="metrics">
+            <div className="space-y-2">
+              {task.completions.map((c) => (
+                <Card key={c.id} className="p-2">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(c.completedDate).toLocaleDateString()}
+                  </p>
+
+                  {c.metrics?.length ? (
+                    c.metrics.map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex justify-between text-xs"
+                      >
+                        <span>{m.emoji} {m.field}</span>
+                        <span>{m.value} {m.unit}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Sem métricas
+                    </p>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  )
+}
