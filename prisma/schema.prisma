@@ -134,7 +134,7 @@ model Task {
   imageUrl      String?     @db.VarChar(255) @map("image_url")
   videoUrl      String?     @db.VarChar(255) @map("video_url")
 
-  isVisible     Boolean?     @default(false)
+  isVisible     Boolean?    @default(false)
 
   isPlus        Boolean?    @default(true)
 

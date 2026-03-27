@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Image from "next/image"
 
 import {
   Dialog,
@@ -149,6 +150,9 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
             <TabsTrigger value="metrics" className="flex-1 text-xs">
               Métricas
             </TabsTrigger>
+            <TabsTrigger value="media" className="flex-1 text-xs">
+              Mídia
+            </TabsTrigger>
           </TabsList>
 
           {/* 📈 LINE */}
@@ -229,6 +233,36 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
                   )}
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="media">
+            <div className="space-y-3">
+              <Card className="p-2 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+
+                  {/* IMAGE */}
+                  {task.imageUrl !== null && (
+                    <div className="relative w-full h-32 rounded-md overflow-hidden">
+                      <Image
+                        src={task.imageUrl}
+                        alt="task image"
+                        fill
+                        className="object-cover rounded-md"
+                      />
+                    </div>
+                  )}
+
+                  {/* VIDEO */}
+                  {task.videoUrl !== null && (
+                    <video
+                      src={task.videoUrl}
+                      controls
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  )}
+                </div>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>

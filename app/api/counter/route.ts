@@ -30,6 +30,11 @@ export async function GET(request: Request) {
 
     const counters = await prisma.counter.findMany({
       where: {
+        task: {
+          every: {
+            userId: userDb.id
+          }
+        },
         status: "ACTIVE",
       },
       include: {
