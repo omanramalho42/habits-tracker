@@ -307,7 +307,6 @@ const CounterItem: React.FC<CounterItemProps> = ({
           </SelectContent>
         </Select>
       )}
-
     </div>
   )
 }

@@ -134,6 +134,8 @@ model Task {
   imageUrl      String?     @db.VarChar(255) @map("image_url")
   videoUrl      String?     @db.VarChar(255) @map("video_url")
 
+  isVisible     Boolean?     @default(false)
+
   isPlus        Boolean?    @default(true)
 
   customField   String?     @map("custom_field") @db.VarChar(12)
@@ -266,6 +268,7 @@ model TaskMetric {
   fieldType MetricType? @default(NUMERIC) @map("field_type")
   field     String?     @db.VarChar(20)
   value     String?     @db.VarChar(20) 
+  unit      String?     @db.VarChar(20)
 
   date      DateTime?
   

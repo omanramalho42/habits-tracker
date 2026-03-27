@@ -105,11 +105,6 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
           "tasks"
         ]
       })
-      await queryClient.invalidateQueries({
-        queryKey: [
-          "counters"
-        ]
-      })
     },
     onError: () => {
       toast.error("Erro ao atualizar contador...", {
@@ -147,7 +142,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className='z-50'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             Editar contador

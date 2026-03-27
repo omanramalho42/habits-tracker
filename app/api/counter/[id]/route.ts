@@ -178,6 +178,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     // ➕ creates
     const newMetrics = await prisma.taskMetric.createMany({
       data: toCreate.map(metric => ({
+        emoji: metric.emoji,
         field: metric.field,
         value: metric.value,
         unit: metric.unit,
