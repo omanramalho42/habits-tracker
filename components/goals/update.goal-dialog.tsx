@@ -99,8 +99,8 @@ const UpdateGoalDialog:React.FC<UpdateGoalDialogProps> = ({ trigger, goal }) => 
 
       setOpen(prev => !prev)
     },
-    onError: () => {
-      toast.error("Aconteceu algo errado", {
+    onError: (error: any) => {
+      toast.error(`Aconteceu algo errado: ${error?.response?.data?.message}`, {
         id: "update-goal",
       })
     }

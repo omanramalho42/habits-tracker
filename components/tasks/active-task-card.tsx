@@ -230,9 +230,14 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                   <span className="truncate">
                     {metric.emoji} {metric.field}
                   </span>
-                  <span className="font-medium">
-                    {metric.value}
-                  </span>
+                  <div className="flex flex-row gap-2 items-center">
+                    <span className="font-medium">
+                      {metric.value}
+                    </span>
+                    <span className="font-bold">
+                      {metric?.unit}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

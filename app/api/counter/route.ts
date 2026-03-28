@@ -30,12 +30,13 @@ export async function GET(request: Request) {
 
     const counters = await prisma.counter.findMany({
       where: {
+        status: "ACTIVE",
         task: {
-          every: {
+          // Garante que o contador tenha PELO MENOS UMA tarefa do usuário
+          some: {
             userId: userDb.id
           }
-        },
-        status: "ACTIVE",
+        }
       },
       include: {
         taskMetric: true

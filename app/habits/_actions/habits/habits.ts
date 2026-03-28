@@ -13,7 +13,6 @@ import {
 
 export async function CreateHabit(form: CreateHabitSchemaType) {
   try {
-    
     const parsedBody =  CreateHabitSchema.safeParse(form)
   
     if (!parsedBody.success) throw new Error(parsedBody.error.message)

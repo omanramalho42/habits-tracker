@@ -31,6 +31,7 @@ import {
 } from "lucide-react"
 
 import type {
+  Annotations,
   Task,
   TaskCompletion,
   TaskMetric
@@ -39,6 +40,7 @@ import type {
 interface TaskWithRelations extends Task {
   completions: (TaskCompletion & {
     metrics?: TaskMetric[]
+    annotations?: Annotations[]
   })[]
 }
 
@@ -153,6 +155,9 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
             <TabsTrigger value="media" className="flex-1 text-xs">
               Mídia
             </TabsTrigger>
+            <TabsTrigger value="annotations" className="flex-1 text-xs">
+              Anotações
+            </TabsTrigger>
           </TabsList>
 
           {/* 📈 LINE */}
@@ -263,6 +268,70 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
                   )}
                 </div>
               </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="annotations">
+            <div className="space-y-2">
+
+              {task.completions.map((c) => {
+                if (!c.annotations || c.annotations.length === 0) return null
+
+                return (
+                  <Card key={c.id} className="p-2 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(c.completedDate).toLocaleDateString()}
+                    </p>
+
+                    {c.annotations.map((a) => (
+                      <div key={a.id} className="space-y-2">
+
+                        {/* TEXTO */}
+                        {a.summary && (
+                          <p className="text-sm text-foreground leading-snug">
+                            {a.summary}
+                          </p>
+                        )}
+
+                        {/* MIDIA */}
+                        <div className="grid grid-cols-2 gap-2">
+
+                          {a.imageUrl && (
+                            <div className="relative w-full h-32 rounded-md overflow-hidden">
+                              <Image
+                                src={a.imageUrl}
+                                alt="annotation image"
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+
+                          {/* {a.videoUrl && (
+                            <video
+                              src={a.videoUrl}
+                              controls
+                              className="w-full h-32 object-cover rounded-md"
+                            />
+                          )} */}
+
+                        </div>
+
+                      </div>
+                    ))}
+                  </Card>
+                )
+              })}
+
+              {/* EMPTY STATE */}
+              {task.completions.every(
+                (c) => !c.annotations || c.annotations.length === 0
+              ) && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Nenhuma anotação encontrada.
+                </p>
+              )}
+
             </div>
           </TabsContent>
         </Tabs>

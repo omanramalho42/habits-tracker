@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 import { CreateCategorieSchema } from "@/lib/schema/categorie"
+import { Prisma } from "@prisma/client"
 
 export async function GET(request: Request) {
   try {
@@ -55,7 +56,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: NextRequest) {
   try {
-    
     const body = await request.json()
 
     const parsedBody = CreateCategorieSchema.safeParse(body)
@@ -98,12 +98,38 @@ export async function POST(request: NextRequest) {
         emoji: emoji || "",
       }
     })
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error posting categories:", error.message)
+  } catch (error: any) {
+    // 🔥 ERRO DE DUPLICIDADE (UNIQUE)
+    console.error("🔥 ERROR RAW:", error)
+
+    // ✅ 1. Forma ideal (quando instanceof funciona)
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json({
-        error: error.message
-      }, { status: 500 })
+        error: "Duplicate entry",
+        message: "Você já possui um objetivo com esse nome.",
+        field: "name"
+      }, { status: 409 })
     }
+    
+    // ✅ 2. Fallback (Turbopack / edge cases)
+    if (
+      error?.code === "P2002" ||
+      error?.message?.includes("Unique constraint failed")
+    ) {
+      return NextResponse.json({
+        error: "Duplicate entry",
+        message: "Você já possui um objetivo com esse nome.",
+        field: "name"
+      }, { status: 409 })
+    }
+
+    // 🔥 fallback geral
+    return NextResponse.json({
+      error: "Internal server error",
+      message: "Algo deu errado ao criar o objetivo."
+    }, { status: 500 })
   }
 }

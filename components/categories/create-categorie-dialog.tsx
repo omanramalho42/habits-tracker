@@ -42,6 +42,9 @@ import { CircleOff, PlusSquare } from 'lucide-react'
 
 import type { CreateCategorieSchemaType } from '@/lib/schema/categorie'
 import { CreateCategorie } from '@/app/habits/_actions/categories/categories'
+import { handleApiError } from '@/helpers/alert-dialog'
+import { useApiError } from '@/hooks/use-alert-dialog'
+import { AlertModalDialog } from '../modals/alert-modal-dialog'
 
 interface CreateCategorieDialogProps {
   trigger?: React.ReactNode
@@ -49,7 +52,13 @@ interface CreateCategorieDialogProps {
 
 const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger }) => {
   const [open, setOpen] = useState<boolean>(false)
-  
+    const {
+      open: alertOpen,
+      setOpen: setAlertOpen,
+      message,
+      handleError
+    } = useApiError()
+
   const form = useForm<CreateCategorieSchemaType>({
     defaultValues: {
       name: "",
@@ -77,7 +86,8 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
       console.log(values, "values")
       return await CreateCategorie(values)
     },
-    onSuccess: async () => {
+    onSuccess: async (values) => {
+      console.log(values, "values")
       toast.success("Categoria criada com sucesso! 🎉", {
         id: "create-categorie"
       })
@@ -95,8 +105,10 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
 
       setOpen(prev => !prev)
     },
-    onError: () => {
-      toast.error("Aconteceu algo errado", {
+    onError: (error: any) => {
+      console.log(error, "error")
+      // handleApiError(error, handleError)
+      toast.error(`Aconteceu algo errado: ${error}`, {
         id: "create-categorie",
       })
     }
@@ -304,7 +316,11 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
           </Button>
         </DialogFooter>
       </DialogContent>
-
+      <AlertModalDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        description={message}
+      />
     </Dialog>
   )
 }

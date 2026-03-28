@@ -37,6 +37,7 @@ model User {
   categories  Categories[]
   feedbacks   Feedback[]
   posts       Post[]
+  // counters    Counter[]
 }
 
 enum THEME {
@@ -203,13 +204,19 @@ model Counter {
   status HabitStatus  @default(ACTIVE)
 
   valueNumber Float?@default(0)
-  valueText String?@db.VarChar(20)
-  unit String?
+  valueText   String?@db.VarChar(20)
+  unit        String?
+
+  // userId  String?
+  // user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   limit       Int     @default(1)
 
   taskMetric TaskMetric[]
   task       Task[]
+  // 🎯 O Pulo do Gato:
+  // @@unique([userId, label, valueNumber, unit])
+  // @@map("counter")
 }
 
 model Frequency {
@@ -455,6 +462,7 @@ model Goals {
   checkpoints   CheckPoint[]
 
   status        HabitStatus? @default(ACTIVE)
+  @@unique([userId, name])
   @@map("goals")
 }
 
@@ -476,6 +484,7 @@ model Categories {
   tasks         Task[]
 
   status        HabitStatus? @default(ACTIVE)
+  @@unique([userId, name])
   @@map("categories")
 }
 

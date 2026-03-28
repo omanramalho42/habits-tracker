@@ -6,6 +6,10 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: Request) {
   try {
+    const authData = await auth();
+    console.log("Auth Data:", authData); // Verifique se há alguma mensagem de erro no terminal
+    // Isso vai imprimir no seu terminal o motivo técnico (ex: "token expired", "invalid signature")
+    console.log("DEBUG CLERK:", authData.debug());
     const { userId } = await auth()
     
     if (!userId) {

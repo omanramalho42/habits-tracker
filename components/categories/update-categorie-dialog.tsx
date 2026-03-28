@@ -101,8 +101,8 @@ const UpdateCategorieDialog:React.FC<UpdateCategoryDialogProps> = ({ trigger, ca
 
       setOpen(prev => !prev)
     },
-    onError: () => {
-      toast.error("Aconteceu algo errado", {
+    onError: (error: any) => {
+      toast.error(`Aconteceu algo errado: ${error?.response?.data?.message}`, {
         id: "update-categorie",
       })
     }

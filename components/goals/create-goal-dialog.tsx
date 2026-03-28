@@ -40,12 +40,22 @@ import {
 import { Card } from '@/components/ui/card'
 
 import { CircleOff, PlusSquare } from 'lucide-react'
+import { handleApiError } from '@/helpers/alert-dialog'
+import { useApiError } from '@/hooks/use-alert-dialog'
+import { AlertModalDialog } from '../modals/alert-modal-dialog'
 
 interface CreateGoalDialogProps {
   trigger?: React.ReactNode
 }
 
 const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
+  const {
+    open: alertOpen,
+    setOpen: setAlertOpen,
+    message,
+    handleError
+  } = useApiError()
+
   const [open, setOpen] = useState<boolean>(false)
   
   const form = useForm<CreateGoalSchemaType>({
@@ -92,8 +102,10 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
 
       setOpen(prev => !prev)
     },
-    onError: () => {
-      toast.error("Aconteceu algo errado", {
+    onError: (error: any) => {
+      console.log(error, "error")
+      // handleApiError(error, handleError)
+      toast.error(`Aconteceu algo errado: ${error}`, {
         id: "create-goal",
       })
     }
@@ -295,7 +307,11 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
           </Button>
         </DialogFooter>
       </DialogContent>
-
+      <AlertModalDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        description={message}
+      />
     </Dialog>
   )
 }
