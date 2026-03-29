@@ -63,6 +63,7 @@ import {
 } from "lucide-react"
 
 import type { HabitWithStats } from "@/lib/types"
+import MultiGraphsChart from "@/components/charts/multi-graphs-chart"
 
 const container = {
   hidden: {},
@@ -190,8 +191,10 @@ export default function Home() {
             onSuccessCallback={setSelectedDate}
           />
 
+          <MultiGraphsChart tasks={tasks} />
+
           <Tabs defaultValue="habits">
-            <TabsList className="bg-background/60 w-full my-5 border-b border-white/10 rounded-none h-auto p-0 justify-start gap-8 max-w-full overflow-x-auto scroll-container">
+            <TabsList className="bg-card w-full my-5 border-b border-white/10 rounded-md h-auto p-0 justify-start gap-8 max-w-full overflow-x-auto scroll-container">
               <TabsTrigger 
                 value="routines" 
                 className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
@@ -293,17 +296,6 @@ export default function Home() {
                           Hábitos
                         </p>
                         <div className="flex flex-row gap-2 items-center justify-center">
-                          {/* <CreateHabitDialog
-                            trigger={
-                              <Button
-                                variant="outline"
-                                type="button"
-                                size="icon-sm"
-                              >
-                                <PlusIcon />
-                              </Button>                          
-                            }
-                          /> */}
                           <Button
                             disabled
                             variant="outline"
@@ -318,6 +310,10 @@ export default function Home() {
                         type="text"
                         placeholder="pesquise pelo nome..."
                         value={filter}
+                        // className="bg-black"
+                        style={{
+                          backgroundColor: 'var(--card)'
+                        }}
                         onChange={(event) => {
                           handleFilterHabits(event.target.value)
                         }}

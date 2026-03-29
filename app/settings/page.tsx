@@ -149,7 +149,7 @@ export default function Settings() {
               Conta
             </h2>
 
-            <Card className='bg-card/80'>
+            <Card className='bg-card'>
               <CardContent className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
@@ -200,7 +200,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
               Exibição
             </h2>
-            <div className="bg-card/80 border border-border rounded-xl divide-y divide-border">
+            <div className="bg-card border border-border rounded-xl divide-y divide-border">
               <div className="flex items-center justify-between p-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="show-archived">Mostrar Arquivados</Label>
@@ -222,7 +222,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
               Sobre
             </h2>
-            <div className="bg-card/80 border border-border rounded-xl p-4 space-y-3">
+            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
                   <Target className="size-6 text-primary-foreground" />
@@ -248,7 +248,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-muted-foreground uppercase">
               Notificações
             </h2>
-            <Card className='bg-card/80'>
+            <Card className='bg-card'>
               <CardContent className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Bell className="size-4"/>
@@ -276,7 +276,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-muted-foreground uppercase">
               Tema
             </h2>
-            <Card className='bg-card/80'>
+            <Card className='bg-card'>
               <CardContent className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Pencil className="size-4"/>
@@ -298,7 +298,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
               Plano
             </h2>
-            <div className="bg-card/80 border rounded-xl p-6 flex items-center justify-between">
+            <div className="bg-card border rounded-xl p-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="size-12 rounded-xl bg-primary flex items-center justify-center">
                   <Crown className="text-primary-foreground"/>
@@ -363,7 +363,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-destructive uppercase mb-3">
               Zona de Perigo
             </h2>
-            <div className="bg-card/80 border border-destructive/50 rounded-xl p-4">
+            <div className="bg-card border border-destructive/50 rounded-xl p-4">
               <div className="space-y-3">
                 <div>
                   <h3 className="font-medium">Resetar Todos os Dados</h3>
@@ -419,7 +419,7 @@ function StatCard({
   value:number
 }){
   return (
-    <Card className='bg-card/80'>
+    <Card className='bg-card'>
       <CardContent className="p-4 text-center">
         <p className="text-2xl font-bold">
           {value}

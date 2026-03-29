@@ -49,7 +49,7 @@ const CurrentSectionDate:React.FC<CurrentSectionDateProps> = ({
   )
 
   return (
-    <div className="bg-card/50 rounded-2xl p-5 border border-border/50">
+    <div className="bg-card/90 rounded-2xl p-5 border border-border/50">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-medium text-foreground">
           {currentMonthYear}

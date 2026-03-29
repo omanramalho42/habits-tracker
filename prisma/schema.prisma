@@ -201,10 +201,10 @@ model Counter {
   updatedAt     DateTime?   @updatedAt @map("updated_at")
   deletedAt     DateTime?   @map("deleted_at")
 
-  status HabitStatus  @default(ACTIVE)
+  status HabitStatus    @default(ACTIVE)
 
-  valueNumber Float?@default(0)
-  valueText   String?@db.VarChar(20)
+  valueNumber Float?    @default(0)
+  valueText   String?   @db.VarChar(20)
   unit        String?
 
   // userId  String?

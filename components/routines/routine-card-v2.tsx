@@ -401,7 +401,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
         "relative flex flex-col justify-between p-5 rounded-2xl gap-4 transition-all duration-500 h-full overflow-hidden",
 
         // BASE
-        "bg-zinc-900/80 border border-white/5",
+        "bg-card border border-white/5",
 
         // ATIVO (🔥 igual mock)
         allDone &&
