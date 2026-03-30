@@ -46,7 +46,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
     isTravelling
   } = parsedBody.data
 
-  console.log(parsedBody.data, "data")
+  // console.log(parsedBody.data, "data")
 
   if(!parsedBody.success) {
     throw new Error("Error parsing data files")
@@ -77,7 +77,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
     }
   })
 
-  console.log(avatarImageUrl, "avatar image")
+  // console.log(avatarImageUrl, "avatar image")
 
   try {
     if(!existUserSettings) {
@@ -159,7 +159,7 @@ export async function createUserSettings(form: UpdateUserSettingSchemaType) {
     isTravelling
   } = parsedBody.data
 
-  console.log(parsedBody.data, "data")
+  // console.log(parsedBody.data, "data")
 
   if(!parsedBody.success) {
     throw new Error("Error parsing data files")

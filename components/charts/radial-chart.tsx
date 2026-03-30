@@ -27,7 +27,7 @@ interface ChartRadialProps {
 }
 
 const ChartRadialGrid: React.FC<ChartRadialProps> = ({ tasks }) => {
-  console.log(tasks, "tasks")
+  // console.log(tasks, "tasks")
   const chartData = React.useMemo(() => {
     const map = new Map<string, number>()
 

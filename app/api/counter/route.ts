@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       throw new Error(parsedBody.error.message)
     }
 
-    console.log(parsedBody.data, "data")
+    // console.log(parsedBody.data, "data")
 
     const {
       label,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log(newCounter, 'result')
+    // console.log(newCounter, 'result')
 
     return NextResponse.json({
       newCounter

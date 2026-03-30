@@ -58,6 +58,28 @@ export function getTodayDay() {
   }).format(now)
 }
 
+export const uploadFile = async (file: File) => {
+  const data = new FormData();
+  data.append("file", file);
+  data.append("upload_preset", "my_unsigned_preset"); // Nome do preset criado no Cloudinary
+
+  try {
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/dxx3qxsxt/auto/upload`, // sem espaço
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+
+    const result = await res.json();
+    console.log("Upload success:", result);
+    return result;
+  } catch (error) {
+    console.error("Upload error:", error);
+    throw error;
+  }
+};
 
 export const mapType = (type?: string): MetricType => {
   switch (type) {

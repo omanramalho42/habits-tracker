@@ -387,7 +387,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                             ref={inputRef}
                             hidden
                             onChange={(e) => {
-                              console.log(e.target.files?.[0],"files")
+                              // console.log(e.target.files?.[0],"files")
                               const file = e.target.files?.[0]
                               if (!file) return
 

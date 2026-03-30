@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       throw new Error(parsedBody.error.message)
     }
 
-    console.log(parsedBody.data, "data")
+    // console.log(parsedBody.data, "data")
 
     const {
       id,

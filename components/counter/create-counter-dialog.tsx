@@ -113,8 +113,6 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
     setOpen(prev => !prev)
   }
 
-  console.log(errors, "errors")
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger

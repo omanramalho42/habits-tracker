@@ -11,7 +11,12 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -34,18 +39,16 @@ import type {
   Annotations,
   Task,
   TaskCompletion,
-  TaskMetric
+  TaskMetric,
 } from "@prisma/client"
 
-interface TaskWithRelations extends Task {
-  completions: (TaskCompletion & {
-    metrics?: TaskMetric[]
-    annotations?: Annotations[]
-  })[]
-}
-
 interface Props {
-  task: TaskWithRelations
+  task: (Task & {
+    completions?: (TaskCompletion & {
+      metrics?: TaskMetric[],
+      annotations?: Annotations[]
+    })[]
+  })
   trigger?: React.ReactNode
 }
 
@@ -55,12 +58,12 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
 
   // 📊 total completions
   const totalCompleted = useMemo(() => {
-    return task.completions.length
+    return task?.completions?.length || 0
   }, [task.completions])
 
   // 📈 gráfico
   const chartData = useMemo(() => {
-    return task.completions.map((c) => ({
+    return task?.completions?.map((c) => ({
       date: new Date(c.completedDate).toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "2-digit"
@@ -79,7 +82,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
     return Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1
 
-      const completed = task.completions.some((c) => {
+      const completed = task.completions?.some((c) => {
         const d = new Date(c.completedDate)
         return (
           d.getDate() === day &&
@@ -99,6 +102,8 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
   const handleNext = () => {
     setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))
   }
+
+  // console.log(task, "tasj")
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -142,7 +147,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
 
         {/* 📊 TABS */}
         <Tabs defaultValue="line">
-          <TabsList className="w-full">
+          <TabsList className="w-full max-w-full container-scroll overflox-x-visible">
             <TabsTrigger value="line" className="flex-1 text-xs">
               Linha
             </TabsTrigger>
@@ -215,7 +220,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
           {/* 📊 METRICS */}
           <TabsContent value="metrics">
             <div className="space-y-2">
-              {task.completions.map((c) => (
+              {task.completions?.map((c) => (
                 <Card key={c.id} className="p-2">
                   <p className="text-xs text-muted-foreground">
                     {new Date(c.completedDate).toLocaleDateString()}
@@ -274,7 +279,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
           <TabsContent value="annotations">
             <div className="space-y-2">
 
-              {task.completions.map((c) => {
+              {task.completions?.map((c) => {
                 if (!c.annotations || c.annotations.length === 0) return null
 
                 return (
@@ -324,7 +329,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
               })}
 
               {/* EMPTY STATE */}
-              {task.completions.every(
+              {task.completions?.every(
                 (c) => !c.annotations || c.annotations.length === 0
               ) && (
                 <p className="text-sm text-muted-foreground text-center">

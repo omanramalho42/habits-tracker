@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 
-import { isHabitActiveOnDate } from '@/lib/habit-utils'
+import { calculateStreak, isHabitActiveOnDate, WEEKDAY_MAP } from '@/lib/habit-utils'
 import { CreateHabitSchema } from '@/lib/schema/habit'
 import { inngest } from '@/src/inngest/client'
 import { welcomeEmailTemplate } from '@/lib/nodemailer/template'
@@ -14,106 +14,111 @@ import { transporter } from '@/lib/nodemailer'
 export async function GET(request: Request) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
-      return NextResponse.json({
-        error: "Unauthorized"
-      }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    
+
     const userDb = await prisma.user.findFirst({
-      where: {
-        clerkUserId: userId
-      }
+      where: { clerkUserId: userId }
     })
-    
+
     if (!userDb) {
-      return NextResponse.json({
-        error: "user not find on db"
-      }, { status: 401 })
+      return NextResponse.json({ error: "User not found" }, { status: 401 })
     }
-    
+
     const { searchParams } = new URL(request.url)
-    const paramDate = searchParams.get('selectedDate')
-    
-    const validator = z.string()
-    const queryParams = validator.safeParse(paramDate)
+    const paramDate = searchParams.get("selectedDate")
 
-    // const inggestData = await inngest.send({
-    //   name: "app/user.created",
-    //   data: {
-    //     email: "contato@habits.app.br",
-    //     name: "Teste"
-    //   }
-    // })
-    // const inggestData2 = await inngest.send({
-    //   name: "app/send.daily.habits",
-    // })
-    // new Intl.DateTimeFormat(
-    //  'pt-BR', {
-    //    timeZone: 'America/Sao_Paulo',
-    //    day: 'numeric',
-    //    month: "long",
-    //    year: "numeric",
-    //    weekday: 'short'
-    // }).format(new Date())
-    // console.log(inggestData, "INNGEST")
-    // console.log(inggestData2, "INNGEST DATA 2")
-    // const htmlTemplate = 
-    //   welcomeEmailTemplate("Oman")
+    const selectedDate = paramDate ? new Date(paramDate) : null
 
-    // const mailOptions = {
-    //   from: "contato@habits.app.br",
-    //   to: 'omanapple42@hotmail.com',
-    //   subject: `Seja bem vindo ao ecossitema de hábitos 🪄`,
-    //   text: 'Obrigado por se juntar ao Habits App',
-    //   html: htmlTemplate
-    // }
-
-    // await transporter.sendMail(mailOptions)
-    
     const habits = await prisma.habit.findMany({
       where: {
         userId: userDb.id,
-        status: 'ACTIVE'
+        status: "ACTIVE",
+        ...(selectedDate && {
+          startDate: { lte: selectedDate },
+          OR: [
+            { endDate: null },
+            { endDate: { gte: selectedDate } }
+          ]
+        })
       },
-      orderBy: {
-        createdAt: "asc",
-      },
+      orderBy: { createdAt: "asc" },
       include: {
-        completions: true,
-        categories: {
-          where: {
-            status: 'ACTIVE'
+        completions: {
+          orderBy: {
+            completedDate: "desc"
           }
         },
-        goals: {
-          where: {
-            status: "ACTIVE"
-          }
-        },
-        schedules: true,
+        categories: { where: { status: "ACTIVE" } },
+        goals: { where: { status: "ACTIVE" } },
+        schedules: true
       }
     })
 
-    if (queryParams.success) {
-      if(queryParams.data) {
+    // 🔥 filtra frequência (única parte que ainda precisa ser JS)
+    let filteredHabits = habits
 
-        const activeHabits: any[] = habits.filter((habit: any) =>
-          isHabitActiveOnDate(habit, new Date(queryParams.data))
+    if (selectedDate) {
+      const dayOfWeek = selectedDate.getUTCDay()
+
+      filteredHabits = habits.filter(habit =>
+        (habit.frequency as string[])?.some(
+          key => WEEKDAY_MAP[key] === dayOfWeek
         )
-        
-        return NextResponse.json(activeHabits)
-      }
+      )
     }
 
-    return NextResponse.json(habits)
+    // 🔥 adiciona stats direto aqui
+    const result = filteredHabits.map(habit => {
+      const completions = habit.completions
+
+      // 📅 normaliza datas
+      const normalized = completions.map(c => {
+        const d = new Date(c.completedDate!)
+        d.setHours(0, 0, 0, 0)
+
+        return {
+          completedDate: d.toISOString().split("T")[0]
+        }
+      })
+
+      const { currentStreak, longestStreak } =
+        calculateStreak(normalized)
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const isCompletedToday = completions.some(c => {
+        const d = new Date(c.completedDate!)
+        d.setHours(0, 0, 0, 0)
+        return d.getTime() === today.getTime()
+      })
+
+      const completionRate =
+        completions.length > 0
+          ? (completions.length / 365) * 100
+          : 0
+
+      return {
+        ...habit,
+        current_streak: currentStreak,
+        longest_streak: longestStreak,
+        completion_rate: Math.round(completionRate),
+        is_completed_today: isCompletedToday
+      }
+    })
+
+    return NextResponse.json(result)
+
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error fetching habits:", error.message)
-      return NextResponse.json({
-        error: error.message
-      }, { status: 500 })
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
     }
   }
 }

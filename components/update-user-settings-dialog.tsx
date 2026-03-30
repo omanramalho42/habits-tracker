@@ -69,7 +69,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
   const [isPreviewOpen, setIsPreviewOpen] =
     useState<boolean>(false)
 
-  console.log(userSettings, "settings ⚙️");
+  // console.log(userSettings, "settings ⚙️");
 
   const form = useForm<UpdateUserSettingSchemaType>({
     defaultValues: {

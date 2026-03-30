@@ -46,7 +46,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const completedDate = new Date(newDate)
     // completedDate.setHours(0, 0, 0, 0)
 
-    console.log(completedDate, "completedDate")
+    // console.log(completedDate, "completedDate")
     
     // 1️⃣ Busca a completion do dia
     const existingCompletion = await prisma.habitCompletion.findUnique({

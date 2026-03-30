@@ -394,7 +394,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     filter.field !== "type" ||
     filter.values.includes("task")
     
-  console.log({ routine }, "routine")
   return (
     <Card
       className={cn(

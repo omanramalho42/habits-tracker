@@ -81,7 +81,7 @@ export default function MultiHabitsTasksPicker({
 
   const isLoading = isLoadingTask || isLoadingHabits
 
-  console.log({tasks}, {habits}, "✨")
+  // console.log({tasks}, {habits}, "✨")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -82,6 +82,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       if(response.data.completion) {
         const { completion } = response.data
         console.log({ completion })
+        console.log(completion, "completion");
         // console.log(completion.counter, completion.habit.limitCounter)
         if(completion?.counter !== completion?.habit?.limitCounter) {
           window.alert("show modal dialog")
@@ -153,6 +154,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       )
     },
   })
+
   const handleToggleHabit = (habitId: string, date: string) => {
     toast.loading(
       "Alterando status do hábito...", {
@@ -167,8 +169,6 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
 
   const start = startOfWeek(selectedDate, { weekStartsOn: 0 }) // domingo
   const end = endOfWeek(selectedDate, { weekStartsOn: 0 })
-
-  console.log(start, end, "RANGE WEEK")
 
   const completionsThisWeek = habit.completions?.filter(c =>
     isWithinInterval(
@@ -226,7 +226,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
         'relative flex flex-col w-full p-4 gap-4 rounded-2xl transition-all duration-300',
 
         // BASE (default)
-        'bg-zinc-900 border border-white/5',
+        'bg-card border border-white/5',
         
         // ATIVO (completado)
         isCompletedToday &&

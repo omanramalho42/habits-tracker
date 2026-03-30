@@ -40,8 +40,6 @@ const CreatetaskMetricCounter: React.FC<CreatetaskMetricCounterProps> = ({ contr
     name: "taskMetric",
   })
 
-  console.log(fields, "fields taskMetric")
-
   return (
     <div className="flex flex-col gap-4 z-50">
       <div className="flex flex-col gap-3 border p-4 rounded-xl">

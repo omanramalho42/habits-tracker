@@ -114,7 +114,7 @@ const chartData = React.useMemo(() => {
     }))
     .sort((a, b) => a.date.localeCompare(b.date))
 }, [tasks, timeRange])
-  console.log(chartData, "tasks!")
+  // console.log(chartData, "tasks!")
 
   return (
     <Card className="pt-0">

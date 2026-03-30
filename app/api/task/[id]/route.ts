@@ -130,8 +130,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       videoUrl
     } = parsedBody.data
 
+    console.log(parsedBody.data, "parsedBody.data")
+
     // ✅ IMAGE
-    let imageUrlUploaded: string | null = null
+    let imageUrlUploaded: string | null = imageUrl
 
     if (imageUrl && imageUrl instanceof File) {
       const uploaded = await uploadToCloudinary(imageUrl)
@@ -142,7 +144,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // ✅ VIDEO
-    let videoUrlUploaded: string | null = null
+    let videoUrlUploaded: string | null = videoUrl
 
     if (videoUrl && videoUrl instanceof File) {
       const uploaded = await uploadToCloudinary(videoUrl)
@@ -199,7 +201,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const newTask = await prisma.task.update({
+    const updatedTask = await prisma.task.update({
       where: {
         id
       },
@@ -213,8 +215,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         } )),
         color,
         description,
-        imageUrl: imageUrlUploaded || null,
-        videoUrl: videoUrlUploaded || null,
+        ...(imageUrlUploaded && { imageUrl: imageUrlUploaded }),
+        ...(videoUrlUploaded && { videoUrl: videoUrlUploaded }),
         updatedAt: today,
         ...(goals  && {goals: {
           connect: {
@@ -232,7 +234,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       },
     })
 
-    return NextResponse.json(newTask)
+    console.log(updatedTask, "updated task")
+
+    return NextResponse.json(updatedTask)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error updating task:", error.message)
@@ -288,6 +292,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       },
       include: {
         task: {
+          // include: {
+          //   counter: {
+          //     include: {
+          //       taskMetric: true
+          //     }
+          //   }
+          // },
           select: {
             limitCounter: true,
           },
@@ -364,8 +375,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         },
         data: {
           counter: nextCounter,
-          updatedAt: new Date()
-        },
+          isCompleted: currentCounter === limitCounter ? true : false,
+          task: {
+            update: {
+              status: 'ACTIVE'
+            }
+          },
+          updatedAt: new Date(),
+        }
       })
 
       return NextResponse.json({

@@ -1,5 +1,20 @@
 "use client"
 
+
+
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import axios from "axios"
+import confetti from "canvas-confetti"
+
+
+import CreateAnnotationDialog from "@/components/annotations/create-annotation-dialog"
+import DeleteTaskDialog from "@/components/tasks/delete-task-dialog"
+import UpdateTaskDialog from "@/components/tasks/update-task-dialog"
+import UpdateCounterDialog from "@/components/counter/update-counter-dialog"
+import { TaskDetailsDialog } from "@/components/tasks/task-detail-dialog"
+import MediaPreview from "@/components/midia-preview"
+
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +25,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 
+import { cn } from "@/lib/utils"
 import {
   Check,
   Eye,
@@ -20,26 +36,34 @@ import {
   Trash2
 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import MediaPreview from "../midia-preview"
-
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
-import axios from "axios"
-import confetti from "canvas-confetti"
-
-import CreateAnnotationDialog from "@/components/annotations/create-annotation-dialog"
-import DeleteTaskDialog from "@/components/tasks/delete-task-dialog"
-import UpdateTaskDialog from "@/components/tasks/update-task-dialog"
-import UpdateCounterDialog from "../counter/update-counter-dialog"
-import { TaskDetailsDialog } from "./task-detail-dialog"
+import type {
+  Categories,
+  Counter,
+  Goals,
+  Task,
+  TaskCompletion,
+  TaskMetric
+} from "@prisma/client"
+import { useState } from "react"
+import UpdateMetricsCounter from "../task-metrics/update-task-metrics"
 
 interface ActiveTaskCardProps {
-  task: any
+  task: (Task & {
+    completions?: TaskCompletion[]
+    goals?: Goals[],
+    categories?: Categories[]
+    counter?: Counter & {
+      taskMetric?: TaskMetric[]
+    }
+  })
   selectedDate?: Date
 }
 
 const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
+  const [openMetricsDialog, setOpenMetricsDialog] =
+    useState<boolean>(false)
+  const [metrics, setMetrics] =
+    useState<TaskMetric[] | undefined>(undefined)
 
   const queryClient = useQueryClient()
 
@@ -51,13 +75,23 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async ({ taskId, date }: any) => {
-      const res = await axios.put(`/api/task/${taskId}`, { date })
+      const res = await axios.put(
+        `/api/task/${taskId}`,
+        { date }
+      )
       return res.data
     },
     onSuccess: async (res) => {
-      await queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      await queryClient.invalidateQueries({
+        queryKey: ["tasks"]
+      })
 
       if (res.completed) {
+        //ABRIR O DIALOG PARA PREENCER OS VALORES DAS METRICS
+        console.log(res.completion, "response")
+        setMetrics(res.completion.id) // ID da métrica que quer editar
+        setOpenMetricsDialog(true)
+
         confetti({
           particleCount: 80,
           spread: 60,
@@ -79,7 +113,9 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       date: (selectedDate || new Date()).toISOString()
     })
   }
-  console.log(task, "task")
+
+  console.log(task, 'task')
+ 
   return (
     <Card className="p-3 flex flex-col gap-3">
 
@@ -172,9 +208,17 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
         </div>
       </div>
-
+      
+      {/* <UpdateMetricsCounter
+        metrics={metrics}
+        open={openMetricsDialog}
+        trigger={
+          <Button>adicionar complemento</Button>
+        }
+      /> */}
+      
       {/* META INFO */}
-      {(task.goals?.length > 0 || task.categories?.length > 0) && (
+      {(task?.goals && task.categories && task?.categories?.length > 0 && task.goals.length > 0 ) && (
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
 
           {task.goals?.map((g: any) => (
@@ -218,16 +262,16 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             />
           </div>
 
-          {/* METRICS */}
-          {task.counter.taskMetric?.length > 0 && (
+          {/* taskMetric */}
+          {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
             <div className="grid grid-cols-2 gap-2 text-xs">
 
-              {task.counter.taskMetric.map((metric: any) => (
+              {task.counter?.taskMetric.map((metric: any) => (
                 <div
                   key={metric.id}
                   className="flex justify-between bg-background rounded px-2 py-1"
                 >
-                  <span className="truncate">
+                  <span className="truncate tracking-tighter">
                     {metric.emoji} {metric.field}
                   </span>
                   <div className="flex flex-row gap-2 items-center">

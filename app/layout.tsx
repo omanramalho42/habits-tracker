@@ -76,7 +76,7 @@ export default async function RootLayout({
     }
   })
 
-  console.log(userSettings, "APP 🪄");
+  // console.log(userSettings, "APP 🪄");
   
   if (!user) {
     redirect('/sign-in')

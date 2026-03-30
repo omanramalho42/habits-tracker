@@ -10,23 +10,25 @@ import { UpdateHabitSchemaType } from "@/lib/schema/habit"
 export const fetchHabits = async (
   selectedDate?: string
 ): Promise<HabitWithStats[]> => {
+  // const habitsWithStats = await Promise.all(
+  //   habits.map(async (habit: any) => {
+  //     const { data: stats } = await axios.get(
+  //       `/api/habits/${habit.id}/stats`
+  //     )
+
+  //     return {
+  //       ...habit,
+  //       ...stats,
+  //     }
+  //   })
+  // )
+
+  // return habitsWithStats
   const { data: habits } = await axios.get(
     `/api/habits${selectedDate ? `?selectedDate=${selectedDate}` : ""}`
   )
-  const habitsWithStats = await Promise.all(
-    habits.map(async (habit: any) => {
-      const { data: stats } = await axios.get(
-        `/api/habits/${habit.id}/stats`
-      )
 
-      return {
-        ...habit,
-        ...stats,
-      }
-    })
-  )
-
-  return habitsWithStats
+  return habits
 }
 
 

@@ -8,12 +8,16 @@ import {
   useForm
 } from "react-hook-form"
 
+import { HexColorPicker } from "react-colorful"
+
 import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
-import { updateTask } from "@/services/tasks"
 
+import CategoriePicker from "@/components/categorie-picker"
+import CounterPicker from "@/components/counter/counter-picker"
 import GoalPicker from "@/components/goal-picker"
+
 import {
   Field,
   FieldContent,
@@ -58,10 +62,10 @@ import {
 
 import type { UpdateTaskSchemaType } from "@/lib/schema/task"
 import type { Categories, Counter, Goals, Task } from "@prisma/client"
-import CategoriePicker from "../categorie-picker"
-
-import { HexColorPicker } from "react-colorful"
-import CounterPicker from "../counter/counter-picker"
+import { updateTask } from "@/app/habits/_actions/task/task"
+import { uploadFile } from "@/lib/utils"
+// import { uploadToCloudinary } from "@/app/habits/_actions/upload/upload-file-action"
+// import { updateTask } from "@/services/tasks"
 
 interface UpdateTaskDialogProps {
   trigger?: React.ReactNode
@@ -74,8 +78,7 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
   const [color, setColor] = useState<boolean>(false)
   const [isCounterTask, setIsCounterTask] =
     useState<boolean>(task?.counter ? true : false)
-  console.log(task, "task 🎉")
-  
+
   const today = new Date()
   today.setHours(0,0,0,0)
 
@@ -113,25 +116,37 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
   } = form
 
   const queryClient = useQueryClient()
-  
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: UpdateTaskSchemaType) => {
-      console.log(values, "values")
-      return await updateTask(values)
+      console.log(values, "values ✨")
+
+    // const image =
+    //   values.imageUrl instanceof File
+    //     ? await uploadFile(values.imageUrl)
+    //     : null
+
+    // const video =
+    //   values.videoUrl instanceof File
+    //     ? await uploadFile(values.videoUrl)
+    //     : null
+
+    //   console.log({ image }, { video }, ".✨IMAGE AND VIDEO.")
+      
+      // await updateTask({
+      //   ...values,
+      //   imageUrl: image?.url || null,
+      //   videoUrl: video?.url || null,
+      // })
+      return await updateTask({
+        ...values,
+      })
     },
+
     onSuccess: async () => {
       toast.success("Tarefa atualizada com sucesso! 🎉", {
         id: "update-task"
       })
-
-      // reset({
-      //   emoji: "",
-      //   goals: "",
-      //   categories: "",
-      //   name: "",
-      //   limitCounter: 1,
-      //   custom_field: ""
-      // })
 
       await queryClient.invalidateQueries({
         queryKey: [
@@ -141,6 +156,9 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
       await queryClient.invalidateQueries({
         queryKey: ['routines'],
       })
+
+      reset()
+
       setOpen(prev => !prev)
     },
     onError: () => {
@@ -329,7 +347,7 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {/* VIDEO */}
               <FormField
                 control={control}

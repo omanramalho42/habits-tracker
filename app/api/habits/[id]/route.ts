@@ -11,7 +11,6 @@ import { getTodayString } from "@/lib/habit-utils"
 import z from "zod"
 import { HabitCompletion } from "@prisma/client"
 
-
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params

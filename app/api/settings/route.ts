@@ -85,7 +85,7 @@ export async function PATCH(request: Request) {
       isTravelling
     } = parsedBody.data
 
-    console.log(parsedBody.data, "data!")
+    // console.log(parsedBody.data, "data!")
 
     //CLOUDINARY PARA PROCESSAR IMAGEM AVATAR
 
@@ -124,7 +124,7 @@ export async function PATCH(request: Request) {
         }
       })
 
-      console.log(updated, "updated user settings")
+      // console.log(updated, "updated user settings")
       return NextResponse.json(updated)
     }
   } catch (error) {

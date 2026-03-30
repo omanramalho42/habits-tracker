@@ -93,7 +93,9 @@ const item = {
 export default function Home() {
   const [filter, setFilter] = useState<string>("")
   const { theme, setTheme } = useTheme()
-  console.log({ theme });
+  
+  // console.log({ theme });
+
   const handleFilterHabits = (value: string) => {
     setFilter(value)
   }
@@ -194,7 +196,7 @@ export default function Home() {
           <MultiGraphsChart tasks={tasks} />
 
           <Tabs defaultValue="habits">
-            <TabsList className="bg-card w-full my-5 border-b border-white/10 rounded-md h-auto p-0 justify-start gap-8 max-w-full overflow-x-auto scroll-container">
+            <TabsList className="bg-background w-full">
               <TabsTrigger 
                 value="routines" 
                 className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"

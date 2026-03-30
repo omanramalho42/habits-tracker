@@ -7,9 +7,9 @@ import { NextRequest, NextResponse } from "next/server"
 export async function GET(request: Request) {
   try {
     const authData = await auth();
-    console.log("Auth Data:", authData); // Verifique se há alguma mensagem de erro no terminal
+    // console.log("Auth Data:", authData); // Verifique se há alguma mensagem de erro no terminal
     // Isso vai imprimir no seu terminal o motivo técnico (ex: "token expired", "invalid signature")
-    console.log("DEBUG CLERK:", authData.debug());
+    // console.log("DEBUG CLERK:", authData.debug());
     const { userId } = await auth()
     
     if (!userId) {
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       isPLus
     } = parsedBody.data
 
-    console.log(parsedBody.data, "data")
+    // console.log(parsedBody.data, "data")
 
     const newTask = await prisma.task.create({
       data: {

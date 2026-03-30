@@ -67,7 +67,7 @@ const MultiHabitsPicker:React.FC<MultiHabitsPickerProps> = ({ control }) => {
 
   const habitsListLoaded: any =
     field?.value?.map(item => item) || []
-  console.log(habitsListLoaded, "habuts list loaded")
+  // console.log(habitsListLoaded, "habuts list loaded")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

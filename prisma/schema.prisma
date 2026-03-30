@@ -269,23 +269,27 @@ enum MetricType {
 }
 
 model TaskMetric {
-  id        String      @id @default(uuid())
+  id          String      @id @default(uuid())
 
-  emoji     String?     @db.VarChar(20)
-  fieldType MetricType? @default(NUMERIC) @map("field_type")
-  field     String?     @db.VarChar(20)
-  value     String?     @db.VarChar(20) 
-  unit      String?     @db.VarChar(20)
-
-  date      DateTime?
+  emoji       String?     @db.VarChar(20)
+  fieldType   MetricType? @default(NUMERIC) @map("field_type")
+  field       String?     @db.VarChar(20)
+  value       String?     @db.VarChar(20) 
+  unit        String?     @db.VarChar(20)
   
-  updatedAt DateTime?   @updatedAt() @map("updated_at")
-  createdAt DateTime    @default(now()) @map("created_at")
-  
-  counterId String
-  counter   Counter     @relation(fields: [counterId], references: [id])
+  limit       String?
+  isComplete  Boolean?    @default(false)     
+  index       String 
 
-  notes     Annotations[]
+  date        DateTime?
+  
+  updatedAt   DateTime?   @updatedAt() @map("updated_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  
+  counterId   String
+  counter     Counter     @relation(fields: [counterId], references: [id])
+
+  notes       Annotations[]
 
   completionId String?        @map("completion_id")
   completion  TaskCompletion? @relation(fields: [completionId], references: [id])

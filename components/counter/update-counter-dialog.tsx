@@ -71,7 +71,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
     }
   })
 
-  console.log(counter, '!counter!');
+  // console.log(counter, '!counter!');
 
   const {
     control,
