@@ -90,7 +90,8 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
         id: 'update-counter'
       })
       return await axios.patch(
-        `/api/counter/${values.id}`, values
+        `/api/counter/${values.id}`,
+        values
       )
     },
     onSuccess: async () => {

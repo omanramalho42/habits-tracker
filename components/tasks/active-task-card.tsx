@@ -7,14 +7,18 @@ import { toast } from "sonner"
 import axios from "axios"
 import confetti from "canvas-confetti"
 
-
 import CreateAnnotationDialog from "@/components/annotations/create-annotation-dialog"
 import DeleteTaskDialog from "@/components/tasks/delete-task-dialog"
 import UpdateTaskDialog from "@/components/tasks/update-task-dialog"
 import UpdateCounterDialog from "@/components/counter/update-counter-dialog"
 import { TaskDetailsDialog } from "@/components/tasks/task-detail-dialog"
 import MediaPreview from "@/components/midia-preview"
-
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -243,7 +247,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               
               <span className="text-muted-foreground">
-                {task.counter.valueNumber}|{task.counter.limit}
+                {Number(task.counter.valueNumber) - 1}|{task.counter.limit}
               </span>
               <UpdateCounterDialog
                 counter={task.counter}
@@ -260,47 +264,124 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               />
             </div>
             <PutTaskMetrics
-              open={openMetricsDialog}
+              open={task?.counter?.taskMetric && task?.counter?.taskMetric?.length > 0 ? openMetricsDialog : false}
               onOpenChange={setOpenMetricsDialog}
-              taskMetric={task.counter.taskMetric || []}
+              taskMetric={
+                task.counter.taskMetric?.filter((metric) =>
+                  metric.index &&
+                  Number(metric.index) === (task.counter?.valueNumber ?? 0)
+                ) || []
+              }
+              disabled={(Number(task.counter.valueNumber) - 1) === task.counter.limit}
+              selectedDate={selectedDate}
+              taskId={task.id}
               counterId={task.counter.id}
             />
             {/* CHECK */}
             <Button
               size="icon"
-              variant={!completion ? "default" : "outline"}
+              variant={task.counter.taskMetric?.some((metric) => metric.date === selectedDate && metric.isComplete) ? "default" : "outline"}
               onClick={() => setOpenMetricsDialog(prev => !prev)}
               disabled={isPending}
               className="rounded-full"
             >
-              <Check className={cn("w-4 h-4", !completion ? "visible" : "hidden")} />
+              <Check className={cn("w-4 h-4", task.counter.taskMetric?.some((metric) => metric.date === selectedDate && metric.isComplete) ? "visible" : "hidden")} />
             </Button>
           </div>
+          
+        {/* taskMetric com steps */}
+        {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
+          <Tabs defaultValue="1" className="w-full">
+            {/* 🔥 TABS HEADER */}
+            <TabsList className="grid w-full grid-cols-3">
+              {Array.from({ length: task.counter.limit }).map((_, i) => {
+                const step = String(i + 1)
 
-          {/* taskMetric */}
-          {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 text-xs">
+                return (
+                  <TabsTrigger disabled={task.counter?.valueNumber?.toString() !== step} key={step} value={step}>
+                    {`Step ${step}`}
+                  </TabsTrigger>
+                )
+              })}
+            </TabsList>
 
-              {task.counter?.taskMetric.map((metric: any) => (
-                <div
-                  key={metric.id}
-                  className="flex justify-between bg-background rounded px-2 py-1"
-                >
-                  <span className="truncate tracking-tighter">
-                    {metric.emoji} {metric.field}
-                  </span>
-                  <div className="flex flex-row gap-2 items-center">
-                    <span className="font-medium">
-                      {metric.value || 0} {" | "} {metric.limit}
-                    </span>
-                    <span className="font-bold">
-                      {metric?.unit}
-                    </span>
+            {/* 🔥 TABS CONTENT */}
+            {Array.from({ length: task.counter.limit }).map((_, i) => {
+              const step = String(i + 1)
+
+              const metrics = task.counter!.taskMetric!.filter(
+                (m: any) => m.index === step
+              )
+
+              return (
+                <TabsContent key={step} value={step}>
+                  <div className="grid grid-cols-1 gap-3 mt-3">
+                    {metrics.length === 0 && (
+                      <div className="text-xs text-muted-foreground text-center py-4">
+                        Nenhuma métrica neste step
+                      </div>
+                    )}
+
+                    {metrics.map((metric: any) => {
+                      const value = Number(metric.value || 0)
+                      const limit = Number(metric.limit || 1)
+                      const percentage = Math.min((value / limit) * 100, 100)
+
+                      const color =
+                        percentage >= 100
+                          ? "bg-green-500"
+                          : percentage >= 60
+                          ? "bg-yellow-500"
+                          : "bg-primary"
+
+                      return (
+                        <div
+                          key={metric.id}
+                          className="flex flex-col gap-2 p-3 rounded-xl border bg-card shadow-sm hover:shadow-md transition-all"
+                        >
+                          {/* HEADER */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{metric.emoji}</span>
+                              <span className="text-sm font-semibold">
+                                {metric.field}
+                              </span>
+                            </div>
+
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {value}/{limit} {metric.unit}
+                            </span>
+                          </div>
+
+                          {/* PROGRESS */}
+                          <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${color} transition-all duration-300`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+
+                          {/* FOOTER */}
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-muted-foreground">
+                              {Math.round(percentage)}%
+                            </span>
+
+                            {percentage >= 100 && (
+                              <span className="text-green-500 font-semibold">
+                                ✔ Completo
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </TabsContent>
+              )
+            })}
+          </Tabs>
+        )}
 
         </div>
       )}

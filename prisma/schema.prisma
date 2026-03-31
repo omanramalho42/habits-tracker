@@ -296,6 +296,7 @@ model TaskMetric {
   completion  TaskCompletion? @relation(fields: [completionId], references: [id])
 
   @@index([date])
+  @@unique([completionId, field, index, counterId])
   @@map("task_metric")
 }
 

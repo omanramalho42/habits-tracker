@@ -96,19 +96,22 @@ export async function POST(request: NextRequest) {
         label,
         emoji,
         userId: userDb.id,
+        valueNumber: 1,
         limit,
         unit,
         taskMetric: {
           createMany: {
-            data: taskMetric?.map((metric) => ({
-              limit: metric.limit.toString(),
-              index: metric?.index || "",
-              emoji: metric.emoji,
-              field: metric.field,
-              value: metric.value,
-              unit: metric.unit,
-              fieldType: mapType(metric.fieldType) as any, // depois vamos melhorar isso
-            })) || [],
+            data: Array.from({ length: limit }).flatMap((_, stepIndex) =>
+              (taskMetric || []).map((metric) => ({
+                limit: metric.limit.toString(),
+                index: String(stepIndex + 1), // 🔥 step correto
+                emoji: metric.emoji,
+                field: metric.field,
+                value: metric.value,
+                unit: metric.unit,
+                fieldType: mapType(metric.fieldType) as any,
+              }))
+            )
           },
         },
         // valueNumber,

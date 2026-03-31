@@ -50,7 +50,8 @@ import type {
   TaskCompletion,
   Habit,
   TaskSchedule,
-  Categories
+  Categories,
+  Counter
 } from "@prisma/client"
 import FilterDropdown from "./filter-dropdown"
 
@@ -64,7 +65,9 @@ interface RoutineCardProps {
       })[];
       taskSchedules?: (TaskSchedule & {
         task: Task & {
-          completions: TaskCompletion[]
+          completions: (TaskCompletion & {
+            counter: Counter
+          })[]
           categories: Categories []
         }
       })[]
@@ -762,7 +765,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                   (c: any) =>
                     c.completedDate.slice(0, 10) ===
                     selectedDate.slice(0, 10)
-                )?.counter || 0
+                )?.counter.valueNumber || 0
               const limit = task.limitCounter ?? 1
 
               const progress = limit > 0 ? counter / limit : 0

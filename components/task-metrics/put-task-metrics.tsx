@@ -40,7 +40,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
@@ -56,17 +55,23 @@ interface PutTaskMetricsProps {
   taskMetric: (TaskMetric & {
     counter?: Counter
   })[]
+  taskId: string
   counterId: string
   trigger?: React.ReactNode
+  selectedDate: any
+  disabled?: boolean;
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
   taskMetric,
+  taskId,
   counterId,
   trigger,
   open,
+  disabled = false,
+  selectedDate,
   onOpenChange,
 }) => {
 
@@ -80,6 +85,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
       index: m.index ?? "1",
       isComplete: m.isComplete ?? false,
       completionId: m.completionId || "",
+      counterId: m.counterId,
       limit: Number(m.limit ?? 1),
       unit: m.unit ?? "",
       emoji: m.emoji ?? "",
@@ -100,15 +106,21 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
   const queryClient = useQueryClient()
   // 🔥 MUTATION
   const mutation = useMutation({
-    mutationFn: async (data: { taskMetric: PutMetricSchemaType }) => {
-      toast.loading("Criando métricas...", {
-        id: "create-metrics"
-      })
-      const response = await axios.put(
-        `/api/counter/${counterId}`,
-        data.taskMetric
-      )
-      return response.data
+    mutationFn: async (
+      data: {
+        taskMetric: PutMetricSchemaType, 
+        date: Date
+      }) => {
+        toast.loading("Criando métricas...", {
+          id: "create-metrics"
+        })
+        const response = await axios.put(
+          `/api/task/${taskId}/${counterId}`, {
+            date: data.date,
+            taskMetric: data.taskMetric
+          }
+        )
+        return response.data
     },
     onSuccess: async () => {
       toast.success("Sucesso ao cadastrar métricas. 🎉", {
@@ -139,7 +151,10 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
   const onSubmit = (data: { taskMetric: PutMetricSchemaType }) => {
     console.log("📤 ENVIANDO:", data)
 
-    mutation.mutate(data)
+    mutation.mutate({
+      taskMetric: data.taskMetric,
+      date: (selectedDate || new Date()).toISOString()
+    })
   }
 
   return (
@@ -152,6 +167,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
             variant="outline"
             size="default"
             type="button"
+            disabled={disabled}
             className=""
           >
             <p className="text-md font-bold text-primary tracking-tighter truncate">
@@ -246,7 +262,6 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
     </Dialog>
   )
 }
-
 
 interface CounterItemProps {
   control: Control<{ taskMetric: PutMetricSchemaType }>

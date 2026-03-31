@@ -52,6 +52,7 @@ export const putMetricSchema = z.object({
   index: z.string(),
   isComplete: z.boolean().default(false),
   completionId: z.string().optional(),
+  counterId: z.string().optional(),
   limit: z.coerce.number()
     .min(1, "O valor minimo é 1"),
   field: 
