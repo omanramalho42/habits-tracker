@@ -1,24 +1,5 @@
 import { z } from "zod"
 
-export const MetricSchema = z.object({
-  id: z.string().optional(),
-  field: 
-    z.string()
-    .min(1, "O valor minimo de caracateres é 1"),
-  value: 
-    z.string()
-    .min(1, "Ovalor minimo de caracteres é 1"),
-  fieldType: 
-    z.string()
-    .optional(),
-  unit: 
-    z.string()
-    .optional(),
-  emoji: 
-    z.string()
-    .optional(),
-})
-
 export const CreateTaskSchema = z.object({
   name: z.string(),
   description: z.string().optional(),

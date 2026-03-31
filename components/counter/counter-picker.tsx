@@ -27,12 +27,11 @@ import {
 
 import { cn } from '@/lib/utils'
 
-import { Check, Loader, PencilIcon } from 'lucide-react'
+import { Check, Loader } from 'lucide-react'
 
 import type { Counter, TaskMetric } from '@prisma/client'
 
 import type { CreateTaskSchemaType, UpdateTaskSchemaType } from '@/lib/schema/task'
-import UpdateCounterDialog from './update-counter-dialog'
 
 interface CounterPikcerProps {
   control: Control<CreateTaskSchemaType | UpdateTaskSchemaType>
@@ -82,7 +81,9 @@ const CounterPicker:React.FC<CounterPikcerProps> = ({
           {isLoading ? (
             <span className='flex flex-row gap-2 items-center'>
               <Loader className='w-4 h-4 animate-spin' />
-              <p className='text-sm'>Carregando contadores...</p>
+              <p className='text-sm'>
+                Carregando contadores...
+              </p>
             </span>
           ) : selectedCounter ? (
               <>

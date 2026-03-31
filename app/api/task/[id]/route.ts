@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma"
 import { UpdateTaskSchema } from "@/lib/schema/task"
 import { getTodayString } from "@/lib/habit-utils"
 import { uploadToCloudinary } from "../route"
+import { log } from "@/lib/utils"
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -248,8 +249,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-
+    log("START", { taskId: id })
+    
     const { userId } = await auth()
+    log("AUTH USER", { userId })
+  
 
     if (!userId) {
       return NextResponse.json({
@@ -262,7 +266,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         clerkUserId: userId
       }
     })
-
+    log("USER DB", userDb)
     if (!userDb) {
       return NextResponse.json({
         error: "user not find on db"
@@ -281,7 +285,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     
     const completedDate =
       new Date(bodyParams.data)
-    
+    log("DATE RECEIVED", body?.date)
+    log("PARSED DATE", completedDate)
+
     // 1️⃣ Busca a completion do dia
     const existingCompletion = await prisma.taskCompletion.findUnique({
       where: {
@@ -291,65 +297,128 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         },
       },
       include: {
-        task: {
-          // include: {
-          //   counter: {
-          //     include: {
-          //       taskMetric: true
-          //     }
-          //   }
-          // },
-          select: {
-            limitCounter: true,
+        counter: {
+          include: {
+            taskMetric: true,
           },
         },
       },
     })
-
+    log("EXISTING COMPLETION", existingCompletion)
     // 2️⃣ NÃO EXISTE → cria
     if (!existingCompletion) {
-      const task = await prisma.task.findUnique({
-        where: {
-          id,
-          userId: userDb.id,
-          status: "ACTIVE"
-        },
-        select: {
-          limitCounter: true,
-        },
-      })
+      log("FLOW", "CREATE NEW COMPLETION")
+      const result = await prisma.$transaction(async (tx) => {
+        const task = await tx.task.findUnique({
+          where: {
+            id,
+            userId: userDb.id,
+            status: "ACTIVE",
+          },
+          include: {
+            counter: {
+              include: {
+                taskMetric: true, // templates
+              },
+            },
+          },
+        })
 
-      if (!task) {
-        return NextResponse.json(
-          { error: "Task not found" },
-          { status: 404 }
-        )
-      }
+        if (!task || !task.counter) {
+          throw new Error("Task or Counter not found")
+        }
 
-      const initialCounter = task.limitCounter ? 1 : 0
+        const counter = task.counter
 
-      const newTaskCompletion = await prisma.$transaction([
-        prisma.taskCompletion.create({
+        const currentValue = counter.valueNumber ?? 0
+        const nextValue = currentValue + 1
+
+        const isCompleted = nextValue >= counter.limit
+        log("TASK FOUND", task)
+
+        log("COUNTER STATE", {
+          currentValue,
+          nextValue,
+          limit: counter.limit,
+        })
+
+        log("IS COMPLETED?", isCompleted)
+        // 1️⃣ cria completion
+        const completion = await tx.taskCompletion.create({
           data: {
             taskId: id,
-        // 👉 se o hábito usa contador, inicia em 1
-        ...(task?.limitCounter
-          && { counter: initialCounter }
-          ),
+            counterId: counter.id,
             completedDate,
+            isCompleted,
           },
-        }),
-      ])
+        })
+        
+        // 2️⃣ clona métricas (snapshot)
+        const baseMetrics = counter.taskMetric.filter(
+          (m) => !m.completionId
+        )
 
+        if (baseMetrics.length > 0) {
+          await tx.taskMetric.createMany({
+            data: baseMetrics.map((metric) => ({
+              emoji: metric.emoji,
+              fieldType: metric.fieldType,
+              field: metric.field,
+              unit: metric.unit,
+
+              value: metric.value,
+              limit: metric.limit,
+
+              // 🔥 STEP ATUAL
+              index: String(nextValue),
+
+              counterId: counter.id,
+              completionId: completion.id,
+
+              isComplete: false,
+              date: new Date(),
+            })),
+          })
+        }
+        log("BASE METRICS", baseMetrics)
+        log("CREATING METRICS SNAPSHOT", {
+          step: nextValue,
+          total: baseMetrics.length,
+        })
+        // 3️⃣ atualiza counter global
+        await tx.counter.update({
+          where: { id: counter.id },
+          data: {
+            valueNumber: nextValue,
+          },
+        })
+        log("UPDATING COUNTER", {
+          old: currentValue,
+          new: nextValue,
+        })
+        log("CREATION RESULT", {
+          completionId: completion.id,
+          nextValue,
+          isCompleted,
+        })
+        return {
+          completion,
+          nextValue,
+          isCompleted,
+          limit: counter.limit,
+        }
+        
+      })
       return NextResponse.json({
-        completion: newTaskCompletion,
-        completed: true,
-        counter: task.limitCounter ? initialCounter : null,
+        completion: result.completion,
+        completed: result.isCompleted,
+        progress: `${result.nextValue}/${result.limit}`,
+        value: result.nextValue,
       })
     }
-
+    log("FLOW", "UPDATE EXISTING COMPLETION")
     // 3️⃣ EXISTE e NÃO TEM contador → toggle normal
-    if (!existingCompletion.task.limitCounter) {
+    if (!existingCompletion.counter) {
       await prisma.taskCompletion.delete({
         where: {
           id: existingCompletion.id,
@@ -362,41 +431,101 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // 4️⃣ EXISTE e TEM contador
-    const currentCounter = existingCompletion.counter ?? 0
-    const limitCounter = existingCompletion.task.limitCounter ?? 1
-
+    const currentCounter = existingCompletion.counter.valueNumber ?? 0
+    const limitCounter = existingCompletion.counter.limit ?? 1
+    log("CURRENT COUNTER STATE", {
+      currentCounter,
+      limitCounter,
+    })
     // 4.1️⃣ Ainda não chegou no limite → incrementa
     if (currentCounter < limitCounter) {
-      const nextCounter = currentCounter + 1
+      const result = await prisma.$transaction(async (tx) => {
+        const counter = existingCompletion.counter
 
-      const updatedTaskCompletion = await prisma.taskCompletion.update({
-        where: {
-          id: existingCompletion.id
-        },
-        data: {
-          counter: nextCounter,
-          isCompleted: currentCounter === limitCounter ? true : false,
-          task: {
-            update: {
-              status: 'ACTIVE'
-            }
+        const currentValue = counter.valueNumber ?? 0
+        const nextValue = currentValue + 1
+
+        const isCompleted = nextValue >= counter.limit
+        log("INCREMENT STEP", {
+          currentValue,
+          nextValue,
+        })
+        log("FETCHING BASE METRICS")
+        // 1️⃣ cria NOVAS métricas (novo step)
+        const baseMetrics = await tx.taskMetric.findMany({
+          where: {
+            counterId: counter.id,
+            completionId: null,
           },
-          updatedAt: new Date(),
+        })
+        log("NEW METRICS SNAPSHOT", {
+          step: nextValue,
+          metricsCount: baseMetrics.length,
+        })
+        if (baseMetrics.length > 0) {
+          await tx.taskMetric.createMany({
+            data: baseMetrics.map((metric) => ({
+              emoji: metric.emoji,
+              fieldType: metric.fieldType,
+              field: metric.field,
+              unit: metric.unit,
+
+              value: metric.value,
+              limit: metric.limit,
+
+              index: String(nextValue),
+
+              counterId: counter.id,
+              completionId: existingCompletion.id,
+
+              isComplete: false,
+              date: new Date(),
+            })),
+          })
+        }
+
+        // 2️⃣ atualiza counter
+        await tx.counter.update({
+          where: { id: counter.id },
+          data: {
+            valueNumber: nextValue,
+          },
+        })
+
+        // 3️⃣ atualiza completion
+        const updatedCompletion = await tx.taskCompletion.update({
+          where: { id: existingCompletion.id },
+          data: {
+            isCompleted,
+          },
+        })
+        log("UPDATED COMPLETION", updatedCompletion)
+        return {
+          updatedCompletion,
+          nextValue,
+          isCompleted,
+          limit: counter.limit,
         }
       })
 
+      log("LIMIT REACHED - NO ACTION", {
+        currentCounter,
+        limitCounter,
+      })
       return NextResponse.json({
-        completion: updatedTaskCompletion,
-        completed: true,
-        counter: nextCounter,
+        completion: result.updatedCompletion,
+        completed: result.isCompleted,
+        progress: `${result.nextValue}/${result.limit}`,
+        value: result.nextValue,
       })
     }
-    // 4.2️⃣ Chegou no limite → reset
-    await prisma.taskCompletion.delete({
-      where: {
-        id: existingCompletion.id,
-      },
-    });
+
+    // // 4.2️⃣ Chegou no limite → reset
+    // await prisma.taskCompletion.delete({
+    //   where: {
+    //     id: existingCompletion.id,
+    //   },
+    // });
 
     return NextResponse.json({
       completion: existingCompletion,
@@ -406,6 +535,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error toggling task completion:", error.message)
+      console.error("❌ ERROR TOGGLING TASK", {
+        message: error.message,
+        stack: error.stack,
+      })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }

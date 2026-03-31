@@ -8,7 +8,9 @@ export default function SignInPage() {
           <h1 className="text-4xl font-bold bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
             Welcome Back
           </h1>
-          <p className="text-gray-400">Sign in to continue your journey</p>
+          <p className="text-gray-400">
+            Sign in to continue your journey
+          </p>
         </div>
         <SignIn
           appearance={{

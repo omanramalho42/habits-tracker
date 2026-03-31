@@ -60,27 +60,21 @@ export default async function RootLayout({
 }>) {
   const user = await currentUser()
 
+  if (!user) {
+    redirect("/sign-in")
+  }
+
   const userDb = await prisma.user.findUnique({
     where: {
-      clerkUserId: user?.id
+      clerkUserId: user.id
     }
   })
 
-  if(!userDb) {
-    redirect("/login")
-  }
-
-  const userSettings = await prisma.userSettings.findUnique({
+  const userSettings = await prisma.userSettings?.findUnique({
     where: {
-      userId: userDb.id
+      userId: userDb?.id 
     }
   })
-
-  // console.log(userSettings, "APP 🪄");
-  
-  if (!user) {
-    redirect('/sign-in')
-  }
 
   return (
     <ClerkProvider

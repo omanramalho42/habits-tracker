@@ -1,163 +1,333 @@
 "use client"
 
-import React, { useState } from "react"
-import { useForm, Controller, SubmitHandler } from "react-hook-form"
-import z from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect } from "react"
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Pencil, Save, Trash } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { TaskMetric } from "@prisma/client"
+  Control,
+  useController,
+  useFieldArray,
+  useWatch,
+} from "react-hook-form"
 
-interface UpdateMetricsCounterProps {
-  metrics?: TaskMetric[]
-  trigger?: React.ReactNode
-  open?: boolean;
-  onSave?: (data: UpdateTaskMetricSchemaType[]) => void
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel
+} from "@/components/ui/form"
+
+import { Plus, Trash2 } from "lucide-react"
+
+import type { UpdateCounterSchemaType } from "@/lib/schema/counter"
+import { Counter, TaskMetric } from "@prisma/client"
+
+interface UpdateTaskMetricsProps {
+  control: Control<UpdateCounterSchemaType>
+  counter: (Counter & { taskMetric?: TaskMetric[] })
 }
 
-const updateTaskMetricSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  limit: z.string(),
-  value: z.string(),
-  emoji: z.string().optional(),
-})
-
-type UpdateTaskMetricSchemaType = z.infer<typeof updateTaskMetricSchema>
-
-const UpdateMetricsCounter: React.FC<UpdateMetricsCounterProps> = ({
-  metrics = [],
-  open: openMetricsDialog = false,
-  trigger,
-}) => {
-  const [open, setOpen] = useState(openMetricsDialog)
-
-  const form = useForm<{ metrics: UpdateTaskMetricSchemaType[] }>({
-    resolver: zodResolver(
-      z.object({
-        metrics: z.array(updateTaskMetricSchema),
-      })
-    ),
-    defaultValues: {
-      metrics: metrics?.map((m) => ({
-        id: m.id,
-        label: m.field,
-        value: String(m.value || ""),
-        emoji: m.emoji || "",
-      })),
-    },
+const UpdateTaskMetrics: React.FC<UpdateTaskMetricsProps> = ({ control, counter }) => {
+  const { fields, append, remove, replace } = useFieldArray({
+    control,
+    name: "taskMetric",
   })
-
-  const { control, handleSubmit } = form
-
-  const onSubmit: SubmitHandler<{ metrics: UpdateTaskMetricSchemaType[] }> = (
-    data
-  ) => {
-    setOpen(false)
-  }
+  useEffect(() => {
+    if (counter.taskMetric && counter.taskMetric.length > 0) {
+      replace(
+        counter.taskMetric.map((m) => ({
+          id: m.id,
+          field: m.field ?? "",
+          // value: String(m.value ?? ""),
+          fieldType: m.fieldType ?? "numeric",
+          index: m.index ?? "",
+          isComplete: false,
+          limit: Number(m.limit ?? 1),
+          unit: m.unit ?? "",
+          emoji: m.emoji ?? "",
+        }))
+      )
+    }
+  }, [counter, replace])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
+    <div className="flex flex-col gap-4 z-50">
+      <div className="flex flex-col gap-3 border p-4 rounded-xl">
+        <div className="flex justify-between">
+          <p className="text-sm font-medium">
+            Complemento
+          </p>
+
           <Button
             type="button"
-            role="combobox"
-            variant="outline"
-            size="default"
-            className="w-full flex items-center gap-2"
+            size="sm"
+            onClick={() =>
+              append({
+                field: "",
+                value: "",
+                fieldType: "numeric",
+                index: "",
+                isComplete: false,
+                limit: 0,
+                unit: "",
+                emoji: "",
+              })
+            }
           >
-            <Pencil className="w-3 h-3" />
-            <span className="text-sm font-normal truncate tracking-tighter">
-              Editar métricas
-            </span>
+            <Plus className="w-4 h-4 mr-1" />
+            Adicionar
           </Button>
-        )}
-      </DialogTrigger>
+        </div>
 
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Editar métricas</DialogTitle>
-          <DialogDescription>
-            Atualize os detalhes das métricas do contador
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {metrics.map((metric, index) => (
-            <div
-              key={metric.id}
-              className="flex flex-col gap-2 border rounded p-2"
-            >
-              <Controller
-                name={`metrics.${index}.name`}
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Nome da métrica" />
-                )}
-              />
-              <Controller
-                name={`metrics.${index}.description`}
-                control={control}
-                render={({ field }) => (
-                  <Textarea {...field} placeholder="Descrição" />
-                )}
-              />
-              <div className="flex gap-2">
-                <Controller
-                  name={`metrics.${index}.limit`}
-                  control={control}
-                  render={({ field }) => (
-                    <Input {...field} placeholder="Limite" type="number" />
-                  )}
-                />
-                <Controller
-                  name={`metrics.${index}.value`}
-                  control={control}
-                  render={({ field }) => (
-                    <Input {...field} placeholder="Valor atual" type="number" />
-                  )}
-                />
-                <Controller
-                  name={`metrics.${index}.emoji`}
-                  control={control}
-                  render={({ field }) => (
-                    <Input {...field} placeholder="Emoji" />
-                  )}
-                />
-              </div>
-            </div>
-          ))}
-
-          <div className="flex justify-end gap-2 mt-4">
-            <DialogClose asChild>
-              <Button variant="outline" size="sm" className="flex gap-2">
-                <Trash className="w-3 h-3 text-destructive" />
-                Cancelar
-              </Button>
-            </DialogClose>
-
-            <Button type="submit" variant="outline" size="sm" className="flex gap-2">
-              <Save className="w-3 h-3" />
-              Salvar
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        {fields.map((item, index) => (
+          <CounterItem
+            key={item.id}
+            control={control}
+            index={index}
+            remove={remove}
+          />
+        ))}
+      </div>
+    </div>
   )
 }
 
-export default UpdateMetricsCounter
+interface CounterItemProps {
+  control: Control<UpdateCounterSchemaType>
+  index: number
+  remove: (index: number) => void
+}
+
+const CounterItem: React.FC<CounterItemProps> = ({
+  control,
+  index,
+  remove,
+}) => {
+  const type = useWatch({
+    control,
+    name: `taskMetric.${index}.fieldType`,
+  })
+
+  // const { field: label, fieldState: { error: labelError } } = useController({
+  //   control,
+  //   name: `taskMetric.${index}.label`,
+  // })
+
+  // const { field: value } = useController({
+  //   control,
+  //   name: `taskMetric.${index}.value`,
+  // })
+
+  // const { field: emoji } = useController({
+  //   control,
+  //   name: `taskMetric.${index}.emoji`,
+  // })
+
+  // const { field: unitField } = useController({
+  //   control,
+  //   name: `taskMetric.${index}.unit`,
+  const { field: typeField } = useController({
+    control,
+    name: `taskMetric.${index}.fieldType`,
+  })
+
+  const { field: unit } = useController({
+    control,
+    name: `taskMetric.${index}.unit`,
+  })
+
+  return (
+    <div className="flex flex-col gap-2 border rounded-lg p-3">
+
+      <div className="flex place-items-center-safe gap-2">
+
+        <FormField
+          name={`taskMetric.${index}.emoji`}
+          control={control}
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>
+                  <Label>Emoji</Label>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="⚙️"
+                    className="w-10"
+                  />
+                </FormControl>
+              </FormItem>
+            )
+          }}
+        />
+        <FormField
+          control={control}
+          name={`taskMetric.${index}.field`}
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>
+                  <Label>Nome</Label>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Ex: carga"
+                  />
+                </FormControl>
+                {/* {labelError && (
+                  <span className="text-destructive text-sm truncate max-w-25 tracking-tighter">
+                    {labelError.message}
+                  </span>
+                )} */}
+              </FormItem>
+            )
+          }}
+        />
+        <FormField
+          control={control}
+          name={`taskMetric.${index}.limit`}
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>
+                  <Label>Valor</Label>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Ex: 12"
+                  />
+                </FormControl>
+                {/* {labelError && (
+                  <span className="text-destructive text-sm truncate max-w-25 tracking-tighter">
+                    {labelError.message}
+                  </span>
+                )} */}
+              </FormItem>
+            )
+          }}
+        />
+
+        <Button
+          type="button"
+          role="button"
+          variant="outline"
+          size="icon-sm"
+          onClick={() => remove(index)}
+        >
+          <Trash2 className="text-destructive text-sm tracking-tighter" />
+        </Button>
+      </div>
+
+      <Select
+        value={typeField.value}
+        onValueChange={typeField.onChange}
+      >
+        <SelectTrigger>
+          <SelectValue
+            placeholder="Tipo"
+          />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="currency">
+            💰 Monetário
+          </SelectItem>
+          <SelectItem value="numeric">
+            🔢 Numérico
+          </SelectItem>
+          <SelectItem value="liquid">
+            💧 Líquido
+          </SelectItem>
+          <SelectItem value="distance">
+            📏 Distância
+          </SelectItem>
+          <SelectItem value="weight">
+            ⚖️ Peso
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* UNIT DINÂMICO */}
+      {type === "currency" && (
+        <Select
+          value={unit.value}
+          onValueChange={unit.onChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Moeda" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="BRL">R$</SelectItem>
+            <SelectItem value="USD">$</SelectItem>
+            <SelectItem value="EUR">€</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+
+      {type === "liquid" && (
+        <Select
+          value={unit.value}
+          onValueChange={unit.onChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Unidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ml">ml</SelectItem>
+            <SelectItem value="l">L</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+
+      {type === "distance" && (
+        <Select
+          value={unit.value}
+          onValueChange={unit.onChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Unidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cm">cm</SelectItem>
+            <SelectItem value="m">m</SelectItem>
+            <SelectItem value="km">km</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+      {/* UNIT */}
+      {type === "weight" && (
+        <Select value={unit.value} onValueChange={unit.onChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Peso" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="kg">kg</SelectItem>
+            <SelectItem value="g">g</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+    </div>
+  )
+}
+
+export default UpdateTaskMetrics

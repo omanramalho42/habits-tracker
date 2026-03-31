@@ -13,7 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
 
-import CreateMetricsCounter from '@/components/counter/create-metrics-counter'
+import CreateTaskMetrics from '@/components/task-metrics/create-task-metrics'
 
 import {
   FormControl,
@@ -36,7 +36,7 @@ import { Form } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
-import { createCounterSchema, CreateCounterSchemaType } from '@/lib/schema/counter'
+import { createCounterSchema, type CreateCounterSchemaType } from '@/lib/schema/counter'
 
 interface CreateCounterDailogProps {
   trigger?: React.ReactNode
@@ -52,6 +52,7 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
       emoji: "",
       label: "",
       unit: "",
+      index: "",
       limit: 1,
       taskMetric: []
     }
@@ -91,7 +92,7 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
       })
       await queryClient.invalidateQueries({
         queryKey: [
-          "counters"
+          "counter"
         ]
       })
     },
@@ -112,6 +113,8 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
 
     setOpen(prev => !prev)
   }
+
+  console.log(errors, "errors");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -232,7 +235,7 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
               />
             </div>
 
-            <CreateMetricsCounter
+            <CreateTaskMetrics
               control={control}
             />
           </form>

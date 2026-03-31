@@ -81,6 +81,17 @@ export const uploadFile = async (file: File) => {
   }
 };
 
+const DEBUG = true
+
+export function log(step: string, data?: any) {
+  if (!DEBUG) return
+
+  console.log(`\n🧩 [TASK TOGGLE] → ${step}`)
+  if (data) {
+    console.log(JSON.stringify(data, null, 2))
+  }
+}
+
 export const mapType = (type?: string): MetricType => {
   switch (type) {
     case "currency":

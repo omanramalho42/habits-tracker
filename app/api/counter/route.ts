@@ -31,12 +31,7 @@ export async function GET(request: Request) {
     const counters = await prisma.counter.findMany({
       where: {
         status: "ACTIVE",
-        task: {
-          // Garante que o contador tenha PELO MENOS UMA tarefa do usuário
-          some: {
-            userId: userDb.id
-          }
-        }
+        userId: userDb.id
       },
       include: {
         taskMetric: true
@@ -65,9 +60,7 @@ export async function POST(request: NextRequest) {
     if(!parsedBody.success) {
       throw new Error(parsedBody.error.message)
     }
-
-    // console.log(parsedBody.data, "data")
-
+  
     const {
       label,
       limit,
@@ -102,11 +95,14 @@ export async function POST(request: NextRequest) {
       data: {
         label,
         emoji,
+        userId: userDb.id,
         limit,
         unit,
         taskMetric: {
           createMany: {
             data: taskMetric?.map((metric) => ({
+              limit: metric.limit.toString(),
+              index: metric?.index || "",
               emoji: metric.emoji,
               field: metric.field,
               value: metric.value,

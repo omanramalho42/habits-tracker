@@ -37,7 +37,7 @@ model User {
   categories  Categories[]
   feedbacks   Feedback[]
   posts       Post[]
-  // counters    Counter[]
+  counters    Counter[]
 }
 
 enum THEME {
@@ -192,31 +192,32 @@ model CheckPoint {
 }
 
 model Counter {
-  id          String  @id @default(uuid())
+  id           String  @id @default(uuid())
 
-  label       String  @db.VarChar(20)
-  emoji       String? @db.VarChar(20)
+  label        String  @db.VarChar(20)
+  emoji        String? @db.VarChar(20)
 
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime?   @updatedAt @map("updated_at")
-  deletedAt     DateTime?   @map("deleted_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime?   @updatedAt @map("updated_at")
+  deletedAt    DateTime?   @map("deleted_at")
 
-  status HabitStatus    @default(ACTIVE)
+  status       HabitStatus    @default(ACTIVE)
 
   valueNumber Float?    @default(0)
   valueText   String?   @db.VarChar(20)
   unit        String?
 
-  // userId  String?
-  // user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId      String?
+  user        User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   limit       Int     @default(1)
 
   taskMetric TaskMetric[]
+  taskCompletion TaskCompletion[]
   task       Task[]
-  // 🎯 O Pulo do Gato:
-  // @@unique([userId, label, valueNumber, unit])
-  // @@map("counter")
+
+  @@unique([userId, label, valueNumber, unit])
+  @@map("counter")
 }
 
 model Frequency {
@@ -324,7 +325,10 @@ model TaskCompletion {
   deletedAt     DateTime? @map("deleted_at")
 
   completedDate DateTime  @map("completed_date")
-  counter       Int?      @default(0)// null = conta apenas 1 vez
+  
+  counterId     String
+  counter       Counter   @relation(fields: [counterId], references: [id], onDelete: Cascade)
+  
   isCompleted   Boolean?  @default(false) @map("is_completed")
   
   taskId        String    @map("task_id")

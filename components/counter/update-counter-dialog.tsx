@@ -13,7 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { toast } from 'sonner'
 
-import CreateMetricsCounter from '@/components/counter/create-metrics-counter'
+import UpdateTaskMetrics from '@/components/task-metrics/update-task-metrics'
 
 import {
   FormControl,
@@ -71,8 +71,6 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
     }
   })
 
-  // console.log(counter, '!counter!');
-
   const {
     control,
     handleSubmit,
@@ -86,7 +84,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
 
   const queryClient = useQueryClient()
 
-  const { mutate } = useMutation({
+  const { mutate, data } = useMutation({
     mutationFn:  async (values: UpdateCounterSchemaType) => {
       toast.loading("Atualizando contador...", {
         id: 'update-counter'
@@ -103,6 +101,11 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
       await queryClient.invalidateQueries({
         queryKey: [
           "tasks"
+        ]
+      })
+      await queryClient.invalidateQueries({
+        queryKey: [
+          "counter"
         ]
       })
     },
@@ -123,6 +126,8 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
 
     setOpen(prev => !prev)
   }
+
+  console.log(data, 'data agte subitti-ng')
 
   console.log(errors, "errors")
 
@@ -245,8 +250,9 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
               />
             </div>
 
-            <CreateMetricsCounter
+            <UpdateTaskMetrics
               control={control}
+              counter={counter}
             />
           </form>
         </Form>

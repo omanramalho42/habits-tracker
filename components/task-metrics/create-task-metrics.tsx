@@ -30,19 +30,18 @@ import { Plus, Trash2 } from "lucide-react"
 
 import type { CreateCounterSchemaType } from "@/lib/schema/counter"
 
-
-interface CreateMetricsCounterProps {
+interface CreateTaskMetricsProps {
   control: Control<CreateCounterSchemaType>
 }
 
-const CreateMetricsCounter: React.FC<CreateMetricsCounterProps> = ({ control }) => {
+const CreateTaskMetrics: React.FC<CreateTaskMetricsProps> = ({ control }) => {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "metrics",
+    name: "taskMetric",
   })
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 z-50">
       <div className="flex flex-col gap-3 border p-4 rounded-xl">
         <div className="flex justify-between">
           <p className="text-sm font-medium">
@@ -54,9 +53,12 @@ const CreateMetricsCounter: React.FC<CreateMetricsCounterProps> = ({ control }) 
             size="sm"
             onClick={() =>
               append({
-                label: "",
+                field: "",
                 value: "",
-                type: "numeric",
+                fieldType: "numeric",
+                index: "",
+                isComplete: false,
+                limit: 0,
                 unit: "",
                 emoji: "",
               })
@@ -93,36 +95,35 @@ const CounterItem: React.FC<CounterItemProps> = ({
 }) => {
   const type = useWatch({
     control,
-    name: `metrics.${index}.type`,
+    name: `taskMetric.${index}.fieldType`,
   })
 
   // const { field: label, fieldState: { error: labelError } } = useController({
   //   control,
-  //   name: `metrics.${index}.label`,
+  //   name: `taskMetric.${index}.label`,
   // })
 
   // const { field: value } = useController({
   //   control,
-  //   name: `metrics.${index}.value`,
+  //   name: `taskMetric.${index}.value`,
   // })
 
   // const { field: emoji } = useController({
   //   control,
-  //   name: `metrics.${index}.emoji`,
+  //   name: `taskMetric.${index}.emoji`,
   // })
 
-  const { field: unitField } = useController({
-    control,
-    name: `metrics.${index}.unit`,
-  })
+  // const { field: unitField } = useController({
+  //   control,
+  //   name: `taskMetric.${index}.unit`,
   const { field: typeField } = useController({
     control,
-    name: `metrics.${index}.type`,
+    name: `taskMetric.${index}.fieldType`,
   })
 
   const { field: unit } = useController({
     control,
-    name: `metrics.${index}.unit`,
+    name: `taskMetric.${index}.unit`,
   })
 
   return (
@@ -131,7 +132,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
       <div className="flex place-items-center-safe gap-2">
 
         <FormField
-          name={`metrics.${index}.emoji`}
+          name={`taskMetric.${index}.emoji`}
           control={control}
           render={({ field }) => {
             return (
@@ -155,7 +156,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`metrics.${index}.label`}
+          name={`taskMetric.${index}.field`}
           render={({ field }) => {
             return (
               <FormItem>
@@ -182,7 +183,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`metrics.${index}.value`}
+          name={`taskMetric.${index}.limit`}
           render={({ field }) => {
             return (
               <FormItem>
@@ -250,8 +251,8 @@ const CounterItem: React.FC<CounterItemProps> = ({
       {/* UNIT DINÂMICO */}
       {type === "currency" && (
         <Select
-          value={unitField.value}
-          onValueChange={unitField.onChange}
+          value={unit.value}
+          onValueChange={unit.onChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Moeda" />
@@ -266,8 +267,8 @@ const CounterItem: React.FC<CounterItemProps> = ({
 
       {type === "liquid" && (
         <Select
-          value={unitField.value}
-          onValueChange={unitField.onChange}
+          value={unit.value}
+          onValueChange={unit.onChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Unidade" />
@@ -281,8 +282,8 @@ const CounterItem: React.FC<CounterItemProps> = ({
 
       {type === "distance" && (
         <Select
-          value={unitField.value}
-          onValueChange={unitField.onChange}
+          value={unit.value}
+          onValueChange={unit.onChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Unidade" />
@@ -306,9 +307,8 @@ const CounterItem: React.FC<CounterItemProps> = ({
           </SelectContent>
         </Select>
       )}
-
     </div>
   )
 }
 
-export default CreateMetricsCounter
+export default CreateTaskMetrics

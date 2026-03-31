@@ -45,7 +45,8 @@ import type {
   TaskMetric
 } from "@prisma/client"
 import { useState } from "react"
-import UpdateMetricsCounter from "../task-metrics/update-task-metrics"
+
+import PutTaskMetrics from "../task-metrics/put-task-metrics"
 
 interface ActiveTaskCardProps {
   task: (Task & {
@@ -200,7 +201,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             size="icon"
             variant={completion ? "default" : "outline"}
             onClick={handleToggle}
-            disabled={isPending}
+            disabled={!isPending}
             className="rounded-full"
           >
             <Check className={cn("w-4 h-4", completion ? "visible" : "hidden")} />
@@ -208,14 +209,6 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
         </div>
       </div>
-      
-      {/* <UpdateMetricsCounter
-        metrics={metrics}
-        open={openMetricsDialog}
-        trigger={
-          <Button>adicionar complemento</Button>
-        }
-      /> */}
       
       {/* META INFO */}
       {(task?.goals && task.categories && task?.categories?.length > 0 && task.goals.length > 0 ) && (
@@ -240,26 +233,48 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       {task.counter && (
         <div className="flex flex-col gap-2 border rounded-lg p-2 bg-muted/30">
 
-          <div className="flex items-center gap-2 text-xs">
-            <span>{task.counter.emoji}</span>
-            <span className="font-medium">{task.counter.label}</span>
-            
-            <span className="text-muted-foreground">
-              {task.counter.limit}x
-            </span>
-            <UpdateCounterDialog
-              counter={task.counter}
-              trigger={
-                <Button
-                  type="button"
-                  role="button"
-                  variant="outline"
-                  size="sm"
-                >
-                  <PencilIcon className="w-3 h-3" />
-                </Button>
-              }
+          <div className="flex items-center gap-2">
+            <div className="flex flex-row items-center gap-2 w-full my-2">
+              <span className="text-lg">
+                {task.counter.emoji}
+              </span>
+              <span className="font-medium">
+                {task.counter.label}
+              </span>
+              
+              <span className="text-muted-foreground">
+                {task.counter.valueNumber}|{task.counter.limit}
+              </span>
+              <UpdateCounterDialog
+                counter={task.counter}
+                trigger={
+                  <Button
+                    type="button"
+                    role="button"
+                    variant="outline"
+                    size="sm"
+                  >
+                    <PencilIcon className="w-3 h-3" />
+                  </Button>
+                }
+              />
+            </div>
+            <PutTaskMetrics
+              open={openMetricsDialog}
+              onOpenChange={setOpenMetricsDialog}
+              taskMetric={task.counter.taskMetric || []}
+              counterId={task.counter.id}
             />
+            {/* CHECK */}
+            <Button
+              size="icon"
+              variant={!completion ? "default" : "outline"}
+              onClick={() => setOpenMetricsDialog(prev => !prev)}
+              disabled={isPending}
+              className="rounded-full"
+            >
+              <Check className={cn("w-4 h-4", !completion ? "visible" : "hidden")} />
+            </Button>
           </div>
 
           {/* taskMetric */}
@@ -276,7 +291,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                   </span>
                   <div className="flex flex-row gap-2 items-center">
                     <span className="font-medium">
-                      {metric.value}
+                      {metric.value || 0} {" | "} {metric.limit}
                     </span>
                     <span className="font-bold">
                       {metric?.unit}

@@ -1,16 +1,18 @@
 import { z } from "zod"
-import { MetricSchema } from "@/lib/schema/task"
+import { CreateMetricSchema, UpdateMetricSchema } from "./metrics"
 
 export const createCounterSchema = z.object({
   label: 
     z.string()
     .min(2, "O valor minimo de caracateres permitido é igual a 2"),
-  emoji: 
+  emoji:
     z.string()
     .optional(),
   limit: 
     z.coerce.number()
     .min(1, "O valor minimo é 1"),
+  index:
+    z.string().optional(),
   valueNumber:
     z.coerce.number()
     .optional(),
@@ -22,7 +24,7 @@ export const createCounterSchema = z.object({
     .optional(),
   taskMetric: 
     z.array(
-      MetricSchema
+      CreateMetricSchema
     )
     .optional()
 })
@@ -51,7 +53,7 @@ export const updateCounterSchema = z.object({
     .optional(),
   taskMetric: 
     z.array(
-      MetricSchema
+      UpdateMetricSchema
     )
     .optional()
 })
