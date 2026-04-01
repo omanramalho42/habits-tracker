@@ -10,6 +10,7 @@ import { UpdateTaskSchema } from "@/lib/schema/task"
 import { getTodayString } from "@/lib/habit-utils"
 import { uploadToCloudinary } from "../route"
 import { log } from "@/lib/utils"
+import { TaskMetric } from "@prisma/client"
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -282,9 +283,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!bodyParams.success) {
       throw new Error("Invalid date format")
     }
-    
-    const completedDate =
-      new Date(bodyParams.data)
+    const newDate =
+      bodyParams.data
+    const completedDate = new Date(newDate)
+
     log("DATE RECEIVED", body?.date)
     log("PARSED DATE", completedDate)
 
@@ -304,6 +306,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         },
       },
     })
+
     log("EXISTING COMPLETION", existingCompletion)
     // 2️⃣ NÃO EXISTE → cria
     if (!existingCompletion) {
@@ -358,40 +361,30 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           (m) => !m.completionId
         )
 
-        if (baseMetrics.length > 0) {
-          await tx.taskMetric.createMany({
-            data: baseMetrics.map((metric) => ({
-              emoji: metric.emoji,
-              fieldType: metric.fieldType,
-              field: metric.field,
-              unit: metric.unit,
-
-              value: metric.value,
-              limit: metric.limit,
-
-              // 🔥 STEP ATUAL
-              index: String(nextValue),
-
-              counterId: counter.id,
-              completionId: completion.id,
-
-              isComplete: false,
-              date: new Date(),
-            })),
-          })
-        }
+        await tx.taskMetric.updateMany({
+          where: {
+            counterId: counter.id,
+            completionId: null,
+          },
+          data: {
+            completionId: completion.id,
+            // index: String(nextValue),
+            // isComplete: false,
+            // date: new Date(),
+          },
+        })
         log("BASE METRICS", baseMetrics)
         log("CREATING METRICS SNAPSHOT", {
           step: nextValue,
           total: baseMetrics.length,
         })
         // 3️⃣ atualiza counter global
-        await tx.counter.update({
-          where: { id: counter.id },
-          data: {
-            valueNumber: nextValue,
-          },
-        })
+        // await tx.counter.update({
+        //   where: { id: counter.id },
+        //   data: {
+        //     valueNumber: nextValue,
+        //   },
+        // })
         log("UPDATING COUNTER", {
           old: currentValue,
           new: nextValue,
@@ -433,10 +426,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // 4️⃣ EXISTE e TEM contador
     const currentCounter = existingCompletion.counter.valueNumber ?? 0
     const limitCounter = existingCompletion.counter.limit ?? 1
-    log("CURRENT COUNTER STATE", {
-      currentCounter,
-      limitCounter,
-    })
+
+    console.log(currentCounter, limitCounter, "current x limit counter")
+
     // 4.1️⃣ Ainda não chegou no limite → incrementa
     if (currentCounter < limitCounter) {
       const result = await prisma.$transaction(async (tx) => {
@@ -470,7 +462,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               field: metric.field,
               unit: metric.unit,
 
-              value: metric.value,
+              // value: metric.value,
               limit: metric.limit,
 
               index: String(nextValue),
@@ -485,12 +477,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         // 2️⃣ atualiza counter
-        await tx.counter.update({
-          where: { id: counter.id },
-          data: {
-            valueNumber: nextValue,
-          },
-        })
+        // await tx.counter.update({
+        //   where: { id: counter.id },
+        //   data: {
+        //     valueNumber: nextValue,
+        //   },
+        // })
 
         // 3️⃣ atualiza completion
         const updatedCompletion = await tx.taskCompletion.update({
@@ -521,11 +513,15 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // // 4.2️⃣ Chegou no limite → reset
-    // await prisma.taskCompletion.delete({
-    //   where: {
-    //     id: existingCompletion.id,
-    //   },
-    // });
+    await prisma.taskCompletion.update({
+      where: {
+        id: existingCompletion.id,
+      },
+      data: {
+        isCompleted: !existingCompletion.isCompleted,
+        updatedAt: new Date(),
+      }
+    });
 
     return NextResponse.json({
       completion: existingCompletion,

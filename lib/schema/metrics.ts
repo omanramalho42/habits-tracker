@@ -48,19 +48,21 @@ export const UpdateMetricSchema = z.object({
 })
 
 export const putMetricSchema = z.object({
-  id: z.string().optional(),
-  index: z.string(),
-  isComplete: z.boolean().default(false),
-  completionId: z.string().optional(),
-  counterId: z.string().optional(),
-  limit: z.coerce.number()
+  id: 
+    z.string()
+    .optional(),
+  completionId: 
+    z.string()
+    .optional(),
+  counterId: 
+    z.string()
+    .optional(),
+  limit:
+    z.coerce.number()
     .min(1, "O valor minimo é 1"),
   field: 
     z.string()
     .min(1, "O valor minimo de caracateres é 1"),
-  value: 
-    z.string()
-    .min(1, "Ovalor minimo de caracteres é 1"),
   fieldType: 
     z.string()
     .optional(),
@@ -70,6 +72,14 @@ export const putMetricSchema = z.object({
   emoji: 
     z.string()
     .optional(),
+  index:
+    z.string(),
+  value: 
+    z.string()
+    .min(1, "Ovalor minimo de caracteres é 1"),
+  isComplete: 
+    z.boolean()
+    .default(false),
 }).array()
 
 export type PutMetricSchemaType = z.infer<typeof putMetricSchema>

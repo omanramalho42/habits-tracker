@@ -34,6 +34,7 @@ import {
   Check,
   Eye,
   File,
+  Files,
   MoreVertical,
   Pencil,
   PencilIcon,
@@ -46,7 +47,8 @@ import type {
   Goals,
   Task,
   TaskCompletion,
-  TaskMetric
+  TaskMetric,
+  TaskMetricCompletion
 } from "@prisma/client"
 import { useState } from "react"
 
@@ -58,7 +60,9 @@ interface ActiveTaskCardProps {
     goals?: Goals[],
     categories?: Categories[]
     counter?: Counter & {
-      taskMetric?: TaskMetric[]
+      taskMetric?: (TaskMetric & {
+        completion?: TaskMetricCompletion[]
+      })[]
     }
   })
   selectedDate?: Date
@@ -67,8 +71,6 @@ interface ActiveTaskCardProps {
 const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
   const [openMetricsDialog, setOpenMetricsDialog] =
     useState<boolean>(false)
-  const [metrics, setMetrics] =
-    useState<TaskMetric[] | undefined>(undefined)
 
   const queryClient = useQueryClient()
 
@@ -80,33 +82,42 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async ({ taskId, date }: any) => {
+      toast.success("Atualizando status da tarefa", {
+        id: "toggle-task"
+      })
       const res = await axios.put(
         `/api/task/${taskId}`,
         { date }
       )
       return res.data
     },
-    onSuccess: async (res) => {
-      await queryClient.invalidateQueries({
-        queryKey: ["tasks"]
+    onSuccess: async (values) => {
+      toast.success("Status atualizado", {
+        id: "toggle-task"
       })
-
-      if (res.completed) {
-        //ABRIR O DIALOG PARA PREENCER OS VALORES DAS METRICS
-        console.log(res.completion, "response")
-        setMetrics(res.completion.id) // ID da métrica que quer editar
+      
+      await queryClient.invalidateQueries({
+        queryKey: ["tasks", selectedDate],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["routines", selectedDate],
+      })
+      if(values.completion.counter.valueNumber < values.completion.counter.limit) {
         setOpenMetricsDialog(true)
-
+      }
+      if (!values.completion.isCompleted) {
         confetti({
-          particleCount: 80,
-          spread: 60,
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
         })
       }
-
-      toast.success("Status atualizado")
     },
-    onError: () => {
-      toast.error("Erro ao atualizar tarefa")
+    onError: (error) => {
+      toast.error(error?.message || "Erro ao alterar status do hábito", {
+        id: "toggle-task",
+      })
     }
   })
 
@@ -119,7 +130,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
     })
   }
 
-  console.log(task, 'task')
+  console.log(task, 'task!')
  
   return (
     <Card className="p-3 flex flex-col gap-3">
@@ -203,12 +214,12 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           {/* CHECK */}
           <Button
             size="icon"
-            variant={completion ? "default" : "outline"}
+            variant={completion?.isCompleted ? "default" : "outline"}
             onClick={handleToggle}
-            disabled={!isPending}
+            disabled={isPending || ((Number(task.counter?.valueNumber)) !== task.counter?.limit)}
             className="rounded-full"
           >
-            <Check className={cn("w-4 h-4", completion ? "visible" : "hidden")} />
+            <Check className={cn("w-4 h-4", completion?.isCompleted ? "visible" : "hidden")} />
           </Button>
 
         </div>
@@ -247,7 +258,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               
               <span className="text-muted-foreground">
-                {Number(task.counter.valueNumber) - 1}|{task.counter.limit}
+                {Number(task.counter.valueNumber)}|{task.counter.limit}
               </span>
               <UpdateCounterDialog
                 counter={task.counter}
@@ -257,6 +268,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                     role="button"
                     variant="outline"
                     size="sm"
+                    disabled={(Number(task.counter.valueNumber) - 1) < task.counter.limit}
                   >
                     <PencilIcon className="w-3 h-3" />
                   </Button>
@@ -266,122 +278,174 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             <PutTaskMetrics
               open={task?.counter?.taskMetric && task?.counter?.taskMetric?.length > 0 ? openMetricsDialog : false}
               onOpenChange={setOpenMetricsDialog}
-              taskMetric={
-                task.counter.taskMetric?.filter((metric) =>
-                  metric.index &&
-                  Number(metric.index) === (task.counter?.valueNumber ?? 0)
-                ) || []
-              }
+              taskMetric={task.counter.taskMetric || []}
               disabled={(Number(task.counter.valueNumber) - 1) === task.counter.limit}
               selectedDate={selectedDate}
               taskId={task.id}
+              index={task.counter.valueNumber || 1}
               counterId={task.counter.id}
+              trigger={
+                <Button 
+                  type="button"
+                  role="button"
+                  aria-expanded={openMetricsDialog}
+                  variant="ghost"
+                  disabled={task.counter.valueNumber === task.counter.limit}
+                  size="icon-sm"
+                >
+                  <Files className="w-3 h-3" />
+                </Button>
+              }
             />
             {/* CHECK */}
             <Button
               size="icon"
-              variant={task.counter.taskMetric?.some((metric) => metric.date === selectedDate && metric.isComplete) ? "default" : "outline"}
+              variant={task.counter.valueNumber === task.counter.limit ? "default" : "outline"}
               onClick={() => setOpenMetricsDialog(prev => !prev)}
-              disabled={isPending}
+              disabled={isPending || task.counter.valueNumber === task.counter.limit}
               className="rounded-full"
             >
-              <Check className={cn("w-4 h-4", task.counter.taskMetric?.some((metric) => metric.date === selectedDate && metric.isComplete) ? "visible" : "hidden")} />
+              <Check className={cn("w-4 h-4", task.counter.valueNumber === task.counter.limit ? "visible" : "hidden")} />
             </Button>
           </div>
           
-        {/* taskMetric com steps */}
-        {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
-          <Tabs defaultValue="1" className="w-full">
-            {/* 🔥 TABS HEADER */}
-            <TabsList className="grid w-full grid-cols-3">
+          {/* taskMetric com steps */}
+          {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
+            <Tabs
+              defaultValue={String(task.counter.valueNumber || 1)}
+              className="w-full"
+            >
+              {/* 🔥 TABS HEADER */}
+              <TabsList className="grid w-full grid-cols-3">
+                {Array.from({ length: task.counter.limit }).map((_, i) => {
+                  const step = String(i + 1)
+
+                  return (
+                    <TabsTrigger key={step} value={step}>
+                      {`${step} ${task.counter?.label.slice(
+                        0,
+                        task.counter.label.length - 1
+                      )}`}
+                    </TabsTrigger>
+                  )
+                })}
+              </TabsList>
+
+              {/* 🔥 TABS CONTENT */}
               {Array.from({ length: task.counter.limit }).map((_, i) => {
-                const step = String(i + 1)
+                const step = i + 1
+                const isCurrentStep = step === task?.counter?.valueNumber
+
+                // 🔥 AGORA USANDO COMPLETIONS
+                const metrics = task?.counter?.taskMetric?.map((metric: any) => {
+                  const completion = metric.taskMetricCompletion?.find(
+                    (c: any) => c.index === step
+                  )
+
+                  return {
+                    ...metric,
+                    completion,
+                  }
+                })
 
                 return (
-                  <TabsTrigger disabled={task.counter?.valueNumber?.toString() !== step} key={step} value={step}>
-                    {`Step ${step}`}
-                  </TabsTrigger>
-                )
-              })}
-            </TabsList>
+                  <TabsContent key={step} value={String(step)}>
+                    <div className="grid grid-cols-1 gap-3 mt-3">
+                      {metrics?.length === 0 && (
+                        <div className="text-xs text-muted-foreground text-center py-4">
+                          Nenhuma métrica neste step
+                        </div>
+                      )}
 
-            {/* 🔥 TABS CONTENT */}
-            {Array.from({ length: task.counter.limit }).map((_, i) => {
-              const step = String(i + 1)
+                      {metrics?.map((metric: any) => {
+                        const completion = metric.completion
 
-              const metrics = task.counter!.taskMetric!.filter(
-                (m: any) => m.index === step
-              )
+                        const value = Number(completion?.value || 0)
+                        const limit = Number(metric.limit || 1)
 
-              return (
-                <TabsContent key={step} value={step}>
-                  <div className="grid grid-cols-1 gap-3 mt-3">
-                    {metrics.length === 0 && (
-                      <div className="text-xs text-muted-foreground text-center py-4">
-                        Nenhuma métrica neste step
-                      </div>
-                    )}
+                        const percentage = Math.min((value / limit) * 100, 100)
 
-                    {metrics.map((metric: any) => {
-                      const value = Number(metric.value || 0)
-                      const limit = Number(metric.limit || 1)
-                      const percentage = Math.min((value / limit) * 100, 100)
+                        const color =
+                          percentage >= 100
+                            ? "bg-green-500"
+                            : percentage >= 60
+                            ? "bg-yellow-500"
+                            : "bg-primary"
 
-                      const color =
-                        percentage >= 100
-                          ? "bg-green-500"
-                          : percentage >= 60
-                          ? "bg-yellow-500"
-                          : "bg-primary"
+                        const isLocked = !isCurrentStep
 
-                      return (
-                        <div
-                          key={metric.id}
-                          className="flex flex-col gap-2 p-3 rounded-xl border bg-card shadow-sm hover:shadow-md transition-all"
-                        >
-                          {/* HEADER */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">{metric.emoji}</span>
-                              <span className="text-sm font-semibold">
-                                {metric.field}
+                        return (
+                          <div
+                            key={metric.id}
+                            className={`flex flex-col gap-2 p-3 rounded-xl border bg-card shadow-sm transition-all ${
+                              isLocked ? "opacity-60" : "hover:shadow-md"
+                            }`}
+                          >
+                            {/* HEADER */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-base">{metric.emoji}</span>
+                                <span className="text-sm font-semibold">
+                                  {metric.field}
+                                </span>
+                              </div>
+
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {value}/{limit} {metric.unit}
                               </span>
                             </div>
 
-                            <span className="text-xs font-medium text-muted-foreground">
-                              {value}/{limit} {metric.unit}
-                            </span>
-                          </div>
+                            {/* PROGRESS */}
+                            <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${color} transition-all duration-300`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
 
-                          {/* PROGRESS */}
-                          <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-full ${color} transition-all duration-300`}
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-
-                          {/* FOOTER */}
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-muted-foreground">
-                              {Math.round(percentage)}%
-                            </span>
-
-                            {percentage >= 100 && (
-                              <span className="text-green-500 font-semibold">
-                                ✔ Completo
+                            {/* FOOTER */}
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-muted-foreground">
+                                {Math.round(percentage)}%
                               </span>
-                            )}
+
+                              <div className="flex items-center gap-2">
+                                {completion?.isComplete && (
+                                  <span className="text-green-500 font-semibold">
+                                    ✔ Completo
+                                  </span>
+                                )}
+
+                                {/* 🔥 ÍCONE NO LUGAR DO BOTÃO */}
+                                {!completion?.isComplete && isCurrentStep && (
+                                  <Button
+                                    size="icon"
+                                    variant={completion?.isComplete ? "default" : "outline"}
+                                    onClick={() => handleToggle()}
+                                    disabled={isPending}
+                                    className="rounded-full"
+                                > 
+                                  <Check className={cn("w-4 h-4", completion?.isComplete ? "visible" : "hidden")} />
+                                </Button>
+                                )}
+
+                                {/* 🔒 BLOQUEADO */}
+                                {isLocked && (
+                                  <span className="text-muted-foreground text-xs">
+                                    🔒
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </TabsContent>
-              )
-            })}
-          </Tabs>
-        )}
+                        )
+                      })}
+                    </div>
+                  </TabsContent>
+                )
+              })}
+            </Tabs>
+          )}
 
         </div>
       )}

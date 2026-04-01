@@ -56,128 +56,184 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id: counterId } = await params
 
     const body = await request.json()
 
     const parsedBody = updateCounterSchema.safeParse(body)
-    
-    if(!parsedBody.success) {
+
+    if (!parsedBody.success) {
       throw new Error(parsedBody.error.message)
     }
+
     const {
-      id,
       label,
       limit,
       emoji,
       unit,
-      valueNumber,
-      valueText,
-      taskMetric
+      taskMetric,
     } = parsedBody.data
-    
+
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json({
         error: "Unauthorized"
       }, { status: 401 })
     }
-    
+
     const userDb = await prisma.user.findFirst({
-      where: {
-        clerkUserId: userId
-      }
+      where: { clerkUserId: userId },
     })
-    
+
     if (!userDb) {
-      return NextResponse.json({
-        error: "user not find on db"
-      }, { status: 401 })
+      return NextResponse.json(
+        { error: "user not find on db" },
+        { status: 401 }
+      )
     }
 
-    await prisma.counter.update({
-      where: { id: counterId },
-      data: {
-        label,
-        emoji,
-        limit,
-        unit,
-      }
-    })
-    const existingMetrics = await prisma.taskMetric.findMany({
-      where: {
-        counterId
-      }
-    })
-    const incoming = taskMetric || []
+    const result = await prisma.$transaction(async (tx) => {
+      // 🔥 1. update counter
+      await tx.counter.update({
+        where: { id: counterId },
+        data: {
+          label,
+          emoji,
+          limit,
+          unit,
+        },
+      })
 
-    // UPDATE
-    const toUpdate = incoming.filter(m => m.id)
+      // 🔥 2. existing metrics
+      const existingMetrics = await tx.taskMetric.findMany({
+        where: {
+          counterId
+        },
+      })
 
-    // CREATE
-    const toCreate = incoming.filter(m => !m.id)
+      const incoming = taskMetric || []
 
-    // DELETE
-    const toDelete = existingMetrics.filter(
-      db => !incoming.some(m => m.id === db.id)
-    )
+      const toUpdate = incoming.filter((m) => m.id)
+      const toCreate = incoming.filter((m) => !m.id)
 
-    const updatedMetrics = await Promise.all(
-      toUpdate.map(metric =>
-        prisma.taskMetric.update({
-          where: {
-            id: metric.id
-          },
-          data: {
-            emoji: metric.emoji,
-            limit: metric.limit.toString(),
-            index: metric.index,
-            field: metric.field,
-            value: metric.value,
-            unit: metric.unit,
-            fieldType: mapType(metric.fieldType),
-          }
-        })
+      const toDelete = existingMetrics.filter(
+        (db) => !incoming.some((m) => m.id === db.id)
       )
-    )
 
-    // ➕ creates
-    const newMetrics = await prisma.taskMetric.createMany({
-      data: toCreate.map(metric => ({
-        limit: metric.limit.toString(),
-        index: metric.index || "",
-        emoji: metric.emoji,
-        field: metric.field,
-        value: metric.value,
-        unit: metric.unit,
-        fieldType: mapType(metric.fieldType),
-        counterId
-      }))
-    })
+      // 🔥 3. update templates
+      const updatedMetrics = await Promise.all(
+        toUpdate.map((metric) =>
+          tx.taskMetric.update({
+            where: { id: metric.id },
+            data: {
+              emoji: metric.emoji,
+              limit: metric.limit.toString(),
+              field: metric.field,
+              unit: metric.unit,
+              fieldType: mapType(metric.fieldType),
+            },
+          })
+        )
+      )
 
-    // ❌ deletes
-    const deletedMetrics = await prisma.taskMetric.deleteMany({
-      where: {
-        id: {
-          in: toDelete.map(m => m.id)
+      // 🔥 4. create templates
+      const createdMetrics = await Promise.all(
+        toCreate.map((metric) =>
+          tx.taskMetric.create({
+            data: {
+              limit: metric.limit.toString(),
+              emoji: metric.emoji,
+              field: metric.field,
+              unit: metric.unit,
+              fieldType: mapType(metric.fieldType),
+              counterId,
+            },
+          })
+        )
+      )
+
+      // 🔥 5. delete templates + cascade completions
+      await tx.taskMetric.deleteMany({
+        where: {
+          id: {
+            in: toDelete.map((m) => m.id),
+          },
+        },
+      })
+
+      // 🔥 6. juntar todos os templates válidos
+      const allMetrics = [...updatedMetrics, ...createdMetrics]
+
+      // 🔥 7. buscar completions existentes
+      const existingCompletions = await tx.taskMetricCompletion.findMany({
+        where: {
+          taskMetricId: {
+            in: allMetrics.map((m) => m.id),
+          },
+        },
+        select: {
+          taskMetricId: true,
+          index: true,
+        },
+      })
+
+      // 🔥 8. mapear maior index por metric
+      const maxIndexByMetric = new Map<string, number>()
+
+      for (const comp of existingCompletions) {
+        const currentMax = maxIndexByMetric.get(comp.taskMetricId) || 0
+
+        if (comp.index > currentMax) {
+          maxIndexByMetric.set(comp.taskMetricId, comp.index)
         }
       }
+
+      // 🔥 9. criar apenas os novos steps
+      const completionsToCreate = allMetrics.flatMap((metric) => {
+        const currentMax = maxIndexByMetric.get(metric.id) || 0
+
+        // nada pra criar
+        if (currentMax >= Number(limit)) return []
+
+        return Array.from({
+          length: Number(limit) - currentMax,
+        }).map((_, i) => ({
+          taskMetricId: metric.id,
+          index: currentMax + i + 1,
+          value: "",
+          isComplete: false,
+        }))
+      })
+
+      // 🔥 10. criar somente se houver
+      if (completionsToCreate.length > 0) {
+        await tx.taskMetricCompletion.createMany({
+          data: completionsToCreate,
+        })
+      }
+      return {
+        updatedMetrics,
+        createdMetrics,
+        deleted: toDelete.length,
+        completionsCreated: completionsToCreate.length,
+      }
     })
 
-    return NextResponse.json({
-      newMetrics,
-      deletedMetrics,
-      updatedMetrics,
-    })
+    return NextResponse.json(result)
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       console.error("Error update counter id", error.message)
-      return NextResponse.json({
-        error: error.message
-      }, { status: 500 })
+
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
     }
   }
 }

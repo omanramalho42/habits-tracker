@@ -275,14 +275,13 @@ model TaskMetric {
   emoji       String?     @db.VarChar(20)
   fieldType   MetricType? @default(NUMERIC) @map("field_type")
   field       String?     @db.VarChar(20)
-  value       String?     @db.VarChar(20) 
   unit        String?     @db.VarChar(20)
-  
   limit       String?
-  isComplete  Boolean?    @default(false)     
-  index       String 
 
-  date        DateTime?
+  // value       String?     @db.VarChar(20) 
+  // isComplete  Boolean?    @default(false)     
+  // index       String 
+  // date        DateTime?
   
   updatedAt   DateTime?   @updatedAt() @map("updated_at")
   createdAt   DateTime    @default(now()) @map("created_at")
@@ -295,9 +294,30 @@ model TaskMetric {
   completionId String?        @map("completion_id")
   completion  TaskCompletion? @relation(fields: [completionId], references: [id])
 
-  @@index([date])
-  @@unique([completionId, field, index, counterId])
+  taskMetricCompletion TaskMetricCompletion[]
+
+  // @@index([date])
+  @@unique([completionId, field, limit, unit, fieldType])
   @@map("task_metric")
+}
+
+model TaskMetricCompletion {
+  id           String     @id @default(uuid())
+  
+  date         DateTime?
+  value        String
+  index        Int
+  isComplete   Boolean?   @default(false)
+  
+  taskMetricId String     @map("task_metric_id")
+  taskMetric   TaskMetric @relation(fields: [taskMetricId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt    DateTime   @default(now()) @map("creted_at")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
+
+  @@index([date, index])
+  @@unique([date, index, taskMetricId])
+  @@map("task_metric_completion")
 }
 
 model Post {

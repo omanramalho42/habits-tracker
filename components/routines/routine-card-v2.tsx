@@ -15,6 +15,7 @@ import UpdateTaskScheduleDialog from "@/components/task-schedule/update-task-sch
 import DeleteTaskScheduleDialog from "@/components/task-schedule/delete-task-schedule-dialog"
 import RoutineFrequencyCard from "@/components/routines/routine-frequency"
 import RoutineCronCard from "@/components/routines/routine-card-cron"
+import FilterDropdown from "@/components/routines/filter-dropdown"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -51,9 +52,9 @@ import type {
   Habit,
   TaskSchedule,
   Categories,
-  Counter
+  Counter,
+  // Goals
 } from "@prisma/client"
-import FilterDropdown from "./filter-dropdown"
 
 interface RoutineCardProps {
   routine: (Routine & {
@@ -61,6 +62,7 @@ interface RoutineCardProps {
       habit: Habit & {
         completions: HabitCompletion[]
         categories: Categories []
+        // goals:      Goals[]
       }
       })[];
       taskSchedules?: (TaskSchedule & {

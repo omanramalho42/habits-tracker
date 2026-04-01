@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     const parsedBody = createCounterSchema.safeParse(body)
     
-    if(!parsedBody.success) {
+    if (!parsedBody.success) {
       throw new Error(parsedBody.error.message)
     }
   
@@ -66,17 +66,16 @@ export async function POST(request: NextRequest) {
       limit,
       emoji,
       unit,
-      valueNumber,
-      valueText,
       taskMetric
     } = parsedBody.data
     
     const { userId } = await auth()
     
     if (!userId) {
-      return NextResponse.json({
-        error: "Unauthorized"
-      }, { status: 401 })
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
     }
     
     const userDb = await prisma.user.findFirst({
@@ -86,53 +85,75 @@ export async function POST(request: NextRequest) {
     })
     
     if (!userDb) {
-      return NextResponse.json({
-        error: "user not find on db"
-      }, { status: 401 })
+      return NextResponse.json(
+        { error: "user not find on db" },
+        { status: 401 }
+      )
     }
     
-    const newCounter = await prisma.counter.create({
-      data: {
-        label,
-        emoji,
-        userId: userDb.id,
-        valueNumber: 1,
-        limit,
-        unit,
-        taskMetric: {
-          createMany: {
-            data: Array.from({ length: limit }).flatMap((_, stepIndex) =>
-              (taskMetric || []).map((metric) => ({
-                limit: metric.limit.toString(),
-                index: String(stepIndex + 1), // 🔥 step correto
-                emoji: metric.emoji,
-                field: metric.field,
-                value: metric.value,
-                unit: metric.unit,
-                fieldType: mapType(metric.fieldType) as any,
-              }))
-            )
-          },
-        },
-        // valueNumber,
-        // valueText,
-      },
-      include: {
-        taskMetric: true
+    const result = await prisma.$transaction(async (tx) => {
+      // 1️⃣ cria counter
+      const counter = await tx.counter.create({
+        data: {
+          label,
+          emoji,
+          userId: userDb.id,
+          valueNumber: 0, // 🔥 começa do zero
+          limit,
+          unit,
+        }
+      })
+
+      // 2️⃣ cria templates (TaskMetric)
+      const createdMetrics = await Promise.all(
+        (taskMetric || []).map((metric) =>
+          tx.taskMetric.create({
+            data: {
+              emoji: metric.emoji,
+              field: metric.field,
+              unit: metric.unit,
+              limit: metric.limit.toString(),
+              fieldType: mapType(metric.fieldType),
+              counterId: counter.id,
+            }
+          })
+        )
+      )
+
+      // 3️⃣ cria completions (TaskMetricCompletion)
+      const completions = createdMetrics.flatMap((metric) =>
+        Array.from({ length: Number(limit) }).map((_, i) => ({
+          taskMetricId: metric.id,
+          index: i + 1, // 🔥 step (1 até limit)
+          value: "", // vazio inicialmente
+          isComplete: false,
+          date: null,
+        }))
+      )
+
+      await tx.taskMetricCompletion.createMany({
+        data: completions
+      })
+
+      return {
+        counter,
+        metrics: createdMetrics
       }
     })
 
-    // console.log(newCounter, 'result')
-
     return NextResponse.json({
-      newCounter
+      newCounter: result.counter,
+      metrics: result.metrics
     })
+
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error posting counter:", error.message)
-      return NextResponse.json({
-        error: error.message
-      }, { status: 500 })
+
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
     }
   }
 }

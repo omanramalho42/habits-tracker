@@ -5,6 +5,7 @@ import type {
 
 import type {
   Categories,
+  Counter,
   Habit,
   HabitCompletion,
   HabitSchedule,
@@ -27,7 +28,9 @@ export const fetchRoutines = async (
   })[] } & {
   taskSchedules?: (TaskSchedule & {
     task: Task & {
-      completions: TaskCompletion[]
+      completions: (TaskCompletion & {
+        counter: Counter
+      })[]
       categories: Categories[]
     }
   })[]})[]> => {

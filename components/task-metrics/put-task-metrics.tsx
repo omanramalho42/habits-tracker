@@ -46,7 +46,7 @@ import {
 
 import { Plus, Trash2, Save } from "lucide-react"
 
-import type { Counter, TaskMetric } from "@prisma/client"
+import type { Counter, TaskMetric, TaskMetricCompletion } from "@prisma/client"
 
 import type { PutMetricSchemaType } from "@/lib/schema/metrics"
 import { toast } from "sonner"
@@ -54,12 +54,14 @@ import { toast } from "sonner"
 interface PutTaskMetricsProps {
   taskMetric: (TaskMetric & {
     counter?: Counter
+    completion?: TaskMetricCompletion[]
   })[]
   taskId: string
   counterId: string
   trigger?: React.ReactNode
   selectedDate: any
-  disabled?: boolean;
+  disabled?: boolean
+  index: Number
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -70,29 +72,38 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
   counterId,
   trigger,
   open,
+  index,
   disabled = false,
   selectedDate,
   onOpenChange,
 }) => {
 
   // 🔥 MAPEAMENTO FORA DO useForm
-  const defaultValues: { taskMetric: PutMetricSchemaType } = {
-    taskMetric: taskMetric?.map((m) => ({
-      id: m.id,
-      field: m.field ?? "",
-      value: m.value ?? "",
-      fieldType: m.fieldType ?? "numeric",
-      index: m.index ?? "1",
-      isComplete: m.isComplete ?? false,
-      completionId: m.completionId || "",
-      counterId: m.counterId,
-      limit: Number(m.limit ?? 1),
-      unit: m.unit ?? "",
-      emoji: m.emoji ?? "",
-    })) ?? [],
+  const defaultValues: {
+    taskMetric: PutMetricSchemaType
+  } = {
+    taskMetric:
+      taskMetric?.map((m) => ({
+        id: m.id,
+
+        value: "",
+        index: index.toString(),
+        isComplete: false,
+
+        field: m.field ?? "",
+        fieldType: m.fieldType ?? "numeric",
+        completionId: m.completionId || "",
+        counterId: m.counterId,
+
+        limit: Number(m.limit ?? 1),
+        unit: m.unit ?? "",
+        emoji: m.emoji ?? "",
+      })) ?? [],
   }
 
-  const form = useForm<{ taskMetric: PutMetricSchemaType }>({
+  const form = useForm<{
+    taskMetric: PutMetricSchemaType
+  }>({
     defaultValues,
   })
 
@@ -112,7 +123,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
         date: Date
       }) => {
         toast.loading("Criando métricas...", {
-          id: "create-metrics"
+          id: "create-metrics-completion"
         })
         const response = await axios.put(
           `/api/task/${taskId}/${counterId}`, {
@@ -124,7 +135,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
     },
     onSuccess: async () => {
       toast.success("Sucesso ao cadastrar métricas. 🎉", {
-        id: "create-metrics"
+        id: "create-metrics-completion"
       })
 
       await queryClient.invalidateQueries({
@@ -142,7 +153,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
     },
     onError: (err) => {
       toast.error("Houve um erro ao cadastrar métricas", {
-        id: "create-metrics"
+        id: "create-metrics-completion"
       })
       console.error("❌ Erro", err)
     },
