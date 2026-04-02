@@ -286,6 +286,8 @@ model TaskMetric {
 
   notes       Annotations[]
 
+  status      HabitStatus @default(ACTIVE)
+
   completionId String?        @map("completion_id")
   completion  TaskCompletion? @relation(fields: [completionId], references: [id])
 
