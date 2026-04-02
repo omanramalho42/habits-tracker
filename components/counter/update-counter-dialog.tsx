@@ -62,7 +62,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
     defaultValues: {
       id: counter.id,
       emoji: counter.emoji || "",
-      counterAuxId: counter.CounterAux[0].id,
+      counterAuxId: counter.CounterAux[0]?.id,
       label: counter.label || "",
       unit: counter.unit || "",
       limit: counter.limit || 1,
