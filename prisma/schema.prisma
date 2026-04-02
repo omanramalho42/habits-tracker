@@ -277,11 +277,6 @@ model TaskMetric {
   field       String?     @db.VarChar(20)
   unit        String?     @db.VarChar(20)
   limit       String?
-
-  // value       String?     @db.VarChar(20) 
-  // isComplete  Boolean?    @default(false)     
-  // index       String 
-  // date        DateTime?
   
   updatedAt   DateTime?   @updatedAt() @map("updated_at")
   createdAt   DateTime    @default(now()) @map("created_at")

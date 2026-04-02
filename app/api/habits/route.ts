@@ -1,22 +1,19 @@
-import { z } from 'zod'
-
 import { type NextRequest, NextResponse } from "next/server"
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 
-import { calculateStreak, isHabitActiveOnDate, WEEKDAY_MAP } from '@/lib/habit-utils'
+import { calculateStreak, WEEKDAY_MAP } from '@/lib/habit-utils'
 import { CreateHabitSchema } from '@/lib/schema/habit'
-import { inngest } from '@/src/inngest/client'
-import { welcomeEmailTemplate } from '@/lib/nodemailer/template'
-import { transporter } from '@/lib/nodemailer'
 
 export async function GET(request: Request) {
   try {
     const { userId } = await auth()
 
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({
+        error: "Unauthorized"
+      }, { status: 401 })
     }
 
     const userDb = await prisma.user.findFirst({
@@ -24,7 +21,9 @@ export async function GET(request: Request) {
     })
 
     if (!userDb) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 })
+      return NextResponse.json({
+        error: "User not found"
+      }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
