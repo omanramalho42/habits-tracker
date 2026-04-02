@@ -6,10 +6,6 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: Request) {
   try {
-    // const authData = await auth();
-    // console.log("Auth Data:", authData); // Verifique se há alguma mensagem de erro no terminal
-    // Isso vai imprimir no seu terminal o motivo técnico (ex: "token expired", "invalid signature")
-    // console.log("DEBUG CLERK:", authData.debug());
     const { userId } = await auth()
     
     if (!userId) {
@@ -29,39 +25,64 @@ export async function GET(request: Request) {
         error: "user not find on db"
       }, { status: 401 })
     }
+
+    const { searchParams } = new URL(request.url)
+    const paramDate = searchParams.get("selectedDate")
+
+    const selectedDate = paramDate ? new Date(paramDate) : null
     
+    const baseDate = new Date(selectedDate!)
+
+    const startOfDay =
+      new Date(baseDate.toISOString().split("T")[0])
+    const nextDay = new Date(startOfDay)
+    nextDay.setDate(nextDay.getDate() + 1)
+    
+    // fim do dia LOCAL
+    const endOfDay = new Date(baseDate)
+    endOfDay.setHours(23, 59, 59, 999)
+
+    console.log("🧠 RANGE LOCAL:", { startOfDay, endOfDay })
+
     const tasks = await prisma.task.findMany({
       where: {
         userId: userDb.id,
-        status: 'ACTIVE'
-      },
-      orderBy: {
-        createdAt: "asc",
+        status: 'ACTIVE',
       },
       include: {
-        completions: true,
-        categories: {
-          where: {
-            status: 'ACTIVE'
-          }
-        },
-        goals: {
-          where: {
-            status: "ACTIVE"
-          }
-        },
-        schedules: true,
         counter: {
           include: {
             taskMetric: {
               include: {
-                taskMetricCompletion: true
+                taskMetricCompletion: {
+                  where: {
+                    ...(baseDate && {
+                      date: {
+                        gte: startOfDay,
+                        lt: nextDay
+                      },
+                    })
+                  }
+                }
+              }
+            },
+            CounterAux: {
+              where: {
+                ...(baseDate && {
+                  date: {
+                    gte: startOfDay,
+                    lte: nextDay
+                  },
+                })
               }
             }
           }
-        }
+        },
+        metricCompletions: true
       }
     })
+
+    console.log(tasks, "Tasks")
 
     return NextResponse.json(tasks)
   } catch (error) {
@@ -179,7 +200,11 @@ export async function POST(request: NextRequest) {
         completions: true,
         counter: {
           include: {
-            taskMetric: true
+            taskMetric: {
+              include: {
+                completion: true
+              }
+            }
           }
         },
       },

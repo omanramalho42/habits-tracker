@@ -51,6 +51,16 @@ export async function PUT(
       date
     } = bodyParams.data
 
+    const baseDate = new Date(date)
+
+    const startOfDay = new Date(baseDate)
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const endOfDay = new Date(baseDate)
+    endOfDay.setHours(23, 59, 59, 999)
+
+    console.log("📅 Day range:", { startOfDay, endOfDay })
+
     const result = await prisma.$transaction(async (tx) => {
       // 🔥 1. pega counter atual
       const counter = await tx.counter.findUnique({
@@ -60,22 +70,48 @@ export async function PUT(
       })
 
       if (!counter) throw new Error("Counter not found")
+        const counterDay = await tx.counterAux.upsert({
+          where: {
+            counterId_date: {
+              counterId: counter.id,
+              date: startOfDay
+            }
+          },
+          update: {},
+          create: {
+            counterId: counter.id,
+            date: startOfDay,
+            currentStep: 0,
+            limit: counter.limit
+          }
+        })
 
-      const currentStep = Number(counter.valueNumber ?? 0)
+      console.log("📊 CounterDay:", counterDay)
+
+      const currentStep = counterDay.currentStep
 
       // 🛑 bloqueia se já atingiu limite
-      if (currentStep >= Number(counter.limit)) {
-        throw new Error("Counter limit reached")
+      if (currentStep >= Number(counterDay.limit)) {
+        console.log("⛔ Daily limit reached:", {
+          currentStep,
+          limit: counterDay.limit
+        })
+        throw new Error("Daily counter limit reached")
       }
 
       const nextStep = currentStep + 1
+
+      console.log("➡️ Step (daily):", {
+        currentStep,
+        nextStep
+      })
 
       // 🔥 2. cria completion do dia (se quiser manter)
       const completion = await tx.taskCompletion.upsert({
         where: {
           taskId_completedDate: {
             taskId,
-            completedDate: date,
+            completedDate: startOfDay
           },
         },
         update: {
@@ -84,11 +120,20 @@ export async function PUT(
         create: {
           taskId,
           counterId,
-          completedDate: date,
-          isCompleted: nextStep >= Number(counter.limit),
+          completedDate: startOfDay,
+          isCompleted: nextStep >= Number(counterDay.limit),
         },
       })
+      await tx.counterAux.update({
+        where: {
+          id: counterDay.id
+        },
+        data: {
+          currentStep: nextStep
+        }
+      })
 
+      console.log("🔄 CounterDay updated:", nextStep)
       await tx.counter.update({
         where: { id: counter.id },
         data: {
@@ -96,21 +141,44 @@ export async function PUT(
         },
       })
 
+      // 🔥 cria ou atualiza metric completions corretamente
       await Promise.all(
-        taskMetric.map((metric) =>
-          tx.taskMetricCompletion.updateMany({
-            where: {
-              taskMetricId: metric.id!,
-              index: nextStep, // 🔥 ATUAL (não nextStep - 1)
-            },
-            data: {
+        taskMetric
+          .filter(metric => metric?.id) // evita null/undefined
+          .map(metric => {
+            console.log("🧩 Upserting metric completion:", {
+              metricId: metric.id,
+              step: nextStep,
               value: metric.value,
-              date: date,
-              isComplete: true,
-            },
+              taskId: taskId
+            })
+
+            return tx.taskMetricCompletion.upsert({
+              where: {
+                date_index_taskMetricId_taskId: {
+                  date: startOfDay, // 🔥 padronizado
+                  index: nextStep,
+                  taskMetricId: metric.id!,
+                  taskId,
+                }
+              },
+              update: {
+                value: metric.value,
+                taskId,
+                isComplete: true
+              },
+              create: {
+                taskMetricId: metric.id!,
+                index: nextStep,
+                value: metric.value,
+                date: startOfDay,
+                isComplete: true,
+                taskId,
+              }
+            })
           })
-        )
       )
+
       return {
         step: nextStep,
         completionId: completion.id,

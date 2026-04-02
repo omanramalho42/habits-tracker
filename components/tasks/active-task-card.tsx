@@ -44,6 +44,7 @@ import {
 import type {
   Categories,
   Counter,
+  CounterAux,
   Goals,
   Task,
   TaskCompletion,
@@ -56,10 +57,12 @@ import PutTaskMetrics from "../task-metrics/put-task-metrics"
 
 interface ActiveTaskCardProps {
   task: (Task & {
+    metricCompletions?: TaskMetricCompletion[],
     completions?: TaskCompletion[]
     goals?: Goals[],
     categories?: Categories[]
     counter?: Counter & {
+      CounterAux: CounterAux[],
       taskMetric?: (TaskMetric & {
         completion?: TaskMetricCompletion[]
       })[]
@@ -79,6 +82,22 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       new Date(c.completedDate).toDateString() ===
       new Date(selectedDate || new Date()).toDateString()
   )
+
+  const formatter = new Intl.DateTimeFormat("pt-BR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+
+  const selected = formatter.format(new Date(selectedDate || new Date()))
+
+  const counterDay = task?.counter?.CounterAux?.find(
+    (c: CounterAux) =>
+      formatter.format(new Date(c.date)) === selected
+  )
+
+  const currentStep = Number(counterDay?.currentStep ?? 0)
+  const limit = Number(counterDay?.limit ?? task?.counter?.limit ?? 1)
 
   const { mutate, isPending } = useMutation({
     mutationFn: async ({ taskId, date }: any) => {
@@ -102,7 +121,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       await queryClient.invalidateQueries({
         queryKey: ["routines", selectedDate],
       })
-      if(values.completion.counter.valueNumber < values.completion.counter.limit) {
+      if(values.step < values.limit) {
         setOpenMetricsDialog(true)
       }
       if (!values.completion.isCompleted) {
@@ -216,7 +235,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             size="icon"
             variant={completion?.isCompleted ? "default" : "outline"}
             onClick={handleToggle}
-            disabled={isPending || ((Number(task.counter?.valueNumber)) !== task.counter?.limit)}
+            disabled={isPending || currentStep >= limit}
             className="rounded-full"
           >
             <Check className={cn("w-4 h-4", completion?.isCompleted ? "visible" : "hidden")} />
@@ -258,17 +277,18 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               
               <span className="text-muted-foreground">
-                {Number(task.counter.valueNumber)}|{task.counter.limit}
+                {currentStep}|{limit}
               </span>
               <UpdateCounterDialog
                 counter={task.counter}
+                taskId={task.id}
+                selectedDate={selectedDate || new Date()}
                 trigger={
                   <Button
                     type="button"
                     role="button"
                     variant="outline"
                     size="sm"
-                    disabled={(Number(task.counter.valueNumber) - 1) < task.counter.limit}
                   >
                     <PencilIcon className="w-3 h-3" />
                   </Button>
@@ -282,7 +302,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               disabled={(Number(task.counter.valueNumber) - 1) === task.counter.limit}
               selectedDate={selectedDate}
               taskId={task.id}
-              index={task.counter.valueNumber || 1}
+              index={currentStep || 1}
               counterId={task.counter.id}
               trigger={
                 <Button 
@@ -290,7 +310,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                   role="button"
                   aria-expanded={openMetricsDialog}
                   variant="ghost"
-                  disabled={task.counter.valueNumber === task.counter.limit}
+                  disabled={currentStep >= limit}
                   size="icon-sm"
                 >
                   <Files className="w-3 h-3" />
@@ -300,9 +320,9 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             {/* CHECK */}
             <Button
               size="icon"
-              variant={task.counter.valueNumber === task.counter.limit ? "default" : "outline"}
+              variant={currentStep >= limit ? "default" : "outline"}
+              disabled={isPending || currentStep >= limit}
               onClick={() => setOpenMetricsDialog(prev => !prev)}
-              disabled={isPending || task.counter.valueNumber === task.counter.limit}
               className="rounded-full"
             >
               <Check className={cn("w-4 h-4", task.counter.valueNumber === task.counter.limit ? "visible" : "hidden")} />
@@ -312,12 +332,12 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           {/* taskMetric com steps */}
           {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
             <Tabs
-              defaultValue={String(task.counter.valueNumber || 1)}
+              defaultValue={String(currentStep || 1)}
               className="w-full"
             >
               {/* 🔥 TABS HEADER */}
               <TabsList className="grid w-full grid-cols-3">
-                {Array.from({ length: task.counter.limit }).map((_, i) => {
+                {Array.from({ length: currentStep }).map((_, i) => {
                   const step = String(i + 1)
 
                   return (
@@ -334,7 +354,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               {/* 🔥 TABS CONTENT */}
               {Array.from({ length: task.counter.limit }).map((_, i) => {
                 const step = i + 1
-                const isCurrentStep = step === task?.counter?.valueNumber
+                const isCurrentStep = step === currentStep
 
                 // 🔥 AGORA USANDO COMPLETIONS
                 const metrics = task?.counter?.taskMetric?.map((metric: any) => {

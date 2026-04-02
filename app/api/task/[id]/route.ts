@@ -10,7 +10,6 @@ import { UpdateTaskSchema } from "@/lib/schema/task"
 import { getTodayString } from "@/lib/habit-utils"
 import { uploadToCloudinary } from "../route"
 import { log } from "@/lib/utils"
-import { TaskMetric } from "@prisma/client"
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

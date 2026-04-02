@@ -28,13 +28,21 @@ export async function GET(request: Request) {
       }, { status: 401 })
     }
 
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
     const counters = await prisma.counter.findMany({
       where: {
         status: "ACTIVE",
         userId: userDb.id
       },
       include: {
-        taskMetric: true
+        taskMetric: true,
+        CounterAux: {
+          where: {
+            date: today
+          }
+        }
       }
     })
 
@@ -98,12 +106,22 @@ export async function POST(request: NextRequest) {
           label,
           emoji,
           userId: userDb.id,
-          valueNumber: 0, // 🔥 começa do zero
           limit,
           unit,
         }
       })
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
 
+      const counterAux = await tx.counterAux.create({
+        data: {
+          counterId: counter.id,
+          date: today,
+          currentStep: 0,
+          limit: counter.limit
+        }
+      })
+      console.log("📅 counterAux created:", counterAux)
       // 2️⃣ cria templates (TaskMetric)
       const createdMetrics = await Promise.all(
         (taskMetric || []).map((metric) =>
@@ -121,19 +139,19 @@ export async function POST(request: NextRequest) {
       )
 
       // 3️⃣ cria completions (TaskMetricCompletion)
-      const completions = createdMetrics.flatMap((metric) =>
-        Array.from({ length: Number(limit) }).map((_, i) => ({
-          taskMetricId: metric.id,
-          index: i + 1, // 🔥 step (1 até limit)
-          value: "", // vazio inicialmente
-          isComplete: false,
-          date: null,
-        }))
-      )
+      // const completions = createdMetrics.flatMap((metric) =>
+      //   Array.from({ length: Number(limit) }).map((_, i) => ({
+      //     taskMetricId: metric.id,
+      //     index: i + 1, // 🔥 step (1 até limit)
+      //     value: "", // vazio inicialmente
+      //     isComplete: false,
+      //     date: null,
+      //   }))
+      // )
 
-      await tx.taskMetricCompletion.createMany({
-        data: completions
-      })
+      // await tx.taskMetricCompletion.createMany({
+      //   data: completions
+      // })
 
       return {
         counter,

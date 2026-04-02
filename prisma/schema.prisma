@@ -166,6 +166,8 @@ model Task {
 
   checkpoints   CheckPoint[]
 
+  metricCompletions TaskMetricCompletion[]
+
   @@index([indexPos])
   @@index([userId])
   @@map("task")
@@ -191,6 +193,23 @@ model CheckPoint {
   @@map("checkpoint")
 }
 
+model CounterAux {
+  id          String   @id @default(uuid())
+
+  date        DateTime
+  currentStep Int      @default(0)
+  limit       Int
+
+  counterId   String   @map("counter_id")
+  counter     Counter  @relation(fields: [counterId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime?   @updatedAt @map("updated_at")
+
+  @@unique([counterId, date]) // 🔥 UM POR DIA
+  @@map("counter_aux")
+}
+
 model Counter {
   id           String  @id @default(uuid())
 
@@ -201,10 +220,10 @@ model Counter {
   updatedAt    DateTime?   @updatedAt @map("updated_at")
   deletedAt    DateTime?   @map("deleted_at")
 
-  status       HabitStatus    @default(ACTIVE)
+  status       HabitStatus? @default(ACTIVE)
 
   valueNumber Float?    @default(0)
-  valueText   String?   @db.VarChar(20)
+  valueText   String?   @db.VarChar(20) 
   unit        String?
 
   userId      String?
@@ -215,6 +234,7 @@ model Counter {
   taskMetric TaskMetric[]
   taskCompletion TaskCompletion[]
   task       Task[]
+  CounterAux CounterAux[]
 
   @@unique([userId, label, valueNumber, unit])
   @@map("counter")
@@ -305,15 +325,21 @@ model TaskMetricCompletion {
   value        String
   index        Int
   isComplete   Boolean?   @default(false)
-  
+
+  taskId       String     // ✅ NOVO
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
   taskMetricId String     @map("task_metric_id")
-  taskMetric   TaskMetric @relation(fields: [taskMetricId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  taskMetric   TaskMetric @relation(fields: [taskMetricId], references: [id], onDelete: Cascade)
 
   createdAt    DateTime   @default(now()) @map("creted_at")
   updatedAt    DateTime?  @updatedAt @map("updated_at")
 
   @@index([date, index])
-  @@unique([date, index, taskMetricId])
+
+  // 🔥 IMPORTANTE: agora inclui taskId
+  @@unique([date, index, taskMetricId, taskId])
+
   @@map("task_metric_completion")
 }
 
