@@ -52,7 +52,7 @@ import type { PutMetricSchemaType } from "@/lib/schema/metrics"
 import { toast } from "sonner"
 
 interface PutTaskMetricsProps {
-  taskMetric: (TaskMetric & {
+  metrics: (TaskMetric & {
     counter?: Counter
     completion?: TaskMetricCompletion[]
   })[]
@@ -67,7 +67,7 @@ interface PutTaskMetricsProps {
 }
 
 const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
-  taskMetric,
+  metrics,
   taskId,
   counterId,
   trigger,
@@ -80,20 +80,19 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
 
   // 🔥 MAPEAMENTO FORA DO useForm
   const defaultValues: {
-    taskMetric: PutMetricSchemaType
+    metrics: PutMetricSchemaType
   } = {
-    taskMetric:
-      taskMetric?.map((m) => ({
+    metrics:
+      metrics?.map((m) => ({
         id: m.id,
 
         value: "",
+        step: index.toString(),
         index: index.toString(),
         isComplete: false,
 
         field: m.field ?? "",
         fieldType: m.fieldType ?? "numeric",
-        completionId: m.completionId || "",
-        counterId: m.counterId,
 
         limit: Number(m.limit ?? 1),
         unit: m.unit ?? "",
@@ -102,7 +101,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
   }
 
   const form = useForm<{
-    taskMetric: PutMetricSchemaType
+    metrics: PutMetricSchemaType
   }>({
     defaultValues,
   })
@@ -111,7 +110,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "taskMetric",
+    name: "metrics",
   })
 
   const queryClient = useQueryClient()
@@ -119,7 +118,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
   const mutation = useMutation({
     mutationFn: async (
       data: {
-        taskMetric: PutMetricSchemaType, 
+        metrics: PutMetricSchemaType, 
         date: Date
       }) => {
         toast.loading("Criando métricas...", {
@@ -128,7 +127,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
         const response = await axios.put(
           `/api/task/${taskId}/${counterId}`, {
             date: data.date,
-            taskMetric: data.taskMetric
+            metrics: data.metrics
           }
         )
         return response.data
@@ -159,11 +158,11 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
     },
   })
 
-  const onSubmit = (data: { taskMetric: PutMetricSchemaType }) => {
+  const onSubmit = (data: { metrics: PutMetricSchemaType }) => {
     console.log("📤 ENVIANDO:", data)
 
     mutation.mutate({
-      taskMetric: data.taskMetric,
+      metrics: data.metrics,
       date: (selectedDate || new Date()).toISOString()
     })
   }
@@ -218,7 +217,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
                       field: "",
                       value: "",
                       fieldType: "numeric",
-                      index: "1",
+                      step: "1",
                       completionId: "",
                       isComplete: false,
                       limit: 1,
@@ -275,7 +274,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
 }
 
 interface CounterItemProps {
-  control: Control<{ taskMetric: PutMetricSchemaType }>
+  control: Control<{ metrics: PutMetricSchemaType }>
   index: number
   remove: (index: number) => void
 }
@@ -287,12 +286,12 @@ const CounterItem: React.FC<CounterItemProps> = ({
 }) => {
   const type = useWatch({
     control,
-    name: `taskMetric.${index}.fieldType`,
+    name: `metrics.${index}.fieldType`,
   })
 
   // const { field: label, fieldState: { error: labelError } } = useController({
   //   control,
-  //   name: `taskMetric.${index}.label`,
+  //   name: `metrics.${index}.label`,
   // })
 
   const {
@@ -302,33 +301,33 @@ const CounterItem: React.FC<CounterItemProps> = ({
     }
   } = useController({
     control,
-    name: `taskMetric.${index}.value`,
+    name: `metrics.${index}.value`,
   })
 
   // const { field: emoji } = useController({
   //   control,
-  //   name: `taskMetric.${index}.emoji`,
+  //   name: `metrics.${index}.emoji`,
   // })
 
   // const { field: unitField } = useController({
   //   control,
-  //   name: `taskMetric.${index}.unit`,
+  //   name: `metrics.${index}.unit`,
 
   const { field: typeField } = useController({
     control,
-    name: `taskMetric.${index}.fieldType`,
+    name: `metrics.${index}.fieldType`,
   })
 
   const { field: unit } = useController({
     control,
-    name: `taskMetric.${index}.unit`,
+    name: `metrics.${index}.unit`,
   })
 
   return (
     <div className="flex flex-col gap-2 border rounded-lg p-3">
       <div className="flex place-items-center-safe gap-2">
         <FormField
-          name={`taskMetric.${index}.emoji`}
+          name={`metrics.${index}.emoji`}
           control={control}
           render={({ field }) => {
             return (
@@ -353,7 +352,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.field`}
+          name={`metrics.${index}.field`}
           rules={{
             required: true
           }}
@@ -384,7 +383,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.value`}
+          name={`metrics.${index}.value`}
           rules={{
             required: true
           }}
@@ -414,7 +413,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.limit`}
+          name={`metrics.${index}.limit`}
           render={({ field }) => {
             return (
               <FormItem>

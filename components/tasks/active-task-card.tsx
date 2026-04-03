@@ -44,6 +44,7 @@ import {
 import type {
   Categories,
   Counter,
+  CounterStep,
   Goals,
   Task,
   TaskCompletion,
@@ -56,13 +57,14 @@ import PutTaskMetrics from "../task-metrics/put-task-metrics"
 
 interface ActiveTaskCardProps {
   task: (Task & {
+    metrics?: (TaskMetric & {
+      taskMetricCompletion: TaskMetricCompletion[]
+    })[],
     completions?: TaskCompletion[]
     goals?: Goals[],
     categories?: Categories[]
     counter?: Counter & {
-      taskMetric?: (TaskMetric & {
-        completion?: TaskMetricCompletion[]
-      })[]
+      CounterStep: CounterStep[],
     }
   })
   selectedDate?: Date
@@ -79,6 +81,22 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       new Date(c.completedDate).toDateString() ===
       new Date(selectedDate || new Date()).toDateString()
   )
+
+  const formatter = new Intl.DateTimeFormat("pt-BR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+
+  const selected = formatter.format(new Date(selectedDate || new Date()))
+
+  const counterDay = task?.counter?.CounterStep?.find(
+    (c: CounterStep) =>
+      formatter.format(new Date(c.date)) === selected
+  )
+
+  const currentStep = Number(counterDay?.currentStep ?? 0)
+  const limit = Number(counterDay?.limit ?? task?.counter?.limit ?? 1)
 
   const { mutate, isPending } = useMutation({
     mutationFn: async ({ taskId, date }: any) => {
@@ -102,7 +120,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       await queryClient.invalidateQueries({
         queryKey: ["routines", selectedDate],
       })
-      if(values.completion.counter.valueNumber < values.completion.counter.limit) {
+      if(values.step < values.limit) {
         setOpenMetricsDialog(true)
       }
       if (!values.completion.isCompleted) {
@@ -121,11 +139,9 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
     }
   })
 
-  const handleToggle = () => {
-    console.log(selectedDate, "selected Date");
-
+  const handleToggle = (taskId: string) => {
     mutate({
-      taskId: task.id,
+      taskId,
       date: (selectedDate || new Date()).toISOString()
     })
   }
@@ -215,9 +231,9 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           <Button
             size="icon"
             variant={completion?.isCompleted ? "default" : "outline"}
-            onClick={handleToggle}
-            disabled={isPending || ((Number(task.counter?.valueNumber)) !== task.counter?.limit)}
-            className="rounded-full"
+            onClick={() => handleToggle(task.id)}
+            disabled={isPending || currentStep <= limit}
+            className={cn("rounded-full", currentStep < limit && "cursor-not-allowed")}
           >
             <Check className={cn("w-4 h-4", completion?.isCompleted ? "visible" : "hidden")} />
           </Button>
@@ -258,17 +274,18 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               
               <span className="text-muted-foreground">
-                {Number(task.counter.valueNumber)}|{task.counter.limit}
+                {currentStep}|{limit}
               </span>
               <UpdateCounterDialog
                 counter={task.counter}
+                taskId={task.id}
+                selectedDate={selectedDate || new Date()}
                 trigger={
                   <Button
                     type="button"
                     role="button"
                     variant="outline"
                     size="sm"
-                    disabled={(Number(task.counter.valueNumber) - 1) < task.counter.limit}
                   >
                     <PencilIcon className="w-3 h-3" />
                   </Button>
@@ -276,13 +293,13 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               />
             </div>
             <PutTaskMetrics
-              open={task?.counter?.taskMetric && task?.counter?.taskMetric?.length > 0 ? openMetricsDialog : false}
+              open={task?.metrics && task?.metrics?.length > 0 ? openMetricsDialog : false}
               onOpenChange={setOpenMetricsDialog}
-              taskMetric={task.counter.taskMetric || []}
-              disabled={(Number(task.counter.valueNumber) - 1) === task.counter.limit}
+              metrics={task.metrics || []}
+              disabled={currentStep === task.counter.limit}
               selectedDate={selectedDate}
               taskId={task.id}
-              index={task.counter.valueNumber || 1}
+              index={currentStep || 1}
               counterId={task.counter.id}
               trigger={
                 <Button 
@@ -290,7 +307,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                   role="button"
                   aria-expanded={openMetricsDialog}
                   variant="ghost"
-                  disabled={task.counter.valueNumber === task.counter.limit}
+                  disabled={currentStep >= limit}
                   size="icon-sm"
                 >
                   <Files className="w-3 h-3" />
@@ -300,32 +317,25 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             {/* CHECK */}
             <Button
               size="icon"
-              variant={task.counter.valueNumber === task.counter.limit ? "default" : "outline"}
+              variant={currentStep >= limit ? "default" : "outline"}
+              disabled={isPending || currentStep >= limit}
               onClick={() => setOpenMetricsDialog(prev => !prev)}
-              disabled={isPending || task.counter.valueNumber === task.counter.limit}
               className="rounded-full"
             >
               <Check className={cn("w-4 h-4", task.counter.valueNumber === task.counter.limit ? "visible" : "hidden")} />
             </Button>
           </div>
           
-          {/* taskMetric com steps */}
-          {task.counter?.taskMetric && task.counter?.taskMetric?.length > 0 && (
-            <Tabs
-              defaultValue={String(task.counter.valueNumber || 1)}
-              className="w-full"
-            >
+          {/* TASK METRIC COM STEPS */}
+          {task?.metrics && task.metrics.length > 0 && (
+            <Tabs defaultValue={String(currentStep || 1)} className="container-scroll max-w-full overflox-x-auto">
               {/* 🔥 TABS HEADER */}
               <TabsList className="grid w-full grid-cols-3">
                 {Array.from({ length: task.counter.limit }).map((_, i) => {
                   const step = String(i + 1)
-
                   return (
                     <TabsTrigger key={step} value={step}>
-                      {`${step} ${task.counter?.label.slice(
-                        0,
-                        task.counter.label.length - 1
-                      )}`}
+                      {`${step} ${task.counter?.label || "Step"}`}
                     </TabsTrigger>
                   )
                 })}
@@ -334,12 +344,12 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               {/* 🔥 TABS CONTENT */}
               {Array.from({ length: task.counter.limit }).map((_, i) => {
                 const step = i + 1
-                const isCurrentStep = step === task?.counter?.valueNumber
+                const isCurrentStep = step === currentStep
 
-                // 🔥 AGORA USANDO COMPLETIONS
-                const metrics = task?.counter?.taskMetric?.map((metric: any) => {
+                const metricsWithCompletion = task.metrics?.map((metric) => {
+                  // Cada metric pode ter taskMetricCompletion por step
                   const completion = metric.taskMetricCompletion?.find(
-                    (c: any) => c.index === step
+                    (c) => c.step === step
                   )
 
                   return {
@@ -351,19 +361,16 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                 return (
                   <TabsContent key={step} value={String(step)}>
                     <div className="grid grid-cols-1 gap-3 mt-3">
-                      {metrics?.length === 0 && (
+                      {metricsWithCompletion?.length === 0 && (
                         <div className="text-xs text-muted-foreground text-center py-4">
                           Nenhuma métrica neste step
                         </div>
                       )}
 
-                      {metrics?.map((metric: any) => {
-                        const completion = metric.completion
-
-                        const value = Number(completion?.value || 0)
+                      {metricsWithCompletion?.map((metric) => {
+                        const value = metric.completion?.value || 0
                         const limit = Number(metric.limit || 1)
-
-                        const percentage = Math.min((value / limit) * 100, 100)
+                        const percentage = Math.min((Number(value) / limit) * 100, 100)
 
                         const color =
                           percentage >= 100
@@ -385,9 +392,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <span className="text-base">{metric.emoji}</span>
-                                <span className="text-sm font-semibold">
-                                  {metric.field}
-                                </span>
+                                <span className="text-sm font-semibold">{metric.field}</span>
                               </div>
 
                               <span className="text-xs font-medium text-muted-foreground">
@@ -410,30 +415,24 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                               </span>
 
                               <div className="flex items-center gap-2">
-                                {completion?.isComplete && (
-                                  <span className="text-green-500 font-semibold">
-                                    ✔ Completo
-                                  </span>
+                                {metric.completion?.isComplete && (
+                                  <span className="text-green-500 font-semibold">✔ Completo</span>
                                 )}
 
-                                {/* 🔥 ÍCONE NO LUGAR DO BOTÃO */}
-                                {!completion?.isComplete && isCurrentStep && (
+                                {!metric.completion?.isComplete && isCurrentStep && (
                                   <Button
                                     size="icon"
-                                    variant={completion?.isComplete ? "default" : "outline"}
-                                    onClick={() => handleToggle()}
+                                    variant="outline"
+                                    onClick={() => handleToggle(task.id)}
                                     disabled={isPending}
                                     className="rounded-full"
-                                > 
-                                  <Check className={cn("w-4 h-4", completion?.isComplete ? "visible" : "hidden")} />
-                                </Button>
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </Button>
                                 )}
 
-                                {/* 🔒 BLOQUEADO */}
                                 {isLocked && (
-                                  <span className="text-muted-foreground text-xs">
-                                    🔒
-                                  </span>
+                                  <span className="text-muted-foreground text-xs">🔒</span>
                                 )}
                               </div>
                             </div>

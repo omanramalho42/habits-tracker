@@ -121,56 +121,6 @@ model Habit {
   @@map("habits")
 }
 
-model Task {
-  id            String      @id @default(uuid())
-  userId        String      @map("user_id")
-
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  name          String      @db.VarChar(100)
-  description   String?     @db.VarChar(255)
-  emoji         String?     @db.VarChar(10)
-  color         String?     @db.VarChar(10)
-
-  imageUrl      String?     @db.VarChar(255) @map("image_url")
-  videoUrl      String?     @db.VarChar(255) @map("video_url")
-
-  isVisible     Boolean?    @default(false)
-
-  isPlus        Boolean?    @default(true)
-
-  customField   String?     @map("custom_field") @db.VarChar(12)
-  
-  limitCounter  Int?        @default(1) @map("limit_counter")
-
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime?   @updatedAt @map("updated_at")
-  deletedAt     DateTime?   @map("deleted_at")
-
-  counterId     String?
-  counter       Counter? @relation(fields: [counterId], references: [id])
-
-  cronId        String?
-  cron          Cron? @relation(fields: [cronId], references: [id])
-  
-  frequencyId   String?
-  frequency     Frequency? @relation(fields: [frequencyId], references: [id])
-
-  indexPos      Int?
-  status        HabitStatus   @default(ACTIVE)
-
-  schedules     TaskSchedule[]
-  completions   TaskCompletion[]
-  goals         Goals[]
-  categories    Categories[]
-
-  checkpoints   CheckPoint[]
-
-  @@index([indexPos])
-  @@index([userId])
-  @@map("task")
-}
-
 model CheckPoint {
   id          String    @id @unique @default(uuid())
   userId      String                    @map("user_id")
@@ -189,35 +139,6 @@ model CheckPoint {
 
   tasks Task[]
   @@map("checkpoint")
-}
-
-model Counter {
-  id           String  @id @default(uuid())
-
-  label        String  @db.VarChar(20)
-  emoji        String? @db.VarChar(20)
-
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime?   @updatedAt @map("updated_at")
-  deletedAt    DateTime?   @map("deleted_at")
-
-  status       HabitStatus    @default(ACTIVE)
-
-  valueNumber Float?    @default(0)
-  valueText   String?   @db.VarChar(20)
-  unit        String?
-
-  userId      String?
-  user        User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  limit       Int     @default(1)
-
-  taskMetric TaskMetric[]
-  taskCompletion TaskCompletion[]
-  task       Task[]
-
-  @@unique([userId, label, valueNumber, unit])
-  @@map("counter")
 }
 
 model Frequency {
@@ -269,6 +190,154 @@ enum MetricType {
   FLOAT
 }
 
+model CounterStep {
+  id          String   @id @default(uuid())
+
+  date        DateTime
+  currentStep Int      @default(0)
+  limit       Int
+
+  counterId   String   @map("counter_id")
+  counter     Counter  @relation(fields: [counterId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime?   @updatedAt @map("updated_at")
+
+  completionId String @unique @map("completion_id")
+  completion TaskCompletion @relation(fields: [completionId], references: [id])
+
+  @@unique([counterId, date, completionId]) // 🔥 UM POR DIA
+  @@map("counter_step")
+}
+
+model Counter {
+  id           String  @id @default(uuid())
+
+  label        String  @db.VarChar(20)
+  emoji        String? @db.VarChar(20)
+
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime?   @updatedAt @map("updated_at")
+  deletedAt    DateTime?   @map("deleted_at")
+
+  status       HabitStatus? @default(ACTIVE)
+
+  valueNumber Float?    @default(0)
+  valueText   String?   @db.VarChar(20) 
+  unit        String?
+
+  userId      String?
+  user        User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  limit       Int     @default(1)
+
+  // taskMetric TaskMetric[]
+  // taskCompletion TaskCompletion[]
+  task       Task[]
+  CounterStep CounterStep[]
+
+  @@unique([userId, label, valueNumber, unit])
+  @@map("counter")
+}
+
+model Task {
+  id            String      @id @default(uuid())
+
+  userId        String      @map("user_id")
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name          String      @db.VarChar(100)
+
+  description   String?     @db.VarChar(255)
+  emoji         String?     @db.VarChar(10)
+  color         String?     @db.VarChar(10)
+
+  imageUrl      String?     @db.VarChar(255) @map("image_url")
+  videoUrl      String?     @db.VarChar(255) @map("video_url")
+
+  isVisible     Boolean?    @default(false)
+  isPlus        Boolean?    @default(true)
+
+  //REMOVER
+  customField   String?     @map("custom_field") @db.VarChar(12)
+  //REMOVER
+  limitCounter  Int?        @default(1) @map("limit_counter")
+
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime?   @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at")
+
+  counterId     String?
+  counter       Counter? @relation(fields: [counterId], references: [id])
+
+  cronId        String?
+  cron          Cron? @relation(fields: [cronId], references: [id])
+
+  frequencyId   String?
+  frequency     Frequency? @relation(fields: [frequencyId], references: [id])
+
+  indexPos      Int?
+  status        HabitStatus   @default(ACTIVE)
+
+  schedules     TaskSchedule[]
+  completions   TaskCompletion[]
+  goals         Goals[]
+  categories    Categories[]
+  checkpoints   CheckPoint[]
+  metrics       TaskMetric[]
+
+  @@index([indexPos])
+  @@index([userId])
+  @@map("task")
+}
+
+model TaskCompletion {
+  id          String      @id @default(uuid())
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  completedDate DateTime  @map("completed_date")
+  
+  counterStep    CounterStep[]
+  
+  isCompleted   Boolean?  @default(false) @map("is_completed")
+  
+  taskId        String    @map("task_id")
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  annotations   Annotations[]
+  //AGORA AS COMPLETIONS POSSUEM METRICAS 
+  metrics       TaskMetricCompletion[]
+
+  @@unique([taskId, completedDate])
+  @@index([completedDate])
+  @@map("task_completion")
+}
+
+model TaskSchedule {
+  id            String    @unique @id @default(uuid())
+
+  duration      String?    @db.VarChar(20)
+  clock         String?    @db.VarChar(20)
+
+  status        HabitStatus    @default(ACTIVE)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime? @updatedAt      @map("updated_at")
+
+  routineId     String?    @map("routine_id")
+  routine       Routine?   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  taskId        String?    @map("task_id")
+  task          Task?      @relation(fields: [taskId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  // @@unique([routineId, clock])
+  @@index([routineId, clock])
+  @@map("task_schedule")
+}
+
 model TaskMetric {
   id          String      @id @default(uuid())
 
@@ -281,39 +350,53 @@ model TaskMetric {
   updatedAt   DateTime?   @updatedAt() @map("updated_at")
   createdAt   DateTime    @default(now()) @map("created_at")
   
-  counterId   String
-  counter     Counter     @relation(fields: [counterId], references: [id])
+  // counterId   String
+  // counter     Counter     @relation(fields: [counterId], references: [id])
 
   notes       Annotations[]
 
   status      HabitStatus @default(ACTIVE)
 
-  completionId String?        @map("completion_id")
-  completion  TaskCompletion? @relation(fields: [completionId], references: [id])
+  // completionId String?        @map("completion_id")
+  // completion  TaskCompletion? @relation(fields: [completionId], references: [id])
 
+  //POSSO CRIAR UMA TASKMETRIC SEM VINCULO COM A TAREFA
+  taskId  String? @map("task_id")
+  task    Task? @relation(fields: [taskId], references: [id])
   taskMetricCompletion TaskMetricCompletion[]
 
   // @@index([date])
-  @@unique([completionId, field, limit, unit, fieldType])
+  @@unique([field, limit, unit, fieldType, taskId])
   @@map("task_metric")
 }
 
 model TaskMetricCompletion {
   id           String     @id @default(uuid())
   
-  date         DateTime?
   value        String
-  index        Int
-  isComplete   Boolean?   @default(false)
-  
-  taskMetricId String     @map("task_metric_id")
-  taskMetric   TaskMetric @relation(fields: [taskMetricId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // index        Int
+  step         Int
 
-  createdAt    DateTime   @default(now()) @map("creted_at")
+  date         DateTime?
+  isComplete   Boolean?   @default(false)
+
+  // taskId       String     // ✅ NOVO
+  // task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  taskMetricId String     @map("task_metric_id")
+  taskMetric   TaskMetric @relation(fields: [taskMetricId], references: [id], onDelete: Cascade)
+
+  completionId String?        @map("completion_id")
+  completion  TaskCompletion? @relation(fields: [completionId], references: [id])
+
+  createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime?  @updatedAt @map("updated_at")
 
-  @@index([date, index])
-  @@unique([date, index, taskMetricId])
+  // @@index([date, index])
+
+  // 🔥 IMPORTANTE: agora inclui taskId
+  // @@unique([date, index, taskMetricId, taskId])
+
   @@map("task_metric_completion")
 }
 
@@ -333,31 +416,6 @@ model Post {
 
   userId  String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model TaskCompletion {
-  id          String      @id @default(uuid())
-
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime? @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
-
-  completedDate DateTime  @map("completed_date")
-  
-  counterId     String
-  counter       Counter   @relation(fields: [counterId], references: [id], onDelete: Cascade)
-  
-  isCompleted   Boolean?  @default(false) @map("is_completed")
-  
-  taskId        String    @map("task_id")
-  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  
-  annotations   Annotations[]
-  metrics       TaskMetric[]
-
-  @@unique([taskId, completedDate])
-  @@index([completedDate])
-  @@map("task_completion")
 }
 
 model Routine {
@@ -385,28 +443,6 @@ model Routine {
   taskSchedules  TaskSchedule[]
 
   @@map("routine")
-}
-
-model TaskSchedule {
-  id            String    @unique @id @default(uuid())
-
-  duration      String?    @db.VarChar(20)
-  clock         String?    @db.VarChar(20)
-
-  status        HabitStatus    @default(ACTIVE)
-
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime? @updatedAt      @map("updated_at")
-
-  routineId     String?    @map("routine_id")
-  routine       Routine?   @relation(fields: [routineId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  taskId        String?    @map("task_id")
-  task          Task?      @relation(fields: [taskId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-  // @@unique([routineId, clock])
-  @@index([routineId, clock])
-  @@map("task_schedule")
 }
 
 model HabitSchedule {

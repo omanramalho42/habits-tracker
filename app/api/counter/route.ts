@@ -28,13 +28,16 @@ export async function GET(request: Request) {
       }, { status: 401 })
     }
 
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
     const counters = await prisma.counter.findMany({
       where: {
         status: "ACTIVE",
         userId: userDb.id
       },
       include: {
-        taskMetric: true
+        CounterStep: true
       }
     })
 
@@ -98,13 +101,12 @@ export async function POST(request: NextRequest) {
           label,
           emoji,
           userId: userDb.id,
-          valueNumber: 0, // 🔥 começa do zero
           limit,
           unit,
         }
       })
 
-      // 2️⃣ cria templates (TaskMetric)
+      // 2️⃣ cria TaskMetric desvinculadas de Task (opcional)
       const createdMetrics = await Promise.all(
         (taskMetric || []).map((metric) =>
           tx.taskMetric.create({
@@ -112,29 +114,13 @@ export async function POST(request: NextRequest) {
               emoji: metric.emoji,
               field: metric.field,
               unit: metric.unit,
-              limit: metric.limit.toString(),
+              limit: metric.limit?.toString(),
               fieldType: mapType(metric.fieldType),
-              counterId: counter.id,
             }
           })
         )
       )
-
-      // 3️⃣ cria completions (TaskMetricCompletion)
-      const completions = createdMetrics.flatMap((metric) =>
-        Array.from({ length: Number(limit) }).map((_, i) => ({
-          taskMetricId: metric.id,
-          index: i + 1, // 🔥 step (1 até limit)
-          value: "", // vazio inicialmente
-          isComplete: false,
-          date: null,
-        }))
-      )
-
-      await tx.taskMetricCompletion.createMany({
-        data: completions
-      })
-
+      
       return {
         counter,
         metrics: createdMetrics
@@ -148,7 +134,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error posting counter:", error.message)
+      console.error("Error posting counter&metrics:", error.message)
 
       return NextResponse.json(
         { error: error.message },
@@ -157,3 +143,47 @@ export async function POST(request: NextRequest) {
     }
   }
 }
+
+
+      // const today = new Date()
+      // today.setHours(0, 0, 0, 0)
+
+      // const counterStep = await tx.counterStep.create({
+      //   data: {
+      //     counterId: counter.id,
+      //     date: today,
+      //     currentStep: 0,
+      //     limit: counter.limit
+      //   }
+      // })
+      // console.log("📅 counterStep created:", counterStep)
+      // 2️⃣ cria templates (TaskMetric)
+      // const createdMetrics = await Promise.all(
+      //   (taskMetric || []).map((metric) =>
+      //     tx.taskMetric.create({
+      //       data: {
+      //         emoji: metric.emoji,
+      //         field: metric.field,
+      //         unit: metric.unit,
+      //         limit: metric.limit.toString(),
+      //         fieldType: mapType(metric.fieldType),
+      //         counterId: counter.id,
+      //       }
+      //     })
+      //   )
+      // )
+
+      // 3️⃣ cria completions (TaskMetricCompletion)
+      // const completions = createdMetrics.flatMap((metric) =>
+      //   Array.from({ length: Number(limit) }).map((_, i) => ({
+      //     taskMetricId: metric.id,
+      //     index: i + 1, // 🔥 step (1 até limit)
+      //     value: "", // vazio inicialmente
+      //     isComplete: false,
+      //     date: null,
+      //   }))
+      // )
+
+      // await tx.taskMetricCompletion.createMany({
+      //   data: completions
+      // })

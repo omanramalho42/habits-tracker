@@ -36,7 +36,7 @@ export async function PUT(
     const body = await request.json()
 
     const validator = z.object({
-      taskMetric: putMetricSchema,
+      metrics: putMetricSchema,
       date: z.coerce.date(),
     })
 
@@ -47,80 +47,121 @@ export async function PUT(
     }
 
     const {
-      taskMetric,
+      metrics,
       date
     } = bodyParams.data
 
+    const baseDate = new Date(date);
+    const startOfDay = new Date(baseDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(baseDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
     const result = await prisma.$transaction(async (tx) => {
-      // 🔥 1. pega counter atual
+      // 1️⃣ pega o counter
       const counter = await tx.counter.findUnique({
         where: {
           id: counterId
-        },
+        }
       })
 
-      if (!counter) throw new Error("Counter not found")
+      if (!counter) throw new Error("Counter not found");
 
-      const currentStep = Number(counter.valueNumber ?? 0)
-
-      // 🛑 bloqueia se já atingiu limite
-      if (currentStep >= Number(counter.limit)) {
-        throw new Error("Counter limit reached")
-      }
-
-      const nextStep = currentStep + 1
-
-      // 🔥 2. cria completion do dia (se quiser manter)
+      // 2️⃣ cria ou atualiza a TaskCompletion do dia
       const completion = await tx.taskCompletion.upsert({
         where: {
           taskId_completedDate: {
             taskId,
-            completedDate: date,
-          },
+            completedDate: startOfDay
+          }
         },
         update: {
           updatedAt: new Date()
         },
         create: {
           taskId,
-          counterId,
-          completedDate: date,
-          isCompleted: nextStep >= Number(counter.limit),
+          completedDate: startOfDay
+        },
+        include: {
+          counterStep: true
         },
       })
 
-      await tx.counter.update({
-        where: { id: counter.id },
-        data: {
-          valueNumber: nextStep,
+      // 3️⃣ cria ou atualiza CounterStep
+      const counterStep = await tx.counterStep.upsert({
+        where: {
+          counterId_date_completionId: {
+            counterId: counter.id,
+            date: startOfDay,
+            completionId: completion.id,
+          },
+        },
+        update: {
+          updatedAt: new Date(),
+          limit: counter.limit,
+        },
+        create: {
+          counterId: counter.id,
+          date: startOfDay,
+          currentStep: 0,
+          limit: counter.limit,
+          completionId: completion.id,
         },
       })
 
+      if (counterStep.currentStep >= counterStep.limit) {
+        throw new Error("Daily counter limit reached")
+      }
+
+      const nextStep = counterStep.currentStep + 1
+
+      // 4️⃣ atualiza CounterStep
+      await tx.counterStep.update({
+        where: { id: counterStep.id },
+        data: { currentStep: nextStep },
+      });
+
+      // 5️⃣ atualiza Counter valueNumber
+      // await tx.counter.update({
+      //   where: { id: counter.id },
+      //   data: { valueNumber: nextStep },
+      // });
+
+      // 6️⃣ cria/atualiza TaskMetricCompletions
       await Promise.all(
-        taskMetric.map((metric) =>
-          tx.taskMetricCompletion.updateMany({
+        metrics.map((metric) =>
+          tx.taskMetricCompletion.upsert({
             where: {
-              taskMetricId: metric.id!,
-              index: nextStep, // 🔥 ATUAL (não nextStep - 1)
+              id: metric.id,
+              // completionId_taskMetricId_step: {
+                completionId: completion.id,
+                taskMetricId: metric.id,
+                step: nextStep,
+              // },
             },
-            data: {
-              value: metric.value,
-              date: date,
-              isComplete: true,
+            create: {
+              taskMetricId: metric.id!,
+              completionId: completion.id,
+              step: nextStep,
+              value: metric.value || "",
+              isComplete: !metric.isComplete,
+              date: startOfDay,
+            },
+            update: {
+              value: metric.value || "",
+              isComplete: !metric.isComplete,
             },
           })
         )
-      )
+      );
+
       return {
         step: nextStep,
         completionId: completion.id,
       }
     })
 
-    return NextResponse.json({
-      success: true,
-      ...result,
-    })
+    return NextResponse.json(result)
   } catch (error) {
     if (error instanceof Error) {
       console.error("❌ ERROR:", error.message)

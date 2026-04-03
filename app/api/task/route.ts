@@ -1,15 +1,13 @@
+import { NextRequest, NextResponse } from "next/server"
+
+import { auth } from "@clerk/nextjs/server"
+
 import { cloudinary } from "@/lib/cloudinary"
 import { prisma } from "@/lib/prisma"
 import { CreateTaskSchema } from "@/lib/schema/task"
-import { auth } from "@clerk/nextjs/server"
-import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: Request) {
   try {
-    // const authData = await auth();
-    // console.log("Auth Data:", authData); // Verifique se há alguma mensagem de erro no terminal
-    // Isso vai imprimir no seu terminal o motivo técnico (ex: "token expired", "invalid signature")
-    // console.log("DEBUG CLERK:", authData.debug());
     const { userId } = await auth()
     
     if (!userId) {
@@ -29,39 +27,67 @@ export async function GET(request: Request) {
         error: "user not find on db"
       }, { status: 401 })
     }
-    
+
+    const { searchParams } = new URL(request.url)
+    const paramDate = searchParams.get("selectedDate")
+
+    // Define start e end do dia
+    const selectedDate = paramDate ? new Date(paramDate) : new Date()
+    selectedDate.setHours(0, 0, 0, 0) // início do dia
+    const nextDay = new Date(selectedDate)
+    nextDay.setHours(23, 59, 59, 999) // fim do dia
+
     const tasks = await prisma.task.findMany({
       where: {
         userId: userDb.id,
-        status: 'ACTIVE'
-      },
-      orderBy: {
-        createdAt: "asc",
+        status: "ACTIVE",
       },
       include: {
-        completions: true,
-        categories: {
-          where: {
-            status: 'ACTIVE'
-          }
-        },
-        goals: {
-          where: {
-            status: "ACTIVE"
-          }
-        },
-        schedules: true,
         counter: {
           include: {
-            taskMetric: {
-              include: {
-                taskMetricCompletion: true
-              }
-            }
-          }
-        }
-      }
+            // inclui CounterStep apenas do dia selecionado
+            CounterStep: {
+              where: {
+                date: {
+                  gte: selectedDate,
+                  lte: nextDay,
+                },
+              },
+            },
+          },
+        },
+        goals: true,
+        categories: true,
+        metrics: {
+          where: {
+            status: "ACTIVE",
+          },
+          include: {
+            taskMetricCompletion: {
+              where: {
+                date: {
+                  gte: selectedDate,
+                  lte: nextDay,
+                },
+              },
+            },
+          },
+        },
+        // completions da Task, filtradas apenas para o dia
+        completions: {
+          where: {
+            completedDate: {
+              gte: selectedDate,
+              lte: nextDay,
+            },
+          },
+        },
+      },
     })
+
+    console.log("Selected date:", selectedDate)
+    console.log("Next day:", nextDay)
+    console.log("Tasks for the day:", tasks)
 
     return NextResponse.json(tasks)
   } catch (error) {
@@ -179,7 +205,11 @@ export async function POST(request: NextRequest) {
         completions: true,
         counter: {
           include: {
-            taskMetric: true
+            // taskMetric: {
+            //   include: {
+            //     completion: true
+            //   }
+            // }
           }
         },
       },

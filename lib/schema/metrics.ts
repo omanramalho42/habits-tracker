@@ -1,19 +1,26 @@
+import { HabitStatus, MetricType } from "@prisma/client"
 import { z } from "zod"
 
 export const CreateMetricSchema = z.object({
   id: z.string().optional(),
-  index: z.string().optional(),
-  isComplete: z.boolean().default(false),
-  limit: z.coerce.number()
+  step: z.number().optional(),
+  limit: 
+    z.coerce.string()
     .min(1, "O valor minimo é 1"),
+  taskId: z.string(),
+  isComplete: z.boolean().default(false).optional(),
   field: 
     z.string()
     .min(1, "O valor minimo de caracateres é 1"),
   value: 
     z.string()
     .optional(),
-  fieldType: 
-    z.string()
+  fieldType: z.string().optional(),
+    // z.nativeEnum(MetricType)
+    // .default(MetricType.NUMERIC)
+    // .optional(),
+  status: z.nativeEnum(HabitStatus)
+    .default(HabitStatus.ACTIVE)
     .optional(),
   unit: 
     z.string()
@@ -25,16 +32,15 @@ export const CreateMetricSchema = z.object({
 
 export const UpdateMetricSchema = z.object({
   id: z.string().optional(),
-  index: z.string().optional(),
+  step: z.string().optional(),
   isComplete: z.boolean().default(false),
-  limit: z.coerce.number()
+  limit: z.coerce.string()
     .min(1, "O valor minimo é 1"),
   field: 
     z.string()
     .min(1, "O valor minimo de caracateres é 1"),
   value: 
     z.string()
-    .min(1, "Ovalor minimo de caracteres é 1")
     .optional(),
   fieldType: 
     z.string()
@@ -72,11 +78,11 @@ export const putMetricSchema = z.object({
   emoji: 
     z.string()
     .optional(),
-  index:
+  step:
     z.string(),
   value: 
     z.string()
-    .min(1, "Ovalor minimo de caracteres é 1"),
+    .min(1, "O valor minimo de caracteres é 1"),
   isComplete: 
     z.boolean()
     .default(false),

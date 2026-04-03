@@ -36,19 +36,25 @@ import { Form } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
-import type { Counter, TaskMetric } from '@prisma/client'
+import type { Counter, CounterStep, TaskMetric } from '@prisma/client'
 import { updateCounterSchema, type UpdateCounterSchemaType } from '@/lib/schema/counter'
+import { formatDateBR } from '@/lib/utils'
 
 interface UpdateCounterDialog {
-  trigger?: React.ReactNode;
+  trigger?: React.ReactNode
+  taskId: string
+  selectedDate: Date
   counter: (Counter & {
+    CounterStep: CounterStep[]
     taskMetric?: TaskMetric[]
   })
 }
 
 const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
   trigger,
-  counter
+  counter,
+  selectedDate,
+  taskId
 }) => {
   const [open, setOpen] = useState<boolean>(false)
   const form = useForm<UpdateCounterSchemaType>({
@@ -56,20 +62,25 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
     defaultValues: {
       id: counter.id,
       emoji: counter.emoji || "",
+      //⚠️
+      counterStepId: counter.CounterStep[0]?.id || "",
       label: counter.label || "",
       unit: counter.unit || "",
       limit: counter.limit || 1,
+      taskId: taskId,
       taskMetric: counter?.taskMetric?.map((metric) => {
         return {
           emoji: metric.emoji || "",
           field: metric?.field || "",
           fieldType: metric?.fieldType || "",
-          unit: metric?.unit || "",
-          value: metric.value || ""
+          unit: metric?.unit || ""
         }
       })
     }
   })
+
+  const selectedDateStr =
+    formatDateBR(selectedDate)
 
   const {
     control,
@@ -90,7 +101,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
         id: 'update-counter'
       })
       return await axios.patch(
-        `/api/counter/${values.id}`,
+        `/api/counter/${values.id}${selectedDate ? `?selectedDate=${selectedDateStr}` : ""}`,
         values
       )
     },
@@ -100,9 +111,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
       })
 
       await queryClient.invalidateQueries({
-        queryKey: [
-          "tasks"
-        ]
+        queryKey: ["tasks"]
       })
       await queryClient.invalidateQueries({
         queryKey: [
@@ -127,8 +136,6 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
 
     setOpen(prev => !prev)
   }
-
-  console.log(data, 'data agte subitti-ng')
 
   console.log(errors, "errors")
 

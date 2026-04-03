@@ -10,7 +10,6 @@ import { UpdateTaskSchema } from "@/lib/schema/task"
 import { getTodayString } from "@/lib/habit-utils"
 import { uploadToCloudinary } from "../route"
 import { log } from "@/lib/utils"
-import { TaskMetric } from "@prisma/client"
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -246,296 +245,119 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 }
-
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await params
-    log("START", { taskId: id })
-    
-    const { userId } = await auth()
-    log("AUTH USER", { userId })
-  
+    const { id: taskId } = await params;
 
-    if (!userId) {
-      return NextResponse.json({
-        error: "Unauthorized"
-      }, { status: 401 })
-    }
+    const { userId } = await auth()
+
+    if (!userId) return NextResponse.json({
+      error: "Unauthorized"
+    }, { status: 401 });
 
     const userDb = await prisma.user.findFirst({
-      where: {
-        clerkUserId: userId
-      }
+      where: { clerkUserId: userId }
     })
-    log("USER DB", userDb)
-    if (!userDb) {
-      return NextResponse.json({
-        error: "user not find on db"
-      }, { status: 401 })
-    }
+    if (!userDb) return NextResponse.json({
+      error: "User not found"
+    }, { status: 401 })
 
     const body = await request.json()
-    const date = body?.date ?? getTodayString()
-    
-    const validator = z.string()
-    const bodyParams = validator.safeParse(date)
-    
-    if (!bodyParams.success) {
-      throw new Error("Invalid date format")
-    }
-    const newDate =
-      bodyParams.data
-    const completedDate = new Date(newDate)
+    const date = body?.date 
+      ? new Date(body.date) 
+      : new Date()
+    date.setHours(0, 0, 0, 0) // padroniza início do dia
 
-    log("DATE RECEIVED", body?.date)
-    log("PARSED DATE", completedDate)
+    // 1️⃣ Busca ou cria TaskCompletion do dia
+    const completion = await prisma.taskCompletion.upsert({
+      where: { taskId_completedDate: { taskId, completedDate: date } },
+      create: { taskId, completedDate: date },
+      update: { updatedAt: new Date() },
+      include: { counterStep: true, task: { include: { counter: true } } },
+    })
 
-    // 1️⃣ Busca a completion do dia
-    const existingCompletion = await prisma.taskCompletion.findUnique({
+    const counter = completion.task.counter;
+    if (!counter) throw new Error("Counter not found")
+
+    // 2️⃣ Cria ou atualiza CounterStep
+    const counterStep = await prisma.counterStep.upsert({
       where: {
-        taskId_completedDate: {
-          taskId: id,
-          completedDate,
+        counterId_date_completionId: {
+          counterId: counter.id,
+          date,
+          completionId: completion.id,
         },
       },
-      include: {
-        counter: {
-          include: {
-            taskMetric: true,
-          },
-        },
+      create: {
+        counterId: counter.id,
+        date,
+        completionId: completion.id,
+        currentStep: 0,
+        limit: counter.limit,
+      },
+      update: {
+        updatedAt: new Date(),
+        limit: counter.limit,
       },
     })
 
-    log("EXISTING COMPLETION", existingCompletion)
-    // 2️⃣ NÃO EXISTE → cria
-    if (!existingCompletion) {
-      log("FLOW", "CREATE NEW COMPLETION")
-      const result = await prisma.$transaction(async (tx) => {
-        const task = await tx.task.findUnique({
-          where: {
-            id,
-            userId: userDb.id,
-            status: "ACTIVE",
-          },
-          include: {
-            counter: {
-              include: {
-                taskMetric: true, // templates
-              },
-            },
-          },
-        })
-
-        if (!task || !task.counter) {
-          throw new Error("Task or Counter not found")
-        }
-
-        const counter = task.counter
-
-        const currentValue = counter.valueNumber ?? 0
-        const nextValue = currentValue + 1
-
-        const isCompleted = nextValue >= counter.limit
-        log("TASK FOUND", task)
-
-        log("COUNTER STATE", {
-          currentValue,
-          nextValue,
-          limit: counter.limit,
-        })
-
-        log("IS COMPLETED?", isCompleted)
-        // 1️⃣ cria completion
-        const completion = await tx.taskCompletion.create({
-          data: {
-            taskId: id,
-            counterId: counter.id,
-            completedDate,
-            isCompleted,
-          },
-        })
-        
-        // 2️⃣ clona métricas (snapshot)
-        const baseMetrics = counter.taskMetric.filter(
-          (m) => !m.completionId
-        )
-
-        await tx.taskMetric.updateMany({
-          where: {
-            counterId: counter.id,
-            completionId: null,
-          },
-          data: {
-            completionId: completion.id,
-            // index: String(nextValue),
-            // isComplete: false,
-            // date: new Date(),
-          },
-        })
-        log("BASE METRICS", baseMetrics)
-        log("CREATING METRICS SNAPSHOT", {
-          step: nextValue,
-          total: baseMetrics.length,
-        })
-        // 3️⃣ atualiza counter global
-        // await tx.counter.update({
-        //   where: { id: counter.id },
-        //   data: {
-        //     valueNumber: nextValue,
-        //   },
-        // })
-        log("UPDATING COUNTER", {
-          old: currentValue,
-          new: nextValue,
-        })
-        log("CREATION RESULT", {
-          completionId: completion.id,
-          nextValue,
-          isCompleted,
-        })
-        return {
-          completion,
-          nextValue,
-          isCompleted,
-          limit: counter.limit,
-        }
-        
-      })
-      return NextResponse.json({
-        completion: result.completion,
-        completed: result.isCompleted,
-        progress: `${result.nextValue}/${result.limit}`,
-        value: result.nextValue,
-      })
-    }
-    log("FLOW", "UPDATE EXISTING COMPLETION")
-    // 3️⃣ EXISTE e NÃO TEM contador → toggle normal
-    if (!existingCompletion.counter) {
-      await prisma.taskCompletion.delete({
-        where: {
-          id: existingCompletion.id,
-        },
-      })
-
-      return NextResponse.json({
-        completed: false
-      })
+    if (counterStep.currentStep >= counterStep.limit) {
+      throw new Error("Daily counter limit reached")
     }
 
-    // 4️⃣ EXISTE e TEM contador
-    const currentCounter = existingCompletion.counter.valueNumber ?? 0
-    const limitCounter = existingCompletion.counter.limit ?? 1
+    const nextStep = counterStep.currentStep + 1
 
-    console.log(currentCounter, limitCounter, "current x limit counter")
+    // 3️⃣ Atualiza CounterStep com novo step
+    await prisma.counterStep.update({
+      where: { id: counterStep.id },
+      data: { currentStep: nextStep },
+    })
 
-    // 4.1️⃣ Ainda não chegou no limite → incrementa
-    if (currentCounter < limitCounter) {
-      const result = await prisma.$transaction(async (tx) => {
-        const counter = existingCompletion.counter
+    // 4️⃣ Atualiza valor total do Counter
+    await prisma.counter.update({
+      where: { id: counter.id },
+      data: { valueNumber: nextStep },
+    })
 
-        const currentValue = counter.valueNumber ?? 0
-        const nextValue = currentValue + 1
-
-        const isCompleted = nextValue >= counter.limit
-        log("INCREMENT STEP", {
-          currentValue,
-          nextValue,
-        })
-        log("FETCHING BASE METRICS")
-        // 1️⃣ cria NOVAS métricas (novo step)
-        const baseMetrics = await tx.taskMetric.findMany({
-          where: {
-            counterId: counter.id,
-            completionId: null,
-          },
-        })
-        log("NEW METRICS SNAPSHOT", {
-          step: nextValue,
-          metricsCount: baseMetrics.length,
-        })
-        if (baseMetrics.length > 0) {
-          await tx.taskMetric.createMany({
-            data: baseMetrics.map((metric) => ({
-              emoji: metric.emoji,
-              fieldType: metric.fieldType,
-              field: metric.field,
-              unit: metric.unit,
-
-              // value: metric.value,
-              limit: metric.limit,
-
-              index: String(nextValue),
-
-              counterId: counter.id,
-              completionId: existingCompletion.id,
-
-              isComplete: false,
-              date: new Date(),
-            })),
-          })
-        }
-
-        // 2️⃣ atualiza counter
-        // await tx.counter.update({
-        //   where: { id: counter.id },
-        //   data: {
-        //     valueNumber: nextValue,
-        //   },
-        // })
-
-        // 3️⃣ atualiza completion
-        const updatedCompletion = await tx.taskCompletion.update({
-          where: { id: existingCompletion.id },
-          data: {
-            isCompleted,
-          },
-        })
-        log("UPDATED COMPLETION", updatedCompletion)
-        return {
-          updatedCompletion,
-          nextValue,
-          isCompleted,
-          limit: counter.limit,
-        }
-      })
-
-      log("LIMIT REACHED - NO ACTION", {
-        currentCounter,
-        limitCounter,
-      })
-      return NextResponse.json({
-        completion: result.updatedCompletion,
-        completed: result.isCompleted,
-        progress: `${result.nextValue}/${result.limit}`,
-        value: result.nextValue,
-      })
-    }
-
-    // // 4.2️⃣ Chegou no limite → reset
-    await prisma.taskCompletion.update({
+    // 5️⃣ Cria TaskMetricCompletion para cada métrica do Counter
+    const metrics = await prisma.taskMetric.findMany({
       where: {
-        id: existingCompletion.id,
+        taskId,
+        status: "ACTIVE"
       },
-      data: {
-        isCompleted: !existingCompletion.isCompleted,
-        updatedAt: new Date(),
-      }
-    });
+    })
+
+    await Promise.all(
+      metrics.map((metric) =>
+        prisma.taskMetricCompletion.create({
+          data: {
+            taskMetricId: metric.id,
+            completionId: completion.id,
+            step: nextStep,
+            value: "",
+            isComplete: false,
+            date,
+          },
+        })
+      )
+    )
 
     return NextResponse.json({
-      completion: existingCompletion,
-      completed: false,
-      counter: 0,
+      success: true,
+      completionId: completion.id,
+      step: nextStep,
+      limit: counter.limit,
+      progress: `${nextStep}/${counter.limit}`,
     })
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error toggling task completion:", error.message)
-      console.error("❌ ERROR TOGGLING TASK", {
-        message: error.message,
-        stack: error.stack,
-      })
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error("Error toggling task completion:", error.message);
+      return NextResponse.json({
+        error: error.message
+      }, { status: 500 });
     }
   }
 }
