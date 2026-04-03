@@ -99,12 +99,13 @@ export async function createTask(form: CreateTaskSchemaType) {
             connect: { id: categories }
           }
         })
+
       },
       include: {
         completions: true,
         counter: {
           include: {
-            taskMetric: true
+            CounterStep: true
           }
         },
       },
@@ -246,7 +247,7 @@ export async function updateTask(form: UpdateTaskSchemaType) {
         completions: true,
         counter: {
           include: {
-            taskMetric: true
+            CounterStep: true
           }
         },
       },

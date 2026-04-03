@@ -36,16 +36,16 @@ import { Form } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
-import type { Counter, CounterAux, TaskMetric } from '@prisma/client'
+import type { Counter, CounterStep, TaskMetric } from '@prisma/client'
 import { updateCounterSchema, type UpdateCounterSchemaType } from '@/lib/schema/counter'
 import { formatDateBR } from '@/lib/utils'
 
 interface UpdateCounterDialog {
-  trigger?: React.ReactNode;
-  taskId: string;
-  selectedDate: Date;
+  trigger?: React.ReactNode
+  taskId: string
+  selectedDate: Date
   counter: (Counter & {
-    CounterAux: CounterAux[]
+    CounterStep: CounterStep[]
     taskMetric?: TaskMetric[]
   })
 }
@@ -62,7 +62,8 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
     defaultValues: {
       id: counter.id,
       emoji: counter.emoji || "",
-      counterAuxId: counter.CounterAux[0]?.id,
+      //⚠️
+      counterStepId: counter.CounterStep[0]?.id || "",
       label: counter.label || "",
       unit: counter.unit || "",
       limit: counter.limit || 1,
@@ -100,7 +101,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
         id: 'update-counter'
       })
       return await axios.patch(
-        `/api/counter/${values.id}?${selectedDate ? `?selectedDate=${selectedDateStr}` : ""}`,
+        `/api/counter/${values.id}${selectedDate ? `?selectedDate=${selectedDateStr}` : ""}`,
         values
       )
     },
@@ -135,8 +136,6 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
 
     setOpen(prev => !prev)
   }
-
-  console.log(data, 'data agte subitti-ng')
 
   console.log(errors, "errors")
 

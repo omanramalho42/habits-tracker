@@ -55,10 +55,10 @@ const CreateTaskMetrics: React.FC<CreateTaskMetricsProps> = ({ control }) => {
               append({
                 field: "",
                 value: "",
-                fieldType: "numeric",
-                index: "",
+                fieldType: "NUMERIC",
+                step: 0,
                 isComplete: false,
-                limit: 0,
+                limit: "1",
                 unit: "",
                 emoji: "",
               })

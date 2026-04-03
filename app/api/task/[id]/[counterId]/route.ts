@@ -36,7 +36,7 @@ export async function PUT(
     const body = await request.json()
 
     const validator = z.object({
-      taskMetric: putMetricSchema,
+      metrics: putMetricSchema,
       date: z.coerce.date(),
     })
 
@@ -47,137 +47,113 @@ export async function PUT(
     }
 
     const {
-      taskMetric,
+      metrics,
       date
     } = bodyParams.data
 
-    const baseDate = new Date(date)
-
-    const startOfDay = new Date(baseDate)
-    startOfDay.setHours(0, 0, 0, 0)
-
-    const endOfDay = new Date(baseDate)
-    endOfDay.setHours(23, 59, 59, 999)
-
-    console.log("📅 Day range:", { startOfDay, endOfDay })
+    const baseDate = new Date(date);
+    const startOfDay = new Date(baseDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(baseDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const result = await prisma.$transaction(async (tx) => {
-      // 🔥 1. pega counter atual
+      // 1️⃣ pega o counter
       const counter = await tx.counter.findUnique({
         where: {
           id: counterId
-        },
+        }
       })
 
-      if (!counter) throw new Error("Counter not found")
-        const counterDay = await tx.counterAux.upsert({
-          where: {
-            counterId_date: {
-              counterId: counter.id,
-              date: startOfDay
-            }
-          },
-          update: {},
-          create: {
-            counterId: counter.id,
-            date: startOfDay,
-            currentStep: 0,
-            limit: counter.limit
-          }
-        })
+      if (!counter) throw new Error("Counter not found");
 
-      console.log("📊 CounterDay:", counterDay)
-
-      const currentStep = counterDay.currentStep
-
-      // 🛑 bloqueia se já atingiu limite
-      if (currentStep >= Number(counterDay.limit)) {
-        console.log("⛔ Daily limit reached:", {
-          currentStep,
-          limit: counterDay.limit
-        })
-        throw new Error("Daily counter limit reached")
-      }
-
-      const nextStep = currentStep + 1
-
-      console.log("➡️ Step (daily):", {
-        currentStep,
-        nextStep
-      })
-
-      // 🔥 2. cria completion do dia (se quiser manter)
+      // 2️⃣ cria ou atualiza a TaskCompletion do dia
       const completion = await tx.taskCompletion.upsert({
         where: {
           taskId_completedDate: {
             taskId,
             completedDate: startOfDay
-          },
+          }
         },
         update: {
           updatedAt: new Date()
         },
         create: {
           taskId,
-          counterId,
-          completedDate: startOfDay,
-          isCompleted: nextStep >= Number(counterDay.limit),
+          completedDate: startOfDay
+        },
+        include: {
+          counterStep: true
         },
       })
-      await tx.counterAux.update({
+
+      // 3️⃣ cria ou atualiza CounterStep
+      const counterStep = await tx.counterStep.upsert({
         where: {
-          id: counterDay.id
+          counterId_date_completionId: {
+            counterId: counter.id,
+            date: startOfDay,
+            completionId: completion.id,
+          },
         },
-        data: {
-          currentStep: nextStep
-        }
+        update: {
+          updatedAt: new Date(),
+          limit: counter.limit,
+        },
+        create: {
+          counterId: counter.id,
+          date: startOfDay,
+          currentStep: 0,
+          limit: counter.limit,
+          completionId: completion.id,
+        },
       })
 
-      console.log("🔄 CounterDay updated:", nextStep)
-      await tx.counter.update({
-        where: { id: counter.id },
-        data: {
-          valueNumber: nextStep,
-        },
-      })
+      if (counterStep.currentStep >= counterStep.limit) {
+        throw new Error("Daily counter limit reached")
+      }
 
-      // 🔥 cria ou atualiza metric completions corretamente
+      const nextStep = counterStep.currentStep + 1
+
+      // 4️⃣ atualiza CounterStep
+      await tx.counterStep.update({
+        where: { id: counterStep.id },
+        data: { currentStep: nextStep },
+      });
+
+      // 5️⃣ atualiza Counter valueNumber
+      // await tx.counter.update({
+      //   where: { id: counter.id },
+      //   data: { valueNumber: nextStep },
+      // });
+
+      // 6️⃣ cria/atualiza TaskMetricCompletions
       await Promise.all(
-        taskMetric
-          .filter(metric => metric?.id) // evita null/undefined
-          .map(metric => {
-            console.log("🧩 Upserting metric completion:", {
-              metricId: metric.id,
+        metrics.map((metric) =>
+          tx.taskMetricCompletion.upsert({
+            where: {
+              id: metric.id,
+              // completionId_taskMetricId_step: {
+                completionId: completion.id,
+                taskMetricId: metric.id,
+                step: nextStep,
+              // },
+            },
+            create: {
+              taskMetricId: metric.id!,
+              completionId: completion.id,
               step: nextStep,
-              value: metric.value,
-              taskId: taskId
-            })
-
-            return tx.taskMetricCompletion.upsert({
-              where: {
-                date_index_taskMetricId_taskId: {
-                  date: startOfDay, // 🔥 padronizado
-                  index: nextStep,
-                  taskMetricId: metric.id!,
-                  taskId,
-                }
-              },
-              update: {
-                value: metric.value,
-                taskId,
-                isComplete: true
-              },
-              create: {
-                taskMetricId: metric.id!,
-                index: nextStep,
-                value: metric.value,
-                date: startOfDay,
-                isComplete: true,
-                taskId,
-              }
-            })
+              value: metric.value || "",
+              isComplete: !metric.isComplete,
+              date: startOfDay,
+            },
+            update: {
+              value: metric.value || "",
+              isComplete: !metric.isComplete,
+            },
           })
-      )
+        )
+      );
 
       return {
         step: nextStep,
@@ -185,10 +161,7 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json({
-      success: true,
-      ...result,
-    })
+    return NextResponse.json(result)
   } catch (error) {
     if (error instanceof Error) {
       console.error("❌ ERROR:", error.message)

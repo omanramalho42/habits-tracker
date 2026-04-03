@@ -31,29 +31,29 @@ import { Plus, Trash2 } from "lucide-react"
 import type { UpdateCounterSchemaType } from "@/lib/schema/counter"
 import { Counter, TaskMetric } from "@prisma/client"
 
-interface UpdateTaskMetricsProps {
+interface UpdateTaskMetricDialogProps {
   control: Control<UpdateCounterSchemaType>
-  counter: (Counter & { taskMetric?: TaskMetric[] })
+  counter: (Counter & {
+    metrics?: TaskMetric[]
+  })
 }
 
-const UpdateTaskMetrics: React.FC<UpdateTaskMetricsProps> = ({ control, counter }) => {
+const UpdateTaskMetricDialog: React.FC<UpdateTaskMetricDialogProps> = ({ control, counter }) => {
   const { fields, append, remove, replace } = useFieldArray({
     control,
-    name: "taskMetric",
+    name: "metrics",
   })
   useEffect(() => {
-    if (counter.taskMetric && counter.taskMetric.length > 0) {
+    if (counter.metrics && counter.metrics.length > 0) {
       replace(
-        counter.taskMetric.map((m) => ({
+        counter.metrics.map((m) => ({
           id: m.id,
           field: m.field ?? "",
-          // value: String(m.value ?? ""),
-          fieldType: m.fieldType ?? "numeric",
-          index: m.index ?? "",
           isComplete: false,
-          limit: Number(m.limit ?? 1),
+          limit: m.limit?.toString() ?? "0",
           unit: m.unit ?? "",
           emoji: m.emoji ?? "",
+          value: "",
         }))
       )
     }
@@ -75,9 +75,9 @@ const UpdateTaskMetrics: React.FC<UpdateTaskMetricsProps> = ({ control, counter 
                 field: "",
                 value: "",
                 fieldType: "numeric",
-                index: "",
+                step: "",
                 isComplete: false,
-                limit: 0,
+                limit: "0",
                 unit: "",
                 emoji: "",
               })
@@ -114,35 +114,32 @@ const CounterItem: React.FC<CounterItemProps> = ({
 }) => {
   const type = useWatch({
     control,
-    name: `taskMetric.${index}.fieldType`,
+    name: `metrics.${index}.fieldType`,
   })
 
   // const { field: label, fieldState: { error: labelError } } = useController({
   //   control,
-  //   name: `taskMetric.${index}.label`,
+  //   name: `metrics.${index}.label`,
   // })
 
   // const { field: value } = useController({
   //   control,
-  //   name: `taskMetric.${index}.value`,
+  //   name: `metrics.${index}.value`,
   // })
 
   // const { field: emoji } = useController({
   //   control,
-  //   name: `taskMetric.${index}.emoji`,
+  //   name: `metrics.${index}.emoji`,
   // })
 
-  // const { field: unitField } = useController({
-  //   control,
-  //   name: `taskMetric.${index}.unit`,
   const { field: typeField } = useController({
     control,
-    name: `taskMetric.${index}.fieldType`,
+    name: `metrics.${index}.fieldType`,
   })
 
   const { field: unit } = useController({
     control,
-    name: `taskMetric.${index}.unit`,
+    name: `metrics.${index}.unit`,
   })
 
   return (
@@ -151,7 +148,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
       <div className="flex place-items-center-safe gap-2">
 
         <FormField
-          name={`taskMetric.${index}.emoji`}
+          name={`metrics.${index}.emoji`}
           control={control}
           render={({ field }) => {
             return (
@@ -175,7 +172,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.field`}
+          name={`metrics.${index}.field`}
           render={({ field }) => {
             return (
               <FormItem>
@@ -202,7 +199,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.limit`}
+          name={`metrics.${index}.limit`}
           render={({ field }) => {
             return (
               <FormItem>
@@ -330,4 +327,4 @@ const CounterItem: React.FC<CounterItemProps> = ({
   )
 }
 
-export default UpdateTaskMetrics
+export default UpdateTaskMetricDialog

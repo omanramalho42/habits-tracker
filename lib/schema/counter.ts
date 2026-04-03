@@ -33,7 +33,7 @@ export type CreateCounterSchemaType = z.infer<typeof createCounterSchema>
 
 export const updateCounterSchema = z.object({
   id: z.string().optional(),
-  counterAuxId: z.string(),
+  counterStepId: z.string().optional(),
   label: 
     z.string()
     .min(2, "O valor minimo de caracateres permitido é igual a 2"),
@@ -53,7 +53,7 @@ export const updateCounterSchema = z.object({
   unit: 
     z.string()
     .optional(),
-  taskMetric: 
+  metrics: 
     z.array(
       UpdateMetricSchema
     )

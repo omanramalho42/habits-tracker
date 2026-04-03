@@ -37,12 +37,7 @@ export async function GET(request: Request) {
         userId: userDb.id
       },
       include: {
-        taskMetric: true,
-        CounterAux: {
-          where: {
-            date: today
-          }
-        }
+        CounterStep: true
       }
     })
 
@@ -110,19 +105,8 @@ export async function POST(request: NextRequest) {
           unit,
         }
       })
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
 
-      const counterAux = await tx.counterAux.create({
-        data: {
-          counterId: counter.id,
-          date: today,
-          currentStep: 0,
-          limit: counter.limit
-        }
-      })
-      console.log("📅 counterAux created:", counterAux)
-      // 2️⃣ cria templates (TaskMetric)
+      // 2️⃣ cria TaskMetric desvinculadas de Task (opcional)
       const createdMetrics = await Promise.all(
         (taskMetric || []).map((metric) =>
           tx.taskMetric.create({
@@ -130,13 +114,64 @@ export async function POST(request: NextRequest) {
               emoji: metric.emoji,
               field: metric.field,
               unit: metric.unit,
-              limit: metric.limit.toString(),
+              limit: metric.limit?.toString(),
               fieldType: mapType(metric.fieldType),
-              counterId: counter.id,
             }
           })
         )
       )
+      
+      return {
+        counter,
+        metrics: createdMetrics
+      }
+    })
+
+    return NextResponse.json({
+      newCounter: result.counter,
+      metrics: result.metrics
+    })
+
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error posting counter&metrics:", error.message)
+
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
+    }
+  }
+}
+
+
+      // const today = new Date()
+      // today.setHours(0, 0, 0, 0)
+
+      // const counterStep = await tx.counterStep.create({
+      //   data: {
+      //     counterId: counter.id,
+      //     date: today,
+      //     currentStep: 0,
+      //     limit: counter.limit
+      //   }
+      // })
+      // console.log("📅 counterStep created:", counterStep)
+      // 2️⃣ cria templates (TaskMetric)
+      // const createdMetrics = await Promise.all(
+      //   (taskMetric || []).map((metric) =>
+      //     tx.taskMetric.create({
+      //       data: {
+      //         emoji: metric.emoji,
+      //         field: metric.field,
+      //         unit: metric.unit,
+      //         limit: metric.limit.toString(),
+      //         fieldType: mapType(metric.fieldType),
+      //         counterId: counter.id,
+      //       }
+      //     })
+      //   )
+      // )
 
       // 3️⃣ cria completions (TaskMetricCompletion)
       // const completions = createdMetrics.flatMap((metric) =>
@@ -152,26 +187,3 @@ export async function POST(request: NextRequest) {
       // await tx.taskMetricCompletion.createMany({
       //   data: completions
       // })
-
-      return {
-        counter,
-        metrics: createdMetrics
-      }
-    })
-
-    return NextResponse.json({
-      newCounter: result.counter,
-      metrics: result.metrics
-    })
-
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error posting counter:", error.message)
-
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      )
-    }
-  }
-}
