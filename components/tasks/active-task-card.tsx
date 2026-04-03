@@ -328,7 +328,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           
           {/* TASK METRIC COM STEPS */}
           {task?.metrics && task.metrics.length > 0 && (
-            <Tabs defaultValue={String(currentStep || 1)} className="w-full">
+            <Tabs defaultValue={String(currentStep || 1)} className="container-scroll max-w-full overflox-x-auto">
               {/* 🔥 TABS HEADER */}
               <TabsList className="grid w-full grid-cols-3">
                 {Array.from({ length: task.counter.limit }).map((_, i) => {

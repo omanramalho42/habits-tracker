@@ -128,6 +128,8 @@ export async function PATCH(
         },
       })
 
+      console.log(updatedMetrics, createdMetrics, toDelete.length, "ALL INFO PATCH COUNTER ⚠️")
+
       return {
         updatedMetrics,
         createdMetrics,
