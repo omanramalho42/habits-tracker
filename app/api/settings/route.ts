@@ -68,8 +68,9 @@ export async function PATCH(request: Request) {
         error: "Error find user on db"
       }, { status: 400 })
     }
+    const body = await request.json()
 
-    const parsedBody = updateUserSettingSchema.safeParse(request.body)
+    const parsedBody = updateUserSettingSchema.safeParse(body)
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
 
@@ -121,7 +122,9 @@ export async function PATCH(request: Request) {
   } catch (error) {
     if (error instanceof Error) {
       console.log("error", error.message);
-      NextResponse.json({ error: error.message}, { status: 500 })
+      return NextResponse.json({
+        error: error.message
+      }, { status: 500 })
     }   
   }
 }

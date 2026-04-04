@@ -57,27 +57,37 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
     }
   })
 
+  const { reset } = form
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: UpdateSettingsSchemaType) => {
-      const response = await axios.patch('/api/settings', values)
-      
-      if (!response.data) throw new Error('Erro ao atualizar dados')
-      return response.data
+      return await axios.patch(
+        '/api/settings',
+        values
+      )
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Dados atualizados! Seu presente está a caminho 🎁", {
         id: "update-settings"
       })
-      queryClient.invalidateQueries({ queryKey: ["user-settings"] })
+      reset()
+      await queryClient.invalidateQueries({
+        queryKey: ["user-settings"]
+      })
       setOpen(false)
     },
     onError: (error: any) => {
-      toast.error(`Ops! ${error.message}`, { id: "update-settings" })
+      toast.error(`Ops! ${error.message}`, {
+        id: "update-settings"
+      })
     }
   })
 
   const onSubmit = useCallback((values: UpdateSettingsSchemaType) => {
-    toast.loading("Enviando informações...", { id: "update-settings" })
+    console.log(values, "values");
+    toast.loading("Enviando informações...", {
+      id: "update-settings"
+    })
     mutate(values)
   }, [mutate])
 

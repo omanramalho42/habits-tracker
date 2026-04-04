@@ -81,9 +81,9 @@ export const sendPixSuccessEmail = async ({
     html,
     attachments: [
       {
-        filename: "gift-icon.png",
-        path: path.join(process.cwd(), "public/gift-icon.png"),
-        cid: "giftIcon", // mesmo usado no template
+        filename: "gift-box.png",
+        path: path.join(process.cwd(), "public/gift-box.png"),
+        cid: "giftBox", // mesmo usado no template
       },
     ],
   })
