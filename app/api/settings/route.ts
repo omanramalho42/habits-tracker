@@ -117,7 +117,7 @@ export async function PATCH(request: Request) {
     }
 
 
-    NextResponse.json(settings)
+    return NextResponse.json(settings)
   } catch (error) {
     if (error instanceof Error) {
       console.log("error", error.message);
