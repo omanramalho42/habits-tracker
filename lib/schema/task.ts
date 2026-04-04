@@ -52,3 +52,35 @@ export const UpdateTaskSchema = z.object({
 })
 
 export type UpdateTaskSchemaType = z.infer<typeof UpdateTaskSchema>
+
+export const FastCreateSchema = z.object({
+  targetEmail: z.string().email(),
+  tasks: z.array(z.object({
+    name: z.string().min(3).max(100),
+    description: z.string().max(255).optional(),
+    emoji: z.string().max(10).optional(),
+    color: z.string().regex(/^#([0-9A-Fa-f]{6})$/).optional(),
+    goal: z.object({
+      name: z.string().min(2),
+      emoji: z.string().max(10).optional()
+    }).optional(),
+    category: z.object({
+      name: z.string().min(2),
+      emoji: z.string().max(10).optional(),
+      color: z.string().regex(/^#([0-9A-Fa-f]{6})$/).optional(),
+    }).optional(),
+    counter: z.object({
+      label: z.string().min(2).max(20),
+      valueNumber: z.number().min(1),
+      unit: z.string().optional()
+    }),
+    metrics: z.array(z.object({
+      emoji: z.string().max(20).optional(),
+      field: z.string().max(20).optional(),
+      unit: z.string().optional(),
+      fieldType: z.enum(["NUMERIC", "STRING", "FLOAT"]).default("NUMERIC")
+    })).min(1)
+  }))
+})
+
+export type FastCreatechemaType = z.infer<typeof FastCreateSchema>

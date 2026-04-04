@@ -1,5 +1,8 @@
 "use client"
 
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+
 import React, { useState, useRef } from 'react'
 
 import { useForm } from 'react-hook-form'
@@ -9,8 +12,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { udapteUserSettings } from '@/app/habits/_actions/settings/user-settings'
+import { PreferencesMultiSelect } from "@/components/settings/preferences-multi-select"
+import { preferencesList } from "@/lib/constants/preferences"
 
-import { Uploader } from '@/components/uploader'
 import ThemePicker from '@/components/theme-picker'
 
 import {
@@ -39,7 +43,13 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import {
   Fullscreen,
   PenIcon,
@@ -48,9 +58,6 @@ import {
 } from 'lucide-react'
 
 import type { UpdateUserSettingSchemaType } from '@/lib/schema/user-settings'
-import type { UserSettings } from '@prisma/client'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 interface UpdateUserSettingsDialogProps {
   trigger: React.ReactNode
@@ -84,6 +91,10 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
       theme: userSettings?.theme,
       bannerUrl: [],
       avatarUrl: [],
+      preferences: {
+        showGraphs: userSettings?.showGraphs ?? true,
+        habitLayout: userSettings?.habitLayout ?? "VERTICAL",
+      }
     }
   })
 
@@ -111,11 +122,6 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
     try {
       console.log(values, "values !")
       const res = await udapteUserSettings(values)
-      // const res = 
-      //   await axios.patch(
-      //     "/api/settings",
-      //     values
-      //   )
   
       if(res) {
         toast.success(
@@ -310,23 +316,6 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
               />
             </React.Fragment>
 
-            {/* <React.Fragment>
-              <FormField
-                control={control}
-                name="bannerUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Imagem de fundo</FormLabel>
-                    <FormControl>
-                      <Uploader
-                        files={field.value}
-                        onSuccessCallback={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </React.Fragment> */}
             <FormField
               control={control}
               name="bannerUrl"
@@ -537,6 +526,101 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
 
                   </div>
                 )}
+
+                <FormField
+                  control={control}
+                  name="preferences"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold">
+                        Preferências do App
+                      </FormLabel>
+
+                      <FormControl>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-between"
+                            >
+                              Configurar preferências
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent className="w-80 p-3 space-y-3">
+                            <DropdownMenuLabel>
+                              Personalização
+                            </DropdownMenuLabel>
+
+                            <DropdownMenuSeparator />
+
+                            {/* SHOW GRAPHS */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">
+                                Exibir gráficos
+                              </span>
+
+                              <Switch
+                                checked={field.value?.showGraphs}
+                                onCheckedChange={(val) =>
+                                  field.onChange({
+                                    ...field.value,
+                                    showGraphs: val,
+                                  })
+                                }
+                              />
+                            </div>
+
+                            {/* HABIT LAYOUT */}
+                            <div className="flex flex-col gap-2">
+                              <span className="text-sm font-medium">
+                                Layout dos hábitos
+                              </span>
+
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={
+                                    field.value?.habitLayout === "VERTICAL"
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  onClick={() =>
+                                    field.onChange({
+                                      ...field.value,
+                                      habitLayout: "VERTICAL",
+                                    })
+                                  }
+                                >
+                                  Vertical
+                                </Button>
+
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={
+                                    field.value?.habitLayout === "HORIZONTAL"
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  onClick={() =>
+                                    field.onChange({
+                                      ...field.value,
+                                      habitLayout: "HORIZONTAL",
+                                    })
+                                  }
+                                >
+                                  Horizontal
+                                </Button>
+                              </div>
+                            </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
               </div>
             </React.Fragment>

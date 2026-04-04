@@ -156,6 +156,19 @@
     scrollbar-color: rgba(59, 130, 246, 0.2) transparent; /* primary/20 */
   }
 
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
   /* Chrome, Edge, Safari */
   .scroll-container::-webkit-scrollbar {
     height: 6px; /* equivalente ao scrollbar-thin */

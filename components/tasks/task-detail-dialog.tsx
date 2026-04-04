@@ -147,7 +147,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
 
         {/* 📊 TABS */}
         <Tabs defaultValue="line">
-          <TabsList className="w-full max-w-full container-scroll overflox-x-visible">
+          <TabsList className="w-full max-w-full scroll-container overflox-x-visible">
             <TabsTrigger value="line" className="flex-1 text-xs">
               Linha
             </TabsTrigger>

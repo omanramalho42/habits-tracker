@@ -30,7 +30,9 @@ import type {
   Routine,
   Task,
   TaskCompletion,
-  TaskSchedule
+  TaskSchedule,
+  User,
+  UserSettings
 } from "@prisma/client"
 
 import CreateRoutineDialog from "@/components/create-routine-dialog"
@@ -65,6 +67,7 @@ import {
 
 import type { HabitWithStats } from "@/lib/types"
 import MultiGraphsChart from "@/components/charts/multi-graphs-chart"
+import { fetchUserSettings } from "@/services/settings"
 
 const container = {
   hidden: {},
@@ -95,8 +98,6 @@ export default function Home() {
   const [filter, setFilter] = useState<string>("")
   const { theme, setTheme } = useTheme()
   
-  // console.log({ theme });
-
   const handleFilterHabits = (value: string) => {
     setFilter(value)
   }
@@ -107,6 +108,13 @@ export default function Home() {
     useState(today)
   const selectedDateStr =
     formatDateBR(selectedDate)
+
+  const {
+    data: userSettings,
+  } = useQuery<UserSettings>({
+    queryKey: ["user-settings"],
+    queryFn: () => fetchUserSettings(),
+  })
 
   const {
     data: habits = [],
@@ -181,7 +189,7 @@ export default function Home() {
       </div>
     )
   }
-
+  console.log(userSettings, "userSettings")
   return (
     <>
       {/* <MoodWizard /> */}
@@ -195,14 +203,15 @@ export default function Home() {
             selectedDate={selectedDate}
             onSuccessCallback={setSelectedDate}
           />
-
-          <MultiGraphsChart tasks={tasks} />
+          {userSettings && "showGraphs" in userSettings && userSettings.showGraphs && (
+            <MultiGraphsChart tasks={tasks} />
+          )}
 
           <Tabs defaultValue="habits">
-            <TabsList className="bg-background w-full">
+            <TabsList className="bg-background w-full my-2">
               <TabsTrigger 
                 value="routines" 
-                className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
+                className="flex items-center gap-2 rounded-sm bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
               >
                 <AppWindowIcon className="w-4 h-4" />
                 Rotinas
@@ -210,7 +219,7 @@ export default function Home() {
 
               <TabsTrigger 
                 value="habits" 
-                className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
+                className="flex items-center gap-2 rounded-sm bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
               >
                 <CodeIcon className="w-4 h-4" />
                 Hábitos
@@ -218,7 +227,7 @@ export default function Home() {
 
               <TabsTrigger 
                 value="tasks" 
-                className="flex items-center gap-2 pb-3 rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
+                className="flex items-center gap-2 rounded-sm bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-[0_4px_20px_-5px_rgba(34,197,94,0.8)] transition-all"
               >
                 <TargetIcon className="w-4 h-4" />
                 Tarefas

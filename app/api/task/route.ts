@@ -75,12 +75,12 @@ export async function GET(request: Request) {
         },
         // completions da Task, filtradas apenas para o dia
         completions: {
-          where: {
-            completedDate: {
-              gte: selectedDate,
-              lte: nextDay,
-            },
-          },
+          // where: {
+          //   completedDate: {
+          //     gte: selectedDate,
+          //     lte: nextDay,
+          //   },
+          // },
         },
       },
     })

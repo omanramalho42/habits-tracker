@@ -31,9 +31,9 @@ export async function GET() {
   
     const userSettings =
       await prisma.userSettings.findUnique({
-      where: {
-        userId: userDb.id
-      }
+        where: {
+          userId: userDb.id
+        }
     })
   
     return NextResponse.json(userSettings)
@@ -80,6 +80,7 @@ export async function PATCH(request: Request) {
       phone,
       pixKey,
       pixKeyType,
+      preferences
     } = parsedBody.data
 
     // console.log(parsedBody.data, "data!")
@@ -96,6 +97,9 @@ export async function PATCH(request: Request) {
         phone,
         pixKey,
         pixKeyType,
+        // ✅ MAPEAMENTO NOVO
+        showGraphs: preferences?.showGraphs,
+        habitLayout: preferences?.habitLayout,
       },
       create: {
         userId: userDb.id,
@@ -104,6 +108,9 @@ export async function PATCH(request: Request) {
         phone,
         pixKey,
         pixKeyType,
+        // ✅ MAPEAMENTO NOVO
+        showGraphs: preferences?.showGraphs ?? true,
+        habitLayout: preferences?.habitLayout ?? "VERTICAL",
       },
     })
 
@@ -116,6 +123,8 @@ export async function PATCH(request: Request) {
         pixKeyType,
       })
     }
+
+    console.log(settings, "✨")
 
 
     return NextResponse.json(settings)

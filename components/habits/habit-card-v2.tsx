@@ -89,8 +89,6 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
         // }
       }
 
-      console.log(response.data, "response!")
-
       return response.data
     },
     onSuccess: async (values) => {

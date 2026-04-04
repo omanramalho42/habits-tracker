@@ -43,7 +43,8 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
     emailNotifications,
     smsNotifications,
     allow_notifications,
-    isTravelling
+    isTravelling,
+    preferences
   } = parsedBody.data
 
   // console.log(parsedBody.data, "data")
@@ -93,6 +94,9 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
           emailNotifications,
           smsNotifications,
           userId: userDb.id,
+          // ✅ MAPEAMENTO NOVO
+          showGraphs: preferences?.showGraphs,
+          habitLayout: preferences?.habitLayout,
         }
       })
 
@@ -112,7 +116,10 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
           bannerUrl: uploadedFiles[0]?.url || "",
           emailNotifications,
           smsNotifications,
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          // ✅ MAPEAMENTO NOVO
+          showGraphs: preferences?.showGraphs,
+          habitLayout: preferences?.habitLayout,
         }
       })
 

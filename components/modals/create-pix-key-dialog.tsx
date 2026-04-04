@@ -1,11 +1,17 @@
 "use client"
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+
+import axios from 'axios'
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
+
 import * as z from "zod"
+
 import Image from 'next/image'
+
 import { toast } from 'sonner'
 
 import {
@@ -27,40 +33,45 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import axios from 'axios'
 
-// 1. Schema atualizado com o campo pixKey
-const updateSettingsSchema = z.object({
-  name: z.string().min(2, "Nome é necessário para identificação"),
-  email: z.string().email("E-mail inválido").optional().or(z.literal('')),
-  phone: z.string().min(8, "Telefone inválido").optional().or(z.literal('')),
-  pixKey: z.string().min(1, "A chave Pix é obrigatória para o recebimento"), // <-- Novo campo
-})
-
-type UpdateSettingsSchemaType = z.infer<typeof updateSettingsSchema>
+import type { UserSettings } from '@prisma/client'
+import { updateUserSettingSchema, UpdateUserSettingSchemaType } from '@/lib/schema/user-settings'
 
 interface CreatePixKeyDialogProps {
-  trigger?: React.ReactNode
+  trigger?: React.ReactNode;
+  userSettings?: UserSettings
 }
 
-const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
+const CreatePixKeyDialog = ({ trigger, userSettings }: CreatePixKeyDialogProps) => {
+  console.log(userSettings, "⚙️")
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const form = useForm<UpdateSettingsSchemaType>({
-    resolver: zodResolver(updateSettingsSchema),
+  const form = useForm<UpdateUserSettingSchemaType>({
+    resolver: zodResolver(updateUserSettingSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      pixKey: "", // <-- Valor padrão
+      name: userSettings?.name || "",
+      email: userSettings?.email || "",
+      phone: userSettings?.phone || "",
+      pixKey: userSettings?.pixKey || "", // <-- Valor padrão
     }
   })
 
   const { reset } = form
 
+  // useEffect(() => {
+  //   if (userSettings) {
+  //     reset({
+  //       name: userSettings.name || "",
+  //       email: userSettings.email || "",
+  //       phone: userSettings.phone || "",
+  //       pixKey: userSettings.pixKey || "",
+  //     })
+  //   }
+  // }, [userSettings, reset])
+
   const { mutate, isPending } = useMutation({
-    mutationFn: async (values: UpdateSettingsSchemaType) => {
+    mutationFn: async (values: UpdateUserSettingSchemaType) => {
       return await axios.patch(
         '/api/settings',
         values
@@ -83,7 +94,7 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
     }
   })
 
-  const onSubmit = useCallback((values: UpdateSettingsSchemaType) => {
+  const onSubmit = useCallback((values: UpdateUserSettingSchemaType) => {
     console.log(values, "values");
     toast.loading("Enviando informações...", {
       id: "update-settings"
@@ -95,12 +106,15 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <button 
+          <button
+            type='button'
+            role='combobox'
+            disabled={isPending}
             className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
             title="Ganhar Presente"
           >
             <div className="animate-float">
-              <Image 
+              <Image
                 src="/gift-box.png" 
                 alt="Ícone de Presente" 
                 width={80} 
@@ -112,7 +126,7 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-[400px] w-[95vw] rounded-xl">
+      <DialogContent className="max-w-100 w-[95vw] rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             Resgatar Presente 🎁
@@ -131,9 +145,16 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-bold text-muted-foreground">Nome Completo</FormLabel>
+                  <FormLabel className="font-bold text-muted-foreground">
+                    Nome Completo
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Como está no seu banco..." {...field} />
+                    <Input
+                      {...field}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Como está no seu banco..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,9 +172,11 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
                   </FormLabel>
                   <FormControl>
                     <Input 
+                        {...field}
                         placeholder="Digite sua chave pix aqui" 
                         className="border-purple-500/50 focus-visible:ring-purple-500"
-                        {...field} 
+                        value={field.value}
+                        onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -164,13 +187,21 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
             <div className="grid grid-cols-2 gap-4">
                  {/* Campo Email */}
                 <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
                     <FormItem>
-                    <FormLabel className="font-bold text-xs">E-mail de Contato</FormLabel>
+                    <FormLabel className="font-bold text-xs">
+                      E-mail de Contato
+                    </FormLabel>
                     <FormControl>
-                        <Input placeholder="seu@email.com" {...field} />
+                        <Input
+                          {...field}
+                          type='email'
+                          placeholder="seu@email.com"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -179,13 +210,21 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
 
                 {/* Campo Telefone */}
                 <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
                     <FormItem>
-                    <FormLabel className="font-bold text-xs">Telefone</FormLabel>
+                    <FormLabel className="font-bold text-xs">
+                      Telefone
+                    </FormLabel>
                     <FormControl>
-                        <Input placeholder="(00) 00000-0000" {...field} />
+                        <Input
+                          {...field}
+                          value={field.value}
+                          onChange={field.onChange}
+                          type='number'
+                          placeholder="(00) 00000-0000"
+                        />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -197,7 +236,7 @@ const CreatePixKeyDialog = ({ trigger }: CreatePixKeyDialogProps) => {
               <Button 
                 type="submit" 
                 disabled={isPending}
-                className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+                className="w-full h-12 text-lg font-bold bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
               >
                 {isPending ? "Processando..." : "Confirmar e Ganhar"}
               </Button>

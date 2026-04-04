@@ -1,164 +1,149 @@
 import { prisma } from "@/lib/prisma"
+import { FastCreateSchema } from "@/lib/schema/task";
 import { auth } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-// Adicione isso no topo do arquivo
 export const dynamic = 'force-dynamic';
 
-export const CreateTaskFullSchema = z.object({
-  name: z.string().min(3).max(100),
-
-  description: z.string().max(255).optional(),
-
-  emoji: z.string().max(10).optional(),
-
-  color: z.string().regex(/^#([0-9A-Fa-f]{6})$/).optional(),
-
-  // 🎯 GOAL
-  goal: z.object({
-    name: z.string().min(2),
-    emoji: z.string().max(10).optional()
-  }).optional(),
-
-  // 📂 CATEGORY
-  category: z.object({
-    name: z.string().min(2),
-    emoji: z.string().max(10).optional(),
-    color: z.string().regex(/^#([0-9A-Fa-f]{6})$/).optional(),
-  }).optional(),
-
-  // 🔢 COUNTER (OBRIGATÓRIO)
-  counter: z.object({
-    label: z.string().min(2).max(20),
-    value: z.number().min(1),
-    unit: z.string().optional()
-  }),
-
-  // 📊 METRICS (OBRIGATÓRIO)
-  metrics: z.array(
-    z.object({
-      emoji: z.string().max(20).optional(),
-      field: z.string().max(20).optional(),
-      value: z.string().max(20).optional(),
-      unit: z.string().optional(),
-
-      // ⚠️ IMPORTANTE
-      date: z.date().nullable().optional()
-      // Prisma já define null automaticamente
-    })
-  ).min(1)
-})
-
-export async function POST(request: NextRequest) {
-  console.log("🚀 Rota POST /fast-create chamada!");
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+// 2. ROTA GET - Mock de sugestões
+export async function GET() {
+  const mockedTasks = [
+    {
+      name: "Beber Água",
+      description: "Manter a hidratação diária",
+      emoji: "💧",
+      color: "#3b82f6",
+      counter: { label: "Copos", valueNumber: 8, unit: "un" },
+      category: { name: "Saúde", emoji: "🏥", color: "#3b82f6" },
+      metrics: [{ emoji: "💧", field: "Quantidade", unit: "ml", fieldType: "NUMERIC" }]
+    },
+    {
+      name: "Leitura",
+      description: "Ler um livro antes de dormir",
+      emoji: "📚",
+      color: "#8b5cf6",
+      counter: { label: "Páginas", valueNumber: 20, unit: "pag" },
+      category: { name: "Educação", emoji: "📖", color: "#8b5cf6" },
+      metrics: [{ emoji: "📖", field: "Progresso", unit: "NUMERIC", fieldType: "NUMERIC" }]
     }
+  ];
+
+  return NextResponse.json(mockedTasks);
+}
+
+// 3. ROTA POST - Criação em massa
+export async function POST(request: NextRequest) {
+  try {
+    const { userId: authId } = await auth();
+    if (!authId) return NextResponse.json({
+      error: "Unauthorized"
+    }, { status: 401 });
 
     const body = await request.json();
-
-    // 1. Validamos que o corpo é um ARRAY de tarefas
-    const parsed = z.array(CreateTaskFullSchema).safeParse(body);
+    const parsed = FastCreateSchema.safeParse(body);
 
     if (!parsed.success) {
-      console.log("⚠️ Falha no Zod:", parsed.error.flatten());
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const userDb = await prisma.user.findFirst({
-      where: { clerkUserId: userId }
+    const { targetEmail, tasks } = parsed.data;
+
+    // Localizar o usuário alvo pelo e-mail
+    const targetUser = await prisma.user.findFirst({ 
+      where: { email: targetEmail } 
     });
 
-    if (!userDb) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    if (!targetUser) {
+      return NextResponse.json({ error: "Usuário destino não encontrado" }, { status: 404 });
     }
 
-    // 2. Usamos Promise.all para criar todas as tarefas do array
-    const createdTasks = await Promise.all(
-      parsed.data.map(async (taskData) => {
+    const results = await Promise.all(
+      tasks.map(async (t) => {
         return prisma.task.create({
           data: {
-            name: taskData.name,
-            description: taskData.description,
-            emoji: taskData.emoji,
-            color: taskData.color,
-            user: {
-              connect: { id: userDb.id }
+            name: t.name,
+            description: t.description ?? null,
+            emoji: t.emoji ?? null,
+            color: t.color ?? null,
+            userId: targetUser.id,
+            limitCounter: Math.floor(t.counter.valueNumber),
+
+            // Relacionamento 1:1 com Counter
+            // counter: {
+            //   create: {
+            //     label: t.counter.label,
+            //     valueNumber: t.counter.valueNumber,
+            //     unit: t.counter.unit ?? null,
+            //     limit: Math.floor(t.counter.valueNumber),
+            //     userId: targetUser.id,
+            //   }
+            // },
+
+            // Relacionamento 1:N com TaskMetric
+            metrics: {
+              create: t.metrics.map(m => ({
+                emoji: m.emoji ?? null,
+                field: m.field ?? null,
+                unit: m.unit ?? null,
+                fieldType: m.fieldType,
+              }))
             },
-            limitCounter: taskData.counter.value,
-            counter: {
-              create: {
-                label: taskData.counter.label,
-                valueNumber: taskData.counter.value,
-                unit: taskData.counter.unit,
-                taskMetric: {
-                  create: taskData.metrics.map((m) => ({
-                    emoji: m.emoji,
-                    field: m.field,
-                    value: m.value,
-                    unit: m.unit,
-                    date: null
-                  }))
-                }
-              }
-            },
-            // 📂 CATEGORY com Conexão Inteligente
-            ...(taskData.category && {
+
+            // Relacionamento N:N com Categories
+            ...(t.category && {
               categories: {
                 connectOrCreate: [
                   {
-                    where: {
-                      // 🎯 Busca pela combinação ÚNICA de Usuário + Nome da Categoria
-                      userId_name: {
-                        name: taskData.category.name,
-                        userId: userDb.id,
-                      },
+                    where: { 
+                      userId_name: { 
+                        name: t.category.name, 
+                        userId: targetUser.id 
+                      } 
                     },
                     create: {
-                      name: taskData.category.name,
-                      emoji: taskData.category.emoji ?? null,
-                      color: taskData.category.color ?? null,
-                      userId: userDb.id, // Obrigatório para o registro pertencer ao usuário
-                    },
-                  },
-                ],
-              },
+                      name: t.category.name,
+                      emoji: t.category.emoji ?? null,
+                      color: t.category.color ?? null,
+                      userId: targetUser.id
+                    }
+                  }
+                ]
+              }
             }),
 
-            // 🎯 GOAL com Conexão Inteligente
-            ...(taskData.goal && {
+            // Relacionamento N:N com Goals
+            ...(t.goal && {
               goals: {
                 connectOrCreate: [
                   {
-                    where: {
-                      userId_name: {
-                        name: taskData.goal.name,
-                        userId: userDb.id,
-                      },
+                    where: { 
+                      userId_name: { 
+                        name: t.goal.name, 
+                        userId: targetUser.id 
+                      } 
                     },
                     create: {
-                      name: taskData.goal.name,
-                      emoji: taskData.goal.emoji ?? null,
-                      userId: userDb.id,
-                    },
-                  },
-                ],
-              },
-            }),
+                      name: t.goal.name,
+                      emoji: t.goal.emoji ?? null,
+                      userId: targetUser.id
+                    }
+                  }
+                ]
+              }
+            })
           }
         });
       })
     );
 
-    console.log(`✅ ${createdTasks.length} tarefas criadas com sucesso!`);
-    return NextResponse.json(createdTasks);
+    return NextResponse.json({ 
+      success: true, 
+      count: results.length 
+    });
 
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Failed to create tasks" }, { status: 500 });
+    console.error("ERRO_FAST_CREATE:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

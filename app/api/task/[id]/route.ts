@@ -270,91 +270,106 @@ export async function PUT(
       ? new Date(body.date) 
       : new Date()
     date.setHours(0, 0, 0, 0) // padroniza início do dia
-
-    // 1️⃣ Busca ou cria TaskCompletion do dia
-    const completion = await prisma.taskCompletion.upsert({
-      where: { taskId_completedDate: { taskId, completedDate: date } },
-      create: { taskId, completedDate: date },
-      update: { updatedAt: new Date() },
-      include: { counterStep: true, task: { include: { counter: true } } },
-    })
-
-    const counter = completion.task.counter;
-    if (!counter) throw new Error("Counter not found")
-
-    // 2️⃣ Cria ou atualiza CounterStep
-    const counterStep = await prisma.counterStep.upsert({
+    // 1. Tenta encontrar a conclusão existente
+    const existingCompletion = await prisma.taskCompletion.findUnique({
       where: {
-        counterId_date_completionId: {
-          counterId: counter.id,
-          date,
-          completionId: completion.id,
-        },
+        taskId_completedDate: { taskId, completedDate: date }
+      }
+    });
+
+    // 2. Executa o upsert com a lógica de inversão
+    const completion = await prisma.taskCompletion.upsert({
+      where: {
+        taskId_completedDate: { taskId, completedDate: date }
       },
       create: {
-        counterId: counter.id,
-        date,
-        completionId: completion.id,
-        currentStep: 0,
-        limit: counter.limit,
+        taskId,
+        completedDate: date,
+        isCompleted: true // Se está criando agora, assume-se que o usuário clicou para completar
       },
       update: {
+        // Inverte o valor baseado no que encontramos anteriormente
+        isCompleted: existingCompletion ? !existingCompletion.isCompleted : true,
         updatedAt: new Date(),
-        limit: counter.limit,
       },
-    })
-
-    if (counterStep.currentStep >= counterStep.limit) {
-      throw new Error("Daily counter limit reached")
-    }
-
-    const nextStep = counterStep.currentStep + 1
-
-    // 3️⃣ Atualiza CounterStep com novo step
-    await prisma.counterStep.update({
-      where: { id: counterStep.id },
-      data: { currentStep: nextStep },
-    })
-
-    // 4️⃣ Atualiza valor total do Counter
-    await prisma.counter.update({
-      where: { id: counter.id },
-      data: { valueNumber: nextStep },
-    })
-
-    // 5️⃣ Cria TaskMetricCompletion para cada métrica do Counter
-    const metrics = await prisma.taskMetric.findMany({
-      where: {
-        taskId,
-        status: "ACTIVE"
+      include: {
+        counterStep: true,
+        task: {
+          include: { counter: true }
+        }
       },
-    })
+    });
 
-    await Promise.all(
-      metrics.map((metric) =>
-        prisma.taskMetricCompletion.create({
-          data: {
-            taskMetricId: metric.id,
-            completionId: completion.id,
-            step: nextStep,
-            value: "",
-            isComplete: false,
-            date,
-          },
-        })
-      )
-    )
+    // const counter = completion.task.counter;
+    // if (!counter) throw new Error("Counter not found")
 
-    return NextResponse.json({
-      success: true,
-      completionId: completion.id,
-      step: nextStep,
-      limit: counter.limit,
-      progress: `${nextStep}/${counter.limit}`,
-    })
+    // // 2️⃣ Cria ou atualiza CounterStep
+    // const counterStep = await prisma.counterStep.upsert({
+    //   where: {
+    //     counterId_date_completionId: {
+    //       counterId: counter.id,
+    //       date,
+    //       completionId: completion.id,
+    //     },
+    //   },
+    //   create: {
+    //     counterId: counter.id,
+    //     date,
+    //     completionId: completion.id,
+    //     currentStep: 0,
+    //     limit: counter.limit,
+    //   },
+    //   update: {
+    //     updatedAt: new Date(),
+    //     limit: counter.limit,
+    //   },
+    // })
+
+    // if (counterStep.currentStep >= counterStep.limit) {
+    //   throw new Error("Daily counter limit reached")
+    // }
+
+    // const nextStep = counterStep.currentStep + 1
+
+    // // 3️⃣ Atualiza CounterStep com novo step
+    // await prisma.counterStep.update({
+    //   where: { id: counterStep.id },
+    //   data: { currentStep: nextStep },
+    // })
+
+    // // 4️⃣ Atualiza valor total do Counter
+    // await prisma.counter.update({
+    //   where: { id: counter.id },
+    //   data: { valueNumber: nextStep },
+    // })
+
+    // // 5️⃣ Cria TaskMetricCompletion para cada métrica do Counter
+    // const metrics = await prisma.taskMetric.findMany({
+    //   where: {
+    //     taskId,
+    //     status: "ACTIVE"
+    //   },
+    // })
+
+    // await Promise.all(
+    //   metrics.map((metric) =>
+    //     prisma.taskMetricCompletion.create({
+    //       data: {
+    //         taskMetricId: metric.id,
+    //         completionId: completion.id,
+    //         step: nextStep,
+    //         value: "",
+    //         isComplete: false,
+    //         date,
+    //       },
+    //     })
+    //   )
+    // )
+
+    return NextResponse.json(completion)
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error toggling task completion:", error.message);
+      console.error("❌ Error toggling task completion:", error.message);
       return NextResponse.json({
         error: error.message
       }, { status: 500 });

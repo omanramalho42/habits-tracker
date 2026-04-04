@@ -35,6 +35,7 @@ const HeaderSection:React.FC = () => {
   const { user } = useUser()
   const {
     data: userSettings,
+    isLoading,
   } = useQuery<UserSettings>({
     queryKey: ["user-settings"],
     queryFn: () => fetchUserSettings(),
@@ -43,7 +44,11 @@ const HeaderSection:React.FC = () => {
   return (
     <div className="flex flex-row-reverse items-start justify-between">
       
-          <CreatePixKeyDialog />
+      {!isLoading && (
+        <CreatePixKeyDialog
+          userSettings={userSettings}
+        />
+      )}
       <div className="flex flex-col space-y-2">
 
         <div className='flex flex-row items-baseline gap-2'>

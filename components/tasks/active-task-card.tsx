@@ -71,6 +71,7 @@ interface ActiveTaskCardProps {
 }
 
 const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
+  console.log(task , "task ❌")
   const [openMetricsDialog, setOpenMetricsDialog] =
     useState<boolean>(false)
 
@@ -81,6 +82,8 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       new Date(c.completedDate).toDateString() ===
       new Date(selectedDate || new Date()).toDateString()
   )
+  console.log(new Date(selectedDate || new Date()).toDateString(), completion?.completedDate)
+  console.log(completion, "completionxdate")
 
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     year: "numeric",
@@ -115,7 +118,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       })
       
       await queryClient.invalidateQueries({
-        queryKey: ["tasks", selectedDate],
+        queryKey: ["tasks"],
       })
       await queryClient.invalidateQueries({
         queryKey: ["routines", selectedDate],
@@ -123,7 +126,8 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       if(values.step < values.limit) {
         setOpenMetricsDialog(true)
       }
-      if (!values.completion.isCompleted) {
+
+      if (values.isCompleted) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -232,8 +236,8 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             size="icon"
             variant={completion?.isCompleted ? "default" : "outline"}
             onClick={() => handleToggle(task.id)}
-            disabled={isPending || currentStep <= limit}
-            className={cn("rounded-full", currentStep < limit && "cursor-not-allowed")}
+            disabled={isPending || currentStep < limit && limit !== 1}
+            className={cn("rounded-full", currentStep < limit && limit !== 1 && "cursor-not-allowed")}
           >
             <Check className={cn("w-4 h-4", completion?.isCompleted ? "visible" : "hidden")} />
           </Button>
@@ -328,7 +332,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
           
           {/* TASK METRIC COM STEPS */}
           {task?.metrics && task.metrics.length > 0 && (
-            <Tabs defaultValue={String(currentStep || 1)} className="container-scroll max-w-full overflox-x-auto">
+            <Tabs defaultValue={String(currentStep || 1)} className="scroll-container max-w-full overflox-x-auto">
               {/* 🔥 TABS HEADER */}
               <TabsList className="grid w-full grid-cols-3">
                 {Array.from({ length: task.counter.limit }).map((_, i) => {
