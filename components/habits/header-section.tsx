@@ -41,9 +41,11 @@ const HeaderSection:React.FC = () => {
   })
   
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex flex-row-reverse items-start justify-between">
       
+          <CreatePixKeyDialog />
       <div className="flex flex-col space-y-2">
+
         <div className='flex flex-row items-baseline gap-2'>
           <Avatar>
             <AvatarImage
@@ -59,7 +61,6 @@ const HeaderSection:React.FC = () => {
             Olá, {userSettings?.name || user?.fullName} 👋
           </h1>
         </div>
-        <CreatePixKeyDialog />
         <p className="text-muted-foreground text-base">
           {today}
         </p>
