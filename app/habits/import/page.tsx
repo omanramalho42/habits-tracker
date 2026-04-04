@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Check, Loader2, Download, CheckSquare, Square, Target, BarChart3, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface TaskSuggestion {
   name: string;
@@ -60,6 +61,8 @@ export default function ImportTasksPage() {
   const { fields } = useFieldArray({ control, name: "tasks" });
   const watchedTasks = watch("tasks");
 
+  const navigate = useRouter()
+
   // 3. Mutação ajustada para enviar o objeto { targetEmail, tasks }
   const mutation = useMutation({
     mutationFn: async (payload: { targetEmail: string; tasks: TaskSuggestion[] }) => {
@@ -68,6 +71,7 @@ export default function ImportTasksPage() {
     },
     onSuccess: () => {
       toast.success("Tarefas importadas com sucesso!");
+      navigate.push("/")
     },
     onError: (err: any) => {
       const msg = err.response?.data?.error || "Erro ao importar as tarefas.";

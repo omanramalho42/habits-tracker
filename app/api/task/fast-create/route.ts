@@ -5,10 +5,20 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
 export const dynamic = 'force-dynamic';
-
-// 2. ROTA GET - Mock de sugestões
+// 2. ROTA GET - Mock de sugestões aprimorado
 export async function GET() {
   const mockedTasks = [
+    {
+      name: "Alimentação Limpa",
+      description: "Comer salada e proteína",
+      emoji: "🥗",
+      color: "#3b82f6",
+      counter: { label: "Dia", valueNumber: 1, unit: "x" },
+      category: { name: "Saúde", emoji: "🍱", color: "#3b82f6" },
+      metrics: [
+        { emoji: "🥗", field: "Refeições", unit: "NUMERIC", fieldType: "NUMERIC" }
+      ]
+    },
     {
       name: "Beber Água",
       description: "Manter a hidratação diária",
@@ -16,16 +26,53 @@ export async function GET() {
       color: "#3b82f6",
       counter: { label: "Copos", valueNumber: 8, unit: "un" },
       category: { name: "Saúde", emoji: "🏥", color: "#3b82f6" },
-      metrics: [{ emoji: "💧", field: "Quantidade", unit: "ml", fieldType: "NUMERIC" }]
+      metrics: [
+        { emoji: "💧", field: "Quantidade", unit: "ml", fieldType: "NUMERIC" }
+      ]
+    },
+    {
+      name: "Trabalho Focado",
+      description: "2 horas de trabalho profundo",
+      emoji: "💻",
+      color: "#6366f1",
+      counter: { label: "Horas", valueNumber: 2, unit: "h" },
+      category: { name: "Produtividade", emoji: "📑", color: "#6366f1" },
+      metrics: [
+        { emoji: "⏱️", field: "Foco", unit: "min", fieldType: "NUMERIC" }
+      ]
+    },
+    {
+      name: "Treino",
+      description: "Treinar pernas",
+      emoji: "🏋️",
+      color: "#a855f7",
+      counter: { label: "Treino", valueNumber: 1, unit: "un" },
+      category: { name: "Fitness", emoji: "✨", color: "#a855f7" },
+      metrics: [
+        { emoji: "🔥", field: "Calorias", unit: "kcal", fieldType: "NUMERIC" }
+      ]
+    },
+    {
+      name: "Dormir Cedo",
+      description: "Deitar às 22:30",
+      emoji: "⏰",
+      color: "#3b82f6",
+      counter: { label: "Horas", valueNumber: 8, unit: "h" },
+      category: { name: "Saúde", emoji: "🏥", color: "#3b82f6" },
+      metrics: [
+        { emoji: "💤", field: "Qualidade", unit: "pt", fieldType: "NUMERIC" }
+      ]
     },
     {
       name: "Leitura",
       description: "Ler um livro antes de dormir",
       emoji: "📚",
-      color: "#8b5cf6",
+      color: "#ec4899",
       counter: { label: "Páginas", valueNumber: 20, unit: "pag" },
-      category: { name: "Educação", emoji: "📖", color: "#8b5cf6" },
-      metrics: [{ emoji: "📖", field: "Progresso", unit: "NUMERIC", fieldType: "NUMERIC" }]
+      category: { name: "Educação", emoji: "📖", color: "#ec4899" },
+      metrics: [
+        { emoji: "📖", field: "Progresso", unit: "NUMERIC", fieldType: "NUMERIC" }
+      ]
     }
   ];
 
@@ -55,7 +102,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (!targetUser) {
-      return NextResponse.json({ error: "Usuário destino não encontrado" }, { status: 404 });
+      return NextResponse.json({
+        error: "Usuário destino não encontrado"
+      }, { status: 404 });
     }
 
     const results = await Promise.all(
