@@ -69,8 +69,11 @@ export async function POST(request: NextRequest) {
       limit,
       emoji,
       unit,
-      taskMetric
+      taskId,
+      metrics
     } = parsedBody.data
+
+    console.log(metrics, "metrics");
     
     const { userId } = await auth()
     
@@ -108,9 +111,10 @@ export async function POST(request: NextRequest) {
 
       // 2️⃣ cria TaskMetric desvinculadas de Task (opcional)
       const createdMetrics = await Promise.all(
-        (taskMetric || []).map((metric) =>
+        (metrics || []).map((metric) =>
           tx.taskMetric.create({
             data: {
+              taskId: "",
               emoji: metric.emoji,
               field: metric.field,
               unit: metric.unit,

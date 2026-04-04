@@ -5,6 +5,7 @@ export const createCounterSchema = z.object({
   label: 
     z.string()
     .min(2, "O valor minimo de caracateres permitido é igual a 2"),
+  taskId: z.string(),
   emoji:
     z.string()
     .optional(),
@@ -22,7 +23,7 @@ export const createCounterSchema = z.object({
   unit: 
     z.string()
     .optional(),
-  taskMetric: 
+  metrics: 
     z.array(
       CreateMetricSchema
     )

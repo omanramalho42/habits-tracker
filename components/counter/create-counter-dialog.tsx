@@ -43,7 +43,7 @@ interface CreateCounterDailogProps {
 }
 
 const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
-  trigger
+  trigger,
 }) => {
   const [open, setOpen] = useState<boolean>(false)
   const form = useForm<CreateCounterSchemaType>({
@@ -54,7 +54,7 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
       unit: "",
       index: "",
       limit: 1,
-      taskMetric: []
+      metrics: []
     }
   })
 
@@ -235,9 +235,9 @@ const CreateCounterDialog: React.FC<CreateCounterDailogProps> = ({
               />
             </div>
 
-            <CreateTaskMetrics
+            {/* <CreateTaskMetrics
               control={control}
-            />
+            /> */}
           </form>
         </Form>
         

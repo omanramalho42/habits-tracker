@@ -2,12 +2,10 @@ import { HabitStatus, MetricType } from "@prisma/client"
 import { z } from "zod"
 
 export const CreateMetricSchema = z.object({
-  id: z.string().optional(),
-  step: z.number().optional(),
+  step: z.string().optional(),
   limit: 
     z.coerce.string()
     .min(1, "O valor minimo é 1"),
-  taskId: z.string(),
   isComplete: z.boolean().default(false).optional(),
   field: 
     z.string()

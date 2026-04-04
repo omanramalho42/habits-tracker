@@ -81,12 +81,12 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       
       if(response.data.completion) {
         const { completion } = response.data
-        console.log({ completion })
-        console.log(completion, "completion");
+        // console.log({ completion })
+        // console.log(completion, "completion");
         // console.log(completion.counter, completion.habit.limitCounter)
-        if(completion?.counter !== completion?.habit?.limitCounter) {
-          window.alert("show modal dialog")
-        }
+        // if(completion?.counter !== completion?.habit?.limitCounter) {
+        //   window.alert("show modal dialog")
+        // }
       }
 
       console.log(response.data, "response!")

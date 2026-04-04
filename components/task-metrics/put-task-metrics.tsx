@@ -139,7 +139,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
 
       await queryClient.invalidateQueries({
         queryKey: [
-          "tasks"
+          "tasks", selectedDate
         ]
       })
       await queryClient.invalidateQueries({

@@ -38,7 +38,7 @@ interface CounterPikcerProps {
 }
 
 const CounterPicker:React.FC<CounterPikcerProps> = ({
-  control
+  control,
 }) => {
   const [open, setOpen] = useState<boolean>(false)
   
@@ -46,7 +46,9 @@ const CounterPicker:React.FC<CounterPikcerProps> = ({
     data: counters,
     isLoading,
     isFetching
-  } = useQuery<{ data: (Counter & { metrics: TaskMetric[] })[] }>({
+  } = useQuery<{ data: (Counter & {
+    metrics: TaskMetric[]
+  })[] }>({
     queryKey: ["counter"],
     queryFn: async () => {
       return await axios.get("/api/counter")

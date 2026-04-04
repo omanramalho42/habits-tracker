@@ -37,7 +37,7 @@ interface CreateTaskMetricsProps {
 const CreateTaskMetrics: React.FC<CreateTaskMetricsProps> = ({ control }) => {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "taskMetric",
+    name: "metrics",
   })
 
   return (
@@ -56,9 +56,9 @@ const CreateTaskMetrics: React.FC<CreateTaskMetricsProps> = ({ control }) => {
                 field: "",
                 value: "",
                 fieldType: "NUMERIC",
-                step: 0,
+                step: "",
                 isComplete: false,
-                limit: "1",
+                limit: "0",
                 unit: "",
                 emoji: "",
               })
@@ -95,35 +95,35 @@ const CounterItem: React.FC<CounterItemProps> = ({
 }) => {
   const type = useWatch({
     control,
-    name: `taskMetric.${index}.fieldType`,
+    name: `metrics.${index}.fieldType`,
   })
 
   // const { field: label, fieldState: { error: labelError } } = useController({
   //   control,
-  //   name: `taskMetric.${index}.label`,
+  //   name: `metrics.${index}.label`,
   // })
 
   // const { field: value } = useController({
   //   control,
-  //   name: `taskMetric.${index}.value`,
+  //   name: `metrics.${index}.value`,
   // })
 
   // const { field: emoji } = useController({
   //   control,
-  //   name: `taskMetric.${index}.emoji`,
+  //   name: `metrics.${index}.emoji`,
   // })
 
   // const { field: unitField } = useController({
   //   control,
-  //   name: `taskMetric.${index}.unit`,
+  //   name: `metrics.${index}.unit`,
   const { field: typeField } = useController({
     control,
-    name: `taskMetric.${index}.fieldType`,
+    name: `metrics.${index}.fieldType`,
   })
 
   const { field: unit } = useController({
     control,
-    name: `taskMetric.${index}.unit`,
+    name: `metrics.${index}.unit`,
   })
 
   return (
@@ -132,7 +132,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
       <div className="flex place-items-center-safe gap-2">
 
         <FormField
-          name={`taskMetric.${index}.emoji`}
+          name={`metrics.${index}.emoji`}
           control={control}
           render={({ field }) => {
             return (
@@ -156,7 +156,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.field`}
+          name={`metrics.${index}.field`}
           render={({ field }) => {
             return (
               <FormItem>
@@ -183,7 +183,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
         />
         <FormField
           control={control}
-          name={`taskMetric.${index}.limit`}
+          name={`metrics.${index}.limit`}
           render={({ field }) => {
             return (
               <FormItem>

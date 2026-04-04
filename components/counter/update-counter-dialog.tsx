@@ -68,7 +68,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
       unit: counter.unit || "",
       limit: counter.limit || 1,
       taskId: taskId,
-      taskMetric: counter?.taskMetric?.map((metric) => {
+      metrics: counter?.taskMetric?.map((metric) => {
         return {
           emoji: metric.emoji || "",
           field: metric?.field || "",
@@ -272,6 +272,9 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
               role='button'
               variant="outline"
               disabled={false}
+              onClick={() => {
+                reset()
+              }}
             >
               <p className='text-sm text-destructive tracking-tighter'>
                 Cancelar

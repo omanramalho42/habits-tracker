@@ -69,10 +69,16 @@ export async function PATCH(
     const { label, limit, emoji, unit, metrics, taskId } = parsedBody.data;
 
     const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!userId) return NextResponse.json({
+      error: "Unauthorized"
+    }, { status: 401 });
 
-    const userDb = await prisma.user.findFirst({ where: { clerkUserId: userId } });
-    if (!userDb) return NextResponse.json({ error: "user not found in db" }, { status: 401 });
+    const userDb = await prisma.user.findFirst({
+      where: { clerkUserId: userId }
+    });
+    if (!userDb) return NextResponse.json({
+      error: "user not found in db"
+    }, { status: 401 });
 
     const result = await prisma.$transaction(async (tx) => {
       // 1️⃣ Atualiza Counter
@@ -82,7 +88,9 @@ export async function PATCH(
       })
 
       // 2️⃣ Atualiza métricas
-      const existingMetrics = await tx.taskMetric.findMany({ where: { taskId } });
+      const existingMetrics = await tx.taskMetric.findMany({
+        where: { taskId }
+      });
       const toUpdate = metrics?.filter(m => m.id);
       const toCreate = metrics?.filter(m => !m.id);
       const toDelete = existingMetrics.filter(db => !metrics?.some(m => m.id === db.id));

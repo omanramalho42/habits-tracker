@@ -74,7 +74,7 @@ const UpdateTaskMetricDialog: React.FC<UpdateTaskMetricDialogProps> = ({ control
               append({
                 field: "",
                 value: "",
-                fieldType: "numeric",
+                fieldType: "NUMERIC",
                 step: "",
                 isComplete: false,
                 limit: "0",
