@@ -76,3 +76,77 @@ Começar agora
 </body>
 </html>
 `
+
+export const pixSuccessEmailTemplate = ({
+  name,
+  pixKey,
+  pixKeyType,
+}: {
+  name: string
+  pixKey: string
+  pixKeyType: string
+}) => {
+  return `
+  <div style="
+    background: #0b0f1a;
+    padding: 40px;
+    font-family: Arial, sans-serif;
+    color: #e5e7eb;
+  ">
+    <div style="
+      max-width: 600px;
+      margin: auto;
+      background: #111827;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(0,255,140,0.15);
+    ">
+      
+      <img 
+        src="cid:giftIcon" 
+        alt="Gift"
+        style="width: 120px; margin-bottom: 20px;"
+      />
+
+      <h1 style="
+        color: #00ff9c;
+        font-size: 24px;
+        margin-bottom: 16px;
+      ">
+        PIX cadastrado com sucesso 🎉
+      </h1>
+
+      <p style="margin-bottom: 24px;">
+        Olá <strong>${name}</strong>, sua chave PIX foi registrada com sucesso no sistema.
+      </p>
+
+      <div style="
+        background: #0b1220;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(0,255,140,0.2);
+      ">
+        <p><strong>Tipo:</strong> ${pixKeyType}</p>
+        <p><strong>Chave:</strong> ${pixKey}</p>
+      </div>
+
+      <p style="
+        font-size: 14px;
+        color: #9ca3af;
+      ">
+        Agora você já pode receber pagamentos diretamente pelo app 🚀
+      </p>
+
+      <div style="
+        margin-top: 30px;
+        font-size: 12px;
+        color: #6b7280;
+      ">
+        Habits App • Controle total da sua vida
+      </div>
+    </div>
+  </div>
+  `
+}

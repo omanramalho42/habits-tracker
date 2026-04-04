@@ -187,7 +187,7 @@ export default function Home() {
       {/* <MoodWizard /> */}
       <main className="min-h-screen">
         <div className="flex flex-col space-y-2 max-w-5xl mx-auto px-4 py-1">
-
+          
           {/* HEADER + ACTIONS BUTTONS */}
           <HeaderSection />
           {/* CURRENT SELECTION DATE */}

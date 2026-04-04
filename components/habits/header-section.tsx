@@ -23,6 +23,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 import type { UserSettings } from '@prisma/client'
+import CreatePixKeyDialog from '../modals/create-pix-key-dialog'
 
 const HeaderSection:React.FC = () => {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -58,6 +59,7 @@ const HeaderSection:React.FC = () => {
             Olá, {userSettings?.name || user?.fullName} 👋
           </h1>
         </div>
+        <CreatePixKeyDialog />
         <p className="text-muted-foreground text-base">
           {today}
         </p>

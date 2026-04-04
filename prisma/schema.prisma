@@ -49,8 +49,12 @@ enum THEME {
 //TASK -> TASKGROUPS (CATEGORIES)
 //ROUTINES -> HABITS & TASKS
 //ROUTINE -> GOAL
-
-
+enum PixKeyType {
+  CPF
+  EMAIL
+  PHONE
+  RANDOM
+}
 model UserSettings {
   userId String @id @map("user_id")
 
@@ -62,9 +66,12 @@ model UserSettings {
   emailNotifications   Boolean? @default(false)  @map("email_notifications")
   smsNotifications     Boolean? @default(false) @map("sms_notifications")
 
-  name      String?  @db.VarChar(100)
-  email     String? @map("email")
-  phone     String? @map("phone")
+// NOVOS CAMPOS
+  name       String?      @db.VarChar(100)
+  email      String?      @map("email")
+  phone      String?      @map("phone")
+  pixKey     String?      @map("pix_key") @db.VarChar(255)
+  pixKeyType PixKeyType?  @default(CPF) @map("pix_key_type")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt      @map("updated_at")

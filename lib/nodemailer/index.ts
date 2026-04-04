@@ -1,7 +1,8 @@
 import nodemailer from "nodemailer"
 
-import { welcomeEmailTemplate } from "./template"
+import { welcomeEmailTemplate, pixSuccessEmailTemplate } from "./template"
 import { WelcomeEmailData } from "../types"
+import path from "path"
 
 export const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
@@ -54,4 +55,38 @@ export async function sendDailyHabitsEmail({
       <p>Pequenos passos hoje constroem grandes resultados 🚀</p>
     `,
   })
+}
+
+export const sendPixSuccessEmail = async ({
+  email,
+  name,
+  pixKey,
+  pixKeyType,
+}: {
+  email: string
+  name: string
+  pixKey: string
+  pixKeyType: string
+}) => {
+  const html = pixSuccessEmailTemplate({
+    name,
+    pixKey,
+    pixKeyType,
+  })
+
+  await transporter.sendMail({
+    from: "contato@habits.app.br",
+    to: email,
+    subject: "🎉 PIX cadastrado com sucesso",
+    html,
+    attachments: [
+      {
+        filename: "gift-icon.png",
+        path: path.join(process.cwd(), "public/gift-icon.png"),
+        cid: "giftIcon", // mesmo usado no template
+      },
+    ],
+  })
+
+  console.log("PIX email enviado com sucesso")
 }

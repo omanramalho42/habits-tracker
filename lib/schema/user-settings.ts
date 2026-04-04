@@ -27,6 +27,8 @@ export const updateUserSettingSchema = z.object({
   theme: z.enum(["light", "dark"]).optional(),
   avatarUrl: z.any().optional(),
   bannerUrl: z.any().optional(),
+  pixKey: z.string().min(1, "Chave Pix é obrigatória"),
+  pixKeyType: z.enum(["CPF", "EMAIL", "PHONE", "RANDOM"]).default("CPF")
 })
 
 export type UpdateUserSettingSchemaType = z.infer<typeof updateUserSettingSchema>

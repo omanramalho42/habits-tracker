@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
 import { updateUserSettingSchema } from "@/lib/schema/user-settings"
+import { sendPixSuccessEmail } from "@/lib/nodemailer"
 
 export async function GET() {
   try {
@@ -56,13 +57,13 @@ export async function PATCH(request: Request) {
       }, { status: 401 })
     }
 
-    const user = await prisma.user.findFirst({
+    const userDb = await prisma.user.findFirst({
       where: {
         clerkUserId: userId
       }
     })
 
-    if(!user) {
+    if(!userDb) {
       return NextResponse.json({
         error: "Error find user on db"
       }, { status: 400 })
@@ -76,57 +77,47 @@ export async function PATCH(request: Request) {
       name,
       email,
       phone,
-      avatarUrl,
-      bannerUrl,
-      theme,
-      emailNotifications,
-      smsNotifications,
-      allow_notifications,
-      isTravelling
+      pixKey,
+      pixKeyType,
     } = parsedBody.data
 
     // console.log(parsedBody.data, "data!")
 
     //CLOUDINARY PARA PROCESSAR IMAGEM AVATAR
-
     //CLOUDINARY PARA PROCESSAR IMAGEM DE BANNER
-
-    const existUserSettings = await prisma.userSettings.findUnique({
+    const settings = await prisma.userSettings.upsert({
       where: {
-        userId: user.id
-      }
+        userId: userDb.id,
+      },
+      update: {
+        name,
+        email,
+        phone,
+        pixKey,
+        pixKeyType,
+      },
+      create: {
+        userId: userDb.id,
+        name,
+        email,
+        phone,
+        pixKey,
+        pixKeyType,
+      },
     })
 
-    if(!existUserSettings) {
-      const updated = await prisma.userSettings.create({
-        data: {
-          phone,
-          email: email,
-          notificationsEnabled: allow_notifications,
-          emailNotifications,
-          smsNotifications,
-          userId: user.id,
-        }
+    // ✅ Enviar email SOMENTE se tiver PIX
+    if (email && pixKey) {
+      await sendPixSuccessEmail({
+        email,
+        name: name || "Usuário",
+        pixKey,
+        pixKeyType,
       })
-
-      return NextResponse.json(updated)
-    } else {
-      const updated = await prisma.userSettings.update({
-        where: {
-          userId: existUserSettings.userId
-        },
-        data: {
-          phone,
-          email,
-          notificationsEnabled: allow_notifications,
-          emailNotifications,
-          smsNotifications,
-        }
-      })
-
-      // console.log(updated, "updated user settings")
-      return NextResponse.json(updated)
     }
+
+
+    NextResponse.json(settings)
   } catch (error) {
     if (error instanceof Error) {
       console.log("error", error.message);
