@@ -7,9 +7,7 @@ import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 
 import { UpdateTaskSchema } from "@/lib/schema/task"
-import { getTodayString } from "@/lib/habit-utils"
 import { uploadToCloudinary } from "../route"
-import { log } from "@/lib/utils"
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -245,6 +243,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 }
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -278,8 +277,8 @@ export async function PUT(
           completedDate: date
         }
       }
-    });
-
+    })
+    console.log(existingCompletion, "exist completion ⚠️")
     // 2. Executa o upsert com a lógica de inversão
     const completion = await prisma.taskCompletion.upsert({
       where: {
@@ -292,7 +291,10 @@ export async function PUT(
       },
       update: {
         // Inverte o valor baseado no que encontramos anteriormente
-        isCompleted: existingCompletion ? !existingCompletion.isCompleted : true,
+        isCompleted:
+          existingCompletion 
+          ? !existingCompletion.isCompleted 
+          : true,
         updatedAt: new Date(),
       },
       include: {
@@ -304,7 +306,7 @@ export async function PUT(
         }
       },
     });
-
+    console.log(completion ,"completion after updated ⏳");
     // const counter = completion.task.counter;
     // if (!counter) throw new Error("Counter not found")
 

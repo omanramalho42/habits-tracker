@@ -77,11 +77,15 @@ export async function GET(request: Request) {
             task: {
               include: {
                 completions: {
+                  include: {
+                    counterStep: true,
+                  },
                   where: {
-                    completedDate:
-                      queryParams.success 
+                    completedDate: {
+                      gte: queryParams.success 
                         ? new Date(queryParams.data) 
                         : new Date()
+                    }
                   }
                 }
               }

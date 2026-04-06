@@ -80,8 +80,8 @@ const ActiveTaskScheduleCard = ({ schedule, selectedDate }: ActiveTaskCardProps)
       await queryClient.invalidateQueries({
         queryKey: ["routines"],
       })
-
-      if(values.completed) {
+      console.log(values, "🦇")
+      if(values.isCompleted) {
         confetti({
           particleCount: 100,
           spread: 70,

@@ -53,27 +53,30 @@ import type {
   TaskSchedule,
   Categories,
   Counter,
+  CounterStep,
   // Goals
 } from "@prisma/client"
 
 interface RoutineCardProps {
   routine: (Routine & {
-      habitSchedules?: (HabitSchedule & {
-      habit: Habit & {
-        completions: HabitCompletion[]
-        categories: Categories []
-        // goals:      Goals[]
-      }
-      })[];
-      taskSchedules?: (TaskSchedule & {
-        task: Task & {
-          completions: (TaskCompletion & {
-            counter: Counter
-          })[]
-          categories: Categories []
-        }
+    habitSchedules?: (HabitSchedule & {
+    habit: Habit & {
+      completions: (HabitCompletion & {
+        counterStep?: CounterStep[]
       })[]
-    })
+      categories: Categories []
+      // goals:      Goals[]
+    }
+    })[];
+    taskSchedules?: (TaskSchedule & {
+      task: Task & {
+        completions: (TaskCompletion & {
+          counterStep?: CounterStep[]
+        })[]
+        categories: Categories []
+      }
+    })[]
+  })
   selectedDate: string
 }
 
@@ -176,6 +179,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
   const filteredTasks = useMemo(() => {
     if (!routine.taskSchedules) return []
+
+    console.log(routine.taskSchedules, "task schedules ⏳");
 
     let data = routine.taskSchedules.filter((schedule) => {
       const task = schedule.task
@@ -305,8 +310,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       await queryClient.invalidateQueries({
         queryKey: ["routines"],
       })
-
-      if(values.completed) {
+      if(values.isCompleted) {
+        console.log(values, 'values')
         confetti({
           particleCount: 100,
           spread: 70,
@@ -371,17 +376,19 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       return counter === limit
     }).length || 0
 
+  console.log(routine.taskSchedules, "task schedules")
+
   const doneTaskCount =
     routine.taskSchedules?.filter((hs: any) => {
-      const habit = hs.habit
-      if (!habit) return false
+      const task = hs.task
+      if (!task) return false
 
-      const limit = habit.limitCounter ?? 1
+      const limit = task.limitCounter ?? 1
       const counter =
-        habit.completions?.find(
+        task.completions?.find(
           (c: any) =>
             c.completedDate.slice(0, 10) === selectedDate.slice(0, 10)
-        )?.counter || 0
+        )?.stepCounter || 0
 
       return counter === limit
     }).length || 0
@@ -398,6 +405,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     !filter.values.length ||
     filter.field !== "type" ||
     filter.values.includes("task")
+
+  console.log(doneTaskCount, progressTask, showTasks, 'tasks')
     
   return (
     <Card
@@ -731,6 +740,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
               </Card>
             )
           })}
+
           {filteredHabits.length === 0 && (
             <div className="text-center text-xs text-muted-foreground py-4">
               <p className="text-sm tracking-tighter">
@@ -759,25 +769,44 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
           </p>
 
           <div className="flex flex-col gap-3 max-h-40 overflow-y-auto scroll-container">
-            {filteredTasks?.map((schedule) => {
-              const task = schedule.task
-              if (!task) return null
-              const counter =
-                task.completions?.find(
-                  (c: any) =>
-                    c.completedDate.slice(0, 10) ===
-                    selectedDate.slice(0, 10)
-                )?.counter.valueNumber || 0
-              const limit = task.limitCounter ?? 1
-              const isCompleted =
-                task.completions?.find(
-                  (c: any) =>
-                    c.completedDate.slice(0, 10) ===
-                    selectedDate.slice(0, 10)
-                )?.isCompleted || false
+          {filteredTasks?.map((schedule) => {
+            const task = schedule.task
+            if (!task) return null
 
-              const progress = limit > 0 ? counter / limit : 0
-              const isDone = counter === limit || isCompleted
+            const selectedDateStr = selectedDate.slice(0, 10)
+            
+            // 🔥 pega completion do dia
+            const completion = task.completions?.find(
+              (c) => new Date(c.completedDate)?.
+              toISOString()
+              .slice(0, 10) === selectedDateStr
+            )
+            console.log(selectedDateStr, "selected date str")
+            console.log({ completion }, "COMLETION DAY")
+            // 🔥 pega o CounterStep do dia
+            const counterStep = completion?.counterStep?.find(
+              (step) =>
+                step.date.toISOString().slice(0, 10) === selectedDateStr
+            )
+
+            // 🔥 valores reais agora
+            const current = counterStep?.currentStep ?? 0
+            const limit = counterStep?.limit ?? task.limitCounter ?? 1
+
+            const isCompleted = completion?.isCompleted ?? false
+
+            // 🔥 lógica correta
+            const isDone = isCompleted || current >= limit
+
+            const progress = limit > 0 ? (current / limit) * 100 : 0
+
+            console.log({
+              current,
+              limit,
+              isCompleted,
+              isDone,
+              progress,
+            }, "🦇!")
               return (
                 <Card
                   key={task.id}
@@ -785,16 +814,16 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                   cn(
                     "relative flex h-full flex-row items-center justify-between p-3 rounded-xl overflow-hidden transition-all duration-300",
                     // ATIVO
-                    isDone &&
+                    completion?.isCompleted &&
                       `
-                      bg-transparent
-                      rounded-sm
-                      border-green-500/30
-                      shadow-[0_0px_7px_rgba(34,197,94,0.25)]
-                      bg-[url('/card-active-bg.png')]
-                      bg-size-[110%]
-                      bg-center
-                      bg-no-repeat
+                        bg-transparent
+                        rounded-sm
+                        border-green-500/30
+                        shadow-[0_0px_7px_rgba(34,197,94,0.25)]
+                        bg-[url('/card-active-bg.png')]
+                        bg-size-[110%]
+                        bg-center
+                        bg-no-repeat
                       `
                   )
                 }
@@ -908,16 +937,16 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                         className={cn(
                           "relative z-10 rounded-full w-8 h-8 flex items-center justify-center",
                           
-                          isDone && "bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.8)]",
-                          isDone && "animate-pulse",
-                          !isDone && "bg-white/5"
+                          completion?.isCompleted && "bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.8)]",
+                          completion?.isCompleted && "animate-pulse",
+                          !completion?.isCompleted && "bg-white/5"
                         )}
                       >
-                        {isDone ? (
+                        {completion?.isCompleted ? (
                           <Check className="w-4 h-4" />
                         ) : (
                           <span className="text-[10px]">
-                            {counter}
+                            {counterStep?.currentStep}
                           </span>
                         )}
                       </Button>
