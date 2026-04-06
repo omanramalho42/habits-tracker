@@ -769,9 +769,15 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                     selectedDate.slice(0, 10)
                 )?.counter.valueNumber || 0
               const limit = task.limitCounter ?? 1
+              const isCompleted =
+                task.completions?.find(
+                  (c: any) =>
+                    c.completedDate.slice(0, 10) ===
+                    selectedDate.slice(0, 10)
+                )?.isCompleted || false
 
               const progress = limit > 0 ? counter / limit : 0
-              const isDone = counter === limit
+              const isDone = counter === limit || isCompleted
               return (
                 <Card
                   key={task.id}

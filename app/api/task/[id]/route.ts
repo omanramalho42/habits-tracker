@@ -273,7 +273,10 @@ export async function PUT(
     // 1. Tenta encontrar a conclusão existente
     const existingCompletion = await prisma.taskCompletion.findUnique({
       where: {
-        taskId_completedDate: { taskId, completedDate: date }
+        taskId_completedDate: {
+          taskId,
+          completedDate: date
+        }
       }
     });
 
@@ -295,7 +298,9 @@ export async function PUT(
       include: {
         counterStep: true,
         task: {
-          include: { counter: true }
+          include: {
+            counter: true
+          }
         }
       },
     });
