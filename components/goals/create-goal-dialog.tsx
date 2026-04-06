@@ -43,12 +43,14 @@ import { CircleOff, PlusSquare } from 'lucide-react'
 import { handleApiError } from '@/helpers/alert-dialog'
 import { useApiError } from '@/hooks/use-alert-dialog'
 import { AlertModalDialog } from '../modals/alert-modal-dialog'
+import GoalsDialog from '@/app/wizzard/components/goals-dialog'
 
 interface CreateGoalDialogProps {
   trigger?: React.ReactNode
 }
 
 const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
+  const [showGoals, setShowGoals] = useState<boolean>(false)
   const {
     open: alertOpen,
     setOpen: setAlertOpen,
@@ -89,6 +91,7 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
       toast.success("Objetivo criado com sucesso! 🎉", {
         id: "create-goal"
       })
+      setShowGoals((prev) => !prev)
       reset({
         name: "",
         description: "",
@@ -132,6 +135,13 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
           </Button>
         )}
       </DialogTrigger>
+
+      <GoalsDialog
+        isOpen={showGoals}
+        onClose={() => {
+          setShowGoals(false)
+        }}
+      />
 
 
       <DialogContent className="max-w-[90vw]">
