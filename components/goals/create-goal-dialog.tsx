@@ -43,6 +43,7 @@ import { CircleOff, PlusSquare } from 'lucide-react'
 import { useApiError } from '@/hooks/use-alert-dialog'
 import { AlertModalDialog } from '../modals/alert-modal-dialog'
 import GoalsDialog from '@/app/wizzard/components/goals-dialog'
+import { Goals } from '@prisma/client'
 import axios from 'axios'
 
 interface CreateGoalDialogProps {
@@ -140,7 +141,7 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
           </Button>
         )}
       </DialogTrigger>
-
+      
       <GoalsDialog
         data={goalsData}
         isOpen={showGoals}

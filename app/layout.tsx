@@ -130,7 +130,7 @@ export default async function RootLayout({
                 }}
               >     
                 <TimezoneWarningBanner />
-                {children}
+                { children }
                 <CreateFeedbackDialog
                   trigger={
                     <Button
