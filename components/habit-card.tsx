@@ -249,12 +249,12 @@ export function HabitCard({
         { id: "update-habit" }
       )
     },
-    onSuccess: (_, __, toastId) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (_, __, toastId) => {
+      await queryClient.invalidateQueries({
         queryKey: ["habits"],
         exact: false,
       })
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ['routines'],
       })
       toast.success(

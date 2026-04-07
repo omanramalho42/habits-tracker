@@ -98,7 +98,9 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       await queryClient.invalidateQueries({
         queryKey: ["routines"],
       })
-
+      await queryClient.invalidateQueries({
+        queryKey: ["streak"],
+      })
       if (values.counter === habit.limitCounter) {
         confetti({
           particleCount: 100,

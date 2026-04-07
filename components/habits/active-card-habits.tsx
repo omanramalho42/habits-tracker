@@ -98,7 +98,9 @@ const ActiveCardHabits: React.FC<ActiveCardHabitsProps> = ({
       await queryClient.invalidateQueries({
         queryKey: ["routines", selectedDate],
       })
-
+      await queryClient.invalidateQueries({
+        queryKey: ["streak"],
+      })
       if(values.completed) {
         confetti({
           particleCount: 100,

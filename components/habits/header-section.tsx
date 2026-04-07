@@ -24,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 import type { UserSettings } from '@prisma/client'
 import CreatePixKeyDialog from '../modals/create-pix-key-dialog'
+import { StreakDialog } from '../streak/streak-dialog'
 
 const HeaderSection:React.FC = () => {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -44,11 +45,14 @@ const HeaderSection:React.FC = () => {
   return (
     <div className="flex flex-row-reverse py-2 items-start justify-between">
       
-      {!isLoading && (
-        <CreatePixKeyDialog
-          userSettings={userSettings}
-        />
-      )}
+      <div className='flex flex-row items-center gap-1'>
+        {!isLoading && (
+          <CreatePixKeyDialog
+            userSettings={userSettings}
+          />
+        )}
+        <StreakDialog />
+      </div>
       <div className="flex flex-col space-y-2">
 
         <div className='flex flex-row items-center gap-2'>

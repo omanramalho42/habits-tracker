@@ -35,6 +35,14 @@ import type {
   UserSettings
 } from "@prisma/client"
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import CreateRoutineDialog from "@/components/create-routine-dialog"
 import CreateTaskDialog from "@/components/tasks/create-task-dialog"
 import ActiveTaskCard from "@/components/tasks/active-task-card"
@@ -59,6 +67,7 @@ import { formatDateBR } from "@/lib/utils"
 
 import {
   AppWindowIcon,
+  Check,
   CodeIcon,
   Filter,
   Plus,
@@ -95,11 +104,20 @@ const item = {
 }
 
 export default function Home() {
-  const [filter, setFilter] = useState<string>("")
+  const [search, setSearch] = useState<string>("")
+  const [filter, setFilter] = useState<{
+    status: "all" | "completed" | "pending"
+    sortBy: "createdAt" | "updatedAt" | "name"
+    order: "asc" | "desc"
+  }>({
+    status: "all",
+    sortBy: "createdAt",
+    order: "desc"
+  })
   const { theme, setTheme } = useTheme()
   
   const handleFilterHabits = (value: string) => {
-    setFilter(value)
+    setSearch(value)
   }
 
   const today = new Date()
@@ -127,11 +145,74 @@ export default function Home() {
     staleTime: 1000 * 60,
     retry: 1,
   })
+  const applyStatus = (status: "all" | "completed" | "pending") => {
+    setFilter((prev) => ({ ...prev, status }))
+  }
 
-  const habitsFiltered: HabitWithStats[] =
-    habits.filter((habit) => 
-      habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))
+  const applySort = (sortBy: "createdAt" | "updatedAt" | "name") => {
+    setFilter((prev) => ({ ...prev, sortBy }))
+  }
 
+  const applyOrder = (order: "asc" | "desc") => {
+    setFilter((prev) => ({ ...prev, order }))
+  }
+
+  const resetFilter = () => {
+    setFilter({
+      status: "all",
+      sortBy: "createdAt",
+      order: "desc"
+    })
+  }
+  const isCompletedOnSelectedDate = (habit: HabitWithStats) => {
+    return habit.completions?.some((c) =>
+      c.completedDate.startsWith(selectedDateStr)
+    )
+  }
+  const isActive = (type: string, value: string) => {
+    return filter[type as keyof typeof filter] === value
+  }
+  const habitsFiltered = habits
+    // 🔎 busca
+    .filter((habit) =>
+      habit.name.toLowerCase().includes(search.toLowerCase())
+    )
+
+    .filter((habit) => {
+      if (filter.status === "completed") {
+        return isCompletedOnSelectedDate(habit)
+      }
+
+      if (filter.status === "pending") {
+        return !isCompletedOnSelectedDate(habit)
+      }
+
+      return true
+    })
+
+    // 📊 ordenação
+    .sort((a, b) => {
+      let comparison = 0
+
+      if (filter.sortBy === "name") {
+        comparison = a.name.localeCompare(b.name)
+      }
+
+      if (filter.sortBy === "createdAt") {
+        comparison =
+          new Date(a.createdAt).getTime() -
+          new Date(b.createdAt).getTime()
+      }
+
+      if (filter.sortBy === "updatedAt") {
+        comparison =
+          new Date(a.updatedAt ?? a.createdAt).getTime() -
+          new Date(b.updatedAt ?? b.createdAt).getTime()
+      }
+
+      return filter.order === "asc" ? comparison : -comparison
+    })
+    
   const {
     data: tasks = [],
   } = useQuery<Task[]>({
@@ -306,24 +387,119 @@ export default function Home() {
                   {habits.length > 0 && (
                     <div className="flex flex-col justify-start gap-2 items-start w-full">
                       <div className="w-full flex flex-row justify-between items-center">
-                        <p className="text-sm font-bold text-foreground">
+                        {/* <p className="text-sm font-bold text-foreground">
                           Hábitos
-                        </p>
-                        <div className="flex flex-row gap-2 items-center justify-center">
-                          <Button
-                            disabled
-                            variant="outline"
-                            type="button"
-                            size="icon-sm"
-                          >
-                            <Filter />
-                          </Button>
-                        </div>
+                        </p> */}
+                        {/* <div className="w-full flex flex-row justify-between items-center"> */}
+                          <p className="text-sm font-bold text-foreground">
+                            Hábitos
+                          </p>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                type="button"
+                                size="icon-sm"
+                                className="
+                                  border-white/10 bg-black/40 backdrop-blur-md
+                                  hover:bg-green-500/10 hover:border-green-500/30
+                                  shadow-[0_0_10px_rgba(34,197,94,0.15)]
+                                "
+                              >
+                                <Filter className="w-4 h-4 text-green-400" />
+                              </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-56 bg-black/80 backdrop-blur-xl border border-white/10"
+                            >
+
+                              {/* STATUS */}
+                              <DropdownMenuLabel>Status</DropdownMenuLabel>
+
+                              {[
+                                { label: "Todos", value: "all" },
+                                { label: "✔️ Completados", value: "completed" },
+                                { label: "⏳ Pendentes", value: "pending" }
+                              ].map((item) => (
+                                <DropdownMenuItem
+                                  key={item.value}
+                                  onClick={() => applyStatus(item.value as any)}
+                                  className="flex justify-between"
+                                >
+                                  {item.label}
+
+                                  {isActive("status", item.value) && (
+                                    <Check className="w-4 h-4 text-green-400" />
+                                  )}
+                                </DropdownMenuItem>
+                              ))}
+
+                              <DropdownMenuSeparator />
+
+                              {/* ORDENAÇÃO */}
+                              <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+
+                              {[
+                                { label: "🆕 Criação", value: "createdAt" },
+                                { label: "✏️ Edição", value: "updatedAt" },
+                                { label: "🔤 Nome", value: "name" }
+                              ].map((item) => (
+                                <DropdownMenuItem
+                                  key={item.value}
+                                  onClick={() => applySort(item.value as any)}
+                                  className="flex justify-between"
+                                >
+                                  {item.label}
+
+                                  {isActive("sortBy", item.value) && (
+                                    <Check className="w-4 h-4 text-green-400" />
+                                  )}
+                                </DropdownMenuItem>
+                              ))}
+
+                              <DropdownMenuSeparator />
+
+                              {/* ORDEM */}
+                              <DropdownMenuLabel>Ordem</DropdownMenuLabel>
+
+                              {[
+                                { label: "⬆️ Ascendente", value: "asc" },
+                                { label: "⬇️ Descendente", value: "desc" }
+                              ].map((item) => (
+                                <DropdownMenuItem
+                                  key={item.value}
+                                  onClick={() => applyOrder(item.value as any)}
+                                  className="flex justify-between"
+                                >
+                                  {item.label}
+
+                                  {isActive("order", item.value) && (
+                                    <Check className="w-4 h-4 text-green-400" />
+                                  )}
+                                </DropdownMenuItem>
+                              ))}
+
+                              <DropdownMenuSeparator />
+
+                              {/* RESET */}
+                              <DropdownMenuItem
+                                onClick={resetFilter}
+                                className="text-red-400"
+                              >
+                                Limpar filtros
+                              </DropdownMenuItem>
+
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        {/* </div> */}
                       </div>
                       <Input
                         type="text"
                         placeholder="pesquise pelo nome..."
-                        value={filter}
+                        value={search}
                         // className="bg-black"
                         style={{
                           backgroundColor: 'var(--card)'

@@ -119,6 +119,9 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       await queryClient.invalidateQueries({
         queryKey: ["routines", selectedDate],
       })
+      await queryClient.invalidateQueries({
+        queryKey: ["streak"],
+      })
       if(values.step < values.limit) {
         setOpenMetricsDialog(true)
       }
