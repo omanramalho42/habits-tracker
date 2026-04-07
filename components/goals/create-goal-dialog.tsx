@@ -40,17 +40,18 @@ import {
 import { Card } from '@/components/ui/card'
 
 import { CircleOff, PlusSquare } from 'lucide-react'
-import { handleApiError } from '@/helpers/alert-dialog'
 import { useApiError } from '@/hooks/use-alert-dialog'
 import { AlertModalDialog } from '../modals/alert-modal-dialog'
 import GoalsDialog from '@/app/wizzard/components/goals-dialog'
+import axios from 'axios'
 
 interface CreateGoalDialogProps {
   trigger?: React.ReactNode
 }
 
 const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
-  const [showGoals, setShowGoals] = useState<boolean>(false)
+  const [showGoals, setShowGoals] = useState(false)
+  const [goalsData, setGoalsData] = useState<any>()
   const {
     open: alertOpen,
     setOpen: setAlertOpen,
@@ -85,13 +86,17 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: CreateGoalSchemaType) => {
       console.log(values, "values")
-      return await CreateGoal(values)
+      return await axios.post(`/api/goals`, values)
     },
-    onSuccess: async () => {
+    onSuccess: async ({ data }) => {
       toast.success("Objetivo criado com sucesso! 🎉", {
         id: "create-goal"
       })
-      setShowGoals((prev) => !prev)
+      if(data) {
+        // console.log(data, 'data ⚠️')
+        setShowGoals(true)
+      }
+      setGoalsData(data)
       reset({
         name: "",
         description: "",
@@ -137,12 +142,12 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
       </DialogTrigger>
 
       <GoalsDialog
+        data={goalsData}
         isOpen={showGoals}
         onClose={() => {
           setShowGoals(false)
         }}
       />
-
 
       <DialogContent className="max-w-[90vw]">
         <DialogHeader>

@@ -1,10 +1,21 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
 import { X, ArrowRight, TrendingUp, Camera, Dumbbell, Briefcase } from "lucide-react"
 
 interface GoalsDialogProps {
   isOpen: boolean
   onClose: () => void
+  data: {
+    totalGoals: number
+    weeklyIncrease: number
+    goalsPreview: {
+      progress: number
+      color: string
+      icon: string
+    }[]
+    remainingCount: number
+  }
 }
 
 interface ProgressRingProps {
@@ -54,15 +65,8 @@ function ProgressRing({ progress, color, size = 56, strokeWidth = 4, icon }: Pro
   )
 }
 
-export default function GoalsDialog({ isOpen, onClose }: GoalsDialogProps) {
+export default function GoalsDialog({ isOpen, onClose, data }: GoalsDialogProps) {
   if (!isOpen) return null
-
-  const goals = [
-    { progress: 75, color: "#FBBF24", icon: <Camera className="w-5 h-5 text-[#888]" /> },
-    { progress: 50, color: "#A855F7", icon: <Dumbbell className="w-5 h-5 text-[#888]" /> },
-    { progress: 85, color: "#22C55E", icon: <Briefcase className="w-5 h-5 text-[#888]" /> },
-  ]
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -84,13 +88,22 @@ export default function GoalsDialog({ isOpen, onClose }: GoalsDialogProps) {
         {/* Header */}
         <div className="flex items-start justify-between mb-1">
           <div>
-            <div className="text-white text-5xl font-bold">21</div>
-            <div className="text-[#666] text-sm">Total goals</div>
+            <div className="text-white text-5xl font-bold">
+              {data.totalGoals}
+            </div>
+            <div className="text-[#666] text-sm">
+              Objetivos totais
+            </div>
           </div>
-          <button className="flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] text-black font-semibold text-sm px-4 py-2 rounded-xl transition-colors">
-            View all goals
+          <Button
+            variant="ghost"
+            type="button"
+            role="button"
+            className="flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] text-black font-semibold text-sm px-4 py-2 rounded-xl transition-colors"
+          >
+            objetivos
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Divider */}
@@ -101,13 +114,15 @@ export default function GoalsDialog({ isOpen, onClose }: GoalsDialogProps) {
           <div className="w-8 h-8 bg-[#1a2a1a] rounded-lg flex items-center justify-center">
             <TrendingUp className="w-4 h-4 text-green-500" />
           </div>
-          <span className="text-green-500 font-medium">+3 goals this week</span>
+          <span className="text-green-500 tracking-tighter font-medium">
+            +{data.weeklyIncrease} Objetivos nesta semana Objetivos nesta semana
+          </span>
         </div>
 
         {/* Progress rings */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {goals.map((goal, i) => (
+            {data.goalsPreview?.map((goal, i) => (
               <ProgressRing
                 key={i}
                 progress={goal.progress}
@@ -119,7 +134,9 @@ export default function GoalsDialog({ isOpen, onClose }: GoalsDialogProps) {
           
           {/* More goals badge */}
           <div className="w-12 h-12 bg-[#1a1a1a] rounded-full flex items-center justify-center border border-[#2a2a2a]">
-            <span className="text-white font-semibold text-sm">18+</span>
+            <span className="text-white font-semibold text-sm">
+              {data.remainingCount}+
+            </span>
           </div>
         </div>
       </div>

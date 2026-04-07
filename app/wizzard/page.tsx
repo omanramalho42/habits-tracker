@@ -298,7 +298,7 @@ const WizzardScreen = () => {
 
     return (
       <div className="flex flex-col bg-[#0a0a0a] items-center justify-center">
-        <div className="relative w-full px-4 py-1">
+        <div className="relative w-full max-w-5xl px-4 py-1">
           <div className="p-2">
             {/* Header Buttons */}
             <div className="flex items-center justify-between mb-8">

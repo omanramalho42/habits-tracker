@@ -60,16 +60,14 @@ export async function POST(request: NextRequest) {
 
     const parsedBody = CreateCategorieSchema.safeParse(body)
   
-    if(!parsedBody.success) {
+    if (!parsedBody.success) {
       throw new Error(parsedBody.error.message)
     }
     
     const { userId } = await auth()
     
     if (!userId) {
-      return NextResponse.json({
-        error: "Unauthorized"
-      }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     
     const userDb = await prisma.user.findFirst({
@@ -80,17 +78,14 @@ export async function POST(request: NextRequest) {
     
     if (!userDb) {
       return NextResponse.json({
-        error: "user not find on db"
+        error: "user not found"
       }, { status: 401 })
     }
 
-    const {
-      name,
-      description,
-      emoji,
-    } = parsedBody.data
-  
-    return await prisma.categories.create({
+    const { name, description, emoji } = parsedBody.data
+
+    // ✅ cria objetivo
+    await prisma.categories.create({
       data: {
         name,
         userId: userDb.id,
@@ -98,11 +93,53 @@ export async function POST(request: NextRequest) {
         emoji: emoji || "",
       }
     })
+
+    // 🔥 BUSCA DADOS ATUALIZADOS
+
+    const now = new Date()
+    const startOfWeek = new Date()
+    startOfWeek.setDate(now.getDate() - 7)
+
+    const [totalGoals, weeklyGoals, goals] = await Promise.all([
+      prisma.categories.count({
+        where: { userId: userDb.id }
+      }),
+
+      prisma.categories.count({
+        where: {
+          userId: userDb.id,
+          createdAt: {
+            gte: startOfWeek
+          }
+        }
+      }),
+
+      prisma.categories.findMany({
+        where: { userId: userDb.id },
+        take: 4, // 👈 só preview
+        orderBy: { createdAt: "desc" }
+      })
+    ])
+
+    // 🎨 Mapeia cores e ícones (pode evoluir depois)
+    const colors = ["#FBBF24", "#A855F7", "#22C55E", "#3B82F6"]
+
+    const goalsPreview = goals.map((goal, index) => ({
+      progress: Math.floor(Math.random() * 100), // 🔥 depois você liga com tasks reais
+      color: colors[index % colors.length],
+      icon: goal.emoji || "🎯"
+    }))
+
+    return NextResponse.json({
+      totalGoals,
+      weeklyIncrease: weeklyGoals,
+      goalsPreview,
+      remainingCount: totalGoals - goalsPreview.length
+    })
+
   } catch (error: any) {
-    // 🔥 ERRO DE DUPLICIDADE (UNIQUE)
     console.error("🔥 ERROR RAW:", error)
 
-    // ✅ 1. Forma ideal (quando instanceof funciona)
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
@@ -114,7 +151,6 @@ export async function POST(request: NextRequest) {
       }, { status: 409 })
     }
     
-    // ✅ 2. Fallback (Turbopack / edge cases)
     if (
       error?.code === "P2002" ||
       error?.message?.includes("Unique constraint failed")
@@ -126,7 +162,6 @@ export async function POST(request: NextRequest) {
       }, { status: 409 })
     }
 
-    // 🔥 fallback geral
     return NextResponse.json({
       error: "Internal server error",
       message: "Algo deu errado ao criar o objetivo."
