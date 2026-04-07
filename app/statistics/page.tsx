@@ -11,8 +11,6 @@ import {
   TabsContent
 } from '@/components/ui/tabs'
 
-import { Skeleton } from '@/components/ui/skeleton'
-
 import Footer from '@/components/habits/footer'
 
 import HabitStats from '@/components/statistics/habit-stats'

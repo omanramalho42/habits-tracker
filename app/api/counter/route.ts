@@ -72,8 +72,6 @@ export async function POST(request: NextRequest) {
       taskId,
       metrics
     } = parsedBody.data
-
-    console.log(metrics, "metrics");
     
     const { userId } = await auth()
     

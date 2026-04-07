@@ -376,8 +376,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
       return counter === limit
     }).length || 0
 
-  console.log(routine.taskSchedules, "task schedules")
-
   const doneTaskCount =
     routine.taskSchedules?.filter((hs: any) => {
       const task = hs.task
@@ -406,8 +404,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
     filter.field !== "type" ||
     filter.values.includes("task")
 
-  console.log(doneTaskCount, progressTask, showTasks, 'tasks')
-    
   return (
     <Card
       className={cn(
@@ -781,8 +777,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
               toISOString()
               .slice(0, 10) === selectedDateStr
             )
-            console.log(selectedDateStr, "selected date str")
-            console.log({ completion }, "COMLETION DAY")
             // 🔥 pega o CounterStep do dia
             const counterStep = completion?.counterStep?.find(
               (step) =>
@@ -800,13 +794,6 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
 
             const progress = limit > 0 ? (current / limit) * 100 : 0
 
-            console.log({
-              current,
-              limit,
-              isCompleted,
-              isDone,
-              progress,
-            }, "🦇!")
               return (
                 <Card
                   key={task.id}

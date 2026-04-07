@@ -124,8 +124,7 @@ export async function PATCH(request: Request) {
       })
     }
 
-    console.log(settings, "✨")
-
+    // console.log(settings, "✨")
 
     return NextResponse.json(settings)
   } catch (error) {

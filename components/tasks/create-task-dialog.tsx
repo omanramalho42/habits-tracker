@@ -611,7 +611,6 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                     setOpen
                   }}
                   className="flex-1 bg-transparent"
-                  disabled={!isSubmitting}
                 >
                   Cancel
                 </Button>

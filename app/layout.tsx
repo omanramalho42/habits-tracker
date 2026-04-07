@@ -19,7 +19,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 
 import { cn } from "@/lib/utils"
 
-import "./globals.css"
+//@ts-ignore
+import "@/app/globals.css"
 import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
 import { Button } from "@/components/ui/button"
 import { BottomNavigation } from "@/components/routines/bottom-navigation"

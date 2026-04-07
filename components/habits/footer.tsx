@@ -2,8 +2,7 @@ import React from 'react'
 
 const Footer:React.FC = () => {
   return (
-    <footer className="mt-20 border-t border-border/40 bg-linear-to-b from-background to-black/40">
-
+    <footer className="mt-15 border-t border-border/40 bg-linear-to-b from-background to-black/40">
       <div className="max-w-7xl mx-auto px-6 py-12">
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">

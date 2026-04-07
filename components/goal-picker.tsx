@@ -100,7 +100,12 @@ const GoalPicker:React.FC<GoalPickerProps> = ({ control }) => {
             </p>
           </CommandEmpty>
           <CommandGroup>
-            <CommandList>
+            <CommandList
+              className='max-h-60 overflow-y-auto scroll-smooth scroll-container'
+              onWheel={(e) => {
+                e.stopPropagation()
+              }}
+            >
               {goals && (
                 goals.map((goal) => (
                   <CommandItem

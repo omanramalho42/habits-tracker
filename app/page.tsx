@@ -189,7 +189,7 @@ export default function Home() {
       </div>
     )
   }
-  console.log(userSettings, "userSettings")
+
   return (
     <>
       {/* <MoodWizard /> */}

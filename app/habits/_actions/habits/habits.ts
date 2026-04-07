@@ -88,7 +88,7 @@ export async function CreateHabit(form: CreateHabitSchemaType) {
       },
     })
 
-    console.log(newHabit)
+    // console.log(newHabit)
 
     return newHabit
   } catch (error) {

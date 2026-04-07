@@ -139,14 +139,14 @@ export default function DayStreak({ onBack }: DayStreakProps) {
   const progress = ((currentStreak - currentMilestone) / (nextMilestone - currentMilestone)) * 100
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
-      <div className="relative w-full max-w-5xl mx-auto px-4 py-1">
+    <div className="min-h-screen mb-25 bg-[#0a0a0a] flex items-center justify-center p-4">
+      <div className="relative w-full">
         {/* Device bezel effect */}
         <div className="absolute inset-0 bg-linear-to-b from-[#1a1a1a] to-[#0a0a0a] rounded-[44px] -z-10 translate-x-1 translate-y-1" />
         
         {/* Main Card */}
-        <div className="bg-[#0c0c0c] rounded-[40px] border border-[#1c1c1c] overflow-hidden shadow-2xl">
-          <div className="px-5 pt-5 pb-6">
+        {/* <div className="bg-[#0c0c0c] rounded-[40px] border border-[#1c1c1c] overflow-hidden shadow-2xl"> */}
+          <div className="">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <button 
@@ -277,7 +277,7 @@ export default function DayStreak({ onBack }: DayStreakProps) {
               </p>
             </div>
           </div>
-        </div>
+        {/* </div> */}
       </div>
     </div>
   )

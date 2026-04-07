@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   Home,
   CalendarPlus,
+  BotIcon,
   RefreshCcw,
   User,
   Plus,
@@ -61,10 +62,10 @@ export function BottomNavigation() {
         />
 
         <NavItem
-          icon={CalendarPlus}
-          label="Rotinas"
-          href="#routines"
-          active={pathname.startsWith("#routines")}
+          icon={BotIcon}
+          label="Ia"
+          href="/wizzard"
+          active={pathname.startsWith("/wizzard")}
         />
 
         {/* CENTER BUTTON */}
@@ -84,7 +85,9 @@ export function BottomNavigation() {
 
               <DropdownMenuContent align="end" className="w-64">
                 {/* -------- NAV -------- */}
-                <DropdownMenuLabel>Navegação</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  Navegação
+                </DropdownMenuLabel>
 
                 <DropdownMenuItem asChild>
                   <Link href="/" className="flex items-center gap-2">

@@ -42,7 +42,7 @@ const HeaderSection:React.FC = () => {
   })
   
   return (
-    <div className="flex flex-row-reverse items-start justify-between">
+    <div className="flex flex-row-reverse py-2 items-start justify-between">
       
       {!isLoading && (
         <CreatePixKeyDialog
@@ -51,8 +51,8 @@ const HeaderSection:React.FC = () => {
       )}
       <div className="flex flex-col space-y-2">
 
-        <div className='flex flex-row items-baseline gap-2'>
-          <Avatar>
+        <div className='flex flex-row items-center gap-2'>
+          <Avatar className='w-12 h-12'>
             <AvatarImage
               src={userSettings?.avatarUrl || ""}
               alt="@avatar"
@@ -62,7 +62,7 @@ const HeaderSection:React.FC = () => {
             </AvatarFallback>
             {/* <AvatarBadge className="bg-green-600 dark:bg-green-800" /> */}
           </Avatar>
-          <h1 className="text-1xl font-bold text-foreground mb-2 bg-linear-to-r from-primary to-blue-600 bg-clip-text">
+          <h1 className="text-1xl font-bold text-foreground bg-linear-to-r from-primary to-blue-600 bg-clip-text">
             Olá, {userSettings?.name || user?.fullName} 👋
           </h1>
         </div>

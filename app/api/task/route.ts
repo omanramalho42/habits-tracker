@@ -85,9 +85,9 @@ export async function GET(request: Request) {
       },
     })
 
-    console.log("Selected date:", selectedDate)
-    console.log("Next day:", nextDay)
-    console.log("Tasks for the day:", tasks)
+    // console.log("Selected date:", selectedDate)
+    // console.log("Next day:", nextDay)
+    // console.log("Tasks for the day:", tasks)
 
     return NextResponse.json(tasks)
   } catch (error) {

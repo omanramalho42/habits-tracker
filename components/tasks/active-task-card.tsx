@@ -71,7 +71,6 @@ interface ActiveTaskCardProps {
 }
 
 const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
-  console.log(task , "task ❌")
   const [openMetricsDialog, setOpenMetricsDialog] =
     useState<boolean>(false)
 
@@ -82,9 +81,6 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       new Date(c.completedDate).toDateString() ===
       new Date(selectedDate || new Date()).toDateString()
   )
-  console.log(new Date(selectedDate || new Date()).toDateString(), completion?.completedDate)
-  console.log(completion, "completionxdate")
-
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     year: "numeric",
     month: "2-digit",
@@ -150,8 +146,6 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
     })
   }
 
-  console.log(task, 'task!')
- 
   return (
     <Card className="p-3 flex flex-col gap-3">
 

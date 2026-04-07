@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         completions: true,
       },
     })
-    console.log(newHabit, "new habit")
+
     return NextResponse.json(newHabit)
   } catch (error) {
     if (error instanceof Error) {

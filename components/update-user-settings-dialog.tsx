@@ -193,12 +193,10 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
 
                     <FormControl>
                       <div className="flex items-center gap-3">
-
                         {/* AVATAR */}
                         <Avatar>
                           <AvatarImage
                             src={avatarUrl}
-                            className=""
                           />
                           <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
@@ -272,49 +270,51 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
                 )}
               />
             </div>
-
-            <FormField
-              control={control}
-              name='email'
-              rules={{ required: true }}
-              render={( { field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      className='font-semibold'
-                      htmlFor='email'
-                    >
-                      Email
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id='email'
-                      type='email'
-                      placeholder='ex: johndoe@example.com'
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  {errors.email && (
-                    <span className='text-red-500 text-sm'>
-                      {errors.email.message}
-                    </span>
-                  )}
-                </FormItem>
-              )}
-            />
-
-            <React.Fragment>
-              <Label>
-                Tema
-              </Label>
-              <ThemePicker
+            
+            <div className='flex flex-row gap-2 items-center justify-between'>
+              <FormField
                 control={control}
+                name='email'
+                rules={{ required: true }}
+                render={( { field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Label
+                        className='font-semibold'
+                        htmlFor='email'
+                      >
+                        Email
+                      </Label>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id='email'
+                        type='email'
+                        placeholder='ex: johndoe@example.com'
+                        value={field.value}
+                        onChange={field.onChange}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    {errors.email && (
+                      <span className='text-red-500 text-sm'>
+                        {errors.email.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
               />
-            </React.Fragment>
+
+              <div className='flex flex-col items-start justify-center gap-2'>
+                <Label>
+                  Tema
+                </Label>
+                <ThemePicker
+                  control={control}
+                />
+              </div>
+            </div>
 
             <FormField
               control={control}

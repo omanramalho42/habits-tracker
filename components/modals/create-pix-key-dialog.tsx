@@ -43,7 +43,6 @@ interface CreatePixKeyDialogProps {
 }
 
 const CreatePixKeyDialog = ({ trigger, userSettings }: CreatePixKeyDialogProps) => {
-  console.log(userSettings, "⚙️")
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
@@ -58,17 +57,6 @@ const CreatePixKeyDialog = ({ trigger, userSettings }: CreatePixKeyDialogProps) 
   })
 
   const { reset } = form
-
-  // useEffect(() => {
-  //   if (userSettings) {
-  //     reset({
-  //       name: userSettings.name || "",
-  //       email: userSettings.email || "",
-  //       phone: userSettings.phone || "",
-  //       pixKey: userSettings.pixKey || "",
-  //     })
-  //   }
-  // }, [userSettings, reset])
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: UpdateUserSettingSchemaType) => {
@@ -117,8 +105,8 @@ const CreatePixKeyDialog = ({ trigger, userSettings }: CreatePixKeyDialogProps) 
               <Image
                 src="/gift-box.png" 
                 alt="Ícone de Presente" 
-                width={80} 
-                height={80}
+                width={100} 
+                height={100}
                 className="drop-shadow-2xl"
               />
             </div>

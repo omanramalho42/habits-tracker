@@ -283,11 +283,11 @@ export default function FriendInvite({ onBack }: FriendInviteProps) {
   )
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+    <div className="min-h-screen mb-22 bg-[#050505] flex items-center justify-center p-4">
       {/* Phone Frame */}
-      <div className="relative w-full max-w-[380px]">
+      <div className="relative w-full max-w-95">
         {/* Device bezel effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] rounded-[44px] -z-10 translate-x-1 translate-y-1" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#1a1a1a] to-[#0a0a0a] rounded-[44px] -z-10 translate-x-1 translate-y-1" />
         
         {/* Main Card */}
         <div 

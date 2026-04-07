@@ -129,7 +129,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       videoUrl
     } = parsedBody.data
 
-    console.log(parsedBody.data, "parsedBody.data")
+    // console.log(parsedBody.data, "parsedBody.data")
 
     // ✅ IMAGE
     let imageUrlUploaded: string | null = imageUrl
@@ -233,7 +233,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       },
     })
 
-    console.log(updatedTask, "updated task")
+    // console.log(updatedTask, "updated task")
 
     return NextResponse.json(updatedTask)
   } catch (error) {

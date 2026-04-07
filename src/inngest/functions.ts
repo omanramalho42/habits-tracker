@@ -34,8 +34,6 @@ export const sendSignUpEmail = inngest.createFunction(
       }
     })
 
-    console.log(response, "NOTIFICATIONS 🪄")
-
     await step.run('send-welcome-email', async () => {
       const part = response.candidates?.[0]?.content?.parts?.[0];
       const introText = (part && 'text' in part ? part.text : null) || 'Obrigado por se juntar ao Habit. Agora voce consegue gerenciar sua rotina'

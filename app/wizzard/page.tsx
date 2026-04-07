@@ -21,6 +21,17 @@ import {
 import DayStreak from './components/day-streak'
 import FriendInvite from './components/friend-invite'
 import PermissionsModal from './components/permissions-modal'
+import Footer from '@/components/habits/footer'
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+import { UserSettings } from '@prisma/client'
+import { fetchUserSettings } from '@/services/settings'
+import { useUser } from '@clerk/nextjs'
+import CreateRoutineDialog from '@/components/create-routine-dialog'
+import { CreateHabitDialog } from '@/components/create-habit-dialog'
+import CreateTaskDialog from '@/components/tasks/create-task-dialog'
+import CreateGoalDialog from '@/components/goals/create-goal-dialog'
+import CreateCategorieDialog from '@/components/categories/create-categorie-dialog'
 
 interface ActionItem {
   id: string
@@ -111,6 +122,14 @@ function SparklesIcon({ className }: { className?: string }) {
 }
 
 const WizzardScreen = () => {
+  const { user } = useUser()
+  const {
+    data: userSettings,
+  } = useQuery<UserSettings>({
+    queryKey: ["user-settings"],
+    queryFn: () => fetchUserSettings(),
+  })
+
   const [currentScreen, setCurrentScreen] = useState<"wizard" | "streak" | "invite">("wizard")
   const [showPermissions, setShowPermissions] = useState(false)
   const [isListening, setIsListening] = useState(false)
@@ -278,177 +297,244 @@ const WizzardScreen = () => {
     }
 
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
-        <div className="relative w-full max-w-5xl mx-auto px-4 py-1">
-          {/* Main Card */}
-          <div className="bg-[#0c0c0c]/90 rounded-[40px] border border-[#1c1c1c] shadow-2xl">
-            <div className="px-6 pt-6 pb-8">
-              {/* Header Buttons */}
-              <div className="flex items-center justify-between mb-8">
-                <button 
-                  className="w-11 h-11 bg-[#161616] hover:bg-[#1e1e1e] rounded-full flex items-center justify-center transition-colors border border-[#222]"
-                  aria-label="Fechar"
-                >
-                  <X className="h-5 w-5 text-[#888]" strokeWidth={2.5} />
-                </button>
-                
-                {/* Day Streak Button */}
-                <button 
-                  onClick={() => setCurrentScreen("streak")}
-                  className="flex items-center gap-2 bg-[#1a1512] hover:bg-[#241c14] border border-[#F97316]/30 rounded-full px-4 py-2 transition-colors"
-                >
-                  <Flame className="h-4 w-4 text-[#F97316]" />
-                  <span className="text-[#F97316] text-sm font-medium">95</span>
-                </button>
-                {/* Friend Invite Button */}
-                <button 
-                  onClick={() => setCurrentScreen("invite")}
-                  className="flex items-center gap-2 bg-[#1a1520] hover:bg-[#241a2a] border border-purple-500/30 rounded-full px-4 py-2 transition-colors"
-                >
-                  <Users className="h-4 w-4 text-purple-400" />
-                </button>
+      <div className="flex flex-col bg-[#0a0a0a] items-center justify-center">
+        <div className="relative w-full px-4 py-1">
+          <div className="p-2">
+            {/* Header Buttons */}
+            <div className="flex items-center justify-between mb-8">
+              {/* Day Streak Button */}
+              <button 
+                onClick={() => setCurrentScreen("streak")}
+                className="flex items-center gap-2 bg-[#1a1512] hover:bg-[#241c14] border border-[#F97316]/30 rounded-full px-4 py-2 transition-colors"
+              >
+                <Flame className="h-4 w-4 text-[#F97316]" />
+                <span className="text-[#F97316] text-sm font-medium">95</span>
+              </button>
+              {/* Friend Invite Button */}
+              <button 
+                onClick={() => setCurrentScreen("invite")}
+                className="flex items-center gap-2 bg-[#1a1520] hover:bg-[#241a2a] border border-purple-500/30 rounded-full px-4 py-2 transition-colors"
+              >
+                <Users className="h-4 w-4 text-purple-400" />
+              </button>
 
-                {/* Settings/Permissions Button */}
-                <button 
-                  onClick={() => setShowPermissions(true)}
-                  className="w-11 h-11 bg-[#161616] hover:bg-[#1e1e1e] rounded-full flex items-center justify-center transition-colors border border-[#222]"
-                  aria-label="Configurações"
-                >
-                  <Settings className="h-4 w-4 text-[#888]" />
-                </button>
-              </div>
+              {/* Settings/Permissions Button */}
+              <button 
+                onClick={() => setShowPermissions(true)}
+                className="w-11 h-11 bg-[#161616] hover:bg-[#1e1e1e] rounded-full flex items-center justify-center transition-colors border border-[#222]"
+                aria-label="Configurações"
+              >
+                <Settings className="h-4 w-4 text-[#888]" />
+              </button>
+            </div>
 
-              {/* AI Icon */}
-              <div className="mb-6">
+            {/* AI Icon */}
+            <div className='flex flex-col gap-2'>
+              <div className="mb-2">
                 <div className="w-13 h-13 bg-[#131318] rounded-2xl flex items-center justify-center border border-[#1e1e24]">
                   <SparklesIcon className="h-6 w-6 text-[#38bdf8]" />
                 </div>
               </div>
 
               {/* Greeting */}
-              <div className="mb-8">
-                <h1 className="text-[28px] font-semibold text-white leading-[1.2] tracking-[-0.02em]">
-                  Olá Oman, pronto para
+              <div className="mb-4">
+                <h1 className="text-2xl tracking-tighter font-semibold text-white leading-[1.2]">
+                  Olá {userSettings?.name || user?.fullName}, pronto para
                   <br />
                   planejar <span className="text-[#38bdf8]">seu dia</span>?
                 </h1>
               </div>
+            </div>
 
-              {/* AI Response */}
-              {aiResponse && (
-                <div className="mb-4 p-4 bg-[#111115] rounded-2xl border border-[#1e1e24] animate-in fade-in slide-in-from-top-2 duration-300">
-                  <p className="text-[#38bdf8] text-sm font-medium mb-1">Assistente IA</p>
-                  <p className="text-[#ccc] text-[14px] leading-relaxed">{aiResponse.response}</p>
-                </div>
-              )}
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-4 p-3 bg-red-500/10 rounded-xl border border-red-500/20">
-                  <p className="text-red-400 text-[13px]">{error}</p>
-                </div>
-              )}
-
-              {/* Actions Label */}
-              <p className="text-[#666] text-[13px] font-medium mb-4 tracking-wide">
-                O que você pode fazer
-              </p>
-
-              {/* Action Cards */}
-              <div className="space-y-2.5 mb-6">
-                {actions.map((action) => (
-                  <button
-                    key={action.id}
-                    id={`action-${action.id}`}
-                    onClick={() => handleAction(action.id)}
-                    className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 border border-[#1a1a1c] hover:border-[#252528] group"
-                  >
-                    <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center shrink-0 group-hover:bg-[#1e1e22] transition-colors">
-                      <span className="text-[#888]">{action.icon}</span>
-                    </div>
-                    <div className="text-left min-w-0">
-                      <h3 className="text-white font-medium text-[15px] leading-tight mb-0.5">
-                        {action.title}
-                      </h3>
-                      <p className="text-[#555] text-[13px] leading-tight truncate">
-                        {action.description}
-                      </p>
-                    </div>
-                  </button>
-                ))}
+            {/* AI Response */}
+            {aiResponse && (
+              <div className="mb-4 p-4 bg-[#111115] rounded-2xl border border-[#1e1e24] animate-in fade-in slide-in-from-top-2 duration-300">
+                <p className="text-[#38bdf8] text-sm font-medium mb-1">Assistente IA</p>
+                <p className="text-[#ccc] text-[14px] leading-relaxed">{aiResponse.response}</p>
               </div>
+            )}
 
-              {/* Voice Assistant Input */}
-              <form onSubmit={handleSubmit} className="relative mt-4">
-                {/* Voice Assistant Active State */}
-                {(isListening || isProcessing) && (
-                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-[#111115] px-5 py-3 rounded-2xl border border-[#38bdf8]/20 shadow-lg shadow-[#38bdf8]/5 z-10 min-w-[200px]">
-                    {isProcessing ? (
-                      <div className="flex items-center gap-3 justify-center">
-                        <Loader2 className="h-5 w-5 text-[#38bdf8] animate-spin" />
-                        <span className="text-[#38bdf8] text-sm font-medium">Processando...</span>
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                <p className="text-red-400 text-[13px]">{error}</p>
+              </div>
+            )}
+
+            {/* Actions Label */}
+            <p className="text-[#666] text-[13px] font-medium mb-4 tracking-wide">
+              O que você pode fazer
+            </p>
+
+            {/* Action Cards */}
+            <div className="space-y-2.5 mb-6">
+
+              {/* ROUTINE */}
+              <CreateRoutineDialog
+                trigger={
+                  <div
+                    id="action-routine"
+                    className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                  >
+                    <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                      {actions[0].icon}
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-white text-[15px]">{actions[0].title}</h3>
+                      <p className="text-[#555] text-[13px]">{actions[0].description}</p>
+                    </div>
+                  </div>
+                }
+              />
+
+              {/* HABIT */}
+              <CreateHabitDialog
+                trigger={
+                  <div
+                    id="action-habit"
+                    className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                  >
+                    <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                      {actions[1].icon}
+                    </div>
+                    <div>
+                      <h3 className="text-white text-[15px]">{actions[1].title}</h3>
+                      <p className="text-[#555] text-[13px]">{actions[1].description}</p>
+                    </div>
+                  </div>
+                }
+              />
+
+              {/* TASK */}
+              <CreateTaskDialog
+                trigger={
+                  <div
+                    id="action-task"
+                    className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                  >
+                    <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                      {actions[2].icon}
+                    </div>
+                    <div>
+                      <h3 className="text-white text-[15px]">{actions[2].title}</h3>
+                      <p className="text-[#555] text-[13px]">{actions[2].description}</p>
+                    </div>
+                  </div>
+                }
+              />
+
+              {/* GOAL */}
+              <CreateGoalDialog
+                trigger={
+                  <div
+                    id="action-goal"
+                    className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                  >
+                    <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                      {actions[3].icon}
+                    </div>
+                    <div>
+                      <h3 className="text-white text-[15px]">{actions[3].title}</h3>
+                      <p className="text-[#555] text-[13px]">{actions[3].description}</p>
+                    </div>
+                  </div>
+                }
+              />
+
+              {/* CATEGORY */}
+              <CreateCategorieDialog
+                trigger={
+                  <div
+                    id="action-category"
+                    className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                  >
+                    <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                      {actions[4].icon}
+                    </div>
+                    <div>
+                      <h3 className="text-white text-[15px]">{actions[4].title}</h3>
+                      <p className="text-[#555] text-[13px]">{actions[4].description}</p>
+                    </div>
+                  </div>
+                }
+              />
+
+            </div>
+
+            {/* Voice Assistant Input */}
+            <form onSubmit={handleSubmit} className="relative mt-4">
+              {/* Voice Assistant Active State */}
+              {(isListening || isProcessing) && (
+                <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-[#111115] px-5 py-3 rounded-2xl border border-[#38bdf8]/20 shadow-lg shadow-[#38bdf8]/5 z-10 min-w-[200px]">
+                  {isProcessing ? (
+                    <div className="flex items-center gap-3 justify-center">
+                      <Loader2 className="h-5 w-5 text-[#38bdf8] animate-spin" />
+                      <span className="text-[#38bdf8] text-sm font-medium">
+                        Processando...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex items-end gap-0.75 h-6">
+                        <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '12px', animationDelay: '0s' }} />
+                        <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '20px', animationDelay: '0.1s' }} />
+                        <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '10px', animationDelay: '0.2s' }} />
+                        <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '24px', animationDelay: '0.3s' }} />
+                        <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '14px', animationDelay: '0.4s' }} />
                       </div>
+                      {transcript ? (
+                        <p className="text-white text-sm text-center max-w-45 truncate">{transcript}</p>
+                      ) : (
+                        <span className="text-[#38bdf8] text-sm font-medium">Ouvindo...</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className={`flex items-center bg-[#111113] rounded-full border overflow-hidden h-13 transition-colors ${isListening ? "border-[#38bdf8]/50" : "border-[#1a1a1c]"}`}>
+                <button 
+                  type="button"
+                  role="button"
+                  className="pl-4 pr-2 text-[#555] hover:text-[#888] transition-colors shrink-0"
+                  aria-label="Adicionar"
+                >
+                  <Plus className="h-5 w-5" strokeWidth={2} />
+                </button>
+                <Input
+                  type="text"
+                  placeholder="Pergunte qualquer coisa"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="flex-1 bg-transparent text-white placeholder-[#444] py-3 px-2 outline-none text-[14px] min-w-0"
+                />
+                <button
+                  type="button"
+                  onClick={toggleVoiceAssistant}
+                  disabled={isProcessing}
+                  className={`pr-4 pl-2 transition-all duration-200 shrink-0 disabled:opacity-50 ${
+                    isListening 
+                      ? "text-[#38bdf8]" 
+                      : "text-[#555] hover:text-[#888]"
+                  }`}
+                  aria-label={isListening ? "Parar de ouvir" : "Ativar voz"}
+                >
+                  <div className="relative">
+                    {isListening ? (
+                      <MicOff className="h-5 w-5" strokeWidth={2} />
                     ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="flex items-end gap-0.75 h-6">
-                          <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '12px', animationDelay: '0s' }} />
-                          <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '20px', animationDelay: '0.1s' }} />
-                          <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '10px', animationDelay: '0.2s' }} />
-                          <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '24px', animationDelay: '0.3s' }} />
-                          <span className="w-0.75 bg-[#38bdf8] rounded-full animate-[soundbar_0.5s_ease-in-out_infinite]" style={{ height: '14px', animationDelay: '0.4s' }} />
-                        </div>
-                        {transcript ? (
-                          <p className="text-white text-sm text-center max-w-45 truncate">{transcript}</p>
-                        ) : (
-                          <span className="text-[#38bdf8] text-sm font-medium">Ouvindo...</span>
-                        )}
-                      </div>
+                      <Mic className="h-5 w-5" strokeWidth={2} />
+                    )}
+                    {isListening && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#38bdf8] rounded-full animate-pulse" />
                     )}
                   </div>
-                )}
-
-                <div className={`flex items-center bg-[#111113] rounded-full border overflow-hidden h-13 transition-colors ${isListening ? "border-[#38bdf8]/50" : "border-[#1a1a1c]"}`}>
-                  <button 
-                    type="button"
-                    role="button"
-                    className="pl-4 pr-2 text-[#555] hover:text-[#888] transition-colors shrink-0"
-                    aria-label="Adicionar"
-                  >
-                    <Plus className="h-5 w-5" strokeWidth={2} />
-                  </button>
-                  <Input
-                    type="text"
-                    placeholder="Pergunte qualquer coisa"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    className="flex-1 bg-transparent text-white placeholder-[#444] py-3 px-2 outline-none text-[14px] min-w-0"
-                  />
-                  <button
-                    type="button"
-                    onClick={toggleVoiceAssistant}
-                    disabled={isProcessing}
-                    className={`pr-4 pl-2 transition-all duration-200 shrink-0 disabled:opacity-50 ${
-                      isListening 
-                        ? "text-[#38bdf8]" 
-                        : "text-[#555] hover:text-[#888]"
-                    }`}
-                    aria-label={isListening ? "Parar de ouvir" : "Ativar voz"}
-                  >
-                    <div className="relative">
-                      {isListening ? (
-                        <MicOff className="h-5 w-5" strokeWidth={2} />
-                      ) : (
-                        <Mic className="h-5 w-5" strokeWidth={2} />
-                      )}
-                      {isListening && (
-                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#38bdf8] rounded-full animate-pulse" />
-                      )}
-                    </div>
-                  </button>
-                </div>
-              </form>
-            </div>
+                </button>
+              </div>
+            </form>
           </div>
+
+          <Footer />
         </div>
 
         <style jsx>{`
@@ -468,8 +554,6 @@ const WizzardScreen = () => {
           onContinue={handlePermissionsContinue}
         />
       </div>
-
-
     )
 }
 
