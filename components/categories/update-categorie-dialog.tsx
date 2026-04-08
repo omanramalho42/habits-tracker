@@ -43,6 +43,8 @@ import { CircleOff, PlusSquare } from 'lucide-react'
 import type { UpdateCategorieSchemaType } from '@/lib/schema/categorie'
 import { Categories } from '@prisma/client'
 import axios from 'axios'
+import { DescriptionAI } from '../tasks/description-ia'
+import { Textarea } from '../ui/textarea'
 
 interface UpdateCategoryDialogProps {
   trigger?: React.ReactNode
@@ -175,37 +177,40 @@ const UpdateCategorieDialog:React.FC<UpdateCategoryDialogProps> = ({ trigger, ca
                 </FormItem>
               )}
             />
-            <FormField
-              name='description'
-              disabled={isLoading}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="description"
-                      className="text-sm font-semibold"
-                    >
-                      Descrição
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="description"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder='ex: Conquistar o tão sonhado peso...'    
-                    />
-                  </FormControl>
-                  
-                  {errors && errors.description && (
-                    <span className='text-red-500 text-sm'>
-                      {errors.description.message}
-                    </span>
-                  )}
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-col gap-2 w-full mt-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description" className="text-sm font-semibold">
+                  Descrição
+                </Label>
+
+                <DescriptionAI 
+                  taskName={form.watch("name")} 
+                  onGenerated={(text) => form.setValue("description", text)} 
+                />
+              </div>
+
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        id="description"
+                        className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Detalhes sobre sua nova rotina..."
+                      />
+                    </FormControl>
+                    {errors && errors.description && (
+                      <span className='text-red-500 text-sm'>
+                        {errors.description.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* ICONE */}
             <FormField
               control={control}

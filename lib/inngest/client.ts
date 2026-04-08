@@ -6,5 +6,7 @@ export const inngest = new Inngest({
     gemini: {
       apikey: process.env.GEMINI_API_KEY!
     }
-  }
+  },
+  // Força o modo dev se não estivermos em produção
+  isDev: process.env.NODE_ENV !== "production",
 })

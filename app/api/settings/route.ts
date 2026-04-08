@@ -33,6 +33,13 @@ export async function GET() {
       await prisma.userSettings.findUnique({
         where: {
           userId: userDb.id
+        },
+        include: {
+          user: {
+            include: {
+              usage: true
+            }
+          }
         }
     })
   

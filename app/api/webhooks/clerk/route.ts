@@ -2,7 +2,7 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { inngest } from '@/src/inngest/client'
+import { inngest } from '@/lib/inngest/client'
 
 export async function POST(req: Request) {
   const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET
@@ -56,6 +56,18 @@ export async function POST(req: Request) {
   if(evt.type === 'user.created') {
     const { id, email_addresses, first_name, image_url } = evt.data
     try {
+      const user = await prisma.user.findUnique({
+        where: {
+          clerkUserId: id
+        }
+      })
+
+      if(user) {
+        return new Response(JSON.stringify(user), {
+          status: 201,
+        })
+      }
+
       const newUser = await prisma.user.create({
         data: {
           clerkUserId: id,

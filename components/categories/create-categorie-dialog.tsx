@@ -45,6 +45,8 @@ import { CreateCategorie } from '@/app/habits/_actions/categories/categories'
 import { handleApiError } from '@/helpers/alert-dialog'
 import { useApiError } from '@/hooks/use-alert-dialog'
 import { AlertModalDialog } from '../modals/alert-modal-dialog'
+import { DescriptionAI } from '../tasks/description-ia'
+import { Textarea } from '../ui/textarea'
 
 interface CreateCategorieDialogProps {
   trigger?: React.ReactNode
@@ -183,37 +185,40 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
                 </FormItem>
               )}
             />
-            <FormField
-              name='description'
-              disabled={isLoading}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <Label
-                      htmlFor="description"
-                      className="text-sm font-semibold"
-                    >
-                      Descrição
-                    </Label>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="description"
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder='Ex: atividades e rotinas sobre academia...'    
-                    />
-                  </FormControl>
-                  
-                  {errors && errors.description && (
-                    <span className='text-red-500 text-sm'>
-                      {errors.description.message}
-                    </span>
-                  )}
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-col gap-2 w-full mt-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description" className="text-sm font-semibold">
+                  Descrição
+                </Label>
+
+                <DescriptionAI 
+                  taskName={form.watch("name")} 
+                  onGenerated={(text) => form.setValue("description", text)} 
+                />
+              </div>
+
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        id="description"
+                        className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Detalhes sobre sua nova rotina..."
+                      />
+                    </FormControl>
+                    {errors && errors.description && (
+                      <span className='text-red-500 text-sm'>
+                        {errors.description.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* ICONE */}
             <FormField
               control={control}
