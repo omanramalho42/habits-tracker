@@ -32,6 +32,7 @@ import { CreateHabitDialog } from '@/components/create-habit-dialog'
 import CreateTaskDialog from '@/components/tasks/create-task-dialog'
 import CreateGoalDialog from '@/components/goals/create-goal-dialog'
 import CreateCategorieDialog from '@/components/categories/create-categorie-dialog'
+import { PlansOverlay } from '@/components/plans-overlay'
 
 interface ActionItem {
   id: string
@@ -141,6 +142,14 @@ const WizzardScreen = () => {
     
   const recognitionRef = useRef<any | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["streak"],
+    queryFn: async () => {
+      const res = await fetch("/api/streak")
+      return res.json()
+    }
+  })
 
   // Inicializar Speech Recognition
   useEffect(() => {
@@ -308,7 +317,9 @@ const WizzardScreen = () => {
                 className="flex items-center gap-2 bg-[#1a1512] hover:bg-[#241c14] border border-[#F97316]/30 rounded-full px-4 py-2 transition-colors"
               >
                 <Flame className="h-4 w-4 text-[#F97316]" />
-                <span className="text-[#F97316] text-sm font-medium">95</span>
+                <span className="text-[#F97316] text-sm font-medium">
+                  {data?.currentStreak || 0}
+                </span>
               </button>
               {/* Friend Invite Button */}
               <button 
@@ -349,8 +360,12 @@ const WizzardScreen = () => {
             {/* AI Response */}
             {aiResponse && (
               <div className="mb-4 p-4 bg-[#111115] rounded-2xl border border-[#1e1e24] animate-in fade-in slide-in-from-top-2 duration-300">
-                <p className="text-[#38bdf8] text-sm font-medium mb-1">Assistente IA</p>
-                <p className="text-[#ccc] text-[14px] leading-relaxed">{aiResponse.response}</p>
+                <p className="text-[#38bdf8] text-sm font-medium mb-1">
+                  Assistente IA
+                </p>
+                <p className="text-[#ccc] text-[14px] leading-relaxed">
+                  {aiResponse.response}
+                </p>
               </div>
             )}
 
@@ -492,45 +507,49 @@ const WizzardScreen = () => {
                 </div>
               )}
 
-              <div className={`flex items-center bg-[#111113] rounded-full border overflow-hidden h-13 transition-colors ${isListening ? "border-[#38bdf8]/50" : "border-[#1a1a1c]"}`}>
-                <button 
-                  type="button"
-                  role="button"
-                  className="pl-4 pr-2 text-[#555] hover:text-[#888] transition-colors shrink-0"
-                  aria-label="Adicionar"
-                >
-                  <Plus className="h-5 w-5" strokeWidth={2} />
-                </button>
-                <Input
-                  type="text"
-                  placeholder="Pergunte qualquer coisa"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  className="flex-1 bg-transparent text-white placeholder-[#444] py-3 px-2 outline-none text-[14px] min-w-0"
-                />
-                <button
-                  type="button"
-                  onClick={toggleVoiceAssistant}
-                  disabled={isProcessing}
-                  className={`pr-4 pl-2 transition-all duration-200 shrink-0 disabled:opacity-50 ${
-                    isListening 
-                      ? "text-[#38bdf8]" 
-                      : "text-[#555] hover:text-[#888]"
-                  }`}
-                  aria-label={isListening ? "Parar de ouvir" : "Ativar voz"}
-                >
-                  <div className="relative">
-                    {isListening ? (
-                      <MicOff className="h-5 w-5" strokeWidth={2} />
-                    ) : (
-                      <Mic className="h-5 w-5" strokeWidth={2} />
-                    )}
-                    {isListening && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#38bdf8] rounded-full animate-pulse" />
-                    )}
-                  </div>
-                </button>
-              </div>
+              <PlansOverlay>
+                <div className={`flex items-center bg-[#111113] rounded-full border overflow-hidden h-13 transition-colors ${isListening ? "border-[#38bdf8]/50" : "border-[#1a1a1c]"}`}>
+                  <button 
+                    type="button"
+                    role="button"
+                    disabled
+                    className="pl-4 pr-2 text-[#555] hover:text-[#888] transition-colors shrink-0"
+                    aria-label="Adicionar"
+                  >
+                    <Plus className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                  <Input
+                    type="text"
+                    disabled
+                    placeholder="Pergunte qualquer coisa"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    className="flex-1 bg-transparent text-white placeholder-[#444] py-3 px-2 outline-none text-[14px] min-w-0"
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleVoiceAssistant}
+                    disabled={/*isProcessing*/true}
+                    className={`pr-4 pl-2 transition-all duration-200 shrink-0 disabled:opacity-50 ${
+                      isListening 
+                        ? "text-[#38bdf8]" 
+                        : "text-[#555] hover:text-[#888]"
+                    }`}
+                    aria-label={isListening ? "Parar de ouvir" : "Ativar voz"}
+                  >
+                    <div className="relative">
+                      {isListening ? (
+                        <MicOff className="h-5 w-5" strokeWidth={2} />
+                      ) : (
+                        <Mic className="h-5 w-5" strokeWidth={2} />
+                      )}
+                      {isListening && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#38bdf8] rounded-full animate-pulse" />
+                      )}
+                    </div>
+                  </button>
+                </div>
+              </PlansOverlay>
             </form>
           </div>
 

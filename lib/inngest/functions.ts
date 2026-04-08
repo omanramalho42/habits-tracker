@@ -1,7 +1,7 @@
 import { inngest } from "./client"
-import { sendDailyHabitsEmail, sendWelcomeEmail } from "../../lib/nodemailer"
+import { sendDailyHabitsEmail, sendWelcomeEmail } from "../nodemailer"
 
-import { prisma } from "../../lib/prisma"
+import { prisma } from "../prisma"
 
 import { PERSONALIZED_WELCOME_EMAIL_PROMPT } from "./prompts"
 
@@ -57,7 +57,7 @@ export const sendSignUpEmail = inngest.createFunction(
 export const sendDailyHabitReminder = inngest.createFunction(
   {
     id: "daily-habit-reminder",
-    triggers: [{ event: 'app/send.daily.habits' }, { cron: "*/1 * * * *" }],
+    triggers: [{ event: 'app/send.daily.habits' }, { cron: "0 8 * * *" }],
  
   },
   async ({ step }) => {

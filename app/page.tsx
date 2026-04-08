@@ -35,6 +35,10 @@ import type {
   UserSettings
 } from "@prisma/client"
 
+import TimezoneWarningBanner from "@/components/banners/timezone-warning-banner"
+import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
+import { BottomNavigation } from "@/components/routines/bottom-navigation"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -578,6 +582,22 @@ export default function Home() {
         </div>
 
         <Footer />
+
+        <TimezoneWarningBanner />
+        <CreateFeedbackDialog
+          trigger={
+            <Button
+              className="fixed z-10 opacity-75 bottom-30 right-10"
+              variant="default"
+              role="button"
+              type="button"
+              size="icon-lg"
+            >
+              <p>✨</p>
+            </Button>
+          }
+        />
+        <BottomNavigation />
       </main>
     </>
   )

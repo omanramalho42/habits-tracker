@@ -7,24 +7,17 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google"
 
 import { Analytics } from "@vercel/analytics/next"
 
-import { redirect } from "next/navigation"
-import { currentUser } from "@clerk/nextjs/server"
-
 import { Toaster } from "sonner"
 
 import QueryClientProvider from "@/components/providers/query-client-provider"
-import TimezoneWarningBanner from "@/components/banners/timezone-warning-banner"
 
 import { ThemeProvider } from "@/components/theme-provider"
 
 import { cn } from "@/lib/utils"
 
-//@ts-ignore
+import { syncCurrentUser } from "@/lib/sync-user"
+
 import "@/app/globals.css"
-import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
-import { Button } from "@/components/ui/button"
-import { BottomNavigation } from "@/components/routines/bottom-navigation"
-import { prisma } from "@/lib/prisma"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -59,23 +52,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await currentUser()
-
-  if (!user) {
-    redirect("/sign-in")
-  }
-
-  const userDb = await prisma.user.findUnique({
-    where: {
-      clerkUserId: user.id
-    }
-  })
-
-  const userSettings = await prisma.userSettings?.findUnique({
-    where: {
-      userId: userDb?.id 
-    }
-  })
+// Sincroniza e busca os dados do banco
+  const userDb = await syncCurrentUser()
+  const settings = userDb?.settings
 
   return (
     <ClerkProvider
@@ -103,7 +82,7 @@ export default async function RootLayout({
         lang="pt-BR"
         className={
           cn(
-            userSettings ? userSettings.theme : "dark",
+            settings ? settings.theme : "dark",
             // spaceGrotesk.className,
             jetBrainsMono.className
           )
@@ -114,7 +93,7 @@ export default async function RootLayout({
           <QueryClientProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme={userSettings?.theme || "system"}
+              defaultTheme={settings?.theme || "system"}
               // enableSystem
               // disableTransitionOnChange
             >
@@ -122,28 +101,14 @@ export default async function RootLayout({
                 className={
                   cn(
                     `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
-                    userSettings?.bannerUrl ? `bg-[url'${userSettings.bannerUrl}']` : "bg-[url('/bg.png')]"
+                    settings?.bannerUrl ? `bg-[url'${settings.bannerUrl}']` : "bg-[url('/bg.png')]"
                   )
                 }
                 style={{
-                  backgroundImage: userSettings?.bannerUrl ? `url(${userSettings?.bannerUrl})` : `bg-[url('/bg.png')]`
+                  backgroundImage: settings?.bannerUrl ? `url(${settings?.bannerUrl})` : `bg-[url('/bg.png')]`
                 }}
-              >     
-                <TimezoneWarningBanner />
+              >
                 { children }
-                <CreateFeedbackDialog
-                  trigger={
-                    <Button
-                      className="fixed z-10 opacity-75 bottom-30 right-10"
-                      variant="default"
-                      type="button"
-                      size="icon-lg"
-                    >
-                      <p>✨</p>
-                    </Button>
-                  }
-                />
-                <BottomNavigation />
               </main>
             </ThemeProvider>
             <Analytics />

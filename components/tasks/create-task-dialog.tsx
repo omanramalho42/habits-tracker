@@ -59,6 +59,8 @@ import {
 
 import type { CreateTaskSchemaType } from "@/lib/schema/task"
 import { createTask } from "@/app/habits/_actions/task/task"
+import { DescriptionAI } from "./description-ia"
+import { Textarea } from "../ui/textarea"
 
 interface CreateTaskDialogProps {
   trigger?: React.ReactNode
@@ -256,7 +258,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                   )}
                 />
               </div>
-
+              
               <div className="w-full col-span-2 flex flex-col gap-3 justify-start items-start">
                 <FormField
                   name="name"
@@ -301,6 +303,41 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                 </div>
 
               </div>
+            </div>
+
+            <div className="flex flex-col gap-2 w-full mt-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description" className="text-sm font-semibold">
+                  Descrição
+                </Label>
+
+                <DescriptionAI
+                  taskName={form.watch("name")} 
+                  onGenerated={(text) => form.setValue("description", text)} 
+                />
+              </div>
+
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        id="description"
+                        className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Detalhes sobre sua nova rotina..."
+                      />
+                    </FormControl>
+                    {errors && errors.description && (
+                      <span className='text-red-500 text-sm'>
+                        {errors.description.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* <div className="flex justify-between gap-4 items-center">
