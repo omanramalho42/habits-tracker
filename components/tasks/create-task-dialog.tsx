@@ -11,11 +11,13 @@ import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
 
-// import { createTask } from "@/services/tasks"
+import { createTask } from "@/app/habits/_actions/task/task"
 
 import GoalPicker from "@/components/goal-picker"
 import CounterPicker from "@/components/counter/counter-picker"
+import { AICreator } from "@/components/tasks/ai-creator"
 
+import { Textarea } from "@/components/ui/textarea"
 import {
   Field,
   FieldContent,
@@ -58,9 +60,6 @@ import {
 } from "lucide-react"
 
 import type { CreateTaskSchemaType } from "@/lib/schema/task"
-import { createTask } from "@/app/habits/_actions/task/task"
-import { DescriptionAI } from "./description-ia"
-import { Textarea } from "../ui/textarea"
 
 interface CreateTaskDialogProps {
   trigger?: React.ReactNode
@@ -311,9 +310,12 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                   Descrição
                 </Label>
 
-                <DescriptionAI
-                  taskName={form.watch("name")} 
-                  onGenerated={(text) => form.setValue("description", text)} 
+                <AICreator
+                  reference={form.watch("name")}
+                  type="task" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
                 />
               </div>
 

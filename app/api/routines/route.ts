@@ -54,6 +54,7 @@ export async function GET(request: Request) {
             status: 'ACTIVE'
           },
           include: {
+            alarms: true,
             habit: {
               include: {
                 completions: {
@@ -139,6 +140,7 @@ export async function POST(request: NextRequest) {
       emoji,
       dateRange,
       habits,
+      tasks,
       cron,
       description,
       frequency
@@ -174,6 +176,16 @@ export async function POST(request: NextRequest) {
               }
             }))
           }
+        }),
+        ...(tasks?.length && {
+          taskSchedules: {
+            deleteMany: {},
+            create: tasks?.map((taskId: string) => ({
+              task: {
+                connect: { id: taskId }
+              }
+            }))
+          },
         })
       }
     })

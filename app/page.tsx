@@ -81,6 +81,7 @@ import {
 import type { HabitWithStats } from "@/lib/types"
 import MultiGraphsChart from "@/components/charts/multi-graphs-chart"
 import { fetchUserSettings } from "@/services/settings"
+import { CreateHabitDialog } from "@/components/create-habit-dialog"
 
 const container = {
   hidden: {},
@@ -280,15 +281,12 @@ export default function Home() {
       {/* <MoodWizard /> */}
       <main className="min-h-screen">
         <div className="flex flex-col space-y-2 max-w-5xl mx-auto px-4 py-1">
-          
-          {/* HEADER + ACTIONS BUTTONS */}
           <HeaderSection />
-          {/* CURRENT SELECTION DATE */}
           <CurrentSectionDate
             selectedDate={selectedDate}
             onSuccessCallback={setSelectedDate}
           />
-          {userSettings && "showGraphs" in userSettings && userSettings.showGraphs && (
+          {userSettings?.showGraphs && (
             <MultiGraphsChart tasks={tasks} />
           )}
 
@@ -318,7 +316,7 @@ export default function Home() {
                 Tarefas
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="routines">
+            <TabsContent value="routines" className="">
               <div className="flex flex-col gap-4">
                 {routines.length > 0 ? (
                   <div className="">
@@ -329,7 +327,7 @@ export default function Home() {
                       variants={container}
                       initial="hidden"
                       animate="show"
-                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-165 overflow-y-auto scroll-container"
+                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-190 overflow-y-auto scroll-container"
                     >
                       {routines.map((routine, index) => (
                         <motion.div
@@ -388,123 +386,117 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="w-full flex flex-col">
-                  {habits.length > 0 && (
+                  {habitsFiltered.length > 0 ? (
                     <div className="flex flex-col justify-start gap-2 items-start w-full">
                       <div className="w-full flex flex-row justify-between items-center">
-                        {/* <p className="text-sm font-bold text-foreground">
+                        <p className="text-sm font-bold text-foreground">
                           Hábitos
-                        </p> */}
-                        {/* <div className="w-full flex flex-row justify-between items-center"> */}
-                          <p className="text-sm font-bold text-foreground">
-                            Hábitos
-                          </p>
+                        </p>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="outline"
-                                type="button"
-                                size="icon-sm"
-                                className="
-                                  border-white/10 bg-black/40 backdrop-blur-md
-                                  hover:bg-green-500/10 hover:border-green-500/30
-                                  shadow-[0_0_10px_rgba(34,197,94,0.15)]
-                                "
-                              >
-                                <Filter className="w-4 h-4 text-green-400" />
-                              </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-56 bg-black/80 backdrop-blur-xl border border-white/10"
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              type="button"
+                              size="icon-sm"
+                              className="
+                                border-white/10 bg-black/40 backdrop-blur-md
+                                hover:bg-green-500/10 hover:border-green-500/30
+                                shadow-[0_0_10px_rgba(34,197,94,0.15)]
+                              "
                             >
+                              <Filter className="w-4 h-4 text-green-400" />
+                            </Button>
+                          </DropdownMenuTrigger>
 
-                              {/* STATUS */}
-                              <DropdownMenuLabel>Status</DropdownMenuLabel>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-56 bg-black/80 backdrop-blur-xl border border-white/10"
+                          >
 
-                              {[
-                                { label: "Todos", value: "all" },
-                                { label: "✔️ Completados", value: "completed" },
-                                { label: "⏳ Pendentes", value: "pending" }
-                              ].map((item) => (
-                                <DropdownMenuItem
-                                  key={item.value}
-                                  onClick={() => applyStatus(item.value as any)}
-                                  className="flex justify-between"
-                                >
-                                  {item.label}
+                            {/* STATUS */}
+                            <DropdownMenuLabel>Status</DropdownMenuLabel>
 
-                                  {isActive("status", item.value) && (
-                                    <Check className="w-4 h-4 text-green-400" />
-                                  )}
-                                </DropdownMenuItem>
-                              ))}
-
-                              <DropdownMenuSeparator />
-
-                              {/* ORDENAÇÃO */}
-                              <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
-
-                              {[
-                                { label: "🆕 Criação", value: "createdAt" },
-                                { label: "✏️ Edição", value: "updatedAt" },
-                                { label: "🔤 Nome", value: "name" }
-                              ].map((item) => (
-                                <DropdownMenuItem
-                                  key={item.value}
-                                  onClick={() => applySort(item.value as any)}
-                                  className="flex justify-between"
-                                >
-                                  {item.label}
-
-                                  {isActive("sortBy", item.value) && (
-                                    <Check className="w-4 h-4 text-green-400" />
-                                  )}
-                                </DropdownMenuItem>
-                              ))}
-
-                              <DropdownMenuSeparator />
-
-                              {/* ORDEM */}
-                              <DropdownMenuLabel>Ordem</DropdownMenuLabel>
-
-                              {[
-                                { label: "⬆️ Ascendente", value: "asc" },
-                                { label: "⬇️ Descendente", value: "desc" }
-                              ].map((item) => (
-                                <DropdownMenuItem
-                                  key={item.value}
-                                  onClick={() => applyOrder(item.value as any)}
-                                  className="flex justify-between"
-                                >
-                                  {item.label}
-
-                                  {isActive("order", item.value) && (
-                                    <Check className="w-4 h-4 text-green-400" />
-                                  )}
-                                </DropdownMenuItem>
-                              ))}
-
-                              <DropdownMenuSeparator />
-
-                              {/* RESET */}
+                            {[
+                              { label: "Todos", value: "all" },
+                              { label: "✔️ Completados", value: "completed" },
+                              { label: "⏳ Pendentes", value: "pending" }
+                            ].map((item) => (
                               <DropdownMenuItem
-                                onClick={resetFilter}
-                                className="text-red-400"
+                                key={item.value}
+                                onClick={() => applyStatus(item.value as any)}
+                                className="flex justify-between"
                               >
-                                Limpar filtros
-                              </DropdownMenuItem>
+                                {item.label}
 
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        {/* </div> */}
+                                {isActive("status", item.value) && (
+                                  <Check className="w-4 h-4 text-green-400" />
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+
+                            <DropdownMenuSeparator />
+
+                            {/* ORDENAÇÃO */}
+                            <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+
+                            {[
+                              { label: "🆕 Criação", value: "createdAt" },
+                              { label: "✏️ Edição", value: "updatedAt" },
+                              { label: "🔤 Nome", value: "name" }
+                            ].map((item) => (
+                              <DropdownMenuItem
+                                key={item.value}
+                                onClick={() => applySort(item.value as any)}
+                                className="flex justify-between"
+                              >
+                                {item.label}
+
+                                {isActive("sortBy", item.value) && (
+                                  <Check className="w-4 h-4 text-green-400" />
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+
+                            <DropdownMenuSeparator />
+
+                            {/* ORDEM */}
+                            <DropdownMenuLabel>Ordem</DropdownMenuLabel>
+
+                            {[
+                              { label: "⬆️ Ascendente", value: "asc" },
+                              { label: "⬇️ Descendente", value: "desc" }
+                            ].map((item) => (
+                              <DropdownMenuItem
+                                key={item.value}
+                                onClick={() => applyOrder(item.value as any)}
+                                className="flex justify-between"
+                              >
+                                {item.label}
+
+                                {isActive("order", item.value) && (
+                                  <Check className="w-4 h-4 text-green-400" />
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+
+                            <DropdownMenuSeparator />
+
+                            {/* RESET */}
+                            <DropdownMenuItem
+                              onClick={resetFilter}
+                              className="text-red-400"
+                            >
+                              Limpar filtros
+                            </DropdownMenuItem>
+
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <Input
                         type="text"
                         placeholder="pesquise pelo nome..."
                         value={search}
-                        // className="bg-black"
                         style={{
                           backgroundColor: 'var(--card)'
                         }}
@@ -512,40 +504,59 @@ export default function Home() {
                           handleFilterHabits(event.target.value)
                         }}
                       />
-                    </div>
-                  )}
-                  {/* <ActiveCardHabits
-                    habits={habits.filter((habit) => habit.name.toLowerCase().trim().includes(filter.toLowerCase().trim()))}
-                    selectedDate={selectedDateStr}
-                  /> */}
-                  <motion.div
-                    variants={container}
-                    initial="hidden"
-                    animate="show"
-                    className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-135 overflow-y-auto scroll-container"
-                  >
-                    {habitsFiltered.map((habit, index) => (
+
                       <motion.div
-                        key={habit.id}
-                        initial={{ opacity: 0, y: 30, scale: 0.98 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                        viewport={{ once: true, margin: "-50px" }}
-                        transition={{
-                          duration: 0.4,
-                          delay: index * 0.05,
-                          ease: "easeOut",
-                        }}
+                        variants={container}
+                        initial="hidden"
+                        animate="show"
+                        className="grid w-full grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center mt-5 max-h-135 overflow-y-auto scroll-container"
                       >
-                        <HabitCardNew
-                          selectedDate={selectedDateStr}
-                          habit={habit}
-                        />
+                        {habitsFiltered.map((habit, index) => (
+                          <motion.div
+                            key={habit.id}
+                            initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{
+                              duration: 0.4,
+                              delay: index * 0.05,
+                              ease: "easeOut",
+                            }}
+                          >
+                            <HabitCardNew
+                              selectedDate={selectedDateStr}
+                              habit={habit}
+                            />
+                          </motion.div>
+                        ))}
                       </motion.div>
-                    ))}
-                  </motion.div>
+                    </div>
+                  ) : (
+                    <Card className="flex flex-col gap-1 px-4">
+                      <div className="flex flex-col text-center text-4xl">
+                        🎯
+                        <h2 className="text-center text-xl font-bold mb-3 text-foreground">
+                          Comece sua jornada
+                        </h2>
+                      </div>
+                      <CreateHabitDialog
+                        trigger={
+                          <Button
+                            aria-label="Criar hábito"
+                            title="Criar hábito"
+                            size="lg"
+                          >
+                            <Plus className="h-5 w-5 mr-2" />
+                            Criar Hábito
+                          </Button>
+                        }
+                      />
+                    </Card>
+                  )}
                 </div>
               )}
             </TabsContent>
+
             <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-190">
               {tasks.length > 0 ? tasks.map((task) => {
                 return (
@@ -597,7 +608,7 @@ export default function Home() {
             </Button>
           }
         />
-        <BottomNavigation />
+        {/* <BottomNavigation /> */}
       </main>
     </>
   )

@@ -33,6 +33,7 @@ import CreateTaskDialog from '@/components/tasks/create-task-dialog'
 import CreateGoalDialog from '@/components/goals/create-goal-dialog'
 import CreateCategorieDialog from '@/components/categories/create-categorie-dialog'
 import { PlansOverlay } from '@/components/plans-overlay'
+import HeaderSection from '@/components/habits/header-section'
 
 interface ActionItem {
   id: string
@@ -308,6 +309,7 @@ const WizzardScreen = () => {
     return (
       <div className="flex flex-col bg-[#0a0a0a] items-center justify-center">
         <div className="relative w-full max-w-5xl px-4 py-1">
+          <HeaderSection />
           <div className="p-2">
             {/* Header Buttons */}
             <div className="flex items-center justify-between mb-8">

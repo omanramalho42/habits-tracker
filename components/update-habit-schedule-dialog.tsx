@@ -45,6 +45,7 @@ import {
   AlarmClock,
   Clock8Icon,
 } from 'lucide-react'
+import { MultiAlarmsPicker } from './multi-alarms-picker'
 
 interface UpdateHabitScheduleDialogProps {
   trigger?: React.ReactNode;
@@ -62,7 +63,9 @@ const UpdateHabitScheduleDialog = ({
       id: schedule.id,
       clock: schedule?.clock || "",
       duration: schedule?.duration || "",
-      habit: habit || null
+      habit: habit || null,
+      // Carregar alarmes existentes se houver
+      alarms: (schedule as any)?.alarms || []
     }
   })
 
@@ -115,7 +118,8 @@ const UpdateHabitScheduleDialog = ({
         id: data.id,
         clock: data.clock,
         duration: data.duration,
-        habit: data.habit
+        habit: data.habit,
+        alarms: data.alarms // Enviando os alarmes para a API
       })
 
       setOpen(prev => !prev)
@@ -234,6 +238,16 @@ const UpdateHabitScheduleDialog = ({
                     </FormItem>
                   )}
                 />    
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-zinc-500">
+                  Alarmes Personalizados
+                </Label>
+                <MultiAlarmsPicker
+                  name="alarms" // Agora aponta para o campo correto no Zod
+                  control={control}
+                />
               </div>
 
               <div className="flex flex-col gap-2 w-full">

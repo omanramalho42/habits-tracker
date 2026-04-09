@@ -15,7 +15,9 @@ export async function GET() {
     })
 
     if (!userDb) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 })
+      return NextResponse.json({
+        error: "User not found"
+      }, { status: 401 })
     }
 
     // 🔥 pega TODAS completions do usuário

@@ -9,7 +9,12 @@ import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
 
-import { CreateGoal } from '@/app/habits/_actions/goals/goals'
+import { CreateCategorie } from '@/app/habits/_actions/categories/categories'
+import { useApiError } from '@/hooks/use-alert-dialog'
+
+import { AlertModalDialog } from '@/components/modals/alert-modal-dialog'
+import { AICreator } from '@/components/tasks/ai-creator'
+import { Textarea } from '@/components/ui/textarea'
 
 import { Card } from '@/components/ui/card'
 import {
@@ -38,15 +43,9 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 
-import { CircleOff, PlusSquare } from 'lucide-react'
-
 import type { CreateCategorieSchemaType } from '@/lib/schema/categorie'
-import { CreateCategorie } from '@/app/habits/_actions/categories/categories'
-import { handleApiError } from '@/helpers/alert-dialog'
-import { useApiError } from '@/hooks/use-alert-dialog'
-import { AlertModalDialog } from '../modals/alert-modal-dialog'
-import { DescriptionAI } from '../tasks/description-ia'
-import { Textarea } from '../ui/textarea'
+
+import { CircleOff, PlusSquare } from 'lucide-react'
 
 interface CreateCategorieDialogProps {
   trigger?: React.ReactNode
@@ -109,7 +108,6 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
     },
     onError: (error: any) => {
       console.log(error, "error")
-      // handleApiError(error, handleError)
       toast.error(`Aconteceu algo errado: ${error}`, {
         id: "create-categorie",
       })
@@ -191,9 +189,12 @@ const CreateCategorieDialog:React.FC<CreateCategorieDialogProps> = ({ trigger })
                   Descrição
                 </Label>
 
-                <DescriptionAI 
-                  taskName={form.watch("name")} 
-                  onGenerated={(text) => form.setValue("description", text)} 
+                <AICreator
+                  reference={form.watch("name")}
+                  type="category" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
                 />
               </div>
 

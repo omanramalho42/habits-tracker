@@ -22,9 +22,10 @@ import {
 } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 
-import type { UserSettings } from '@prisma/client'
+import type { User, UserSettings } from '@prisma/client'
 import CreatePixKeyDialog from '../modals/create-pix-key-dialog'
 import { StreakDialog } from '../streak/streak-dialog'
+import HeaderNavigation from '../header/header-navigation'
 
 const HeaderSection:React.FC = () => {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -37,15 +38,17 @@ const HeaderSection:React.FC = () => {
   const {
     data: userSettings,
     isLoading,
-  } = useQuery<UserSettings>({
+  } = useQuery<(UserSettings & { user: User })>({
     queryKey: ["user-settings"],
     queryFn: () => fetchUserSettings(),
   })
   
   return (
     <div className="flex flex-row-reverse py-2 items-start justify-between">
-      
-      <div className='flex flex-row items-center gap-1'>
+      <HeaderNavigation
+        settings={userSettings}
+      />
+      <div className='flex flex-row mt-15 items-center gap-1'>
         {!isLoading && (
           <CreatePixKeyDialog
             userSettings={userSettings}
@@ -53,8 +56,7 @@ const HeaderSection:React.FC = () => {
         )}
         <StreakDialog />
       </div>
-      <div className="flex flex-col space-y-2">
-
+      <div className="flex flex-col mt-15 space-y-2">
         <div className='flex flex-row items-center gap-2'>
           <Avatar className='w-12 h-12'>
             <AvatarImage
@@ -66,8 +68,8 @@ const HeaderSection:React.FC = () => {
             </AvatarFallback>
             {/* <AvatarBadge className="bg-green-600 dark:bg-green-800" /> */}
           </Avatar>
-          <h1 className="text-1xl font-bold text-foreground bg-linear-to-r from-primary to-blue-600 bg-clip-text">
-            Olá, {userSettings?.name || user?.fullName} 👋
+          <h1 className="sm:text-1xl text-sm tracking-tighter font-bold text-foreground bg-linear-to-r from-primary to-blue-600 bg-clip-text">
+            Olá 👋, {userSettings?.name || user?.fullName}
           </h1>
         </div>
         <p className="text-muted-foreground text-base">

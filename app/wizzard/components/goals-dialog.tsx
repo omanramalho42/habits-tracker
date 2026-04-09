@@ -91,7 +91,7 @@ export default function GoalsDialog({ isOpen, onClose, data }: GoalsDialogProps)
             <div className="text-white text-5xl font-bold">
               {data.totalGoals}
             </div>
-            <div className="text-[#666] text-sm">
+            <div className="text-[#666] tracking-tighter text-sm">
               Objetivos totais
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function GoalsDialog({ isOpen, onClose, data }: GoalsDialogProps)
             variant="ghost"
             type="button"
             role="button"
-            className="flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] text-black font-semibold text-sm px-4 py-2 rounded-xl transition-colors"
+            className="flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] tracking-tight text-black font-semibold text-sm px-4 py-2 rounded-xl transition-colors"
           >
             objetivos
             <ArrowRight className="w-4 h-4" />
@@ -115,7 +115,7 @@ export default function GoalsDialog({ isOpen, onClose, data }: GoalsDialogProps)
             <TrendingUp className="w-4 h-4 text-green-500" />
           </div>
           <span className="text-green-500 tracking-tighter font-medium">
-            +{data.weeklyIncrease} Objetivos nesta semana Objetivos nesta semana
+            +{data.weeklyIncrease} Objetivos nesta semana
           </span>
         </div>
 

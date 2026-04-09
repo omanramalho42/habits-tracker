@@ -144,7 +144,7 @@ export default function DayStreak({ onBack }: DayStreakProps) {
                   🔥
                 </div>
                 <p className="text-white font-bold mt-1">
-                  {data?.currentMilestone}
+                  {data?.currentStreak}
                 </p>
               </div>
 
@@ -158,7 +158,7 @@ export default function DayStreak({ onBack }: DayStreakProps) {
 
                 <div className="h-2 bg-[#2a2a2a] rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-orange-500 to-blue-400"
+                    className="h-full bg-linear-to-r from-orange-500 to-blue-400"
                     style={{ width: `${data?.progress ?? 0}%` }}
                   />
                 </div>

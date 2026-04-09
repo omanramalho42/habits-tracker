@@ -22,7 +22,7 @@ export function StreakDialog() {
       return res.data
     }
   })
-
+  console.log(data, 'STREAK 🔥')
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {/* 🔥 FLOATING BUTTON */}

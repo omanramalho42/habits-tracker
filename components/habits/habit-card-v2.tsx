@@ -458,7 +458,7 @@ const HabitCardNew: React.FC<HabitCardProps> = ({
       {/* FOOTER */}
       <div className='flex items-center justify-between'>
         <div className='text-sm text-muted-foreground text-center'>
-          🔥 {habit.current_streak ?? 0} de {totalDays} completados
+          🔥 {habit.completions.length ?? 0} de {totalDays} completados
         </div>
 
         <Button

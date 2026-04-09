@@ -1,7 +1,8 @@
-import { UserSettings } from "@prisma/client"
 import axios from "axios"
 
-export const fetchUserSettings = async (): Promise<UserSettings> => {
+import type { User, UserSettings } from "@prisma/client"
+
+export const fetchUserSettings = async (): Promise<UserSettings & { user: User }> => {
   const { data: settings } = await axios.get(
     `/api/settings`
   )

@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const { name, description, emoji } = parsedBody.data
 
     // ✅ cria objetivo
-    await prisma.categories.create({
+    await prisma.goals.create({
       data: {
         name,
         userId: userDb.id,
@@ -101,11 +101,11 @@ export async function POST(request: NextRequest) {
     startOfWeek.setDate(now.getDate() - 7)
 
     const [totalGoals, weeklyGoals, goals] = await Promise.all([
-      prisma.categories.count({
+      prisma.goals.count({
         where: { userId: userDb.id }
       }),
 
-      prisma.categories.count({
+      prisma.goals.count({
         where: {
           userId: userDb.id,
           createdAt: {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         }
       }),
 
-      prisma.categories.findMany({
+      prisma.goals.findMany({
         where: { userId: userDb.id },
         take: 4, // 👈 só preview
         orderBy: { createdAt: "desc" }

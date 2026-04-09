@@ -251,14 +251,12 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
                     </FormLabel>
                     <FormControl>
                       <Input
-                        {...field}
                         id='name'
                         type='text'
                         placeholder='ex: John Doe'
                         value={field.value}
                         onChange={field.onChange}
                         disabled={isLoading}
-                        className=''
                       />
                     </FormControl>
                     {errors.name && (
@@ -277,7 +275,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
                 name='email'
                 rules={{ required: true }}
                 render={( { field }) => (
-                  <FormItem>
+                  <FormItem className='w-full'>
                     <FormLabel>
                       <Label
                         className='font-semibold'

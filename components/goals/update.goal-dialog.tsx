@@ -10,6 +10,9 @@ import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
 
+import { AICreator } from '@/components/tasks/ai-creator'
+
+import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import {
   Dialog,
@@ -41,8 +44,6 @@ import { CircleOff, PlusSquare } from 'lucide-react'
 
 import type { UpdateGoalSchemaType } from '@/lib/schema/goal'
 import type { Goals } from '@prisma/client'
-import { DescriptionAI } from '../tasks/description-ia'
-import { Textarea } from '../ui/textarea'
 
 interface UpdateGoalDialogProps {
   trigger?: React.ReactNode
@@ -181,9 +182,12 @@ const UpdateGoalDialog:React.FC<UpdateGoalDialogProps> = ({ trigger, goal }) => 
                   Descrição
                 </Label>
 
-                <DescriptionAI 
-                  taskName={form.watch("name")} 
-                  onGenerated={(text) => form.setValue("description", text)} 
+                <AICreator
+                  reference={form.watch("name")}
+                  type="goal" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
                 />
               </div>
 

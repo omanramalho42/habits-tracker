@@ -105,7 +105,6 @@ export default function NewsPage() {
     <main className="min-h-screen bg-background sm:px-10 px-0">
       <div className="flex flex-col gap-8 max-w-5xl mx-auto px-4 py-8">
         <HeaderSection />
-
         {/* ------------------------------- */}
         {/* HEADER */}
         {/* ------------------------------- */}

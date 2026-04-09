@@ -7,6 +7,9 @@ import { EmojiPicker } from "frimousse"
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { AICreator } from '@/components/tasks/ai-creator'
+
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogClose,
@@ -43,8 +46,6 @@ import {
   CircleOff,
   PlusSquare
 } from 'lucide-react'
-import { Textarea } from './ui/textarea'
-import { DescriptionAI } from './tasks/description-ia'
 
 interface CreateCheckpointDialogProps {
   trigger: React.ReactNode;
@@ -163,9 +164,12 @@ const CreateCheckPointDialog:React.FC<CreateCheckpointDialogProps> = ({ trigger 
                   Descrição
                 </Label>
 
-                <DescriptionAI 
-                  taskName={form.watch("name")} 
-                  onGenerated={(text) => form.setValue("description", text)} 
+                <AICreator
+                  reference={form.watch("name")}
+                  type="task" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
                 />
               </div>
 

@@ -55,6 +55,8 @@ import {
 
 import type { CreateRoutineSchemaType } from '@/lib/schema/routine'
 import { WEEKDAYS } from '@/lib/habit-utils'
+import { Textarea } from './ui/textarea'
+import { AICreator } from './tasks/ai-creator'
 
 interface CreateRoutineDialogProps {
   trigger: React.ReactNode
@@ -209,46 +211,44 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                     </FormItem>
                   )}
                 />
-                <FormField
-                  name='description'
-                  control={control}
-                  disabled={isPending}
-                  rules={{ required: false, min: 5 }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <Label
-                          htmlFor="description"
-                          className="text-sm font-semibold"
-                        >
-                          Descrição da rotina
-                        </Label>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="
-                            bg-black/50
-                            border border-white/10
-                            focus:border-blue-500/60
-                            focus:ring-1 focus:ring-blue-500/30
-                            rounded-lg
-                            text-white
-                            placeholder:text-white/30
-                          "
-                          {...field}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder='ex: coloque uma breve descrição da rotina'
-                        />
-                      </FormControl>
-                      {errors && errors.name && (
-                        <span className='text-sm text-red-500'>
-                          {errors.name.message}
-                        </span>
-                      )}
-                    </FormItem>
-                  )}
-                />
+                <div className="flex flex-col gap-2 w-full mt-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="description" className="text-sm font-semibold">
+                      Descrição
+                    </Label>
+
+                    <AICreator
+                      reference={form.watch("name")}
+                      type="routine" 
+                      onGenerated={
+                        (text) => form.setValue("description", text)
+                      } 
+                    />
+                  </div>
+
+                  <FormField
+                    control={control}
+                    name="description"
+                    rules={{ required: false, min: 5 }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            id="description"
+                            className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Detalhes sobre sua nova rotina..."
+                          />
+                        </FormControl>
+                        {errors && errors.description && (
+                          <span className='text-red-500 text-sm'>
+                            {errors.description.message}
+                          </span>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               <FormField
                 control={control}

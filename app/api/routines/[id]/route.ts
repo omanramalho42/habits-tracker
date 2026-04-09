@@ -116,7 +116,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
-    const { name, emoji, dateRange, habits, tasks, cron, description, frequency } = parsedBody.data
+    const {
+      name,
+      emoji,
+      dateRange,
+      habits,
+      tasks,
+      cron,
+      description,
+      frequency
+    } = parsedBody.data
     
     const newStartdate = new Date(dateRange.from)
       newStartdate.setHours(0,0,0,0)

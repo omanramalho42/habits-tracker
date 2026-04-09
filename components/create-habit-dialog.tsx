@@ -619,6 +619,8 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button
+                      type="button"
+                      role="button"
                       variant="outline"
                     >
                       Cancelar
@@ -643,9 +645,8 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
                     setOpen
                   }}
                   className="flex-1 bg-transparent"
-                  disabled={!isSubmitting}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
               </DialogClose>
               <Button

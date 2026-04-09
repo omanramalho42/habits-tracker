@@ -63,9 +63,8 @@ import {
 import type { UpdateTaskSchemaType } from "@/lib/schema/task"
 import type { Categories, Counter, Goals, Task } from "@prisma/client"
 import { updateTask } from "@/app/habits/_actions/task/task"
-import { uploadFile } from "@/lib/utils"
-// import { uploadToCloudinary } from "@/app/habits/_actions/upload/upload-file-action"
-// import { updateTask } from "@/services/tasks"
+import { AICreator } from "./ai-creator"
+import { Textarea } from "../ui/textarea"
 
 interface UpdateTaskDialogProps {
   trigger?: React.ReactNode
@@ -121,23 +120,6 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
     mutationFn: async (values: UpdateTaskSchemaType) => {
       console.log(values, "values ✨")
 
-    // const image =
-    //   values.imageUrl instanceof File
-    //     ? await uploadFile(values.imageUrl)
-    //     : null
-
-    // const video =
-    //   values.videoUrl instanceof File
-    //     ? await uploadFile(values.videoUrl)
-    //     : null
-
-    //   console.log({ image }, { video }, ".✨IMAGE AND VIDEO.")
-      
-      // await updateTask({
-      //   ...values,
-      //   imageUrl: image?.url || null,
-      //   videoUrl: video?.url || null,
-      // })
       return await updateTask({
         ...values,
       })
@@ -334,6 +316,44 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
                     control={control}
                   />
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-2 w-full mt-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description" className="text-sm font-semibold">
+                    Descrição
+                  </Label>
+
+                  <AICreator
+                    reference={form.watch("name")}
+                    type="task" 
+                    onGenerated={
+                      (text) => form.setValue("description", text)
+                    } 
+                  />
+                </div>
+
+                <FormField
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          id="description"
+                          className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          placeholder="Detalhes sobre sua nova rotina..."
+                        />
+                      </FormControl>
+                      {errors && errors.description && (
+                        <span className='text-red-500 text-sm'>
+                          {errors.description.message}
+                        </span>
+                      )}
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 

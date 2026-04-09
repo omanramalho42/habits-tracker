@@ -1,4 +1,5 @@
-import type { Habit, Routine } from "@prisma/client"
+import { UpdateHabitScheduleSchemaType } from "@/lib/schema/habit-schedule"
+import type { Alarm, Habit, Routine } from "@prisma/client"
 import axios from "axios"
 
 export const removeHabitSchedule = async (
@@ -14,7 +15,7 @@ export const removeHabitSchedule = async (
   return response.data
 }
 export const updateHabitSchedule = async (
-  values: { id: string; clock?: string; duration?: string; habit: Habit }
+  values: UpdateHabitScheduleSchemaType
 ): Promise<Routine> => {
   console.log(values, "values")
 

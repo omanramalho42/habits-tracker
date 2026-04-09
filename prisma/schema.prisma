@@ -487,11 +487,32 @@ model Routine {
   @@map("routine")
 }
 
+model Alarm {
+  id            String         @id @unique @default(uuid())
+  enabled       Boolean        @default(true)
+  
+  // Configurações personalizadas
+  triggerTime   String         // Ex: "08:00:00" ou um offset "-00:05:00"
+  message       String?        // Mensagem customizada da notificação
+  
+  // Relacionamento
+  habitScheduleId String       @map("habit_schedule_id")
+  habitSchedule   HabitSchedule @relation(fields: [habitScheduleId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@map("alarms")
+}
+
 model HabitSchedule {
   id            String    @unique @id @default(uuid())
 
   duration      String?    @db.VarChar(20)
   clock         String?    @db.VarChar(20)
+
+  // Agora um Schedule pode ter vários Alertas (ex: 10min antes, na hora, 5min depois)
+  alarms    Alarm[]
 
   status        HabitStatus    @default(ACTIVE)
 

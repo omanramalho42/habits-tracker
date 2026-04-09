@@ -1,4 +1,5 @@
 import { Annotations, Categories, Goals, HabitStatus } from "@prisma/client"
+import { AI_CONFIG } from "./constants/ai"
 
 export interface Habit {
   id: string
@@ -38,6 +39,8 @@ export interface HabitFormData {
   frequency: string[]
   color: string
 }
+
+export type AIContextType = keyof typeof AI_CONFIG;
 
 export interface HabitCompletion {
   id: string

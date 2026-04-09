@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 
 import { createAnnotation } from '@/app/habits/_actions/annotations/annotations'
 
-
 import {
   Tooltip,
   TooltipContent,
@@ -41,6 +40,7 @@ import { Button } from '@/components/ui/button'
 import { File } from "lucide-react"
 
 import type { CreateAnnotationSchemaType } from '@/lib/schema/annotations'
+import { AICreator } from '../tasks/ai-creator'
 
 interface CreateAnnotationDialogProps {
   completionId: string
@@ -176,38 +176,46 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={control}
-                  name='summary'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <Label htmlFor='summary'>
-                          Resumo
-                        </Label>
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          id="summary"
-                          className=""
-                          placeholder="Faça um breve resumo do seu dia aqui..."
-                          rows={4}
-                          onChange={field.onChange}
-                          value={field.value}
-                        />
-                      </FormControl>
-                      {errors && 
-                          errors.summary && (
-                            <span
-                              className='text-red-500 text-sm font-medium'
-                            >
-                              {errors.summary.message}
-                            </span>
-                        )
-                      }
-                    </FormItem>
-                  )}
-                />
+                <div className="flex flex-col gap-2 w-full mt-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="summary" className="text-sm font-semibold">
+                      Resumo
+                    </Label>
+
+                    <AICreator
+                      reference={form.watch("name")}
+                      type="annotation" 
+                      onGenerated={
+                        (text) => form.setValue("summary", text)
+                      } 
+                    />
+                  </div>
+
+                  <FormField
+                    control={control}
+                    name="summary"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            id="summary"
+                            className=""
+                            placeholder="Faça um breve resumo do seu dia aqui..."
+                            rows={4}
+                            onChange={field.onChange}
+                            value={field.value}
+                          />
+                        </FormControl>
+                        {errors && errors.summary && (
+                          <span className='text-red-500 text-sm'>
+                            {errors.summary.message}
+                          </span>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <Controller
                   name='files'

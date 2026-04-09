@@ -7,7 +7,16 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { CreateGoal } from '@/app/habits/_actions/goals/goals'
+import axios from 'axios'
+
+import { useApiError } from '@/hooks/use-alert-dialog'
+
+import GoalsDialog from '@/app/wizzard/components/goals-dialog'
+
+import { AlertModalDialog } from '@/components/modals/alert-modal-dialog'
+import { AICreator } from '@/components/tasks/ai-creator'
+import { Textarea } from '@/components/ui/textarea'
+
 import type { CreateGoalSchemaType } from '@/lib/schema/goal'
 
 import { EmojiPicker } from "frimousse"
@@ -40,13 +49,6 @@ import {
 import { Card } from '@/components/ui/card'
 
 import { CircleOff, PlusSquare } from 'lucide-react'
-import { useApiError } from '@/hooks/use-alert-dialog'
-import { AlertModalDialog } from '../modals/alert-modal-dialog'
-import GoalsDialog from '@/app/wizzard/components/goals-dialog'
-import { Goals } from '@prisma/client'
-import axios from 'axios'
-import { DescriptionAI } from '../tasks/description-ia'
-import { Textarea } from '../ui/textarea'
 
 interface CreateGoalDialogProps {
   trigger?: React.ReactNode
@@ -91,26 +93,28 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
       console.log(values, "values")
       return await axios.post(`/api/goals`, values)
     },
-    onSuccess: async ({ data }) => {
+    onSuccess: async (values) => {
+      console.log(values, "values")
       toast.success("Objetivo criado com sucesso! 🎉", {
         id: "create-goal"
       })
-      if(data) {
-        // console.log(data, 'data ⚠️')
-        setShowGoals(true)
-      }
-      setGoalsData(data)
-      reset({
-        name: "",
-        description: "",
-        emoji: "",
-      })
+      // if(data) {
+      //   // console.log(data, 'data ⚠️')
+      //   setShowGoals(true)
+      // }
+      // setGoalsData(data)
+
       await queryClient.invalidateQueries({
         queryKey: [
           "goals"
         ]
       })
 
+      reset({
+        name: "",
+        description: "",
+        emoji: "",
+      })
       setOpen(prev => !prev)
     },
     onError: (error: any) => {
@@ -202,9 +206,12 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
                   Descrição
                 </Label>
 
-                <DescriptionAI 
-                  taskName={form.watch("name")} 
-                  onGenerated={(text) => form.setValue("description", text)} 
+                <AICreator
+                  reference={form.watch("name")}
+                  type="goal" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
                 />
               </div>
 

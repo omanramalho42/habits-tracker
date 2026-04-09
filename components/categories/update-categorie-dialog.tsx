@@ -9,7 +9,10 @@ import { toast } from 'sonner'
 
 import { EmojiPicker } from "frimousse"
 
-import { CreateGoal } from '@/app/habits/_actions/goals/goals'
+import axios from 'axios'
+
+import { AICreator } from '@/components/tasks/ai-creator'
+import { Textarea } from '@/components/ui/textarea'
 
 import { Card } from '@/components/ui/card'
 import {
@@ -41,10 +44,7 @@ import {
 import { CircleOff, PlusSquare } from 'lucide-react'
 
 import type { UpdateCategorieSchemaType } from '@/lib/schema/categorie'
-import { Categories } from '@prisma/client'
-import axios from 'axios'
-import { DescriptionAI } from '../tasks/description-ia'
-import { Textarea } from '../ui/textarea'
+import type { Categories } from '@prisma/client'
 
 interface UpdateCategoryDialogProps {
   trigger?: React.ReactNode
@@ -183,9 +183,12 @@ const UpdateCategorieDialog:React.FC<UpdateCategoryDialogProps> = ({ trigger, ca
                   Descrição
                 </Label>
 
-                <DescriptionAI 
-                  taskName={form.watch("name")} 
-                  onGenerated={(text) => form.setValue("description", text)} 
+                <AICreator
+                  reference={form.watch("name")}
+                  type="category" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
                 />
               </div>
 

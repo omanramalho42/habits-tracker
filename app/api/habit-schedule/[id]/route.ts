@@ -36,9 +36,10 @@ export async function PATCH(request: NextRequest) {
       habit,
       duration,
       clock,
-      id
+      id,
+      alarms 
     } = parsedBody.data
-    // Verify the habitSchedule belongs to the user
+
     const existingSchedule = await prisma.habitSchedule.findFirst({
       where: {
         id,
@@ -55,21 +56,31 @@ export async function PATCH(request: NextRequest) {
       }, { status: 404 })
     }
 
-    const newHabitSchedule = await prisma.habitSchedule.update({
+    const updatedHabitSchedule = await prisma.habitSchedule.update({
       where: { id },
       data: {
         clock,
         duration,
         habit: {
-          connect: {
-            id: habit.id
-          }
+          connect: { id: habit.id }
+        },
+        // Gerenciamento de Alarmes
+        alarms: {
+          // Estratégia: Deleta os antigos e cria os novos selecionados
+          deleteMany: {}, 
+          create: alarms?.map(alarm => ({
+            triggerTime: alarm.triggerTime,
+            message: alarm.message || "Lembrete de hábito",
+          }))
         },
         updatedAt: new Date()
+      },
+      include: {
+        alarms: true
       }
     })
 
-    return NextResponse.json(newHabitSchedule)
+    return NextResponse.json(updatedHabitSchedule)
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error habit Schedule:", error)
