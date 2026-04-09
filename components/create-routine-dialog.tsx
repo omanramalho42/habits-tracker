@@ -212,7 +212,7 @@ const CreateRoutineDialog:React.FC<CreateRoutineDialogProps> = ({ trigger }) => 
                   )}
                 />
                 <div className="flex flex-col gap-2 w-full mt-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col items-start gap-1 justify-between">
                     <Label htmlFor="description" className="text-sm font-semibold">
                       Descrição
                     </Label>

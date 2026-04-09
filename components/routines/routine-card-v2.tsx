@@ -628,7 +628,7 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                     <span className="text-xl mb-1 tracking-tighter">
                       {habit.emoji}
                     </span>
-                    <p className="text-sm font-semibold truncate max-w-100 w-full tracking-tight text-zinc-100">
+                    <p className="text-sm font-semibold truncate max-w-30 w-full tracking-tight text-zinc-100">
                       {habit.name}
                     </p>
                   </div>

@@ -327,7 +327,7 @@ export default function Home() {
                       variants={container}
                       initial="hidden"
                       animate="show"
-                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-190 overflow-y-auto scroll-container"
+                      className="grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch mt-5 max-h-180 overflow-y-auto scroll-container"
                     >
                       {routines.map((routine, index) => (
                         <motion.div
@@ -556,7 +556,6 @@ export default function Home() {
                 </div>
               )}
             </TabsContent>
-
             <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-190">
               {tasks.length > 0 ? tasks.map((task) => {
                 return (

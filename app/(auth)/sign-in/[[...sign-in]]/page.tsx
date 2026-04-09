@@ -47,7 +47,7 @@ export default function SignInScreen() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: "elisesmorisev@gmail.com"
+      email: ""
     }
   })
 
@@ -122,6 +122,7 @@ export default function SignInScreen() {
                 E-mail:
               </Label>
               <Input
+                type="email"
                 {...register("email")}
                 className="h-12 bg-white/5 border border-zinc-800 rounded-2xl text-white placeholder:text-zinc-700 focus-visible:ring-1 focus-visible:ring-white/20 transition-all"
                 placeholder="seu@email.com"
