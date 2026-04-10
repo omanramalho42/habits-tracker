@@ -173,10 +173,8 @@ const WizzardScreen = () => {
     }
   }, [])
 
-
   // 1. Estado para controlar qual campo a IA está esperando (ex: 'name')
   const [expectedField, setExpectedField] = useState<string | null>(null);
-
   // 2. Função para abrir os modais de criação baseado na ação da IA
   const handleOpenModal = useCallback((action: string, initialData: any) => {
     // Aqui você deve disparar a lógica que já usa no Lab Habit para abrir modais
@@ -196,7 +194,7 @@ const WizzardScreen = () => {
     setError(null);
     
     try {
-      const response = await axios.post("/api/voice", { 
+      const response = await axios.post("/api/ia/voice", { 
         transcript: text.toLowerCase() 
       });
       
