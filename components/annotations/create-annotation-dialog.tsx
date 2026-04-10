@@ -41,6 +41,7 @@ import { File } from "lucide-react"
 
 import type { CreateAnnotationSchemaType } from '@/lib/schema/annotations'
 import { AICreator } from '../tasks/ai-creator'
+import EditorText from './editor-text'
 
 interface CreateAnnotationDialogProps {
   completionId: string
@@ -197,7 +198,7 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea
+                          {/* <Textarea
                             {...field}
                             id="summary"
                             className=""
@@ -205,6 +206,10 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
                             rows={4}
                             onChange={field.onChange}
                             value={field.value}
+                          /> */}
+                          <EditorText
+                            onChange={field.onChange}
+                            value={field.value || ""}
                           />
                         </FormControl>
                         {errors && errors.summary && (

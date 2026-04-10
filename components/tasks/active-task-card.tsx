@@ -117,7 +117,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
         queryKey: ["tasks"],
       })
       await queryClient.invalidateQueries({
-        queryKey: ["routines", selectedDate],
+        queryKey: ["routines"],
       })
       await queryClient.invalidateQueries({
         queryKey: ["streak"],
@@ -275,7 +275,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               
               <span className="text-muted-foreground">
-                {currentStep}|{limit}
+                {task.metrics?.length}|{limit}
               </span>
               <UpdateCounterDialog
                 counter={task.counter}

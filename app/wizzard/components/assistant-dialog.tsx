@@ -84,8 +84,8 @@ export default function AssistantDialog({ isOpen, onClose }: AssistantDialogProp
                   <div className="flex items-center gap-1.5">
                     <span className="text-[#666] text-xs">Shared with</span>
                     <div className="flex -space-x-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 border-2 border-[#252525]" />
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 border-2 border-[#252525]" />
+                      <div className="w-6 h-6 rounded-full bg-linear-to-br from-blue-400 to-purple-500 border-2 border-[#252525]" />
+                      <div className="w-6 h-6 rounded-full bg-linear-to-br from-orange-400 to-red-500 border-2 border-[#252525]" />
                     </div>
                   </div>
                   <button className="text-[#666] hover:text-white transition-colors">

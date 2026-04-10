@@ -143,13 +143,17 @@ const HabitStats: React.FC<HabitStatsProps> = ({
               {overallStats.totalRate}
             </p>
           )}
-          <p className="text-xs text-primary-foreground/70 mt-1">últimos 30 dias</p>
+          <p className="text-xs text-primary-foreground/70 mt-1">
+            últimos 30 dias
+          </p>
         </div>
 
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Flame className="size-4" />
-            <span className="text-xs">Melhor Sequência</span>
+            <span className="text-xs">
+              Melhor Sequência
+            </span>
           </div>
           {isLoading ? (
             <Skeleton className="h-8 w-12" />
@@ -158,7 +162,9 @@ const HabitStats: React.FC<HabitStatsProps> = ({
               {overallStats.longestCurrentStreak}
             </p>
           )}
-          <p className="text-xs text-muted-foreground mt-1">dias ativos</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            dias ativos
+          </p>
         </div>
 
         <div className="bg-card/60 border border-border rounded-xl p-4">
@@ -173,13 +179,17 @@ const HabitStats: React.FC<HabitStatsProps> = ({
               { overallStats.recentCompletions}
             </p>
           )}
-          <p className="text-xs text-muted-foreground mt-1">últimos 30 dias</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            últimos 30 dias
+          </p>
         </div>
 
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Target className="size-4" />
-            <span className="text-xs">Hábitos Ativos</span>
+            <span className="text-xs">
+              Hábitos Ativos
+            </span>
           </div>
           {isLoading ? (
             <Skeleton className="h-8 w-12" />
@@ -188,7 +198,9 @@ const HabitStats: React.FC<HabitStatsProps> = ({
               { overallStats.totalHabits }
             </p>
           )}
-          <p className="text-xs text-muted-foreground mt-1">em acompanhamento</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            em acompanhamento
+          </p>
         </div>
       </div>
 
@@ -208,7 +220,9 @@ const HabitStats: React.FC<HabitStatsProps> = ({
       ) : (
         overallStats.bestHabit && (
           <div className="bg-card/60 border border-border rounded-xl p-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">Melhor Desempenho</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">
+              Melhor Desempenho
+            </h3>
             <div className="flex items-center gap-3">
               <div
                 className="size-12 rounded-xl flex items-center justify-center"
@@ -308,7 +322,9 @@ const HabitStats: React.FC<HabitStatsProps> = ({
 
           {/* Habit Rankings */}
           <div className="bg-card/60 border border-border rounded-xl p-4">
-            <h3 className="font-semibold mb-4">Ranking de Hábitos</h3>
+            <h3 className="font-semibold mb-4">
+              Ranking de Hábitos
+            </h3>
             <div className="space-y-3">
               {habits.map((stat, index) => {
                 return (
@@ -340,8 +356,12 @@ const HabitStats: React.FC<HabitStatsProps> = ({
                         {isLoading ? <Skeleton className="h-8 w-12" /> : stat.current_streak} dias de sequência
                       </p>
                     </div>
-                    <span className="text-sm font-bold">
-                      {isLoading ? <Skeleton className="h-8 w-12" /> : stat.completion_rate}%
+                    <span className="text-sm font-bold flex flex-row gap-2 items-center">
+                      {isLoading ? <Skeleton className="h-8 w-12" /> : (
+                        <p className='text-green-500 tracking-tighter text-sm font-medium'>
+                          {stat.completions.length} conclúidos
+                        </p>
+                      )}
                     </span>
                   </div>
                 )

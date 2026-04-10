@@ -42,6 +42,7 @@ import { File } from "lucide-react"
 
 import type { UpdateAnnotationSchemaType } from '@/lib/schema/annotations'
 import type { Annotations } from '@prisma/client'
+import EditorText from './editor-text'
 
 interface UpdateAnnotationDialogProps {
   annotation: Annotations
@@ -189,20 +190,15 @@ const UpdateAnnotationDialog:React.FC<UpdateAnnotationDialogProps> = ({ annotati
                     />
                   </div>
 
-                  <FormField
+                 <FormField
                     control={control}
                     name="summary"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea
-                            {...field}
-                            id="summary"
-                            className=""
-                            placeholder="Faça um breve resumo do seu dia aqui..."
-                            rows={4}
+                          <EditorText
                             onChange={field.onChange}
-                            value={field.value}
+                            value={field.value || ""}
                           />
                         </FormControl>
                         {errors && errors.summary && (

@@ -84,6 +84,7 @@ enum HABIT_LAYOUT {
   VERTICAL
   HORIZONTAL
 }
+
 model UserSettings {
   userId String @id @map("user_id")
 
@@ -96,12 +97,10 @@ model UserSettings {
   smsNotifications     Boolean? @default(false) @map("sms_notifications")
 
   // 👇 NOVAS PREFERÊNCIAS
-
   showGraphs Boolean? @default(true) @map("show_graphs")
 
   habitLayout HABIT_LAYOUT? @default(VERTICAL) @map("habit_layout")
 
-// NOVOS CAMPOS
   name       String?      @db.VarChar(100)
   email      String?      @map("email")
   phone      String?      @map("phone")

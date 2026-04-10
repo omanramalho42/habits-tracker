@@ -164,11 +164,11 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
       </DialogTrigger>
 
       <DialogContent className="max-w-[90vw]">
-        <DialogHeader>
+        {/* <DialogHeader>
           <DialogTitle className="flex flex-row items-center justify-start gap-3 text-2xl">
             <p>Criar uma nova tarefa</p>
           </DialogTitle>
-        </DialogHeader>
+        </DialogHeader> */}
 
         <Form {...form}>
           <form className="space-y-3">
