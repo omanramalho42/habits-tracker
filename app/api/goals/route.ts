@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
       prisma.goals.findMany({
         where: { userId: userDb.id },
-        take: 4, // 👈 só preview
+        take: 3, // 👈 só preview
         orderBy: { createdAt: "desc" }
       })
     ])

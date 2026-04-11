@@ -281,6 +281,24 @@ model Counter {
   @@map("counter")
 }
 
+model Emoji {
+  id          String      @id @default(uuid())
+  name        String
+  imageUrl    String      @map("image_url")
+
+
+  taskId      String?     @unique @map("task_id")
+  task        Task?       @relation(fields: [taskId], references: [id])
+
+  status      HabitStatus @default(ACTIVE)
+
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
+
+  @@map("emoji")
+}
+
 model Task {
   id            String      @id @default(uuid())
 
@@ -290,7 +308,10 @@ model Task {
   name          String      @db.VarChar(100)
 
   description   String?     @db.VarChar(255)
+  
   emoji         String?     @db.VarChar(10)
+  emojiUrl      Emoji[]
+
   color         String?     @db.VarChar(10)
 
   imageUrl      String?     @db.VarChar(255) @map("image_url")

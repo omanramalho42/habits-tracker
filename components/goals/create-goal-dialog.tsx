@@ -98,11 +98,11 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
       toast.success("Objetivo criado com sucesso! 🎉", {
         id: "create-goal"
       })
-      // if(data) {
-      //   // console.log(data, 'data ⚠️')
-      //   setShowGoals(true)
-      // }
-      // setGoalsData(data)
+      if(values) {
+        console.log(values, 'values ⚠️')
+        setShowGoals(true)
+      }
+      setGoalsData(values.data)
 
       await queryClient.invalidateQueries({
         queryKey: [
