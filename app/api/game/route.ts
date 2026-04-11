@@ -19,25 +19,44 @@ export type GameResult = {
 }
 
 export async function POST(request: Request) {
-    const { userId } = await auth();
+  const { userId } = await auth();
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Não autorizado" },
-        { status: 401 }
-      );
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Não autorizado" },
+      { status: 401 }
+    );
+  }
+    
+  const userDb = await prisma.user.findFirst({
+    where: {
+      clerkUserId: userId
     }
+  })
+  
+  if (!userDb) {
+    return NextResponse.json({
+      error: "user not found"
+    }, { status: 401 })
+  }
 
   const data = await request.json();
   const { action } = data;
+  
+  console.log(action, "action")
 
   if (action === "spin") {
     // Busca 10 hábitos ativos do usuário de forma aleatória (ou os top 10)
     const habits = await prisma.habit.findMany({
-      where: { userId, status: "ACTIVE" },
+      where: {
+        userId: userDb.id,
+        status: "ACTIVE",
+      },
       take: 10,
     });
 
+
+    console.log(habits, "Habits")
     // MENSAGEM CLARA AQUI
     if (habits.length < 10) {
       return NextResponse.json(

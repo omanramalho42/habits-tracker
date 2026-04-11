@@ -26,6 +26,7 @@ import type { User, UserSettings } from '@prisma/client'
 import CreatePixKeyDialog from '../modals/create-pix-key-dialog'
 import { StreakDialog } from '../streak/streak-dialog'
 import HeaderNavigation from '../header/header-navigation'
+import { Power } from 'lucide-react'
 
 const HeaderSection:React.FC = () => {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -54,6 +55,7 @@ const HeaderSection:React.FC = () => {
             userSettings={userSettings}
           />
         )}
+        <Power className='h-12 w-12' />
         <StreakDialog />
       </div>
       <div className="flex flex-col mt-15 space-y-2">

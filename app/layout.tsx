@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils"
 import { syncCurrentUser } from "@/lib/sync-user"
 
 import "@/app/globals.css"
-import HeaderSection from "@/components/habits/header-section"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })

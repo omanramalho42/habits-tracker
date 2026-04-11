@@ -8,6 +8,7 @@ import { EmojiSuggestions } from "@/components/v2/emoji-suggestion"
 import { JackpotGame } from "@/components/v2/jackpot-game"
 import { VoiceAssistant } from "@/components/v2/voice-assistent.ai"
 import { StreakCelebration } from "@/components/v2/streak-celebration"
+import HeaderSection from "@/components/habits/header-section"
 
 type View = "emoji" | "jackpot" | "voice" | "streak"
 
@@ -17,6 +18,7 @@ export default function Home() {
   return (
     <Providers>
       <main className="relative min-h-screen">
+        {/* <HeaderSection /> */}
         {/* Navigation Toggle */}
         <div className="fixed right-4 top-4 z-50 flex gap-2">
           <motion.button

@@ -52,8 +52,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    const { userId } = await auth()
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
     const body = await request.json();
     
@@ -70,6 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, imageUrl, taskId } = validation.data;
+    console.log(name,imageUrl, taskId)
 
     const newEmoji = await prisma.emoji.create({
       data: {
@@ -80,7 +84,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(newEmoji, { status: 201 });
+    return NextResponse.json(newEmoji, {
+      status: 201
+    });
 
   } catch (error: any) {
     console.error("Erro ao salvar emoji:", error);

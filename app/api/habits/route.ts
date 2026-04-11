@@ -143,6 +143,23 @@ export async function POST(request: NextRequest) {
         error: "user not find on db"
       }, { status: 401 })
     }
+
+    // --- NOVA LÓGICA DE LIMITE ---
+    if (userDb.role === "USER") {
+      const habitCount = await prisma.habit.count({
+        where: { 
+          userId: userDb.id,
+          status: "ACTIVE", // Opcional: contar apenas os que não foram deletados
+          deletedAt: null 
+        }
+      })
+
+      if (habitCount >= 10) {
+        return NextResponse.json({ 
+          error: "Limite de 10 hábitos atingido para o plano gratuito." 
+        }, { status: 403 }) // 403 Forbidden é mais apropriado que 400 aqui
+      }
+    }
     
     const body = await request.json()
 
