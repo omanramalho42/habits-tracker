@@ -60,6 +60,7 @@ import {
 } from "lucide-react"
 
 import type { CreateTaskSchemaType } from "@/lib/schema/task"
+import CustomEmojiPicker from "../v2/emoji-picker"
 
 interface CreateTaskDialogProps {
   trigger?: React.ReactNode
@@ -88,6 +89,7 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
       limitCounter: 1,
       counterId: "",
       custom_field: "",
+      emojiId: ""
     }
   })
 
@@ -318,7 +320,6 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                   } 
                 />
               </div>
-
               <FormField
                 control={control}
                 name="description"
@@ -339,6 +340,12 @@ const CreateTaskDialog = ({ trigger }: CreateTaskDialogProps) => {
                     )}
                   </FormItem>
                 )}
+              />
+            </div>
+            {/* Container do Seletor de Emoji - Largura fixa no desktop, full no mobile */}
+            <div className="w-full">
+              <CustomEmojiPicker
+                control={control}
               />
             </div>
 

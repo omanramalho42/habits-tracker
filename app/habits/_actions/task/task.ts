@@ -44,7 +44,8 @@ export async function createTask(form: CreateTaskSchemaType) {
       videoUrl,
       color,
       description,
-      isPLus
+      isPLus,
+      emojiId,
     } = parsedBody.data
 
     // ✅ IMAGE
@@ -81,7 +82,11 @@ export async function createTask(form: CreateTaskSchemaType) {
         ...(counterId && {
           counterId
         }),
-
+        emojiUrl: {
+          connect: {
+            id: emojiId
+          } // Onde 'emoji' é o ID vindo do formulário
+        },
         imageUrl: imageUrlUploaded || null,
         videoUrl: videoUrlUploaded || null,
 
@@ -108,6 +113,7 @@ export async function createTask(form: CreateTaskSchemaType) {
             CounterStep: true
           }
         },
+        emojiUrl: true
       },
     })
 
@@ -184,7 +190,8 @@ export async function updateTask(form: UpdateTaskSchemaType) {
       videoUrl,
       color,
       description,
-      isPLus
+      isPLus,
+      emojiId
     } = parsedBody.data
 
     // ✅ IMAGE
@@ -220,7 +227,11 @@ export async function updateTask(form: UpdateTaskSchemaType) {
         name,
         color,
         description,
-
+        emojiUrl: {
+          connect: {
+            id: emojiId
+          } // Onde 'emoji' é o ID vindo do formulário
+        },
         ...(counterId && {
           counterId
         }),
@@ -250,6 +261,7 @@ export async function updateTask(form: UpdateTaskSchemaType) {
             CounterStep: true
           }
         },
+        emojiUrl: true
       },
     })
 

@@ -5,12 +5,16 @@ import { cloudinary } from "@/lib/cloudinary";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// ✅ DEFINIÇÃO PRECISA DA TEMÁTICA LAB HABIT
+// ✅ DEFINIÇÃO PRECISA DA TEMÁTICA LAB HABIT (Refinada para ícones 3D Premium)
 const BRAND_STYLE = `
-Style: Minimalist Cyberpunk App Icon
-Core Colors: ONLY Neon Orange (#ff5a3d) and Deep Purple/Black tones.
-Effects: Soft neon glow, translucent cyberpunk glass texture, subtle gradients for depth, 3D rendered style.
-Composition: Single, centered object. No text. Dark background. High contrast. Premium quality mobile app icon.
+Style: High-fidelity 3D Mobile App Icon.
+Visual Language: iOS-inspired aesthetic, rounded corners, soft claymorphism and glassmorphism.
+Core Colors: Dominant Neon Orange (#ff5a3d), accented with deep cosmic purple and midnight black.
+Effects: Volumetric lighting, soft neon inner glow, subtle frosted glass texture, premium 3D render.
+Composition: A single centered subject, bold silhouette, high-angle soft shadows for depth. 
+Background: Solid dark-purple or pitch-black background to make colors pop.
+Quality: 8k resolution, Masterpiece, Unreal Engine 5 render style, minimalist but textured.
+Strict Rule: No text, no words, no letters. Flat-to-3D depth.
 `;
 
 export async function generateEmojiAction(formData: FormData) {

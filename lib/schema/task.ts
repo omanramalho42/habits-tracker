@@ -18,7 +18,10 @@ export const CreateTaskSchema = z.object({
     .max(10, "O valor máximo a ser selecionado é igual a 10")
     .default(1)
     .optional(),
-  counterId: z.string().optional()
+  counterId: z.string().optional(),
+  // ... outros campos
+  emojiId: z.string().min(1, "Selecione um ícone").optional(), // ID do Emoji
+  // ... resto do schema
 })
 
 export type CreateTaskSchemaType = z.infer<typeof CreateTaskSchema>
@@ -48,6 +51,7 @@ export const UpdateTaskSchema = z.object({
     .max(10, "O valor máximo a ser selecionado é igual a 10")
     .default(1)
     .optional(),
+  emojiId: z.string().min(1, "Selecione um ícone").optional(), // ID do Emoji
   counterId: z.string().optional(),
 })
 

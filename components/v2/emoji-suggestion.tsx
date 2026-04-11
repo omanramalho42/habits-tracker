@@ -282,7 +282,7 @@ export function EmojiSuggestions() {
           className="mb-4"
         >
           <span className="inline-flex items-center rounded-full border border-[#ff5a3d]/30 bg-[#ff5a3d]/10 px-4 py-1.5 text-sm font-medium text-[#ff8a70] backdrop-blur-sm shadow-[0_0_20px_rgba(255,90,61,0.2)]">
-            Release v1.65
+            Versão v1.65
           </span>
         </motion.div>
 
@@ -294,7 +294,7 @@ export function EmojiSuggestions() {
           animate="visible"
           className="mb-12 text-balance bg-linear-to-r from-[#ffa590] via-[#ff7a5c] to-[#ff5a3d] bg-clip-text text-center text-4xl font-bold tracking-tight text-transparent sm:text-5xl"
         >
-          AI Emoji Suggestions
+          AI Emoji
         </motion.h1>
 
         {/* Emoji Selector */}
@@ -302,21 +302,27 @@ export function EmojiSuggestions() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="relative mb-12 w-full max-w-3xl"
+          className="relative mb-12 w-full max-w-2xl" // Ajustado para centralizar a grade
         >
-          {/* Glow behind cards */}
-          <div className="absolute -bottom-8 left-1/2 h-24 w-3/4 -translate-x-1/2 rounded-full bg-linear-to-r from-transparent via-[#ff5a3d]/20 to-transparent blur-2xl" />
+          {/* Glow behind the grid */}
+          <div className="absolute -inset-4 rounded-4xl bg-[#ff5a3d]/5 blur-3xl" />
           
-          {/* Scrollable container */}
-          <div className="scrollbar-hide relative flex gap-4 overflow-x-auto px-4 py-8" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {/* Scrollable Grid Container */}
+          <div
+            className="scrollbar-hide relative grid max-h-130 container-scroll grid-cols-5 gap-3 overflow-y-auto rounded-3xl border border-white/5 bg-black/20 p-6 backdrop-blur-md"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
             <style jsx>{`
               .scrollbar-hide::-webkit-scrollbar {
                 display: none;
               }
             `}</style>
-            
+
             {isLoading ? (
-              <div className="flex w-full items-center justify-center py-12">
+              <div className="col-span-5 flex w-full items-center justify-center py-20">
                 <Spinner className="size-8 text-[#ff5a3d]" />
               </div>
             ) : (
@@ -331,72 +337,65 @@ export function EmojiSuggestions() {
                       variants={itemVariants}
                       initial="hidden"
                       animate="visible"
-                      exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                      exit={{ opacity: 0, scale: 0.8 }}
                       whileHover={{ 
-                        scale: isSelected ? 1.05 : 1.1,
-                        transition: { type: "spring", stiffness: 400, damping: 25 }
+                        scale: isSelected ? 1.02 : 1.08,
+                        zIndex: 10
                       }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedId(isSelected ? null : emoji.id)}
-                      className="group relative shrink-0"
-                      style={{ 
-                        transitionDelay: `${index * 50}ms`,
-                      }}
+                      className="group relative flex aspect-square items-center justify-center"
                     >
                       {/* Selection glow */}
                       <AnimatePresence>
                         {isSelected && (
                           <motion.div
+                            layoutId="selection-glow"
                             initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ 
-                              opacity: 1, 
-                              scale: 1,
-                            }}
+                            animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
-                            className="absolute -inset-1 rounded-2xl bg-linear-to-br from-[#ff7a5c] via-[#ff5a3d] to-[#cc3d22] blur-md"
+                            className="absolute -inset-2 rounded-2xl bg-linear-to-br from-[#ff7a5c] via-[#ff5a3d] to-[#cc3d22] blur-md"
                           />
                         )}
                       </AnimatePresence>
                       
-                      {/* Hover glow */}
-                      <div className={`absolute -inset-1 rounded-2xl bg-linear-to-br from-[#ff5a3d]/40 to-[#ff3d1d]/20 opacity-0 blur-lg transition-opacity duration-300 ${isSelected ? '' : 'group-hover:opacity-100'}`} />
-                      
                       {/* Card */}
                       <div
                         className={`
-                          relative flex h-20 w-20 items-center justify-center rounded-2xl
+                          relative flex h-full w-full items-center justify-center rounded-xl
                           border transition-all duration-300
-                          sm:h-24 sm:w-24
                           ${isSelected
                             ? "border-[#ff7a5c]/80 bg-[#1a0808]/90 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_0_30px_rgba(255,90,61,0.4)]"
-                            : "border-[#ff5a3d]/20 bg-[#1a0a0a]/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:border-[#ff5a3d]/40 hover:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_0_20px_rgba(255,90,61,0.2)]"
+                            : "border-[#ff5a3d]/10 bg-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:border-[#ff5a3d]/40 hover:bg-[#1a0a0a]/80"
                           }
                           backdrop-blur-xl
                         `}
                       >
-                        {/* Inner glow effect */}
-                        <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-white/5 via-transparent to-transparent" />
+                        {/* Inner glass reflection */}
+                        <div className="absolute inset-0 rounded-xl bg-linear-to-br from-white/10 via-transparent to-transparent opacity-50" />
                         
-                        {isImage(emoji.imageUrl) ? (
-                          <Image
-                            fill
-                            src={emoji.imageUrl}
-                            alt={emoji.name}
-                            className="h-10 w-10 rounded-lg object-cover sm:h-12 sm:w-12"
-                          />
-                        ) : (
-                          <span className="text-3xl sm:text-4xl">
-                            {emoji.imageUrl}
-                          </span>
-                        )}
+                        <div className="relative h-12 w-12 sm:h-14 sm:w-14">
+                          {isImage(emoji.imageUrl) ? (
+                            <Image
+                              fill
+                              src={emoji.imageUrl}
+                              alt={emoji.name}
+                              className="rounded-lg object-contain p-1 w-12 h-12"
+                            />
+                          ) : (
+                            <span className="flex h-full w-full items-center justify-center text-3xl">
+                              {emoji.imageUrl}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      
-                      {/* Selection indicator pulse */}
+
+                      {/* Animated pulse for selected item */}
                       {isSelected && (
                         <motion.div
-                          initial={{ scale: 1, opacity: 0.5 }}
+                          initial={{ opacity: 0.5 }}
                           animate={{ 
-                            scale: [1, 1.15, 1],
+                            scale: [1, 1.1, 1],
                             opacity: [0.5, 0, 0.5],
                           }}
                           transition={{
@@ -404,7 +403,7 @@ export function EmojiSuggestions() {
                             repeat: Infinity,
                             ease: "easeInOut",
                           }}
-                          className="absolute -inset-2 rounded-3xl border-2 border-[#ff5a3d]/40"
+                          className="absolute -inset-1 z-[-1] rounded-2xl border-2 border-[#ff5a3d]/40"
                         />
                       )}
                     </motion.button>
@@ -413,6 +412,9 @@ export function EmojiSuggestions() {
               </AnimatePresence>
             )}
           </div>
+
+          {/* Bottom Fade Gradient (indicates more content) */}
+          <div className="pointer-events-none absolute bottom-0 left-0 h-16 w-full rounded-b-3xl bg-gradient-to-t from-[#0a0a0a] to-transparent" />
         </motion.div>
 
         {/* Create Emoji Button - Premium Dark Glass with Neon */}
@@ -510,7 +512,9 @@ export function EmojiSuggestions() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between mb-2">
-                      <FormLabel className="text-sm font-medium text-[#ffa590]">Resultado da IA</FormLabel>
+                      <FormLabel className="text-sm font-medium text-[#ffa590]">
+                        Resultado da IA
+                      </FormLabel>
                       
                       <div className="flex items-center gap-2">
                         <input 

@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence, useAnimation } from "framer-motion"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { X, MoreHorizontal, HelpCircle, Trophy, Sparkles } from "lucide-react"
+import { HelpCircle, Trophy, Sparkles } from "lucide-react"
 import type { Player, GameResult } from "@/app/api/game/route"
 import { Habit } from "@prisma/client"
 import { toast } from "sonner"
+import { useSound } from "@/hooks/use-sound"
 
 // Slot symbols using emojis as fallback
 const SLOT_SYMBOLS = ["🍒", "🍋", "🍊", "🍇", "🍎", "🥝", "🍑", "🫐", "🍓", "🍌", "🥭", "🍍"]
@@ -55,37 +56,60 @@ export function JackpotGame() {
     queryKey: ["leaderboard"],
     queryFn: fetchLeaderboard,
   })
+  // 2. Inicialize o som
+  const { play } = useSound()
 
-// 1. Force a regra de 10 hábitos
-const canPlay = habits.length >= 10; 
-
-const spinMutation = useMutation({
-  mutationFn: () => playGame(),
-  onSuccess: (result) => {
-    setGameResult(result);
-    setReelPositions(result.reels);
-    setTimeout(() => {
+  const canPlay = habits.length >= 10; 
+  // No spinMutation, precisamos parar o som
+  const spinMutation = useMutation({
+    mutationFn: () => playGame(),
+    onSuccess: (result) => {
+      setGameResult(result);
+      setReelPositions(result.reels);
+      
+      setTimeout(() => {
+        setIsSpinning(false);
+        setShowResult(true);
+        
+        // 🔇 PARAR SOM DE ROLETA e tocar o final
+        // stop("roulette") // Se o seu hook permitir stop
+        
+        if (result.isWin) {
+          play("success")
+        } else {
+          play("pop") 
+        }
+      }, 2800);
+      
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+    onError: (error: any) => {
       setIsSpinning(false);
-      setShowResult(true);
-    }, 2800);
-    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-  },
-  onError: (error: any) => {
-    setIsSpinning(false);
-    // Exibe a mensagem exata que veio do servidor (API)
-    toast.error(error.message); 
-  }
-});
-  // Se não houver hábitos reais, use os SLOT_SYMBOLS de fallback
-  const numHabits = habits.length > 0 ? habits.length : 12;
-  console.log(numHabits, canPlay)
+      // 🔇 PARAR SOM DE ROLETA
+      play("error")
+      toast.error(error.message); 
+    }
+  });
+
   const handleSpin = useCallback(() => {
-    if (!canPlay || isSpinning) return
+    if (!canPlay) {
+      play("error")
+      return
+    }
+    if (isSpinning) return
+
+    play("click") 
+    
+    // 🔊 SOM DE ROLETA (Loop)
+    // Se o seu useSound retornar o objeto de áudio ou tiver um método de stop, use-o.
+    // Caso contrário, você pode disparar um som de "giro rápido" aqui.
+    play("levelUp") // <--- Adicionado som de roleta constante
+    
     setIsSpinning(true)
     setShowResult(false)
     setGameResult(null)
     spinMutation.mutate()
-  }, [canPlay, isSpinning, spinMutation])
+  }, [canPlay, isSpinning, spinMutation, play])
 
   // Dentro do componente JackpotGame
   const getSymbol = (index: number) => {
@@ -351,12 +375,12 @@ function SlotReel({
   }, [isSpinning, controls, delay])
 
   return (
-    <div className="relative h-48 w-20 overflow-hidden rounded-xl border border-[#2a2a40]/30 bg-gradient-to-b from-[#1a1a28] to-[#12121d] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+    <div className="relative h-48 w-20 overflow-hidden rounded-xl border border-[#2a2a40]/30 bg-linear-to-b from-[#1a1a28] to-[#12121d] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
       {/* Top gradient fade */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-12 bg-gradient-to-b from-[#0d0d15] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-12 bg-linear-to-b from-[#0d0d15] to-transparent" />
       
       {/* Bottom gradient fade */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 bg-gradient-to-t from-[#0d0d15] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 bg-linear-to-t from-[#0d0d15] to-transparent" />
       
       {/* Symbols */}
       <motion.div
@@ -369,7 +393,7 @@ function SlotReel({
             className={`
               flex h-14 w-14 items-center justify-center rounded-xl
               ${i === 1 && !isSpinning
-                ? "bg-gradient-to-br from-[#ff6b4a]/20 to-[#7c3aed]/20 shadow-[0_0_20px_rgba(255,107,74,0.3)]"
+                ? "bg-linear-to-br from-[#ff6b4a]/20 to-[#7c3aed]/20 shadow-[0_0_20px_rgba(255,107,74,0.3)]"
                 : "bg-[#1a1a28]/50"
               }
             `}
@@ -389,7 +413,7 @@ function SlotReel({
       </motion.div>
       
       {/* Glow edge effect */}
-      <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-[#ff6b4a]/5 via-transparent to-[#7c3aed]/5" />
+      <div className="pointer-events-none absolute inset-0 rounded-xl bg-linear-to-br from-[#ff6b4a]/5 via-transparent to-[#7c3aed]/5" />
     </div>
   )
 }

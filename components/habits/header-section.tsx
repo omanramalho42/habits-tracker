@@ -55,7 +55,6 @@ const HeaderSection:React.FC = () => {
             userSettings={userSettings}
           />
         )}
-        <Power className='h-12 w-12' />
         <StreakDialog />
       </div>
       <div className="flex flex-col mt-15 space-y-2">
