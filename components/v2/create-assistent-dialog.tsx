@@ -45,7 +45,7 @@ const schema = z.object({
   name: z.string().min(1),
   emojiId: z.string().min(1),
   prompt: z.string().optional(),
-  voice: z.string().optional(),
+  voiceId: z.string().optional(),
   temperature: z.number().min(0).max(1),
   creativity: z.number().min(0).max(1),
   memoryEnabled: z.boolean(),
@@ -54,7 +54,8 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 async function createAssistant(data: any) {
-  const res = await fetch("/api/assistant", {
+  console.log(data, 'data');
+  const res = await fetch("/api/ia", {
     method: "POST",
     body: JSON.stringify(data),
   })
@@ -72,6 +73,7 @@ export default function CreateAssistantDialog({ trigger }: { trigger?: React.Rea
     defaultValues: {
       name: "",
       prompt: "",
+      voiceId: "",
       temperature: 0.7,
       creativity: 0.5,
       memoryEnabled: true,
@@ -82,7 +84,9 @@ export default function CreateAssistantDialog({ trigger }: { trigger?: React.Rea
     mutationFn: createAssistant,
     onSuccess: () => {
       toast.success("Assistant criado 🚀")
-      queryClient.invalidateQueries({ queryKey: ["assistants"] })
+      queryClient.invalidateQueries({
+        queryKey: ["assistants"]
+      })
       setOpen(false)
       form.reset()
     },
@@ -188,7 +192,9 @@ export default function CreateAssistantDialog({ trigger }: { trigger?: React.Rea
                 </div>
 
             
-            <VoicePicker control={form.control} />
+            <VoicePicker
+              control={form.control}
+            />
 
             {/* TEMPERATURE */}
             <FormField

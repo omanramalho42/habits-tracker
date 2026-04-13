@@ -78,7 +78,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!parsedBody.success) throw new Error(parsedBody.error.message)
     
     const {
-      id,
       name,
       emoji,
       description,

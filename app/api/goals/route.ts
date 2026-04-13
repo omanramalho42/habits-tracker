@@ -7,50 +7,61 @@ import { prisma } from "@/lib/prisma"
 import { CreateCategorieSchema } from "@/lib/schema/categorie"
 import { Prisma } from "@prisma/client"
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
-      return NextResponse.json({
-        error: "Unauthorized"
-      }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    
+
+    const { searchParams } = new URL(request.url)
+
+    const query = searchParams.get("query") || ""
+
     const userDb = await prisma.user.findFirst({
-      where: {
-        clerkUserId: userId
-      }
+      where: { clerkUserId: userId }
     })
-    
+
     if (!userDb) {
-      return NextResponse.json({
-        error: "user not find on db"
-      }, { status: 401 })
+      return NextResponse.json({ error: "user not found" }, { status: 401 })
     }
-    
+    const whereClause: any = { userId: userDb.id }
+
+    if (query && query !== "all") {
+      whereClause.OR = [
+        { name: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } }
+      ]
+    }
     const goals = await prisma.goals.findMany({
       where: {
         userId: userDb.id,
-        status: 'ACTIVE'
+        status: "ACTIVE",
+        ...whereClause
+        // OR: [
+        //   {
+        //     name: {
+        //       contains: query,
+        //       mode: "insensitive"
+        //     }
+        //   },
+        //   {
+        //     description: {
+        //       contains: query,
+        //       mode: "insensitive"
+        //     }
+        //   }
+        // ]
       },
       orderBy: {
         createdAt: "asc"
-      },
-      include: {
-        habits: true,
-        checkpoints: true
       }
     })
 
     return NextResponse.json(goals)
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error fetching goals:", error.message)
-      return NextResponse.json({
-        error: error.message
-      }, { status: 500 })
-    }
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
@@ -165,6 +176,63 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       error: "Internal server error",
       message: "Algo deu errado ao criar o objetivo."
+    }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json()
+    const { id, name, description, emoji } = body
+    
+    const { userId } = await auth()
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    
+    const userDb = await prisma.user.findFirst({
+      where: {
+        clerkUserId: userId
+      }
+    })
+    
+    if (!userDb) {
+      return NextResponse.json({
+        error: "user not found"
+      }, { status: 401 })
+    }
+    
+    if (!id) {
+      return NextResponse.json({ error: "ID obrigatório" }, { status: 400 })
+    }
+    const goal = await prisma.goals.findFirst({
+      where: {
+        id,
+        userId: userDb.id
+      }
+    })
+
+    if (!goal) {
+      return NextResponse.json({ error: "Goal não encontrado" }, { status: 404 })
+    }
+    const updatedGoal = await prisma.goals.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        emoji
+      }
+    })
+
+    return NextResponse.json(updatedGoal)
+
+  } catch (error: any) {
+    console.error(error)
+
+    return NextResponse.json({
+      error: "Erro ao atualizar goal",
+      details: error.message
     }, { status: 500 })
   }
 }

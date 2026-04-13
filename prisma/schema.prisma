@@ -67,6 +67,7 @@ model User {
   feedbacks   Feedback[]
   posts       Post[]
   counters    Counter[]
+  assistents  Assistant[]
 }
 
 enum THEME {
@@ -281,20 +282,50 @@ model Counter {
   @@map("counter")
 }
 
+model Assistant {
+  id              String    @id @default(cuid())
+
+  userId      String?
+  user        User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  name            String
+  
+  // Relacionamento com Emoji (Mascote)
+  emojiId         String    @map("emoji_id")
+  emoji           Emoji     @relation(fields: [emojiId], references: [id])
+  
+  prompt          String?   @db.Text
+  voiceId         String?   @map("voice_id")
+  
+  // Parâmetros de IA
+  temperature     Float     @default(0.7)
+  creativity      Float     @default(0.5)
+  memoryEnabled   Boolean   @default(true) @map("memory_enabled")
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("assistants")
+}
+
 model Emoji {
-  id          String      @id @default(uuid())
-  name        String
-  imageUrl    String      @map("image_url")
+  id        String      @id @default(uuid())
+  name      String
+  imageUrl  String      @map("image_url")
 
+  // Relacionamento com Task (se existir)
+  taskId    String?     @unique @map("task_id")
+  task      Task?       @relation(fields: [taskId], references: [id])
 
-  taskId      String?     @unique @map("task_id")
-  task        Task?       @relation(fields: [taskId], references: [id])
+  // Relacionamento com Assistant
+  assistants Assistant[]
 
-  status      HabitStatus @default(ACTIVE)
+  status    HabitStatus @default(ACTIVE)
 
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime?   @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime?   @updatedAt @map("updated_at")
+  deletedAt DateTime?   @map("deleted_at")
 
   @@map("emoji")
 }

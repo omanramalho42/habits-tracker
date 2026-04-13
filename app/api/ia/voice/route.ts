@@ -3,37 +3,29 @@ import { openai } from "@/lib/openai"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { voiceSchemas } from "@/lib/schema/ia"
-import z from "zod"
+import { ElevenLabsClient } from "elevenlabs"
+
+const elevenlabs = new ElevenLabsClient({
+  apiKey: process.env.ELEVENLABS_API_KEY,
+});
 
 export async function GET() {
   try {
-    const voices = [
-      {
-        id: "alloy",
-        name: "Alloy",
-        provider: "openai",
-        description: "Neutra e equilibrada",
-      },
-      {
-        id: "echo",
-        name: "Echo",
-        provider: "openai",
-        description: "Mais grave e profunda",
-      },
-      {
-        id: "nova",
-        name: "Nova",
-        provider: "openai",
-        description: "Suave e natural",
-      },
-    ]
+    const response = await elevenlabs.voices.getAll();
+    
+    // Mapeamos para o formato que seu front espera
+    const voices = response.voices.map(voice => ({
+      id: voice.voice_id,
+      name: voice.name,
+      provider: "elevenlabs",
+      previewUrl: voice.preview_url, // URL nativa do ElevenLabs
+      description: voice.labels?.accent || "Voz profissional",
+    }));
 
-    return NextResponse.json(voices)
+    return NextResponse.json(voices);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Erro ao buscar vozes" },
-      { status: 500 }
-    )
+    console.error(error);
+    return NextResponse.json({ error: "Erro ao buscar vozes" }, { status: 500 });
   }
 }
 
