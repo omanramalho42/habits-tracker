@@ -38,8 +38,8 @@ export function StreakDialog() {
             <Image
               src="/flame-bg.png" 
               alt="Ícone de fogo" 
-              width={100} 
-              height={100}
+              width={60} 
+              height={60}
               className="drop-shadow-2xl"
             />
           </div>

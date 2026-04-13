@@ -2,13 +2,14 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Sparkles, Gamepad2, Mic2, Flame } from "lucide-react"
+import { Sparkles, Gamepad2, Mic2, Flame, AtomIcon } from "lucide-react"
 import { Providers } from "@/components/v2/providers"
 import { EmojiSuggestions } from "@/components/v2/emoji-suggestion"
-import { JackpotGame } from "@/components/v2/jackpot-game"
+import JackpotGame from "@/app/jackpot/page"
 import { VoiceAssistant } from "@/components/v2/voice-assistent.ai"
 import { StreakCelebration } from "@/components/v2/streak-celebration"
 import HeaderSection from "@/components/habits/header-section"
+import CreateAssistantDialog from "@/components/v2/create-assistent-dialog"
 
 type View = "emoji" | "jackpot" | "voice" | "streak"
 

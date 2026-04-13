@@ -26,7 +26,11 @@ import type { User, UserSettings } from '@prisma/client'
 import CreatePixKeyDialog from '../modals/create-pix-key-dialog'
 import { StreakDialog } from '../streak/streak-dialog'
 import HeaderNavigation from '../header/header-navigation'
-import { Power } from 'lucide-react'
+import { AtomIcon, GamepadIcon, Power } from 'lucide-react'
+import CreateAssistantDialog from '../v2/create-assistent-dialog'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const HeaderSection:React.FC = () => {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -43,6 +47,8 @@ const HeaderSection:React.FC = () => {
     queryKey: ["user-settings"],
     queryFn: () => fetchUserSettings(),
   })
+
+  const router = useRouter()
   
   return (
     <div className="flex flex-row-reverse py-2 items-start justify-between">
@@ -55,6 +61,45 @@ const HeaderSection:React.FC = () => {
             userSettings={userSettings}
           />
         )}
+        <CreateAssistantDialog
+          trigger={
+            <button
+              type='button'
+              role='combobox'
+              className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
+              title="Criar assistente"
+            >
+              <div className="animate-float">
+                <Image
+                  src="/chat.png" 
+                  alt="Ícone de bot" 
+                  width={60} 
+                  height={60}
+                  className="drop-shadow-2xl"
+                />
+              </div>
+            </button>
+          }
+        />
+
+        <button
+          type='button'
+          role='combobox'
+          className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
+          title="Jogar jackpot"
+          onClick={() => router.push("/jackpot")}
+        >
+          <div className="animate-float">
+            <Image
+              src="/jackpot.png" 
+              alt="Iconde de jackpot" 
+              width={60} 
+              height={60}
+              className="drop-shadow-2xl"
+            />
+          </div>
+        </button>
+        
         <StreakDialog />
       </div>
       <div className="flex flex-col mt-15 space-y-2">

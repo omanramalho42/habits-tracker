@@ -47,9 +47,9 @@ export function XPBar({
             exit={{ opacity: 0, scale: 0.5, y: -20 }}
             className="absolute -top-16 left-1/2 -translate-x-1/2 whitespace-nowrap"
           >
-            <div className="flex items-center gap-2 rounded-full border border-yellow-500/50 bg-gradient-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 px-4 py-2 backdrop-blur-xl">
+            <div className="flex items-center gap-2 rounded-full border border-yellow-500/50 bg-linear-to-r from-yellow-500/20 via-amber-500/20 to-orange-500/20 px-4 py-2 backdrop-blur-xl">
               <Trophy className="size-5 text-yellow-400" />
-              <span className="bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text font-bold text-transparent">
+              <span className="bg-linear-to-r from-yellow-300 to-amber-400 bg-clip-text font-bold text-transparent">
                 Level Up!
               </span>
               <motion.div
@@ -122,7 +122,7 @@ export function XPBar({
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="relative h-full rounded-full bg-gradient-to-r from-[#ff5a3d] via-[#ff6b4a] to-[#ff8a70]"
+              className="relative h-full rounded-full bg-linear-to-r from-[#ff5a3d] via-[#ff6b4a] to-[#ff8a70]"
             >
               {/* Shine effect */}
               <motion.div
@@ -135,7 +135,7 @@ export function XPBar({
                   ease: "linear",
                   repeatDelay: 1,
                 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent"
               />
             </motion.div>
           </div>

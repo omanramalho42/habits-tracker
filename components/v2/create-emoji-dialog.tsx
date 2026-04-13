@@ -173,175 +173,171 @@ export default function CreateEmojiDialog({
   }
 
   return (
-    <>
-
-      {/* MODAL */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        {/* BOTÃO */}
-        <DialogTrigger asChild>
-          {trigger || (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }} // Reduzido y para animação mais sutil
-              animate={{ opacity: 1, y: 0 }}
-              // ✅ Animação de entrada MAIS RÁPIDA (0.2s tween)
-              transition={{ type: "tween", duration: 0.2, delay: 0.1 }} 
-              whileHover={{ 
-                scale: 1.01, // Reduzido scale para w-full
-                boxShadow: "0 0 25px rgba(255,90,61,0.3)", 
-              }}
-              whileTap={{ scale: 0.99 }}
-              aria-expanded={open}
-              // ✅ w-full e arredondamento menor
-              className="group relative w-full overflow-hidden rounded-xl" 
-            >
-              {/* Outer neon glow */}
-              <div className="absolute -inset-1 rounded-xl bg-linear-to-r from-[#ff3d1d] via-[#ff5a3d] to-[#cc2211] opacity-60 blur-md transition-all duration-150 group-hover:opacity-90 group-hover:blur-lg" />
+    <Dialog open={open} onOpenChange={setOpen}>
+      {/* BOTÃO */}
+      <DialogTrigger asChild>
+        {trigger || (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }} // Reduzido y para animação mais sutil
+            animate={{ opacity: 1, y: 0 }}
+            // ✅ Animação de entrada MAIS RÁPIDA (0.2s tween)
+            transition={{ type: "tween", duration: 0.2, delay: 0.1 }} 
+            whileHover={{ 
+              scale: 1.01, // Reduzido scale para w-full
+              boxShadow: "0 0 25px rgba(255,90,61,0.3)", 
+            }}
+            whileTap={{ scale: 0.99 }}
+            aria-expanded={open}
+            // ✅ w-full e arredondamento menor
+            className="group relative w-full overflow-hidden rounded-xl" 
+          >
+            {/* Outer neon glow */}
+            <div className="absolute -inset-1 rounded-xl bg-linear-to-r from-[#ff3d1d] via-[#ff5a3d] to-[#cc2211] opacity-60 blur-md transition-all duration-150 group-hover:opacity-90 group-hover:blur-lg" />
+            
+            {/* Button container */}
+            {/* ✅ Ajustado: py-2 (antes py-4), px-4 (antes px-8) e w-full */}
+            <div className="relative flex w-full items-center justify-center gap-2.5 rounded-xl border border-[#ff5a3d]/40 bg-linear-to-br from-[#1a0808]/95 via-[#200a0a]/90 to-[#150505]/95 px-4 py-2 backdrop-blur-xl transition-all duration-150 group-hover:border-[#ff7a5c]/60">
+              {/* Inner glass reflection */}
+              <div className="absolute inset-0 rounded-xl bg-linear-to-br from-white/10 via-transparent to-transparent" />
               
-              {/* Button container */}
-              {/* ✅ Ajustado: py-2 (antes py-4), px-4 (antes px-8) e w-full */}
-              <div className="relative flex w-full items-center justify-center gap-2.5 rounded-xl border border-[#ff5a3d]/40 bg-linear-to-br from-[#1a0808]/95 via-[#200a0a]/90 to-[#150505]/95 px-4 py-2 backdrop-blur-xl transition-all duration-150 group-hover:border-[#ff7a5c]/60">
-                {/* Inner glass reflection */}
-                <div className="absolute inset-0 rounded-xl bg-linear-to-br from-white/10 via-transparent to-transparent" />
-                
-                {/* Animated sparkles */}
-                <motion.div
-                  animate={{
-                    opacity: [0.5, 1, 0.5],
-                    scale: [1, 1.2, 1],
-                  }}
-                  transition={{
-                    // ✅ Animação MAIS RÁPIDA (1s)
-                    duration: 1, 
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  className="relative shrink-0"
-                >
-                  <Sparkles className="size-4 text-[#ff8a70]" /> {/* Reduzido de 5 para 4 */}
-                </motion.div>
-                
-                {/* Icon */}
-                {/* ✅ Ajustado: size-7 (antes size-10) */}
-                <div className="relative flex size-7 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-[#ff5a3d] to-[#cc3311] shadow-[0_0_15px_rgba(255,90,61,0.3)]">
-                  <Plus className="size-4 text-white" /> {/* Reduzido de 5 para 4 */}
-                </div>
-                
-                {/* Text */}
-                {/* ✅ Ajustado: text-sm (antes text-lg) */}
-                <span className="relative bg-linear-to-r from-[#ffd0c0] via-[#ffb090] to-[#ff8a70] bg-clip-text text-sm font-bold tracking-wide text-transparent whitespace-nowrap">
-                  Novo Emoji
-                </span>
-              </div>
-              
-              {/* Animated border glow */}
+              {/* Animated sparkles */}
               <motion.div
-                className="absolute inset-0 rounded-xl"
-                style={{
-                  background: "linear-gradient(90deg, transparent, rgba(255,90,61,0.3), transparent)",
-                  backgroundSize: "200% 100%",
-                }}
                 animate={{
-                  backgroundPosition: ["200% 0", "-200% 0"],
+                  opacity: [0.5, 1, 0.5],
+                  scale: [1, 1.2, 1],
                 }}
                 transition={{
-                  // ✅ Animação MAIS RÁPIDA (2s)
-                  duration: 2, 
+                  // ✅ Animação MAIS RÁPIDA (1s)
+                  duration: 1, 
                   repeat: Infinity,
-                  ease: "linear",
+                  ease: "easeInOut",
                 }}
-              />
-            </motion.button>
-          )}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md bg-[#0d0808] border-white/10">
-          <DialogHeader>
-            <DialogTitle className="text-orange-500">
-              Criar Emoji
-            </DialogTitle>
-            <DialogDescription>
-              Gere com IA ou envie uma imagem
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
-              {/* CONTROLES */}
-              <div className="flex justify-between">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={onFileChange}
-                />
-
-                <button type="button" onClick={() => fileInputRef.current?.click()}>
-                  <Paperclip className="size-4 text-white/50" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleGenerateWithAI}
-                  disabled={isGeneratingAI}
-                  className="flex items-center gap-2 text-xs text-orange-400"
-                >
-                  {isGeneratingAI ? <Spinner className="size-3" /> : <Wand2 className="size-3" />}
-                  IA
-                </button>
-              </div>
-
-              {/* PREVIEWS */}
-              <div className="grid grid-cols-2 gap-2">
-                <Preview
-                  src={originalPreview}
-                  active={selectedSource === "original"}
-                  onClick={() => {
-                    setSelectedSource("original")
-                    form.setValue("imageUrl", originalPreview!)
-                  }}
-                  label="Original"
-                />
-
-                <Preview
-                  src={aiPreview}
-                  active={selectedSource === "ai"}
-                  loading={isGeneratingAI}
-                  onClick={() => {
-                    setSelectedSource("ai")
-                    form.setValue("imageUrl", aiPreview!)
-                  }}
-                  label="IA"
-                />
-              </div>
-
-              {/* NAME */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="Nome..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* SUBMIT */}
-              <button
-                type="submit"
-                disabled={createMutation.isPending || isGeneratingAI}
-                className="w-full bg-orange-600 py-2 text-white rounded"
+                className="relative shrink-0"
               >
-                {createMutation.isPending ? "Salvando..." : "Salvar"}
+                <Sparkles className="size-4 text-[#ff8a70]" /> {/* Reduzido de 5 para 4 */}
+              </motion.div>
+              
+              {/* Icon */}
+              {/* ✅ Ajustado: size-7 (antes size-10) */}
+              <div className="relative flex size-7 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-[#ff5a3d] to-[#cc3311] shadow-[0_0_15px_rgba(255,90,61,0.3)]">
+                <Plus className="size-4 text-white" /> {/* Reduzido de 5 para 4 */}
+              </div>
+              
+              {/* Text */}
+              {/* ✅ Ajustado: text-sm (antes text-lg) */}
+              <span className="relative bg-linear-to-r from-[#ffd0c0] via-[#ffb090] to-[#ff8a70] bg-clip-text text-sm font-bold tracking-wide text-transparent whitespace-nowrap">
+                Novo Emoji
+              </span>
+            </div>
+            
+            {/* Animated border glow */}
+            <motion.div
+              className="absolute inset-0 rounded-xl"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(255,90,61,0.3), transparent)",
+                backgroundSize: "200% 100%",
+              }}
+              animate={{
+                backgroundPosition: ["200% 0", "-200% 0"],
+              }}
+              transition={{
+                // ✅ Animação MAIS RÁPIDA (2s)
+                duration: 2, 
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+          </motion.button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md bg-[#0d0808] border-white/10">
+        <DialogHeader>
+          <DialogTitle className="text-orange-500">
+            Criar Emoji
+          </DialogTitle>
+          <DialogDescription>
+            Gere com IA ou envie uma imagem
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
+            {/* CONTROLES */}
+            <div className="flex justify-between">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={onFileChange}
+              />
+
+              <button type="button" onClick={() => fileInputRef.current?.click()}>
+                <Paperclip className="size-4 text-white/50" />
               </button>
 
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    </>
+              <button
+                type="button"
+                onClick={handleGenerateWithAI}
+                disabled={isGeneratingAI}
+                className="flex items-center gap-2 text-xs text-orange-400"
+              >
+                {isGeneratingAI ? <Spinner className="size-3" /> : <Wand2 className="size-3" />}
+                IA
+              </button>
+            </div>
+
+            {/* PREVIEWS */}
+            <div className="grid grid-cols-2 gap-2">
+              <Preview
+                src={originalPreview}
+                active={selectedSource === "original"}
+                onClick={() => {
+                  setSelectedSource("original")
+                  form.setValue("imageUrl", originalPreview!)
+                }}
+                label="Original"
+              />
+
+              <Preview
+                src={aiPreview}
+                active={selectedSource === "ai"}
+                loading={isGeneratingAI}
+                onClick={() => {
+                  setSelectedSource("ai")
+                  form.setValue("imageUrl", aiPreview!)
+                }}
+                label="IA"
+              />
+            </div>
+
+            {/* NAME */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Nome..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* SUBMIT */}
+            <button
+              type="submit"
+              disabled={createMutation.isPending || isGeneratingAI}
+              className="w-full bg-orange-600 py-2 text-white rounded"
+            >
+              {createMutation.isPending ? "Salvando..." : "Salvar"}
+            </button>
+
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   )
 }
 

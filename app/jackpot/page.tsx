@@ -8,6 +8,7 @@ import type { Player, GameResult } from "@/app/api/game/route"
 import { Habit } from "@prisma/client"
 import { toast } from "sonner"
 import { useSound } from "@/hooks/use-sound"
+import HeaderNavigation from "@/components/header/header-navigation"
 
 // Slot symbols using emojis as fallback
 const SLOT_SYMBOLS = ["🍒", "🍋", "🍊", "🍇", "🍎", "🥝", "🍑", "🫐", "🍓", "🍌", "🥭", "🍍"]
@@ -39,7 +40,7 @@ async function playGame(): Promise<GameResult> {
 
 type Screen = "game" | "leaderboard"
 
-export function JackpotGame() {
+export default function JackpotGame() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("game")
   const [isSpinning, setIsSpinning] = useState(false)
   const [reelPositions, setReelPositions] = useState([[0, 1, 2], [3, 4, 5], [6, 7, 8]])
@@ -126,6 +127,7 @@ export function JackpotGame() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0a0a12]">
+      <HeaderNavigation />
       {/* Deep gradient background */}
       <div className="absolute inset-0 bg-linear-to-b from-[#12121f] via-[#0d0d18] to-[#080810]" />
       
@@ -442,7 +444,7 @@ function LeaderboardScreen({
           transition={{ delay: 0.1 }}
           className="relative"
         >
-          <div className="size-14 rounded-full bg-gradient-to-br from-[#4a4a60] to-[#2a2a40] p-1">
+          <div className="size-14 rounded-full bg-linear-to-br from-[#4a4a60] to-[#2a2a40] p-1">
             <div className="flex size-full items-center justify-center rounded-full bg-[#1a1a28] text-2xl">
               😎
             </div>
@@ -456,7 +458,7 @@ function LeaderboardScreen({
           transition={{ delay: 0 }}
           className="relative"
         >
-          <div className="size-20 rounded-full bg-gradient-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] p-1 shadow-[0_0_30px_rgba(251,191,36,0.4)]">
+          <div className="size-20 rounded-full bg-linear-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] p-1 shadow-[0_0_30px_rgba(251,191,36,0.4)]">
             <div className="flex size-full items-center justify-center rounded-full bg-[#1a1a28] text-3xl">
               🕶️
             </div>
@@ -473,7 +475,7 @@ function LeaderboardScreen({
           transition={{ delay: 0.2 }}
           className="relative"
         >
-          <div className="size-14 rounded-full bg-gradient-to-br from-[#4a4a60] to-[#2a2a40] p-1">
+          <div className="size-14 rounded-full bg-linear-to-br from-[#4a4a60] to-[#2a2a40] p-1">
             <div className="flex size-full items-center justify-center rounded-full bg-[#1a1a28] text-2xl">
               🤠
             </div>
@@ -498,7 +500,7 @@ function LeaderboardScreen({
       </motion.div>
 
       {/* Leaderboard List */}
-      <div className="mt-6 w-full max-w-sm flex-1 overflow-hidden rounded-2xl border border-[#2a2a40]/30 bg-gradient-to-b from-[#1a1a28] to-[#12121d]">
+      <div className="mt-6 w-full max-w-sm flex-1 overflow-hidden rounded-2xl border border-[#2a2a40]/30 bg-linear-to-b from-[#1a1a28] to-[#12121d]">
         <div className="scrollbar-hide max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {players.map((player, index) => (
             <motion.div
@@ -538,7 +540,7 @@ function LeaderboardScreen({
         transition={{ delay: 0.8 }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="mb-8 mt-6 w-full max-w-sm rounded-2xl bg-gradient-to-b from-[#2a2a40] to-[#1a1a28] px-8 py-4 font-semibold tracking-wider text-white shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300"
+        className="mb-8 mt-6 w-full max-w-sm rounded-2xl bg-linear-to-b from-[#2a2a40] to-[#1a1a28] px-8 py-4 font-semibold tracking-wider text-white shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300"
       >
         BUY POINTS
       </motion.button>

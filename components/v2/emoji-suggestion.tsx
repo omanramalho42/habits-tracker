@@ -28,6 +28,7 @@ import { Emoji } from "@prisma/client"
 import { toast } from "sonner"
 import { generateEmojiAction } from "@/app/_actions/emoji.actions"
 import Image from "next/image"
+import CreateAssistantDialog from "./create-assistent-dialog"
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(50),
@@ -253,14 +254,14 @@ export function EmojiSuggestions() {
 
       toast.success("Imagem anexada! ✨");
     }
-  };
+  }
   const isImage = (url: string) => {
     return (
       url.startsWith("data:") ||
       url.startsWith("http") ||
       url.includes("cloudinary")
     );
-  };
+  }
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0d0808]">
       {/* Deep gradient background */}
@@ -414,7 +415,7 @@ export function EmojiSuggestions() {
           </div>
 
           {/* Bottom Fade Gradient (indicates more content) */}
-          <div className="pointer-events-none absolute bottom-0 left-0 h-16 w-full rounded-b-3xl bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-0 h-16 w-full rounded-b-3xl bg-linear-to-t from-[#0a0a0a] to-transparent" />
         </motion.div>
 
         {/* Create Emoji Button - Premium Dark Glass with Neon */}

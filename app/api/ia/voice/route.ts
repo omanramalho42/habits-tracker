@@ -5,6 +5,38 @@ import { auth } from "@clerk/nextjs/server"
 import { voiceSchemas } from "@/lib/schema/ia"
 import z from "zod"
 
+export async function GET() {
+  try {
+    const voices = [
+      {
+        id: "alloy",
+        name: "Alloy",
+        provider: "openai",
+        description: "Neutra e equilibrada",
+      },
+      {
+        id: "echo",
+        name: "Echo",
+        provider: "openai",
+        description: "Mais grave e profunda",
+      },
+      {
+        id: "nova",
+        name: "Nova",
+        provider: "openai",
+        description: "Suave e natural",
+      },
+    ]
+
+    return NextResponse.json(voices)
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Erro ao buscar vozes" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
