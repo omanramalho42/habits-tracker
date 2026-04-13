@@ -53,40 +53,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { id: goalId } = await params
     const { userId } = await auth()
 
-    if (!userId) {
-      return NextResponse.json({
-        error: "Unauthorized"
-      }, { status: 401 })
-    }
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userDb = await prisma.user.findFirst({
-      where: {
-        clerkUserId: userId
-      }
+      where: { clerkUserId: userId }
     })
 
-    if (!userDb) {
-      return NextResponse.json({
-        error: "user not find on db"
-      }, { status: 401 })
-    }
+    if (!userDb) return NextResponse.json({ error: "User not found on db" }, { status: 401 })
 
     const body = await request.json()
-
     const parsedBody = UpdateGoalSchema.safeParse(body)
 
-    if (!parsedBody.success) throw new Error(parsedBody.error.message)
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: parsedBody.error.message }, { status: 400 })
+    }
     
-    const {
-      name,
-      emoji,
-      description,
-    } = parsedBody.data
+    const { name, emoji, description } = parsedBody.data
 
     const updatedGoal = await prisma.goals.update({
       where: {
         id: goalId,
-        userId: userDb.id
+        userId: userDb.id // Segurança: garante que o objetivo pertence ao usuário
       },
       data: {
         name,
@@ -98,8 +85,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json(updatedGoal)
   } catch (error) {
-    if(error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error?.code === "P2002" || error?.message?.includes("Unique constraint failed")) {
+    // Tratamento de erro específico para "Registro não encontrado"
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return NextResponse.json({ 
+          error: "Not Found", 
+          message: "O objetivo selecionado não foi encontrado para atualização." 
+        }, { status: 404 })
+      }
+      if (error.code === "P2002") {
         return NextResponse.json({
           error: "Duplicate entry",
           message: "Você já possui um objetivo com esse nome.",
@@ -107,11 +101,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         }, { status: 409 })
       }
     }
-    if (error instanceof Error) {
-      console.error("Error updating goal:", error.message)
-      return NextResponse.json({
-        error: error.message
-      }, { status: 500 })
-    }
+    
+    console.error("Error updating goal:", error instanceof Error ? error.message : error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }

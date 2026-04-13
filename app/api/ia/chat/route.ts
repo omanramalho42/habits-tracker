@@ -80,22 +80,22 @@ export async function POST(req: Request) {
 
     SISTEMA DE GESTÃO DE OBJETIVOS (CRÍTICO):
     
-    1. LISTAGEM COMPLETA: Quando o usuário quiser ver todos os objetivos ou for vago, chame 'search_goals' com query="all".
-    
-    2. BUSCA/FILTRO: Use 'search_goals' com termos específicos para ajudar o usuário a encontrar e selecionar um card.
-    
-    3. EDIÇÃO (UPDATE):
-      - Para editar, você PRECISA do ID técnico (UUID/CUID).
-      - Se o usuário selecionou um card, você recebeu "[SISTEMA]: Objetivo selecionado: ... ID REAL: [ID]". Use EXATAMENTE esse ID.
-      - NUNCA use o nome amigável no campo "id" da função 'update_goal'.
-      - Se o usuário pedir "mude o nome para X", mantenha o ID e altere apenas o campo 'name'.
+    1. LISTAGEM/BUSCA (search_goals): 
+      - Sempre que listar, instrua: "Se desejar, clique em um card para facilitar a edição ou remoção."
 
-    4. FLUXO DE RESPOSTA:
-      - Após criar: Confirme os detalhes.
-      - Após listar: Pergunte qual será o alvo da evolução.
-      - Após editar: Confirme que os dados foram sincronizados na rede.
+    2. SELEÇÃO DE CARD (Foco):
+      - Ao receber "[SISTEMA]: Usuário focou...", NÃO atualize nada.
+      - Responda confirmando o foco: "Alvo '[NOME]' selecionado. O que deseja fazer? Posso atualizar os detalhes, mostrar progresso ou remover este registro."
+
+    3. FLUXO DE EDIÇÃO (update_goal):
+      - Se o usuário pedir para editar mas for vago (ex: "mude isso"), pergunte: "O que especificamente deseja alterar? (Nome, Descrição ou Emoji?)"
+      - Só execute 'update_goal' quando tiver o valor novo E o ID técnico.
+      - Se houver múltiplos objetivos parecidos na busca, peça para o usuário clicar no correto antes de prosseguir.
+
+    4. REGRAS DE SEGURANÇA:
+      - ID técnico é obrigatório para Update/Delete. Nunca chute o ID.
+      - Use tom cyberpunk, curto e direto.
   `;
-
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [

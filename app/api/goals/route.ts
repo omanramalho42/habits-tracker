@@ -10,53 +10,37 @@ import { Prisma } from "@prisma/client"
 export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
-
     const query = searchParams.get("query") || ""
 
     const userDb = await prisma.user.findFirst({
       where: { clerkUserId: userId }
     })
 
-    if (!userDb) {
-      return NextResponse.json({ error: "user not found" }, { status: 401 })
+    if (!userDb) return NextResponse.json({ error: "User not found" }, { status: 401 })
+
+    // Construção robusta da cláusula WHERE
+    const whereClause: any = { 
+      userId: userDb.id,
+      status: "ACTIVE" 
     }
-    const whereClause: any = { userId: userDb.id }
 
     if (query && query !== "all") {
-      whereClause.OR = [
-        { name: { contains: query, mode: 'insensitive' } },
-        { description: { contains: query, mode: 'insensitive' } }
+      whereClause.AND = [
+        {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { description: { contains: query, mode: 'insensitive' } }
+          ]
+        }
       ]
     }
+
     const goals = await prisma.goals.findMany({
-      where: {
-        userId: userDb.id,
-        status: "ACTIVE",
-        ...whereClause
-        // OR: [
-        //   {
-        //     name: {
-        //       contains: query,
-        //       mode: "insensitive"
-        //     }
-        //   },
-        //   {
-        //     description: {
-        //       contains: query,
-        //       mode: "insensitive"
-        //     }
-        //   }
-        // ]
-      },
-      orderBy: {
-        createdAt: "asc"
-      }
+      where: whereClause,
+      orderBy: { createdAt: "asc" }
     })
 
     return NextResponse.json(goals)
@@ -64,7 +48,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

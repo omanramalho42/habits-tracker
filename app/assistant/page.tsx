@@ -33,17 +33,19 @@ export default function VoiceAssistant() {
     }
   }, [messages])
 
+  // Modifique seu useEffect de seleção
   useEffect(() => {
     if (!selectedGoal || !selectedAssistantId) return
 
+    // Em vez de disparar a mutação de chat direto com tom de "comando", 
+    // envie uma mensagem que apenas situa a IA no contexto.
     chatMutation.mutate({
       assistantId: selectedAssistantId,
-      // Garanta que estamos passando o goal.id real aqui
-      message: `[SISTEMA]: Objetivo selecionado: "${selectedGoal.name}". ID REAL: ${selectedGoal.id}.`,
+      message: `[SISTEMA]: Usuário focou no objetivo "${selectedGoal.name}" (ID: ${selectedGoal.id}). Aguarde instruções dele sobre o que fazer com este registro.`,
       history: messages
     })
 
-    setUserGoals([]) 
+    // Não limpe a lista aqui, deixe o usuário ver o que selecionou
   }, [selectedGoal])
 
   const { register, handleSubmit, watch, control, reset } = useForm<ChatSchema>({
@@ -229,22 +231,29 @@ export default function VoiceAssistant() {
 const GoalCard = ({ goal, isSelected, onClick }: any) => (
   <motion.div
     onClick={onClick}
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
+    // ... suas classes atuais ...
     className={cn(
-      "w-full p-4 rounded-2xl border transition-all group cursor-pointer",
+      "w-full p-4 rounded-2xl border transition-all group cursor-pointer relative overflow-hidden",
       isSelected
         ? "bg-purple-600/20 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
         : "bg-white/5 border-white/10 hover:border-purple-500/50"
     )}
   >
+    {/* Indicador de Seleção no canto do Card */}
+    {isSelected && (
+      <div className="absolute top-2 right-2 flex items-center gap-1">
+        <div className="size-2 rounded-full bg-purple-500 animate-pulse" />
+        <span className="text-[10px] text-purple-400 font-mono">SELECIONADO</span>
+      </div>
+    )}
+
     <div className="flex items-center gap-3">
       <div className="size-10 rounded-xl bg-purple-600/20 flex items-center justify-center text-xl">
         {goal.emoji || "🎯"}
       </div>
       <div className="flex-1">
         <h4 className="font-bold text-white">{goal.name}</h4>
-        <p className="text-xs text-white/40">{goal.description}</p>
+        <p className="text-xs text-white/40 line-clamp-1">{goal.description}</p>
       </div>
     </div>
   </motion.div>
