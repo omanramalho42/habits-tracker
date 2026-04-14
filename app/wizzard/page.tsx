@@ -36,6 +36,11 @@ import { PlansOverlay } from '@/components/plans-overlay'
 import HeaderSection from '@/components/habits/header-section'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import CreateGoalStepDialog from '@/components/goals/create-goal-step-dialog'
+import { CreateCategorieStepDialog } from '@/components/categories/create-categorie-step-dialog'
+import CreateTaskDialogSteps from '@/components/tasks/create-task-step-dialog'
+import { CreateHabitStepDialog } from '@/components/habits/create-habit-step-dialog'
+import CreateRoutineStepDialog from '@/components/routines/create-routine-step-dialog'
 
 interface ActionItem {
   id: string
@@ -426,7 +431,23 @@ const WizzardScreen = () => {
           <div className="space-y-2.5 mb-6">
 
             {/* ROUTINE */}
-            <CreateRoutineDialog
+            {/* <CreateRoutineDialog
+              trigger={
+                <div
+                  id="action-routine"
+                  className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                >
+                  <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                    {actions[0].icon}
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-white text-[15px]">{actions[0].title}</h3>
+                    <p className="text-[#555] text-[13px]">{actions[0].description}</p>
+                  </div>
+                </div>
+              }
+            /> */}
+            <CreateRoutineStepDialog
               trigger={
                 <div
                   id="action-routine"
@@ -444,7 +465,23 @@ const WizzardScreen = () => {
             />
 
             {/* HABIT */}
-            <CreateHabitDialog
+            {/* <CreateHabitDialog
+              trigger={
+                <div
+                  id="action-habit"
+                  className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                >
+                  <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                    {actions[1].icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white text-[15px]">{actions[1].title}</h3>
+                    <p className="text-[#555] text-[13px]">{actions[1].description}</p>
+                  </div>
+                </div>
+              }
+            /> */}
+            <CreateHabitStepDialog
               trigger={
                 <div
                   id="action-habit"
@@ -462,7 +499,23 @@ const WizzardScreen = () => {
             />
 
             {/* TASK */}
-            <CreateTaskDialog
+            {/* <CreateTaskDialog
+              trigger={
+                <div
+                  id="action-task"
+                  className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                >
+                  <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                    {actions[2].icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white text-[15px]">{actions[2].title}</h3>
+                    <p className="text-[#555] text-[13px]">{actions[2].description}</p>
+                  </div>
+                </div>
+              }
+            /> */}
+            <CreateTaskDialogSteps
               trigger={
                 <div
                   id="action-task"
@@ -480,7 +533,23 @@ const WizzardScreen = () => {
             />
 
             {/* GOAL */}
-            <CreateGoalDialog
+            {/* <CreateGoalDialog
+              trigger={
+                <div
+                  id="action-goal"
+                  className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                >
+                  <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                    {actions[3].icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white text-[15px]">{actions[3].title}</h3>
+                    <p className="text-[#555] text-[13px]">{actions[3].description}</p>
+                  </div>
+                </div>
+              }
+            /> */}
+            <CreateGoalStepDialog
               trigger={
                 <div
                   id="action-goal"
@@ -498,7 +567,7 @@ const WizzardScreen = () => {
             />
 
             {/* CATEGORY */}
-            <CreateCategorieDialog
+            <CreateCategorieStepDialog
               trigger={
                 <div
                   id="action-category"
@@ -514,7 +583,22 @@ const WizzardScreen = () => {
                 </div>
               }
             />
-
+            {/* <CreateCategorieDialog
+              trigger={
+                <div
+                  id="action-category"
+                  className="w-full bg-[#111113] hover:bg-[#161618] active:scale-[0.99] rounded-2xl p-4 flex items-center gap-4 border border-[#1a1a1c] hover:border-[#252528] group cursor-pointer"
+                >
+                  <div className="w-11 h-11 bg-[#1a1a1e] rounded-xl flex items-center justify-center">
+                    {actions[4].icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white text-[15px]">{actions[4].title}</h3>
+                    <p className="text-[#555] text-[13px]">{actions[4].description}</p>
+                  </div>
+                </div>
+              }
+            /> */}
           </div>
 
           {/* Voice Assistant Input */}

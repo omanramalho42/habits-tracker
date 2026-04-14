@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { syncCurrentUser } from "@/lib/sync-user"
 
 import "@/app/globals.css"
+import { SoundProvider } from "@/components/trial-wizzard/sound-provider"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -97,19 +98,21 @@ export default async function RootLayout({
               // enableSystem
               // disableTransitionOnChange
             >
-              <main
-                className={
-                  cn(
-                    `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
-                    settings?.bannerUrl ? `bg-[url'${settings.bannerUrl}']` : "bg-[url('/bg.png')]"
-                  )
-                }
-                style={{
-                  backgroundImage: settings?.bannerUrl ? `url(${settings?.bannerUrl})` : `bg-[url('/bg.png')]`
-                }}
-              >
-                { children }
-              </main>
+              <SoundProvider>
+                <main
+                  className={
+                    cn(
+                      `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
+                      settings?.bannerUrl ? `bg-[url'${settings.bannerUrl}']` : "bg-[url('/bg.png')]"
+                    )
+                  }
+                  style={{
+                    backgroundImage: settings?.bannerUrl ? `url(${settings?.bannerUrl})` : `bg-[url('/bg.png')]`
+                  }}
+                >
+                  { children }
+                </main>
+              </SoundProvider>
             </ThemeProvider>
             <Analytics />
           </QueryClientProvider>

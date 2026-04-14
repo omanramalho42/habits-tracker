@@ -8,6 +8,7 @@ export const CreateCategorieSchema = z.object({
   status: z.enum(['ACTIVE', 'PAUSED', 'ARCHIVED']).default("ACTIVE").optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  color: z.string().optional(),
   userId: z.string().optional(),
 })
 
@@ -18,6 +19,7 @@ export const UpdateCategorieSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   emoji: z.string().optional(),
+  color: z.string().optional(),
   status: z.enum(['ACTIVE', 'PAUSED', 'ARCHIVED']).default("ACTIVE").optional(),
 })
 

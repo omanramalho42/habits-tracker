@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
         }),
         ...(tasks?.length && {
           taskSchedules: {
-            deleteMany: {},
+            // deleteMany: {},
             create: tasks?.map((taskId: string) => ({
               task: {
                 connect: { id: taskId }

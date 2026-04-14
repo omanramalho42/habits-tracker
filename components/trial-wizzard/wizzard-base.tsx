@@ -21,6 +21,7 @@ interface WizardBaseProps {
   canProceed?: boolean
   isLastStep?: boolean
   isAIStep?: boolean
+  isLoading?: boolean
 }
 
 export function WizardBase({
@@ -37,6 +38,7 @@ export function WizardBase({
   canProceed = true,
   isLastStep = false,
   isAIStep = false,
+  isLoading
 }: WizardBaseProps) {
   const { playSound } = useSoundContext()
   const progress = (currentStep / totalSteps) * 100
