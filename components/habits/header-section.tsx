@@ -61,26 +61,6 @@ const HeaderSection:React.FC = () => {
             userSettings={userSettings}
           />
         )}
-        <CreateAssistantDialog
-          trigger={
-            <button
-              type='button'
-              role='combobox'
-              className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
-              title="Criar assistente"
-            >
-              <div className="animate-float">
-                <Image
-                  src="/chat.png" 
-                  alt="Ícone de bot" 
-                  width={60} 
-                  height={60}
-                  className="drop-shadow-2xl"
-                />
-              </div>
-            </button>
-          }
-        />
 
         <button
           type='button'
@@ -95,6 +75,24 @@ const HeaderSection:React.FC = () => {
               alt="Iconde de jackpot" 
               width={60} 
               height={60}
+              className="drop-shadow-2xl"
+            />
+          </div>
+        </button>
+
+        <button
+          type='button'
+          role='combobox'
+          className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
+          title="Assistente virtual"
+          onClick={() => router.push("/assistant")}
+        >
+          <div className="animate-float">
+            <Image
+              src="/chat.png" 
+              alt="Iconde de chat" 
+              width={45} 
+              height={45}
               className="drop-shadow-2xl"
             />
           </div>
