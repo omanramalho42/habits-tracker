@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url)
     const paramDate = searchParams.get("selectedDate")
-
+    const query = searchParams.get("query") || "";
     // Define start e end do dia
     const selectedDate = paramDate ? new Date(paramDate) : new Date()
     selectedDate.setHours(0, 0, 0, 0) // início do dia
@@ -41,6 +41,12 @@ export async function GET(request: Request) {
       where: {
         userId: userDb.id,
         status: "ACTIVE",
+        ...(query && query !== "all" && {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { description: { contains: query, mode: 'insensitive' } }
+          ]
+        })
       },
       include: {
         counter: {

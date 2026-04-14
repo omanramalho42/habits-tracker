@@ -72,29 +72,47 @@ export async function POST(req: Request) {
           required: ["id"]
         }
       }
+    },
+    {
+      type: "function",
+      function: {
+        name: "manage_task",
+        description: "Gerencia o ciclo de vida das tarefas (criar, atualizar, buscar ou deletar).",
+        parameters: {
+          type: "object",
+          properties: {
+            action: { 
+              type: "string", 
+              enum: ["create", "update", "search", "delete"],
+              description: "A operação a ser realizada."
+            },
+            id: { type: "string", description: "ID da task (obrigatório para update/delete)." },
+            name: { type: "string", description: "Nome da tarefa." },
+            description: { type: "string", description: "Detalhes da execução." },
+            emoji: { type: "string" },
+            limitCounter: { type: "number", description: "Meta numérica (ex: total de repetições)." },
+            goalId: { type: "string", description: "ID do Objetivo para vincular esta tarefa." },
+            query: { type: "string", description: "Termo de busca para listar tarefas." }
+          },
+          required: ["action"]
+        }
+      }
     }
   ]
 
   const systemContent = `
     ${assistant.prompt}
-
-    SISTEMA DE GESTÃO DE OBJETIVOS (CRÍTICO):
     
-    1. LISTAGEM/BUSCA (search_goals): 
-      - Sempre que listar, instrua: "Se desejar, clique em um card para facilitar a edição ou remoção."
+    PROTOCOLO DE EXIBIÇÃO DE LISTAS (OBRIGATÓRIO):
+    1. Sempre que o usuário solicitar ver objetivos, listar metas ou precisar escolher um objetivo para vincular a uma tarefa, você DEVE obrigatoriamente chamar a função 'search_goals'.
+    2. Sempre que o usuário solicitar ver tarefas ou ações de execução, você DEVE obrigatoriamente chamar a função 'manage_task' com action='search'.
+    3. NÃO responda apenas com texto se houver uma necessidade de seleção visual. A chamada de função é o que renderiza os cards no sistema do usuário.
 
-    2. SELEÇÃO DE CARD (Foco):
-      - Ao receber "[SISTEMA]: Usuário focou...", NÃO atualize nada.
-      - Responda confirmando o foco: "Alvo '[NOME]' selecionado. O que deseja fazer? Posso atualizar os detalhes, mostrar progresso ou remover este registro."
-
-    3. FLUXO DE EDIÇÃO (update_goal):
-      - Se o usuário pedir para editar mas for vago (ex: "mude isso"), pergunte: "O que especificamente deseja alterar? (Nome, Descrição ou Emoji?)"
-      - Só execute 'update_goal' quando tiver o valor novo E o ID técnico.
-      - Se houver múltiplos objetivos parecidos na busca, peça para o usuário clicar no correto antes de prosseguir.
-
-    4. REGRAS DE SEGURANÇA:
-      - ID técnico é obrigatório para Update/Delete. Nunca chute o ID.
-      - Use tom cyberpunk, curto e direto.
+    SISTEMA DE GESTÃO INTEGRADA:
+    - AO CRIAR TAREFA: Antes de finalizar a criação, se não houver um goalId, execute 'search_goals' para que o usuário selecione o objetivo pai nos cards exibidos.
+    - SELEÇÃO ([SISTEMA]: ... focou): Confirme o alvo e aguarde o próximo comando de edição ou exclusão.
+    
+    Estilo: Cyberpunk, direto, minimalista.
   `;
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -117,28 +135,52 @@ export async function POST(req: Request) {
       const functionName = functionCall.function.name
       const args = JSON.parse(functionCall.function.arguments)
 
-      if (functionName === 'create_goal') {
+      // --- LÓGICA DE TASKS ---
+      if (functionName === "manage_task") {
+        const { action, ...payload } = args;
+        const actionType = action.toUpperCase();
+
+        let customMessage = "";
+        switch(action) {
+          case "create": customMessage = `Tarefa "${args.name}" inicializada no buffer.`; break;
+          case "search": customMessage = "Escaneando banco de dados por tarefas ativas..."; break;
+          case "update": customMessage = "Parâmetros de execução atualizados."; break;
+          case "delete": customMessage = "Registro de tarefa deletado da rede."; break;
+        }
+
         return NextResponse.json({
           role: "assistant",
-          content: messageResponse.content || `Objetivo "${args.name}" ${args.emoji || '🎯'} integrado ao sistema.`,
-          action: { type: "CREATE_GOAL", payload: args }
-        })
+          content: messageResponse.content || customMessage,
+          action: { 
+            type: `${actionType}_TASK`, 
+            query: args.query || "all", // Importante para o SEARCH_TASK
+            payload: { ...payload, goals: payload.goalId } 
+          }
+        });
       }
 
+      // --- LÓGICA DE GOALS ---
       if (functionName === "search_goals") {
-        // Verifique se args.query existe, se não, use "all"
         const searchQuery = args.query || 'all';
         return NextResponse.json({
           role: "assistant",
-          content: searchQuery === 'all' ? "Localizei esses registros na sua linha de evolução. Qual deles vamos ajustar?" : `Filtrei os objetivos sobre "${searchQuery}".`,
-          action: { type: "SEARCH_GOALS", query: searchQuery } // Garante que a query vá para a mutação
+          content: messageResponse.content || (searchQuery === 'all' ? "Exibindo todos os seus objetivos ativos." : `Filtrando objetivos para: ${searchQuery}`),
+          action: { type: "SEARCH_GOALS", query: searchQuery }
+        })
+      }
+
+      if (functionName === 'create_goal') {
+        return NextResponse.json({
+          role: "assistant",
+          content: messageResponse.content || `Objetivo "${args.name}" integrado.`,
+          action: { type: "CREATE_GOAL", payload: args }
         })
       }
 
       if (functionName === "update_goal") {
         return NextResponse.json({
           role: "assistant",
-          content: "Protocolo de atualização concluído. Dados sincronizados. ⚡",
+          content: messageResponse.content || "Dados do objetivo sincronizados. ⚡",
           action: { type: "UPDATE_GOAL", payload: args }
         })
       }
@@ -146,7 +188,7 @@ export async function POST(req: Request) {
       if (functionName === "delete_goal") {
         return NextResponse.json({
           role: "assistant",
-          content: "Alvo removido. Menos ruído, mais foco.",
+          content: messageResponse.content || "Alvo removido da linha do tempo.",
           action: { type: "DELETE_GOAL", payload: args }
         })
       }
@@ -158,3 +200,4 @@ export async function POST(req: Request) {
     role: "assistant"
   })
 }
+

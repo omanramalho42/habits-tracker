@@ -48,6 +48,67 @@ export default function VoiceAssistant() {
     // Não limpe a lista aqui, deixe o usuário ver o que selecionou
   }, [selectedGoal])
 
+// Novos estados para Tasks
+const [userTasks, setUserTasks] = useState<any[]>([])
+const [selectedTask, setSelectedTask] = useState<any | null>(null)
+
+// Efeito de Foco para Tasks (Igual ao de Goals)
+useEffect(() => {
+  if (!selectedTask || !selectedAssistantId) return
+  chatMutation.mutate({
+    assistantId: selectedAssistantId,
+    message: `[SISTEMA]: Usuário focou na tarefa "${selectedTask.name}" (ID: ${selectedTask.id}). Aguarde instruções sobre este registro.`,
+    history: messages
+  })
+}, [selectedTask])
+
+// --- MUTAÇÕES DE TASKS ---
+
+const fetchTasksMutation = useMutation({
+  mutationFn: async () => {
+    const { data } = await axios.get("/api/task")
+    return data
+  },
+  onSuccess: (data) => {
+    setUserTasks(data)
+    setMode("chat")
+  }
+})
+
+  const taskMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { data } = await axios.post("/api/task", payload)
+      return data
+    },
+    onSuccess: () => fetchTasksMutation.mutate()
+  })
+
+  const updateTaskMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { id, ...data } = payload
+      return axios.patch(`/api/task/${id}`, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      setUserTasks([])
+    }
+  })
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return axios.delete(`/api/task/${id}`)
+    },
+    onSuccess: () => fetchTasksMutation.mutate()
+  })
+
+  const searchTasksMutation = useMutation({
+    mutationFn: async (query: string) => {
+      const { data } = await axios.get(`/api/task?query=${query}`)
+      return data
+    },
+    onSuccess: (data) => setUserTasks(data)
+  })
+
   const { register, handleSubmit, watch, control, reset } = useForm<ChatSchema>({
     resolver: zodResolver(chatSchema),
     defaultValues: { message: "", assistantId: "" }
@@ -144,6 +205,26 @@ export default function VoiceAssistant() {
       if (data.action?.type === "DELETE_GOAL") {
         deleteGoalMutation.mutate(data.action.payload.id)
       }
+
+    // 🔥 ACTIONS PARA TASKS
+      if (data.action?.type === "CREATE_TASK") {
+        taskMutation.mutate(data.action.payload)
+      }
+      if (data.action?.type === "SEARCH_TASK") {
+        searchTasksMutation.mutate(data.action.query || "all")
+      }
+      if (data.action?.type === "UPDATE_TASK") {
+        updateTaskMutation.mutate(data.action.payload)
+      }
+      if (data.action?.type === "DELETE_TASK") {
+        deleteTaskMutation.mutate(data.action.payload.id)
+      }
+
+      // Limpeza de seleção após ações de escrita
+      if (["UPDATE_TASK", "DELETE_TASK", "CREATE_TASK"].includes(data.action?.type)) {
+        setSelectedTask(null)
+        setUserTasks([])
+      }
     }
   })
 
@@ -185,16 +266,37 @@ export default function VoiceAssistant() {
                   </div>
                   
                   {/* Renderiza Cards de Objetivos se a IA solicitar ou houver dados */}
-                  {msg.role === "assistant" && i === messages.length - 1 && userGoals.length > 0 && (
-                    <div className="grid grid-cols-1 gap-3 py-2">
-                      {userGoals.map((goal) => (
-                        <GoalCard 
-                          key={goal.id} 
-                          goal={goal}
-                          isSelected={selectedGoal?.id === goal.id}
-                          onClick={() => setSelectedGoal(goal)}
-                        />
-                      ))}
+                  {/* Dentro do map de mensagens */}
+                  {msg.role === "assistant" && i === messages.length - 1 && (
+                    <div className="space-y-3 py-2">
+                      {/* Lista de Objetivos */}
+                      {userGoals.length > 0 && (
+                        <div className="grid grid-cols-1 gap-3">
+                          {userGoals.map((goal) => (
+                            <GoalCard 
+                              key={goal.id} 
+                              goal={goal}
+                              isSelected={selectedGoal?.id === goal.id}
+                              onClick={() => setSelectedGoal(goal)}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Lista de Tarefas */}
+                      {userTasks.length > 0 && (
+                        <div className="grid grid-cols-1 gap-3">
+                          <p className="text-[10px] font-mono text-white/20 uppercase tracking-widest px-1">Tarefas Detectadas</p>
+                          {userTasks.map((task) => (
+                            <TaskCard 
+                              key={task.id} 
+                              task={task}
+                              isSelected={selectedTask?.id === task.id}
+                              onClick={() => setSelectedTask(task)}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -254,6 +356,46 @@ const GoalCard = ({ goal, isSelected, onClick }: any) => (
       <div className="flex-1">
         <h4 className="font-bold text-white">{goal.name}</h4>
         <p className="text-xs text-white/40 line-clamp-1">{goal.description}</p>
+      </div>
+    </div>
+  </motion.div>
+)
+
+const TaskCard = ({ task, isSelected, onClick }: any) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    onClick={onClick}
+    className={cn(
+      "w-full p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden",
+      isSelected
+        ? "bg-purple-600/20 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+        : "bg-white/5 border-white/10 hover:border-purple-500/50"
+    )}
+  >
+    {isSelected && (
+      <div className="absolute top-2 right-2 flex items-center gap-1">
+        <div className="size-2 rounded-full bg-purple-500 animate-pulse" />
+        <span className="text-[10px] text-purple-400 font-mono">FOCO ATIVO</span>
+      </div>
+    )}
+
+    <div className="flex items-center gap-3">
+      <div className="size-10 rounded-xl bg-purple-600/20 flex items-center justify-center text-xl border border-purple-500/20">
+        {task.emoji || "⚡"}
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <h4 className="font-bold text-sm text-white">{task.name}</h4>
+          {task.limitCounter > 1 && (
+            <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/60">
+              0/{task.limitCounter}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-white/40 line-clamp-1 italic">
+          {task.description || "Nenhuma descrição definida."}
+        </p>
       </div>
     </div>
   </motion.div>
