@@ -97,6 +97,24 @@ const HeaderSection:React.FC = () => {
             />
           </div>
         </button>
+
+        <button
+          type='button'
+          role='combobox'
+          className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
+          title="Assistente virtual"
+          onClick={() => router.push("/free-trial")}
+        >
+          <div className="animate-float">
+            <Image
+              src="/logo.png" 
+              alt="Free trial" 
+              width={45} 
+              height={45}
+              className="drop-shadow-2xl"
+            />
+          </div>
+        </button>
         
         <StreakDialog />
       </div>
