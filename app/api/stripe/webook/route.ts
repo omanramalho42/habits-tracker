@@ -25,7 +25,9 @@ export async function POST(req: Request) {
     const session = event.data.object as Stripe.Checkout.Session
 
     const userId = session.metadata?.userId
-    if (!userId) return new Response("No userId", { status: 400 })
+    if (!userId) return new Response("No userId", {
+      status: 400
+    })
     
     const userDb = await prisma.user.findFirst({
       where: {
@@ -33,7 +35,9 @@ export async function POST(req: Request) {
       }
     })
     
-    if (!userDb) return new Response("No userId", { status: 400 })
+    if (!userDb) return new Response("No userId", {
+      status: 400
+    })
 
     // ✅ BUSCAR LINE ITEMS CORRETAMENTE
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
