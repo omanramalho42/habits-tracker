@@ -41,6 +41,7 @@ import { CreateCategorieStepDialog } from '@/components/categories/create-catego
 import CreateTaskDialogSteps from '@/components/tasks/create-task-step-dialog'
 import { CreateHabitStepDialog } from '@/components/habits/create-habit-step-dialog'
 import CreateRoutineStepDialog from '@/components/routines/create-routine-step-dialog'
+import { FullEntityWizard } from './components/full-wizard'
 
 interface ActionItem {
   id: string
