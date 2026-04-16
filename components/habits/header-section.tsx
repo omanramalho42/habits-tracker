@@ -98,7 +98,7 @@ const HeaderSection:React.FC = () => {
           </div>
         </button>
 
-        <button
+        {/* <button
           type='button'
           role='combobox'
           className="group relative transition-transform duration-300 hover:scale-125 focus:outline-none active:scale-95"
@@ -114,7 +114,7 @@ const HeaderSection:React.FC = () => {
               className="drop-shadow-2xl"
             />
           </div>
-        </button>
+        </button> */}
         
         <StreakDialog />
       </div>
