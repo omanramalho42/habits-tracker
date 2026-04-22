@@ -1,7 +1,11 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { formatInTimeZone } from "date-fns-tz"
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
 import { MetricType } from '@prisma/client'
+
+import { toZonedTime, format } from "date-fns-tz"
+
+const BRAZIL_TZ = "America/Sao_Paulo"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -45,6 +49,50 @@ export const formatDateBR = (date: Date) => {
   const year = parts.find(p => p.type === "year")?.value
 
   return `${year}-${month}-${day}`
+}
+
+
+export function getBrazilDayRangeUTC(date: Date | string) {
+  let localDate: Date
+
+  if (typeof date === "string" && date.length === 10) {
+    const [y, m, d] = date.split("-").map(Number)
+    localDate = new Date(y, m - 1, d) // 👈 LOCAL (Brasil)
+  } else {
+    const parsed = new Date(date)
+    localDate = new Date(
+      parsed.toLocaleString("en-US", { timeZone: BRAZIL_TZ })
+    )
+  }
+
+  const start = new Date(localDate)
+  start.setHours(0, 0, 0, 0)
+
+  const end = new Date(localDate)
+  end.setHours(23, 59, 59, 999)
+
+  return {
+    startUTC: fromZonedTime(start, BRAZIL_TZ),
+    endUTC: fromZonedTime(end, BRAZIL_TZ),
+  }
+}
+export function toBrazilStartOfDayUTC(date: Date | string) {
+  const parsed = new Date(date)
+
+  // 🔥 cria uma data "local" baseada no Brasil
+  const brDate = new Date(
+    parsed.toLocaleString("en-US", { timeZone: BRAZIL_TZ })
+  )
+
+  brDate.setHours(0, 0, 0, 0)
+
+  // 🔥 converte de volta pra UTC
+  return fromZonedTime(brDate, BRAZIL_TZ)
+}
+export function formatToBrazilDay(date: Date | string) {
+  const zoned = toZonedTime(new Date(date), BRAZIL_TZ)
+  zoned.setHours(0,0,0,0) //COMECO DO DIA
+  return format(zoned, "yyyy-MM-dd", { timeZone: BRAZIL_TZ })
 }
 
 export function getTodayDay() {

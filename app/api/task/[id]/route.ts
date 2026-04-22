@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-import z from "zod"
+import { toBrazilStartOfDayUTC } from "@/lib/utils"
 
 import { auth } from "@clerk/nextjs/server"
 
@@ -265,10 +265,10 @@ export async function PUT(
     }, { status: 401 })
 
     const body = await request.json()
-    const date = body?.date 
-      ? new Date(body.date) 
-      : new Date()
-    date.setHours(0, 0, 0, 0) // padroniza início do dia
+
+    const date = toBrazilStartOfDayUTC(
+      body?.date || new Date()
+    )
     // 1. Tenta encontrar a conclusão existente
     const existingCompletion = await prisma.taskCompletion.findUnique({
       where: {
@@ -282,7 +282,10 @@ export async function PUT(
     // 2. Executa o upsert com a lógica de inversão
     const completion = await prisma.taskCompletion.upsert({
       where: {
-        taskId_completedDate: { taskId, completedDate: date }
+        taskId_completedDate: {
+          taskId,
+          completedDate: date
+        }
       },
       create: {
         taskId,
@@ -372,6 +375,9 @@ export async function PUT(
     //     })
     //   )
     // )
+    console.log("📥 input:", body.date)
+    console.log("💾 salvo UTC:", date.toISOString())
+    console.log("🇧🇷 salvo BR:", new Date(date).toLocaleString("pt-BR"))
 
     return NextResponse.json(completion)
   } catch (error) {

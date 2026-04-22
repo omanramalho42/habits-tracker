@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server"
 import { cloudinary } from "@/lib/cloudinary"
 import { prisma } from "@/lib/prisma"
 import { CreateTaskSchema } from "@/lib/schema/task"
+import { getBrazilDayRangeUTC } from "@/lib/utils"
 
 export async function GET(request: Request) {
   try {
@@ -33,10 +34,26 @@ export async function GET(request: Request) {
     const query = searchParams.get("query") || "";
     // Define start e end do dia
     const selectedDate = paramDate ? new Date(paramDate) : new Date()
-    selectedDate.setHours(0, 0, 0, 0) // início do dia
-    const nextDay = new Date(selectedDate)
-    nextDay.setHours(23, 59, 59, 999) // fim do dia
+    selectedDate.setHours(0, 0, 0, 0)
 
+    const nextDay = new Date(selectedDate)
+    nextDay.setHours(23, 59, 59, 999)
+
+    const { startUTC, endUTC } = getBrazilDayRangeUTC(
+      paramDate || new Date()
+    )
+
+    // console.log("🧠 DEBUG RANGE ------------------")
+
+    // console.log("📥 paramDate:", paramDate)
+
+    // console.log("🕐 startUTC:", startUTC.toISOString())
+    // console.log("🕐 endUTC:", endUTC.toISOString())
+
+    // console.log("🇧🇷 start (BR):", new Date(startUTC).toLocaleString("pt-BR"))
+    // console.log("🇧🇷 end (BR):", new Date(endUTC).toLocaleString("pt-BR"))
+
+    // console.log("----------------------------------")
     const tasks = await prisma.task.findMany({
       where: {
         userId: userDb.id,
@@ -55,9 +72,9 @@ export async function GET(request: Request) {
             CounterStep: {
               where: {
                 date: {
-                  gte: selectedDate,
-                  lte: nextDay,
-                },
+                  gte: startUTC,
+                  lte: endUTC,
+                }
               },
             },
           },
@@ -72,9 +89,9 @@ export async function GET(request: Request) {
             taskMetricCompletion: {
               where: {
                 date: {
-                  gte: selectedDate,
-                  lte: nextDay,
-                },
+                  gte: startUTC,
+                  lte: endUTC,
+                }
               },
             },
           },
@@ -90,11 +107,24 @@ export async function GET(request: Request) {
         },
       },
     })
+    // tasks.forEach((task) => {
+    //   task.metrics?.forEach((metric) => {
+    //     metric.taskMetricCompletion?.forEach((c) => {
+    //       console.log("📊 METRIC COMPLETION ---------")
 
-    // console.log("Selected date:", selectedDate)
-    // console.log("Next day:", nextDay)
-    // console.log("Tasks for the day:", tasks)
+    //       console.log("🆔 metricId:", metric.id)
 
+    //       console.log("📅 RAW DB:", c.date)
+    //       console.log("🕐 ISO:", c.date && new Date(c.date).toISOString())
+    //       console.log("🇧🇷 BR:", c.date && new Date(c.date).toLocaleString("pt-BR"))
+
+    //       console.log("🔢 step:", c.step)
+    //       console.log("✅ isComplete:", c.isComplete)
+
+    //       console.log("-----------------------------")
+    //     })
+    //   })
+    // })
     return NextResponse.json(tasks)
   } catch (error) {
     if (error instanceof Error) {

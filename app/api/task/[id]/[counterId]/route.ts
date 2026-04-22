@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 
 import z from "zod"
 import { putMetricSchema } from "@/lib/schema/metrics"
+import { toBrazilStartOfDayUTC } from "@/lib/utils"
 
 export async function PUT(
   request: NextRequest,
@@ -51,11 +52,7 @@ export async function PUT(
       date
     } = bodyParams.data
 
-    const baseDate = new Date(date);
-    const startOfDay = new Date(baseDate);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(baseDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDayUTC = toBrazilStartOfDayUTC(date)
 
     const result = await prisma.$transaction(async (tx) => {
       // 1️⃣ pega o counter
@@ -72,7 +69,7 @@ export async function PUT(
         where: {
           taskId_completedDate: {
             taskId,
-            completedDate: startOfDay
+            completedDate: startOfDayUTC
           }
         },
         update: {
@@ -80,7 +77,7 @@ export async function PUT(
         },
         create: {
           taskId,
-          completedDate: startOfDay
+          completedDate: startOfDayUTC
         },
         include: {
           counterStep: true
@@ -92,7 +89,7 @@ export async function PUT(
         where: {
           counterId_date_completionId: {
             counterId: counter.id,
-            date: startOfDay,
+            date: startOfDayUTC,
             completionId: completion.id,
           },
         },
@@ -102,7 +99,7 @@ export async function PUT(
         },
         create: {
           counterId: counter.id,
-          date: startOfDay,
+          date: startOfDayUTC,
           currentStep: 0,
           limit: counter.limit,
           completionId: completion.id,
@@ -145,7 +142,7 @@ export async function PUT(
               step: nextStep,
               value: metric.value || "",
               isComplete: !metric.isComplete,
-              date: startOfDay,
+              date: startOfDayUTC,
             },
             update: {
               value: metric.value || "",
@@ -160,7 +157,11 @@ export async function PUT(
         completionId: completion.id,
       }
     })
-
+    console.log({
+      input: date,
+      startOfDayUTC: startOfDayUTC.toISOString(),
+      br: new Date(startOfDayUTC).toLocaleString("pt-BR"),
+    })
     return NextResponse.json(result)
   } catch (error) {
     if (error instanceof Error) {

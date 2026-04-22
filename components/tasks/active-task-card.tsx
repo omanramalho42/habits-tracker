@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 
-import { cn } from "@/lib/utils"
+import { cn, formatToBrazilDay } from "@/lib/utils"
 import {
   Check,
   Eye,
@@ -76,18 +76,28 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
   const queryClient = useQueryClient()
 
-  const completion = task?.completions?.find(
-    (c: any) =>
-      new Date(c.completedDate).toDateString() ===
-      new Date(selectedDate || new Date()).toDateString()
+  console.log(selectedDate, "selected date")
+  console.log(task.completions, "completions")
+
+  const completion = task?.completions?.find((c: any) =>
+    formatToBrazilDay(c.completedDate) ===
+    formatToBrazilDay(selectedDate || new Date())
   )
+  console.log({
+    completionDateRaw: completion?.completedDate,
+    completionDateBR: formatToBrazilDay(completion?.completedDate || new Date()),
+    selectedDateRaw: selectedDate,
+    selectedDateBR: formatToBrazilDay(selectedDate || new Date())
+  })
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   })
 
-  const selected = formatter.format(new Date(selectedDate || new Date()))
+  const selected = formatter.format(
+    new Date(selectedDate || new Date())
+  )
 
   const counterDay = task?.counter?.CounterStep?.find(
     (c: CounterStep) =>
@@ -102,6 +112,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       toast.success("Atualizando status da tarefa", {
         id: "toggle-task"
       })
+      console.log(taskId, date,"values")
       const res = await axios.put(
         `/api/task/${taskId}`,
         { date }
@@ -148,7 +159,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       date: (selectedDate || new Date()).toISOString()
     })
   }
-
+  console.log(completion, "completion 🦾")
   return (
     <Card className="p-3 flex flex-col gap-3">
 
@@ -275,7 +286,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               
               <span className="text-muted-foreground">
-                {task.metrics?.length}|{limit}
+                {currentStep}|{limit}
               </span>
               <UpdateCounterDialog
                 counter={task.counter}
@@ -323,7 +334,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               onClick={() => setOpenMetricsDialog(prev => !prev)}
               className="rounded-full"
             >
-              <Check className={cn("w-4 h-4", task.counter.valueNumber === task.counter.limit ? "visible" : "hidden")} />
+              <Check className={cn("w-4 h-4", currentStep >= limit ? "visible" : "hidden")} />
             </Button>
           </div>
           

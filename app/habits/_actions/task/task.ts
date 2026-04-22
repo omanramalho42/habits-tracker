@@ -85,7 +85,7 @@ export async function createTask(form: CreateTaskSchemaType) {
         emojiUrl: {
           connect: {
             id: emojiId
-          } // Onde 'emoji' é o ID vindo do formulário
+          }
         },
         imageUrl: imageUrlUploaded || null,
         videoUrl: videoUrlUploaded || null,

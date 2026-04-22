@@ -124,6 +124,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
         toast.loading("Criando métricas...", {
           id: "create-metrics-completion"
         })
+        console.log(data, "data values")
         const response = await axios.put(
           `/api/task/${taskId}/${counterId}`, {
             date: data.date,
@@ -139,7 +140,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
 
       await queryClient.invalidateQueries({
         queryKey: [
-          "tasks", selectedDate
+          "tasks"
         ]
       })
       await queryClient.invalidateQueries({
