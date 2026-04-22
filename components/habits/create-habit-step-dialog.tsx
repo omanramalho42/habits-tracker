@@ -107,7 +107,7 @@ export function CreateHabitStepDialog({ trigger }: { trigger?: React.ReactNode }
         {trigger || <Button>Criar Hábito</Button>}
       </DialogTrigger>
 
-      <DialogContent className="max-w-md overflow-hidden bg-background/95 backdrop-blur-md border-purple-500/20 shadow-2xl">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-md border-purple-500/20 shadow-2xl">
         <DialogHeader>
           <div className="flex justify-between items-center mb-4">
             {STEPS.map((s) => (

@@ -107,7 +107,7 @@ const CreateGoalStepDialog: React.FC<CreateGoalStepDialogProps> = ({ trigger }) 
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-112.5 overflow-hidden bg-[#0a0a0c] border-white/10 text-white">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0a0a0c] border-white/10 text-white">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
              <div className="p-2 rounded-lg bg-purple-600/20 text-purple-400">

@@ -248,7 +248,7 @@ export function CreateCategorieStepDialog({ trigger }: CreateCategorieStepDialog
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-lg p-0 bg-transparent border-none overflow-visible">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0 bg-transparent border-none">
         <Form {...form}>
           <WizardBase
             title="Criar Categoria"

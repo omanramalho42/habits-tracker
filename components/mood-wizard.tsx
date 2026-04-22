@@ -156,7 +156,7 @@ export function MoodWizard({ trigger }: MoodWizardProps) {
       <DialogTrigger>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-125 bg-background border-border p-0 overflow-hidden">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div

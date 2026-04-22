@@ -88,7 +88,7 @@ const CreateRoutineStepDialog: React.FC<CreateRoutineDialogProps> = ({ trigger }
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-md bg-[#070B14]/90 backdrop-blur-2xl border border-blue-500/30 rounded-3xl shadow-[0_0_50px_rgba(37,99,235,0.2)] text-white overflow-hidden">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-[#070B14]/90 backdrop-blur-2xl border border-blue-500/30 rounded-3xl shadow-[0_0_50px_rgba(37,99,235,0.2)]">
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
           <motion.div 

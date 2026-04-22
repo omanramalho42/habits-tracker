@@ -178,7 +178,7 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-[90vw]">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex flex-row items-center justify-start gap-3 text-2xl">
             <p>Atualizar tarefa</p>
@@ -317,46 +317,45 @@ const UpdateTaskDialog = ({ trigger, task }: UpdateTaskDialogProps) => {
                   />
                 </div>
               </div>
-
-              <div className="flex flex-col gap-2 w-full mt-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="description" className="text-sm font-semibold">
-                    Descrição
-                  </Label>
-
-                  <AICreator
-                    reference={form.watch("name")}
-                    type="task" 
-                    onGenerated={
-                      (text) => form.setValue("description", text)
-                    } 
-                  />
-                </div>
-
-                <FormField
-                  control={control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          id="description"
-                          className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          placeholder="Detalhes sobre sua nova rotina..."
-                        />
-                      </FormControl>
-                      {errors && errors.description && (
-                        <span className='text-red-500 text-sm'>
-                          {errors.description.message}
-                        </span>
-                      )}
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
 
+            <div className="flex flex-col gap-2 w-full mt-2">
+              <div className="flex w-full gap-2 items-center justify-between">
+                <Label htmlFor="description" className="text-sm font-semibold">
+                  Descrição
+                </Label>
+
+                <AICreator
+                  reference={form.watch("name")}
+                  type="task" 
+                  onGenerated={
+                    (text) => form.setValue("description", text)
+                  } 
+                />
+              </div>
+
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        id="description"
+                        className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Detalhes sobre sua nova rotina..."
+                      />
+                    </FormControl>
+                    {errors && errors.description && (
+                      <span className='text-red-500 text-sm'>
+                        {errors.description.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
             {/* categories */}
             <div className="flex flex-col">
               <Label htmlFor="categories" className="text-sm font-medium">

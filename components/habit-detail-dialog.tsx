@@ -512,7 +512,7 @@ export function HabitDetailDialog({ trigger, habit, selectedDate }: HabitDetailD
         
         {/* ANNOTATIONS */}
         <Dialog open={selectedDay !== null} onOpenChange={() => setSelectedDay(null)}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto scroll-container bg-card border-border">
+          <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 Anotações do dia {selectedDay}

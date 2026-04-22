@@ -250,7 +250,7 @@ export default function CreateEmojiDialog({
           </motion.button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-[#0d0808] border-white/10">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0d0808] border-white/10">
         <DialogHeader>
           <DialogTitle className="text-orange-500">
             Criar Emoji

@@ -56,7 +56,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-125 bg-card/95 backdrop-blur-xl border-border/50">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-xl border-border/50">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Configurações

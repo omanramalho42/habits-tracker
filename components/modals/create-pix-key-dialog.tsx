@@ -114,7 +114,7 @@ const CreatePixKeyDialog = ({ trigger, userSettings }: CreatePixKeyDialogProps) 
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-100 w-[95vw] rounded-xl">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             Resgatar Presente 🎁

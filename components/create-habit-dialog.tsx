@@ -170,7 +170,7 @@ export function CreateHabitDialog({ trigger }: CreateHabitDialogProps) {
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-[90vw]">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex flex-row items-center justify-start gap-3 text-2xl">
             <p>Criar um novo</p>

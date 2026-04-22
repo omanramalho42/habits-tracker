@@ -10,7 +10,7 @@ export const PlansOverlay = ({ children, isPremium = false }: PlansOverlayProps)
   if (isPremium) return <>{children}</>
 
   return (
-    <div className="relative group w-full">
+    <div className="relative group w-full h-auto">
       {/* Container do Filho com Blur */}
       <div className="pointer-events-none select-none blur-[2px] opacity-95 transition-all">
         {children}

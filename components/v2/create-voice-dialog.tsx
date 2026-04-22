@@ -117,7 +117,7 @@ export default function CreateVoiceDialog({ onVoiceCreated }: { onVoiceCreated?:
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="bg-[#0d0808] border-white/10 sm:max-w-lg shadow-[0_0_40px_rgba(234,88,12,0.15)]">
+      <DialogContent className="bg-[#0d0808] w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto border-white/10 shadow-[0_0_40px_rgba(234,88,12,0.15)]">
         <DialogHeader>
           <DialogTitle className="text-orange-500 flex items-center gap-2">
             <Volume2 className="size-5" />

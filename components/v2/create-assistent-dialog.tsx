@@ -107,7 +107,7 @@ export default function CreateAssistantDialog({ trigger }: { trigger?: React.Rea
         )}
       </DialogTrigger>
 
-      <DialogContent className="bg-[#0d0808] border-white/10 sm:max-w-lg">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-autobg-[#0d0808] border-white/10">
         <DialogHeader>
           <DialogTitle className="text-orange-500">
             Novo Assistant

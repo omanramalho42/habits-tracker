@@ -187,7 +187,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="tracking-tighter text-sm">
             Inserir métricas personalizadas

@@ -37,15 +37,20 @@ import {
 
 import type {
   Annotations,
+  Counter,
   Task,
   TaskCompletion,
   TaskMetric,
+  TaskMetricCompletion,
 } from "@prisma/client"
 
 interface Props {
   task: (Task & {
     completions?: (TaskCompletion & {
-      metrics?: TaskMetric[],
+      counter?: Counter
+      metrics?: (TaskMetric[] & {
+        completions?: TaskMetricCompletion[]
+      }),
       annotations?: Annotations[]
     })[]
   })
@@ -233,7 +238,7 @@ export function TaskDetailsDialog({ task, trigger }: Props) {
                         className="flex justify-between text-xs"
                       >
                         <span>{m.emoji} {m.field}</span>
-                        <span>{m.value} {m.unit}</span>
+                        {/* <span>{m.value} {m.unit}</span> */}
                       </div>
                     ))
                   ) : (

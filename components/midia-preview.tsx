@@ -66,9 +66,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
       {/* MODAL */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl w-full flex items-center justify-center">
-
           <div className="w-full flex items-center justify-center">
-
             {type === "image" && imageUrl && (
               <Image
                 src={imageUrl}

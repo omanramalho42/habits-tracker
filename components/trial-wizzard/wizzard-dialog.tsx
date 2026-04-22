@@ -91,7 +91,7 @@ export function WizardDialog({ open, onOpenChange }: WizardDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background border-2 border-primary/30 p-0">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-background border-2 border-primary/30 p-0">
         {/* Pixel corner decorations */}
         <div className="absolute top-0 left-0 w-3 h-3 bg-primary" />
         <div className="absolute top-0 right-0 w-3 h-3 bg-primary" />
