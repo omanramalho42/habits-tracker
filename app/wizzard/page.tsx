@@ -634,7 +634,7 @@ const WizzardScreen = () => {
             )}
 
             <PlansOverlay
-              isPremium={userSettings?.user.role === "PREMIUM"}
+              isPremium={userSettings?.user?.role === "PREMIUM"}
             >
               <div className={`flex items-center bg-[#111113] rounded-full border overflow-hidden h-13 transition-colors ${isListening ? "border-[#38bdf8]/50" : "border-[#1a1a1c]"}`}>
                 <button 

@@ -85,7 +85,7 @@ const CreateTaskStepDialog = ({ trigger }: CreateTaskStepDialogProps) => {
       limitCounter: 1,
       counterId: "",
       custom_field: "",
-      emojiId: ""
+      emojiId: undefined
     }
   })
 
@@ -102,23 +102,34 @@ const CreateTaskStepDialog = ({ trigger }: CreateTaskStepDialogProps) => {
 
   const { mutate } = useMutation({
     mutationFn: async (values: CreateTaskSchemaType) => {
+      console.log(values, "values!")
       return await createTask(values)
     },
     onSuccess: async () => {
-      toast.success("Tarefa criada com sucesso! 🎉", { id: "create-task" })
+      toast.success("Tarefa criada com sucesso! 🎉", {
+        id: "create-task"
+      })
       reset()
       setCurrentStep(0)
-      await queryClient.invalidateQueries({ queryKey: ["tasks"] })
-      await queryClient.invalidateQueries({ queryKey: ["routines"] })
+      await queryClient.invalidateQueries({
+        queryKey: ["tasks"]
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ["routines"]
+      })
       setOpen(false)
     },
     onError: () => {
-      toast.error("Erro ao criar tarefa", { id: "create-task" })
+      toast.error("Erro ao criar tarefa", {
+        id: "create-task"
+      })
     },
   })
 
   const onSubmit = useCallback((values: CreateTaskSchemaType) => {
-    toast.loading("Criando tarefa....", { id: "create-task" })
+    toast.loading("Criando tarefa....", {
+      id: "create-task"
+    })
     mutate(values)
   }, [mutate])
 
@@ -152,7 +163,7 @@ const CreateTaskStepDialog = ({ trigger }: CreateTaskStepDialogProps) => {
       </DialogTrigger>
 
       <DialogContent 
-        className="max-w-[90vw] sm:max-w-[500px]"
+        className="max-w-[90vw] sm:max-w-125"
         onPointerDownOutside={(e) => {
             // Se o step for o 3, evitamos fechar por cliques externos acidentais em pickers
             if (currentStep === 2) e.preventDefault()
@@ -174,7 +185,6 @@ const CreateTaskStepDialog = ({ trigger }: CreateTaskStepDialogProps) => {
 
         <Form {...form}>
           <form className="space-y-4 pt-4" onSubmit={(e) => e.preventDefault()}>
-            
             {/* STEP 1: Básico */}
             {currentStep === 0 && (
               <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -306,7 +316,9 @@ const CreateTaskStepDialog = ({ trigger }: CreateTaskStepDialogProps) => {
                 </Button>
               ) : (
                 <DialogClose asChild>
-                  <Button type="button" variant="ghost" className="flex-1">Cancelar</Button>
+                  <Button type="button" variant="ghost" className="flex-1">
+                    Cancelar
+                  </Button>
                 </DialogClose>
               )}
 

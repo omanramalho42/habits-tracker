@@ -48,6 +48,8 @@ export async function createTask(form: CreateTaskSchemaType) {
       emojiId,
     } = parsedBody.data
 
+    console.log(parsedBody.data, "data backend ⚠️")
+    
     // ✅ IMAGE
     let imageUrlUploaded: string | null = null
 
@@ -82,11 +84,13 @@ export async function createTask(form: CreateTaskSchemaType) {
         ...(counterId && {
           counterId
         }),
-        emojiUrl: {
-          connect: {
-            id: emojiId
-          }
-        },
+        ...(emojiId && {
+          emojiUrl: {
+            connect: {
+              id: emojiId
+            }
+          },
+        }),
         imageUrl: imageUrlUploaded || null,
         videoUrl: videoUrlUploaded || null,
 

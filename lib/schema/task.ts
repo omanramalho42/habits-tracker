@@ -20,7 +20,7 @@ export const CreateTaskSchema = z.object({
     .optional(),
   counterId: z.string().optional(),
   // ... outros campos
-  emojiId: z.string().min(1, "Selecione um ícone").optional(), // ID do Emoji
+  emojiId: z.string().optional(), // ID do Emoji
   // ... resto do schema
 })
 
