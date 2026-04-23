@@ -44,7 +44,8 @@ export async function GET() {
     const datesArray: Date[] = Array.from(allCompletedDates)
       .map(dateStr => new Date(dateStr))
       .sort((a, b) => a.getTime() - b.getTime());
-
+    // Adicione isto para transformar o Set em um array de strings formatadas
+    const completedDatesList = Array.from(allCompletedDates);
     // Cálculo de Streak
     function calculateStreak(dates: Date[]) {
       if (!dates.length) return { current: 0, longest: 0, startDate: null };
@@ -150,6 +151,7 @@ export async function GET() {
       currentMilestone,
       nextMilestone,
       daysToNextMilestone,
+      completedDates: completedDatesList, // <--- NOVO ATRIBUTO
       daysCompletedThisWeek: daysCompletedCount, // <--- O dado que você queria
       progress: Math.round(progress),
       weeklyProgress: Math.round(weeklyProgress) // Novo campo para o front

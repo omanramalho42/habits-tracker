@@ -1,14 +1,34 @@
 "use client"
 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useQuery } from "@tanstack/react-query"
 import { ChevronLeft, Info } from "lucide-react"
+import { useState } from "react"
 
 interface DayStreakProps {
   onBack: () => void
 }
 
 export default function DayStreak({ onBack }: DayStreakProps) {
+  const [currentDate, setCurrentDate] = useState(new Date())
 
+  // Função para navegar entre meses
+  const changeMonth = (offset: number) => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev)
+      newDate.setMonth(newDate.getMonth() + offset)
+      return newDate
+    })
+  }
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const firstDay = new Date(year, month, 1).getDay() // Dia da semana que começa
+    return { daysInMonth, firstDay, month, year }
+  }
+
+  const { daysInMonth, firstDay, month, year } = getDaysInMonth(currentDate)
   const { data, isLoading } = useQuery({
     queryKey: ["streak"],
     queryFn: async () => {
@@ -33,6 +53,8 @@ export default function DayStreak({ onBack }: DayStreakProps) {
       year: "numeric"
     })
   }
+
+  console.log(data, "data")
 
   return (
     <div className="min-h-screen mb-22 bg-[#050505] flex items-center justify-center p-4">
@@ -133,7 +155,56 @@ export default function DayStreak({ onBack }: DayStreakProps) {
               ))}
             </div>
           </div>
+          <div className="bg-[#141414] min-h-90 rounded-2xl p-4 mb-4 border border-[#1c1c1c]">
+            {/* Header do Calendário */}
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={() => changeMonth(-1)} className="text-white hover:text-orange-500">{"<"}</button>
+              <span className="text-white font-medium capitalize">
+                {currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+              </span>
+              <button onClick={() => changeMonth(1)} className="text-white hover:text-orange-500">{">"}</button>
+            </div>
 
+            {/* Grade do Calendário */}
+            <div className="grid grid-cols-7 gap-2 text-center">
+              {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
+                <span key={i} className="text-[#666] text-[10px]">{day}</span>
+              ))}
+              
+              {/* Espaçamento para o primeiro dia */}
+              {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+              
+              {/* Dias do mês */}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const monthIdx = currentDate.getMonth(); 
+                const yearNum = currentDate.getFullYear();
+                const dateStr = `${yearNum}-${String(monthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const isCompleted = data?.completedDates?.includes(dateStr);
+                
+                // MOCK: Simulando quantidade de tarefas/hábitos (substitua pela lógica real depois)
+                const taskCount = isCompleted ? Math.floor(Math.random() * 5) + 1 : 0; 
+
+                return (
+                  <TooltipProvider key={day} delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col items-center justify-center h-8 cursor-pointer">
+                          <span className={`text-[12px] ${isCompleted ? "opacity-100" : "text-[#666]"}`}>
+                            {isCompleted ? "🔥" : day}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-[#1a1a1a] border-[#333] text-white text-xs">
+                        <p>{isCompleted ? `${taskCount} atividades concluídas` : "Nenhuma atividade"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })}
+            </div>
+          </div>
           {/* 🎯 Progresso */}
           <div className="bg-[#141414] rounded-2xl p-4 mb-4 border border-[#1c1c1c]">
             <div className="flex items-center gap-4">

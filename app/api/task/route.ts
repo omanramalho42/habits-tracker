@@ -43,17 +43,6 @@ export async function GET(request: Request) {
       paramDate || new Date()
     )
 
-    // console.log("🧠 DEBUG RANGE ------------------")
-
-    // console.log("📥 paramDate:", paramDate)
-
-    // console.log("🕐 startUTC:", startUTC.toISOString())
-    // console.log("🕐 endUTC:", endUTC.toISOString())
-
-    // console.log("🇧🇷 start (BR):", new Date(startUTC).toLocaleString("pt-BR"))
-    // console.log("🇧🇷 end (BR):", new Date(endUTC).toLocaleString("pt-BR"))
-
-    // console.log("----------------------------------")
     const tasks = await prisma.task.findMany({
       where: {
         userId: userDb.id,
@@ -107,24 +96,6 @@ export async function GET(request: Request) {
         },
       },
     })
-    // tasks.forEach((task) => {
-    //   task.metrics?.forEach((metric) => {
-    //     metric.taskMetricCompletion?.forEach((c) => {
-    //       console.log("📊 METRIC COMPLETION ---------")
-
-    //       console.log("🆔 metricId:", metric.id)
-
-    //       console.log("📅 RAW DB:", c.date)
-    //       console.log("🕐 ISO:", c.date && new Date(c.date).toISOString())
-    //       console.log("🇧🇷 BR:", c.date && new Date(c.date).toLocaleString("pt-BR"))
-
-    //       console.log("🔢 step:", c.step)
-    //       console.log("✅ isComplete:", c.isComplete)
-
-    //       console.log("-----------------------------")
-    //     })
-    //   })
-    // })
     return NextResponse.json(tasks)
   } catch (error) {
     if (error instanceof Error) {
