@@ -4,6 +4,7 @@ import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
 import { MetricType } from '@prisma/client'
 
 import { toZonedTime, format } from "date-fns-tz"
+import { CategoryType, UNIT_TO_CATEGORY } from './constants/field-types'
 
 const BRAZIL_TZ = "America/Sao_Paulo"
 
@@ -140,6 +141,17 @@ export function log(step: string, data?: any) {
   }
 }
 
+export const getCategoryFromData = (unit?: string, fieldType?: MetricType): CategoryType => {
+  // 1. Se tem unidade, prioriza o mapa
+  if (unit && UNIT_TO_CATEGORY[unit]) {
+    return UNIT_TO_CATEGORY[unit];
+  }
+  
+  // 2. Se não tem unidade, tenta inferir pelo MetricType
+  if (fieldType === "FLOAT") return "numeric"; // Ou outro padrão que desejar
+  
+  return "numeric";
+};
 export const mapType = (type?: string): MetricType => {
   switch (type) {
     case "currency":

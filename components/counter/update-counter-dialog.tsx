@@ -36,7 +36,12 @@ import { Form } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
-import type { Counter, CounterStep, TaskMetric } from '@prisma/client'
+import type {
+  Counter,
+  CounterStep,
+  TaskMetric,
+  TaskMetricCompletion
+} from '@prisma/client'
 import { updateCounterSchema, type UpdateCounterSchemaType } from '@/lib/schema/counter'
 import { formatDateBR } from '@/lib/utils'
 
@@ -46,13 +51,16 @@ interface UpdateCounterDialog {
   selectedDate: Date
   counter: (Counter & {
     CounterStep: CounterStep[]
-    taskMetric?: TaskMetric[]
   })
+  metrics?: (TaskMetric & {
+    taskMetricCompletion?: TaskMetricCompletion[]
+  })[]
 }
 
 const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
   trigger,
   counter,
+  metrics,
   selectedDate,
   taskId
 }) => {
@@ -68,7 +76,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
       unit: counter.unit || "",
       limit: counter.limit || 1,
       taskId: taskId,
-      metrics: counter?.taskMetric?.map((metric) => {
+      metrics: metrics?.map((metric) => {
         return {
           emoji: metric.emoji || "",
           field: metric?.field || "",
@@ -137,6 +145,8 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
     setOpen(prev => !prev)
   }
 
+  console.log(counter, "counter")
+  console.log(metrics, "metrics")
   console.log(errors, "errors")
 
   return (
@@ -155,7 +165,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className='w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>
             Editar contador
@@ -260,7 +270,7 @@ const UpdateCounterDialog: React.FC<UpdateCounterDialog> = ({
 
             <UpdateTaskMetrics
               control={control}
-              counter={counter}
+              metrics={metrics}
             />
           </form>
         </Form>

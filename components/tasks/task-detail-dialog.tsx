@@ -49,7 +49,7 @@ interface Props {
     completions?: (TaskCompletion & {
       counter?: Counter
       metrics?: (TaskMetric[] & {
-        completions?: TaskMetricCompletion[]
+        taskMetricCompletion?: TaskMetricCompletion[]
       }),
       annotations?: Annotations[]
     })[]

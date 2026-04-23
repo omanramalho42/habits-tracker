@@ -30,34 +30,35 @@ import { Plus, Trash2 } from "lucide-react"
 
 import type { UpdateCounterSchemaType } from "@/lib/schema/counter"
 import { Counter, TaskMetric } from "@prisma/client"
+import { getCategoryFromData, mapType } from "@/lib/utils"
 
 interface UpdateTaskMetricDialogProps {
   control: Control<UpdateCounterSchemaType>
-  counter: (Counter & {
-    metrics?: TaskMetric[]
-  })
+  metrics?: TaskMetric[]
 }
 
-const UpdateTaskMetricDialog: React.FC<UpdateTaskMetricDialogProps> = ({ control, counter }) => {
+const UpdateTaskMetricDialog: React.FC<UpdateTaskMetricDialogProps> = ({ control, metrics }) => {
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "metrics",
   })
+  console.log(metrics, "metrics")
   useEffect(() => {
-    if (counter.metrics && counter.metrics.length > 0) {
+    if (metrics && metrics.length > 0) {
       replace(
-        counter.metrics.map((m) => ({
+        metrics.map((m) => ({
           id: m.id,
           field: m.field ?? "",
           isComplete: false,
           limit: m.limit?.toString() ?? "0",
           unit: m.unit ?? "",
+          fieldType: getCategoryFromData(m.unit || "", m.fieldType || "NUMERIC"),
           emoji: m.emoji ?? "",
           value: "",
         }))
       )
     }
-  }, [counter, replace])
+  }, [metrics, replace])
 
   return (
     <div className="flex flex-col gap-4 z-50">
@@ -204,7 +205,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
             return (
               <FormItem>
                 <FormLabel>
-                  <Label>Valor</Label>
+                  <Label>esperado</Label>
                 </FormLabel>
                 <FormControl>
                   <Input

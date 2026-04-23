@@ -46,15 +46,20 @@ import {
 
 import { Plus, Trash2, Save } from "lucide-react"
 
-import type { Counter, TaskMetric, TaskMetricCompletion } from "@prisma/client"
+import type {
+  Counter,
+  TaskMetric,
+  TaskMetricCompletion
+} from "@prisma/client"
 
 import type { PutMetricSchemaType } from "@/lib/schema/metrics"
 import { toast } from "sonner"
+import { getCategoryFromData } from "@/lib/utils"
 
 interface PutTaskMetricsProps {
   metrics: (TaskMetric & {
     counter?: Counter
-    completion?: TaskMetricCompletion[]
+    taskMetricCompletion?: TaskMetricCompletion[]
   })[]
   taskId: string
   counterId: string
@@ -92,7 +97,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
         isComplete: false,
 
         field: m.field ?? "",
-        fieldType: m.fieldType ?? "numeric",
+        fieldType: getCategoryFromData(m.unit || "", m.fieldType || "NUMERIC"),
 
         limit: Number(m.limit ?? 1),
         unit: m.unit ?? "",
@@ -106,7 +111,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
     defaultValues,
   })
 
-  const { control, handleSubmit } = form
+  const { control, handleSubmit, reset } = form
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -149,6 +154,7 @@ const PutTaskMetrics: React.FC<PutTaskMetricsProps> = ({
         ]
       })
       console.log("✅ Metrics atualizadas")
+      reset()
       onOpenChange(false)
     },
     onError: (err) => {
@@ -289,7 +295,13 @@ const CounterItem: React.FC<CounterItemProps> = ({
     control,
     name: `metrics.${index}.fieldType`,
   })
-
+  // Mapeamento de unidades por tipo
+  const unitOptions: Record<string, { label: string; value: string }[]> = {
+    currency: [{ label: "R$", value: "BRL" }, { label: "$", value: "USD" }, { label: "€", value: "EUR" }],
+    liquid: [{ label: "ml", value: "ml" }, { label: "L", value: "l" }],
+    distance: [{ label: "cm", value: "cm" }, { label: "m", value: "m" }, { label: "km", value: "km" }],
+    weight: [{ label: "kg", value: "kg" }, { label: "g", value: "g" }],
+  }
   // const { field: label, fieldState: { error: labelError } } = useController({
   //   control,
   //   name: `metrics.${index}.label`,
@@ -454,6 +466,7 @@ const CounterItem: React.FC<CounterItemProps> = ({
       </div>
 
       <Select
+        disabled
         value={typeField.value}
         onValueChange={typeField.onChange}
       >
@@ -481,62 +494,14 @@ const CounterItem: React.FC<CounterItemProps> = ({
         </SelectContent>
       </Select>
 
-      {/* UNIT DINÂMICO */}
-      {type === "currency" && (
-        <Select
-          value={unit.value}
-          onValueChange={unit.onChange}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Moeda" />
-          </SelectTrigger>
+      {/* Renderização dinâmica e limpa */}
+      {unitOptions[type || "NUMERIC"] && (
+        <Select disabled value={unit.value} onValueChange={unit.onChange}>
+          <SelectTrigger><SelectValue placeholder="Unidade" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="BRL">R$</SelectItem>
-            <SelectItem value="USD">$</SelectItem>
-            <SelectItem value="EUR">€</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-
-      {type === "liquid" && (
-        <Select
-          value={unit.value}
-          onValueChange={unit.onChange}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Unidade" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ml">ml</SelectItem>
-            <SelectItem value="l">L</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-
-      {type === "distance" && (
-        <Select
-          value={unit.value}
-          onValueChange={unit.onChange}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Unidade" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="cm">cm</SelectItem>
-            <SelectItem value="m">m</SelectItem>
-            <SelectItem value="km">km</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-      {/* UNIT */}
-      {type === "weight" && (
-        <Select value={unit.value} onValueChange={unit.onChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Peso" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="kg">kg</SelectItem>
-            <SelectItem value="g">g</SelectItem>
+            {unitOptions[type || "NUMERIC"].map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       )}

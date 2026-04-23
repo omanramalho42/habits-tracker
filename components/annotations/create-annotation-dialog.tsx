@@ -137,7 +137,7 @@ const CreateAnnotationDialog:React.FC<CreateAnnotationDialogProps> = ({ completi
               </Button>
             )}
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className='w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
             <DialogHeader className='text-start'>
               Anotações
             </DialogHeader>

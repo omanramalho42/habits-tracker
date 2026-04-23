@@ -290,6 +290,7 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
               </span>
               <UpdateCounterDialog
                 counter={task.counter}
+                metrics={task.metrics}
                 taskId={task.id}
                 selectedDate={selectedDate || new Date()}
                 trigger={

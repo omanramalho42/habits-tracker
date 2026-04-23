@@ -135,7 +135,7 @@ const CounterPicker:React.FC<CounterPikcerProps> = ({
             </p>
           </CommandEmpty>
           <CommandGroup>
-            <CommandList>
+            <CommandList className='overflow-y-visible scroll-container scroll-auto touch-pan'>
               {counters?.data?.map((counter) => {
                 return (
                   <CommandItem

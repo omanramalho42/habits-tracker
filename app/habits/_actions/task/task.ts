@@ -231,11 +231,13 @@ export async function updateTask(form: UpdateTaskSchemaType) {
         name,
         color,
         description,
-        emojiUrl: {
-          connect: {
-            id: emojiId
-          } // Onde 'emoji' é o ID vindo do formulário
-        },
+        ...(emojiId && {
+          emojiUrl: {
+            connect: {
+              id: emojiId
+            }
+          },
+        }),
         ...(counterId && {
           counterId
         }),
