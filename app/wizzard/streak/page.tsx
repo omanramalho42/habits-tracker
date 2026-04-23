@@ -89,7 +89,7 @@ export default function DayStreak() {
           {/* 🔢 Streak */}
           <div className="text-center mb-6">
             <p className="text-white text-[80px] font-bold leading-none">
-              {data?.daysCompletedCount ?? 0}
+              {data?.daysCompletedThisWeek ?? 0}
             </p>
             <p className="text-[#888] text-[13px] font-semibold uppercase mt-1">
               dias seguidos

@@ -343,7 +343,7 @@ const WizzardScreen = () => {
 
   // Renderizar tela de Day Streak
   if (currentScreen === "streak") {
-    return <DayStreak onBack={() => setCurrentScreen("wizard")} />
+    return <DayStreak />
   }
 
   // Renderizar tela de Convite de Amigos
