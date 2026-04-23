@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 
 import { ClerkProvider } from "@clerk/nextjs"
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google"
-
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Analytics } from "@vercel/analytics/next"
 
 import { Toaster } from "sonner"
@@ -90,32 +90,34 @@ export default async function RootLayout({
         }
       >
         <body className={`antialiased`}>
-          <Toaster theme="dark" />
-          <QueryClientProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme={settings?.theme || "system"}
-              // enableSystem
-              // disableTransitionOnChange
-            >
-              <SoundProvider>
-                <main
-                  className={
-                    cn(
-                      `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
-                      settings?.bannerUrl ? `bg-[url'${settings.bannerUrl}']` : "bg-[url('/bg.png')]"
-                    )
-                  }
-                  style={{
-                    backgroundImage: settings?.bannerUrl ? `url(${settings?.bannerUrl})` : `bg-[url('/bg.png')]`
-                  }}
-                >
-                  { children }
-                </main>
-              </SoundProvider>
-            </ThemeProvider>
-            <Analytics />
-          </QueryClientProvider>
+          <NuqsAdapter>
+            <Toaster theme="dark" />
+            <QueryClientProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme={settings?.theme || "system"}
+                // enableSystem
+                // disableTransitionOnChange
+              >
+                <SoundProvider>
+                  <main
+                    className={
+                      cn(
+                        `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
+                        settings?.bannerUrl ? `bg-[url'${settings.bannerUrl}']` : "bg-[url('/bg.png')]"
+                      )
+                    }
+                    style={{
+                      backgroundImage: settings?.bannerUrl ? `url(${settings?.bannerUrl})` : `bg-[url('/bg.png')]`
+                    }}
+                  >
+                    { children }
+                  </main>
+                </SoundProvider>
+              </ThemeProvider>
+              <Analytics />
+            </QueryClientProvider>
+          </NuqsAdapter>
         </body>
       </html>
     </ClerkProvider>
