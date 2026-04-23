@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
     // Aqui assumimos que seu modelo de usuário tem um campo 'points' ou similar
     const topUsers = await prisma.user.findMany({
       take: 10,
-      orderBy: {
-        points: 'desc',
-      },
+      // orderBy: {
+      //   points: 'desc',
+      // },
       select: {
         id: true,
         name: true,
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     // 2. Busca a pontuação do usuário atual
     const currentUser = await prisma.user.findFirst({
       where: { clerkUserId },
-      select: { points: true }
+      // select: { points: true }
     });
 
     // 3. Formata os dados para o formato esperado pelo Player type do front
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       players,
-      userScore: currentUser?.points || 0
+      // userScore: currentUser?.points || 0
     });
 
   } catch (error) {

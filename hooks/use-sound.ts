@@ -13,7 +13,7 @@ const getAudioContext = () => {
   return audioContext
 }
 
-type SoundType = "click" | "hover" | "success" | "notification" | "error" | "toggle"
+type SoundType = "click" | "hover" | "success" | "notification" | "error" | "toggle" | "pop" | "levelUp"
 
 interface SoundConfig {
   frequency: number
@@ -72,6 +72,22 @@ const soundConfigs: Record<SoundType, SoundConfig> = {
     volume: 0.1,
     attack: 0.01,
     decay: 0.05,
+  },
+  pop: {
+    frequency: 400,
+    duration: 0.1,
+    type: "sine",
+    volume: 0.2,
+    attack: 0.01,
+    decay: 0.09,
+  },
+  levelUp: {
+    frequency: 600,
+    duration: 0.5,
+    type: "triangle",
+    volume: 0.15,
+    attack: 0.05,
+    decay: 0.4,
   },
 }
 
@@ -134,6 +150,14 @@ export function useSound() {
         oscillator.frequency.setValueAtTime(800, ctx.currentTime)
         oscillator.frequency.setValueAtTime(1000, ctx.currentTime + 0.05)
         oscillator.frequency.setValueAtTime(1200, ctx.currentTime + 0.1)
+      }
+
+      // Dentro de playSound(type: SoundType)
+      if (type === "levelUp") {
+        // Melodia ascendente rápida
+        oscillator.frequency.setValueAtTime(440, ctx.currentTime) // Lá
+        oscillator.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2) // Lá (oitava acima)
+        oscillator.frequency.exponentialRampToValueAtTime(1318, ctx.currentTime + 0.5) // Mi (nota de conclusão)
       }
 
       // Envelope

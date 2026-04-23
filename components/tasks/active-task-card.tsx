@@ -54,6 +54,7 @@ import type {
 import { useState } from "react"
 
 import PutTaskMetrics from "../task-metrics/put-task-metrics"
+import { StreakCelebration } from "../v2/streak-celebration"
 
 interface ActiveTaskCardProps {
   task: (Task & {
@@ -73,6 +74,8 @@ interface ActiveTaskCardProps {
 const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
   const [openMetricsDialog, setOpenMetricsDialog] =
     useState<boolean>(false)
+
+  const [showStreak, setShowStreak] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -133,17 +136,20 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       await queryClient.invalidateQueries({
         queryKey: ["streak"],
       })
-      if(values.step < values.limit) {
-        setOpenMetricsDialog(true)
-      }
 
       if (values.isCompleted) {
+        setShowStreak(true)
+
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
           colors: ["#3B82F6", "#8B5CF6", "#06B6D4", "#10B981"],
         })
+      }
+
+      if(values.step < values.limit) {
+        setOpenMetricsDialog(true)
       }
     },
     onError: (error) => {
@@ -159,7 +165,6 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
       date: (selectedDate || new Date()).toISOString()
     })
   }
-  console.log(completion, "completion 🦾")
   return (
     <Card className="p-3 flex flex-col gap-3">
 
@@ -173,6 +178,13 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
             {task.name}
           </p>
         </div>
+
+        {showStreak && (
+          <StreakCelebration 
+            open={showStreak} 
+            onOpenChange={setShowStreak} 
+          />
+        )}
 
         {/* ACTIONS */}
         <div className="flex items-center gap-1">

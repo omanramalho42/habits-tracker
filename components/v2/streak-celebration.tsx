@@ -10,6 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
+
 // Particle component for fire/ember effect
 function FireParticle({ delay, x, size }: { delay: number; x: number; size: number }) {
   return (
@@ -77,12 +80,18 @@ function FlameIcon() {
   )
 }
 
-export function StreakCelebration() {
+export function StreakCelebration({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const [isOpen, setIsOpen] = useState(false)
-  const streakDays = 30
-  const streakNumber = 96
 
-  // Generate particles
+  // Buscando os dados que acabamos de validar no back-end
+  const { data, isLoading } = useQuery({
+    queryKey: ["streak"],
+    queryFn: async () => {
+      const res = await axios.get("/api/streak")
+      return res.data
+    }
+  })
+
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
     delay: Math.random() * 2,
@@ -90,170 +99,78 @@ export function StreakCelebration() {
     size: 3 + Math.random() * 5,
   }))
 
+  if (isLoading) return null // Ou um skeleton de carregamento
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="
-            relative flex items-center gap-3 overflow-hidden rounded-2xl
-            bg-gradient-to-r from-[#ff4500]/20 via-[#ff6b35]/20 to-[#ff8c00]/20
-            border border-[#ff4500]/30 px-6 py-4
-            text-white font-semibold
-            shadow-[0_0_30px_rgba(255,69,0,0.3)]
-            backdrop-blur-xl
-            transition-all duration-300
-            hover:border-[#ff4500]/50
-            hover:shadow-[0_0_40px_rgba(255,69,0,0.5)]
-          "
+          className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-linear-to-r from-[#ff4500]/20 via-[#ff6b35]/20 to-[#ff8c00]/20 border border-[#ff4500]/30 px-6 py-4 text-white font-semibold shadow-[0_0_30px_rgba(255,69,0,0.3)] backdrop-blur-xl transition-all duration-300"
         >
           <Flame className="size-6 text-orange-400" />
-          <span className="text-lg">Ver Streak</span>
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-            animate={{ x: ["-100%", "200%"] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-          />
+          <span className="text-lg">Ver Atividade</span>
         </motion.button>
       </DialogTrigger>
 
-      <DialogContent 
-        showCloseButton={false}
-        aria-describedby={undefined}
-        className="
-          border-0 bg-transparent p-0 shadow-none
-          max-w-md w-full
-        "
-      >
+      <DialogContent showCloseButton={false} aria-describedby={undefined} className="border-0 bg-transparent p-0 shadow-none max-w-md w-full">
         <DialogTitle className="sr-only">Streak Celebration</DialogTitle>
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", duration: 0.5 }}
-            className="
-              relative overflow-hidden rounded-3xl
-              bg-gradient-to-br from-[#1a1a1a] via-[#2d1810] to-[#1a1a1a]
-              border border-white/5
-              shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)]
-            "
+            className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#1a1a1a] via-[#2d1810] to-[#1a1a1a] border border-white/5"
           >
             {/* Fire particles background */}
             <div className="absolute inset-0 overflow-hidden">
               {particles.map((particle) => (
-                <FireParticle
-                  key={particle.id}
-                  delay={particle.delay}
-                  x={particle.x}
-                  size={particle.size}
-                />
+                <FireParticle key={particle.id} delay={particle.delay} x={particle.x} size={particle.size} />
               ))}
             </div>
 
-            {/* Gradient overlay for fire effect */}
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `
-                  radial-gradient(ellipse at 50% 120%, rgba(255,69,0,0.15) 0%, transparent 50%),
-                  radial-gradient(ellipse at 80% 80%, rgba(255,100,0,0.1) 0%, transparent 40%)
-                `,
-              }}
-            />
-
-            {/* Large background number */}
+            {/* Large background number - usando o maxStreak ou currentStreak */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 0.08, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="
-                absolute left-4 top-1/2 -translate-y-1/2
-                text-[140px] font-bold leading-none text-white
-                select-none pointer-events-none
-              "
-              style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-[140px] font-bold leading-none text-white select-none pointer-events-none"
             >
-              {streakNumber}
+              {data?.currentStreak}
             </motion.div>
 
-            {/* Main content */}
             <div className="relative z-10 flex items-center justify-between px-8 py-10">
-              {/* Text content */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.4 }}
-                className="flex flex-col items-center text-center flex-1"
-              >
-                <motion.h2
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15, duration: 0.4 }}
-                  className="text-2xl font-bold text-white mb-2"
-                >
-                  You&apos;re on fire!
-                </motion.h2>
+              <div className="flex flex-col items-center text-center flex-1">
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {data?.currentStreak > 0 ? "Você está demais!" : "Vamos começar?"}
+                </h2>
                 
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.4 }}
-                  className="text-[#a0a0a0] text-base leading-relaxed max-w-[200px]"
-                >
-                  {streakDays}-day music streak! You didn&apos;t skip a single beat.
-                </motion.p>
+                <p className="text-[#a0a0a0] text-base leading-relaxed max-w-50">
+                  Atividade de {data?.currentStreak} dias! Você completou {data?.daysCompletedThisWeek} atividades esta semana.
+                </p>
 
                 {/* Share button */}
                 <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.4 }}
-                  whileHover={{ scale: 1.05, x: 3 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="
-                    mt-6 flex items-center gap-1
-                    rounded-full bg-white/10 backdrop-blur-sm
-                    px-6 py-2.5
-                    text-white font-medium text-sm
-                    border border-white/10
-                    transition-all duration-300
-                    hover:bg-white/15 hover:border-white/20
-                  "
+                  whileHover={{ scale: 1.05 }}
+                  className="mt-6 flex items-center gap-1 rounded-full bg-white/10 px-6 py-2.5 text-white font-medium text-sm border border-white/10"
                   onClick={() => {
-                    // Share functionality
                     if (navigator.share) {
                       navigator.share({
-                        title: "My Music Streak!",
-                        text: `I'm on a ${streakDays}-day music streak! 🔥`,
+                        title: "Meu progresso!",
+                        text: `Estou em uma ativade de ${data?.currentStreak} dias no Laboratório de Habitos! 🔥`,
                       })
                     }
                   }}
                 >
-                  Share
+                  Compartilhar
                   <ChevronRight className="size-4" />
                 </motion.button>
-              </motion.div>
+              </div>
 
-              {/* Flame icon */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                transition={{ delay: 0.25, type: "spring", stiffness: 200 }}
-                className="absolute right-4 bottom-4"
-              >
+              <div className="absolute right-4 bottom-4">
                 <FlameIcon />
-              </motion.div>
+              </div>
             </div>
-
-            {/* Bottom glow effect */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none"
-              style={{
-                background: "linear-gradient(to top, rgba(255,69,0,0.1) 0%, transparent 100%)",
-              }}
-            />
           </motion.div>
         </AnimatePresence>
       </DialogContent>

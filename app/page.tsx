@@ -593,7 +593,7 @@ export default function Home() {
 
         <Footer />
 
-        <TimezoneWarningBanner />
+        {/* <TimezoneWarningBanner /> */}
         <CreateFeedbackDialog
           trigger={
             <Button

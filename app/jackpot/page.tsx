@@ -58,7 +58,7 @@ export default function JackpotGame() {
     queryFn: fetchLeaderboard,
   })
   // 2. Inicialize o som
-  const { play } = useSound()
+  const { playSound: play } = useSound()
 
   const canPlay = habits.length >= 10; 
   // No spinMutation, precisamos parar o som

@@ -75,7 +75,7 @@ export function StreakDialog() {
               </div>
 
               <span className="text-xs text-[#888] tracking-widest uppercase">
-                Streak
+                Atividade
               </span>
             </div>
 
@@ -85,7 +85,7 @@ export function StreakDialog() {
           {/* STREAK NUMBER */}
           <div className="mb-4">
             <span className="text-white text-3xl font-bold">
-              {data?.currentStreak ?? 0}
+              {data?.daysCompletedThisWeek ?? 0}
             </span>
             <span className="text-[#888] text-sm ml-1">
               dias
@@ -97,19 +97,13 @@ export function StreakDialog() {
             {data?.weekDays?.map((day: any, i: number) => (
               <div key={i} className="flex flex-col items-center gap-1">
                 
-                {day.completed ? (
-                  <div className="
-                    w-6 h-6 rounded-full
-                    bg-green-500 flex items-center justify-center
-                  ">
-                    <span className="text-[10px] text-black">✓</span>
-                  </div>
-                ) : (
-                  <div className="
-                    w-6 h-6 rounded-full
-                    bg-[#2a2a2a]
-                  " />
-                )}
+                <div className={`
+                    w-6 h-6 rounded-full flex items-center justify-center
+                  ${day.completed ? 'bg-green-500' : 'bg-[#2a2a2a]'}
+                  ${day.highlighted && !day.completed ? 'border border-white/20' : ''}
+                `}>
+                  {day.completed && <span className="text-[10px] text-black font-bold">✓</span>}
+                </div>
 
                 <span className="text-[10px] text-[#666]">
                   {day.day.slice(0, 3)}
@@ -127,8 +121,8 @@ export function StreakDialog() {
 
           <div className="flex items-end justify-between mb-1">
             <span className="text-white text-lg font-semibold">
-              {data?.currentStreak ?? 0}/
-              {data?.nextMilestone ?? 100}
+              {data?.daysCompletedThisWeek ?? 0}/
+              {data?.currentMilestone ?? 100}
             </span>
 
             <span className="text-[#888] text-xs">

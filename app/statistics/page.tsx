@@ -1,8 +1,10 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-
 import { useState } from 'react'
+
+import { useQueryState } from 'nuqs' // 🔥 O segredo para sincronia com a URL
+
 import { useQuery } from '@tanstack/react-query'
 import {
   Tabs,
@@ -39,9 +41,6 @@ import type { GoalsDTO } from '@/services/goals'
 import type { CategoriesDTO } from '@/services/categories'
 
 export default function Statistics() {
-  const [viewMode, setViewMode] =
-    useState<HeatMapRange>("week")
-
   const {
     data: habits = [],
     isLoading: habitsLoading,
@@ -101,7 +100,18 @@ export default function Statistics() {
     retry: 1,
   })
 
-  // console.log({ categories }, { goals }, { annotations }, { tasks }, { routines }, { habits })
+  // Sincroniza o viewMode com a URL (ex: ?view=week)
+  const [viewMode, setViewMode] = useQueryState('view', { 
+    defaultValue: 'week', // Garante um valor padrão
+    parse: (val) => (['week', 'month', 'year'].includes(val) ? (val as HeatMapRange) : 'week'),
+    serialize: (val) => val
+  });
+
+  // Sincroniza a aba ativa com a URL (ex: ?tab=tasks)
+  const [activeTab, setActiveTab] = useQueryState('tab', { 
+    defaultValue: 'habits',
+    shallow: false 
+  })
 
   return (
     <main className='min-h-screen bg-transparent'>
@@ -109,15 +119,26 @@ export default function Statistics() {
         <HeaderSection />
         
         {/* View Mode Tabs */}
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as HeatMapRange)}>
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v)}>
           <TabsList className="w-full">
-            <TabsTrigger value="week" className="flex-1">Semana</TabsTrigger>
-            <TabsTrigger value="month" className="flex-1">Mês</TabsTrigger>
-            <TabsTrigger value="year" className="flex-1">Ano</TabsTrigger>
+            <TabsTrigger value="week" className="flex-1">
+              Semana
+            </TabsTrigger>
+            <TabsTrigger value="month" className="flex-1">
+              Mês
+            </TabsTrigger>
+            <TabsTrigger value="year" className="flex-1">
+              Ano
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <Tabs defaultValue="habits" className="w-full">
+        <Tabs
+          defaultValue="habits"
+          value={activeTab || 'habits'}
+          onValueChange={(v) => setActiveTab(v)}
+          className="w-full"
+        >
           <div className='flex flex-row max-w-full overflox-x-auto scroll-container'>
             <TabsList className="bg-transparent gap-2">
               <TabsTrigger value="habits">Hábitos</TabsTrigger>
@@ -133,7 +154,8 @@ export default function Statistics() {
             <HabitStats
               isLoading={habitsLoading}
               habits={habits}
-              viewMode={viewMode}
+              // Force o fallback para 'week' e garanta que o tipo seja correto
+              viewMode={(viewMode as HeatMapRange) || 'week'}
             />
           </TabsContent>
 
