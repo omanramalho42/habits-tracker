@@ -11,10 +11,12 @@ import {
 
 import Image from "next/image"
 import axios from "axios"
+import { Flame } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export function StreakDialog() {
   const [open, setOpen] = useState(false)
-
+  const router = useRouter()
   const { data, isPending } = useQuery({
     queryKey: ["streak"],
     queryFn: async () => {
@@ -78,6 +80,17 @@ export function StreakDialog() {
                 Atividade
               </span>
             </div>
+
+            {/* Day Streak Button */}
+            <button 
+              onClick={() => router.push("/wizzard/streak")}
+              className="flex items-center gap-2 bg-[#1a1512] hover:bg-[#241c14] border border-[#F97316]/30 rounded-full px-4 py-2 transition-colors"
+            >
+              <Flame className="h-4 w-4 text-[#F97316]" />
+              <span className="text-[#F97316] text-sm font-medium">
+                {data?.currentStreak || 0}
+              </span>
+            </button>
 
             {/* <Flame className="text-orange-500 w-4 h-4 opacity-60" /> */}
           </div>

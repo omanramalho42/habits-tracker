@@ -18,7 +18,6 @@ import {
   Users,
   X
 } from 'lucide-react'
-import DayStreak from './components/day-streak'
 import FriendInvite from './components/friend-invite'
 import PermissionsModal from './components/permissions-modal'
 import Footer from '@/components/habits/footer'
@@ -42,6 +41,7 @@ import CreateTaskDialogSteps from '@/components/tasks/create-task-step-dialog'
 import { CreateHabitStepDialog } from '@/components/habits/create-habit-step-dialog'
 import CreateRoutineStepDialog from '@/components/routines/create-routine-step-dialog'
 import { FullEntityWizard } from './components/full-wizard'
+import DayStreak from './streak/page'
 
 interface ActionItem {
   id: string
@@ -358,32 +358,22 @@ const WizzardScreen = () => {
         <div className="p-2">
           {/* Header Buttons */}
           <div className="flex items-center justify-between mb-8">
-            {/* Day Streak Button */}
-            <button 
-              onClick={() => setCurrentScreen("streak")}
-              className="flex items-center gap-2 bg-[#1a1512] hover:bg-[#241c14] border border-[#F97316]/30 rounded-full px-4 py-2 transition-colors"
-            >
-              <Flame className="h-4 w-4 text-[#F97316]" />
-              <span className="text-[#F97316] text-sm font-medium">
-                {data?.currentStreak || 0}
-              </span>
-            </button>
             {/* Friend Invite Button */}
-            <button 
+            {/* <button 
               onClick={() => setCurrentScreen("invite")}
               className="flex items-center gap-2 bg-[#1a1520] hover:bg-[#241a2a] border border-purple-500/30 rounded-full px-4 py-2 transition-colors"
             >
               <Users className="h-4 w-4 text-purple-400" />
-            </button>
+            </button> */}
 
             {/* Settings/Permissions Button */}
-            <button 
+            {/* <button 
               onClick={() => setShowPermissions(true)}
               className="w-11 h-11 bg-[#161616] hover:bg-[#1e1e1e] rounded-full flex items-center justify-center transition-colors border border-[#222]"
               aria-label="Configurações"
             >
               <Settings className="h-4 w-4 text-[#888]" />
-            </button>
+            </button> */}
           </div>
 
           {/* AI Icon */}

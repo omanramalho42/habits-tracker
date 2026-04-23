@@ -2,16 +2,13 @@
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
 import { ChevronLeft, Info } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-interface DayStreakProps {
-  onBack: () => void
-}
-
-export default function DayStreak({ onBack }: DayStreakProps) {
+export default function DayStreak() {
   const [currentDate, setCurrentDate] = useState(new Date())
-
   // Função para navegar entre meses
   const changeMonth = (offset: number) => {
     setCurrentDate(prev => {
@@ -27,15 +24,17 @@ export default function DayStreak({ onBack }: DayStreakProps) {
     const firstDay = new Date(year, month, 1).getDay() // Dia da semana que começa
     return { daysInMonth, firstDay, month, year }
   }
-
+  
   const { daysInMonth, firstDay, month, year } = getDaysInMonth(currentDate)
   const { data, isLoading } = useQuery({
     queryKey: ["streak"],
     queryFn: async () => {
-      const res = await fetch("/api/streak")
-      return res.json()
+      const res = await axios.get("/api/streak")
+      return res.data
     }
   })
+  
+  console.log(data, "streak 🔥")
 
   if (isLoading) {
     return (
@@ -54,7 +53,7 @@ export default function DayStreak({ onBack }: DayStreakProps) {
     })
   }
 
-  console.log(data, "data")
+  const router = useRouter()
 
   return (
     <div className="min-h-screen mb-22 bg-[#050505] flex items-center justify-center p-4">
@@ -67,7 +66,7 @@ export default function DayStreak({ onBack }: DayStreakProps) {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button 
-              onClick={onBack}
+              onClick={() => router.back()}
               className="w-10 h-10 flex items-center justify-center text-white hover:bg-[#1a1a1a] rounded-full transition-colors"
             >
               <ChevronLeft className="h-6 w-6" />
@@ -90,7 +89,7 @@ export default function DayStreak({ onBack }: DayStreakProps) {
           {/* 🔢 Streak */}
           <div className="text-center mb-6">
             <p className="text-white text-[80px] font-bold leading-none">
-              {data?.currentStreak ?? 0}
+              {data?.daysCompletedCount ?? 0}
             </p>
             <p className="text-[#888] text-[13px] font-semibold uppercase mt-1">
               dias seguidos
