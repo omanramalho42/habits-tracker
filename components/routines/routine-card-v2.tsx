@@ -9,10 +9,13 @@ import { toast } from "sonner"
 
 import UpdateRoutineDialog from "@/components/update-routine-dialog"
 import DeleteRoutineDialog from "@/components/delete-routine-dialog"
-import UpdateHabitSchedule  from "@/components/update-habit-schedule-dialog"
+
+import UpdateHabitScheduleDialog from "@/components/update-habit-schedule-dialog"
 import DeleteHabitScheduleDialog from "@/components/delete-habit-schedule-dialog"
+
 import UpdateTaskScheduleDialog from "@/components/task-schedule/update-task-schedule-dialog"
 import DeleteTaskScheduleDialog from "@/components/task-schedule/delete-task-schedule-dialog"
+
 import RoutineFrequencyCard from "@/components/routines/routine-frequency"
 import RoutineCronCard from "@/components/routines/routine-card-cron"
 import FilterDropdown from "@/components/routines/filter-dropdown"
@@ -621,7 +624,9 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                 <div className="flex justify-between items-start gap-4">
                   
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{habit.emoji}</span>
+                    <span className="text-2xl">
+                      {habit.emoji}
+                    </span>
                     <p className="text-xs font-medium tracking-tight text-foreground/90 line-clamp-2 wrap-break-word">
                       {habit.name}
                     </p>
@@ -637,8 +642,8 @@ const RoutineCard: React.FC<RoutineCardProps> = ({
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent align="end">
-                        <UpdateRoutineDialog
-                          routine={routine}
+                        <UpdateHabitScheduleDialog
+                          schedule={schedule}
                           trigger={
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                               <Pencil className="mr-2 w-4 h-4" />

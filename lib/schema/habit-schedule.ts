@@ -5,7 +5,6 @@ export const updateHabitScheduleSchema = z.object({
   clock: z.string().optional(),
   duration: z.string().optional(),
   habit: z.any(),
-  // Adicionado: Array de alarmes
   alarms: z.array(z.object({
     id: z.string().optional(),
     triggerTime: z.string(),

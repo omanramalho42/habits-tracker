@@ -49,21 +49,19 @@ import { MultiAlarmsPicker } from './multi-alarms-picker'
 
 interface UpdateHabitScheduleDialogProps {
   trigger?: React.ReactNode;
-  habit: Habit;
-  schedule: Partial<HabitSchedule>;
+  schedule: Partial<HabitSchedule & { habit?: Habit }>;
 }
 
 const UpdateHabitScheduleDialog = ({
   trigger,
   schedule,
-  habit,
 }: UpdateHabitScheduleDialogProps) => {
   const form = useForm<UpdateHabitScheduleSchemaType>({
     defaultValues: {
       id: schedule.id,
       clock: schedule?.clock || "",
       duration: schedule?.duration || "",
-      habit: habit || null,
+      habit: schedule.habit || null,
       // Carregar alarmes existentes se houver
       alarms: (schedule as any)?.alarms || []
     }

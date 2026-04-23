@@ -115,7 +115,7 @@ const CounterPicker:React.FC<CounterPikcerProps> = ({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent>
+      <PopoverContent className=''>
         <Command
           onSubmit={(e) => {
             e.preventDefault()
@@ -134,8 +134,8 @@ const CounterPicker:React.FC<CounterPikcerProps> = ({
               Criar novo contador
             </p>
           </CommandEmpty>
-          <CommandGroup>
-            <CommandList className='overflow-y-visible scroll-container scroll-auto touch-pan'>
+          <CommandGroup className='overflow-y-auto'>
+            <CommandList className=''>
               {counters?.data?.map((counter) => {
                 return (
                   <CommandItem
