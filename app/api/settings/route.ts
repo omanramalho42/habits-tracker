@@ -37,6 +37,7 @@ export async function GET() {
         include: {
           user: {
             include: {
+              notifications: true,
               usage: true
             }
           }
@@ -90,10 +91,6 @@ export async function PATCH(request: Request) {
       preferences
     } = parsedBody.data
 
-    // console.log(parsedBody.data, "data!")
-
-    //CLOUDINARY PARA PROCESSAR IMAGEM AVATAR
-    //CLOUDINARY PARA PROCESSAR IMAGEM DE BANNER
     const settings = await prisma.userSettings.upsert({
       where: {
         userId: userDb.id,

@@ -26,11 +26,9 @@ import type { User, UserSettings } from '@prisma/client'
 import CreatePixKeyDialog from '../modals/create-pix-key-dialog'
 import { StreakDialog } from '../streak/streak-dialog'
 import HeaderNavigation from '../header/header-navigation'
-import { AtomIcon, GamepadIcon, Power } from 'lucide-react'
-import CreateAssistantDialog from '../v2/create-assistent-dialog'
-import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import NotificationRequest from '../pwa/notifications'
 
 const HeaderSection:React.FC = () => {
   const today = new Date().toLocaleDateString("pt-BR", {
@@ -49,7 +47,7 @@ const HeaderSection:React.FC = () => {
   })
 
   const router = useRouter()
-  
+
   return (
     <div className="flex flex-row-reverse py-2 items-start justify-between">
       <HeaderNavigation
@@ -97,6 +95,8 @@ const HeaderSection:React.FC = () => {
             />
           </div>
         </button>
+
+        <NotificationRequest />
 
         {/* <button
           type='button'

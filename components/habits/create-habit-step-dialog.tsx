@@ -23,7 +23,6 @@ import { CreateHabitSchemaType } from "@/lib/schema/habit"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
@@ -36,6 +35,7 @@ import {
 
 import GoalPicker from "@/components/goal-picker"
 import CategoriePicker from "@/components/categorie-picker"
+import { sendNotification } from "@/app/_actions/notifications"
 
 const STEPS = [
   { id: 1, title: "Identidade", icon: <PlusSquare className="w-4 h-4" /> },
@@ -80,8 +80,19 @@ export function CreateHabitStepDialog({ trigger }: { trigger?: React.ReactNode }
       reset()
       setStep(1)
       setOpen(false)
-      queryClient.invalidateQueries({ queryKey: ["habits"] })
-      queryClient.invalidateQueries({ queryKey: ["routines"] })
+      queryClient.invalidateQueries({
+        queryKey: ["habits"]
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["routines"]
+      })
+
+      // Exemplo da chamada correta
+      await sendNotification(
+        "Parabéns, você criou um novo hábito!", // message (body da notificação)
+        "/icone-padrao.png",                    // icon
+        "Lab Habit"                             // name (título da notificação)
+      );
     },
     onError: () => toast.error("Erro ao criar hábito")
   })

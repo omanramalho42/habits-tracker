@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+import nextPwa from "next-pwa";
+
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
@@ -22,5 +24,16 @@ const nextConfig = {
     unoptimized: true,
   },
 }
+
+const isDev = process.env.NODE_ENV !== "production";
+
+const withPWA = nextPwa({
+	dest: "public",
+	register: true,
+});
+
+const config = withPWA({
+	...nextConfig,
+});
 
 export default nextConfig

@@ -19,6 +19,7 @@ import { syncCurrentUser } from "@/lib/sync-user"
 
 import "@/app/globals.css"
 import { SoundProvider } from "@/components/trial-wizzard/sound-provider"
+import Pwa from "@/components/pwa/pwa"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -26,8 +27,6 @@ const spaceGrotesk =
   Space_Grotesk({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Lab Habits - Laboratório de hábitos",
-  description: "Gerêncie seus hábitos e rotinas de forma dinâmica",
   generator: "Oman Company",
   icons: {
     icon: [
@@ -46,6 +45,27 @@ export const metadata: Metadata = {
     ],
     apple: "/logo.png",
   },
+
+	metadataBase: new URL("https://habits.app.br"),
+
+	title: {
+		template: "%s | Daily Quest",
+		default: "Lab Habits - Laboratório de hábitos",
+	},
+	authors: {
+		name: "oman ramalho",
+	},
+
+	description: "Gerêncie seus hábitos e rotinas de forma dinâmica",
+	openGraph: {
+		title: "Lab Habits - Laboratório de hábitos",
+		description: "Gerêncie seus hábitos e rotinas de forma dinâmica",
+		url: "https://daily-habit-quest.vercel.app/",
+		siteName: "Lab Habits - Laboratório de hábitos",
+		images: "/logo.png",
+		type: "website",
+	},
+	keywords: ["habitos", "oman ramalho", "habits"],
 }
 
 export default async function RootLayout({
@@ -115,6 +135,7 @@ export default async function RootLayout({
                   </main>
                 </SoundProvider>
               </ThemeProvider>
+              <Pwa />
               <Analytics />
             </QueryClientProvider>
           </NuqsAdapter>
