@@ -5,7 +5,7 @@ import {  useState } from "react"
 import { useTheme } from "next-themes"
 
 import dynamic from "next/dynamic"
-
+import { useQueryState, parseAsString } from 'nuqs';
 import { motion } from 'framer-motion'
 
 import {  useQuery } from "@tanstack/react-query"
@@ -35,9 +35,9 @@ import type {
   UserSettings
 } from "@prisma/client"
 
-import TimezoneWarningBanner from "@/components/banners/timezone-warning-banner"
+// import TimezoneWarningBanner from "@/components/banners/timezone-warning-banner"
 import CreateFeedbackDialog from "@/components/feedback/create-feedback-dialog"
-import { BottomNavigation } from "@/components/routines/bottom-navigation"
+// import { BottomNavigation } from "@/components/routines/bottom-navigation"
 
 import {
   DropdownMenu,
@@ -109,6 +109,13 @@ const item = {
 }
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useQueryState(
+    'tab', 
+    parseAsString.withDefault('habits').withOptions({
+      shallow: true, // Mantém a atualização rápida sem re-executar getServerSideProps
+      history: 'replace' // Não suja o histórico do botão "voltar"
+    })
+  );
   const [search, setSearch] = useState<string>("")
   const [filter, setFilter] = useState<{
     status: "all" | "completed" | "pending"
@@ -290,7 +297,7 @@ export default function Home() {
             <MultiGraphsChart tasks={tasks} />
           )}
 
-          <Tabs defaultValue="habits">
+          <Tabs defaultValue="habits" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-background w-full my-2">
               <TabsTrigger 
                 value="routines" 

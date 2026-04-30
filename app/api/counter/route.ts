@@ -106,7 +106,6 @@ export async function POST(request: NextRequest) {
           unit,
         }
       })
-
       // 2️⃣ cria TaskMetric desvinculadas de Task (opcional)
       const createdMetrics = await Promise.all(
         (metrics || []).map((metric) =>

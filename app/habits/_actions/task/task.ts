@@ -72,6 +72,13 @@ export async function createTask(form: CreateTaskSchemaType) {
       }
     }
 
+    //verificar se existe um contador
+    const isTaskStep = await prisma.counter.findUnique({
+      where: {
+        id: counterId
+      }
+    })
+
     // ✅ Criação da task
     return await prisma.task.create({
       data: {
@@ -80,7 +87,7 @@ export async function createTask(form: CreateTaskSchemaType) {
         name,
         color,
         description,
-
+        //CONECTANDO O CONTADOR
         ...(counterId && {
           counterId
         }),
@@ -94,8 +101,8 @@ export async function createTask(form: CreateTaskSchemaType) {
         imageUrl: imageUrlUploaded || null,
         videoUrl: videoUrlUploaded || null,
 
-        customField: custom_field,
-        limitCounter: Number(limitCounter) || 1,
+        customField: isTaskStep?.valueNumber?.toString() || custom_field,
+        limitCounter: Number(isTaskStep?.limit) || 1,
 
         ...(goals && {
           goals: {

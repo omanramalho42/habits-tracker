@@ -79,19 +79,19 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
   const queryClient = useQueryClient()
 
-  console.log(selectedDate, "selected date")
-  console.log(task.completions, "completions")
+  // console.log(selectedDate, "selected date")
+  // console.log(task.completions, "completions")
 
   const completion = task?.completions?.find((c: any) =>
     formatToBrazilDay(c.completedDate) ===
     formatToBrazilDay(selectedDate || new Date())
   )
-  console.log({
-    completionDateRaw: completion?.completedDate,
-    completionDateBR: formatToBrazilDay(completion?.completedDate || new Date()),
-    selectedDateRaw: selectedDate,
-    selectedDateBR: formatToBrazilDay(selectedDate || new Date())
-  })
+  // console.log({
+  //   completionDateRaw: completion?.completedDate,
+  //   completionDateBR: formatToBrazilDay(completion?.completedDate || new Date()),
+  //   selectedDateRaw: selectedDate,
+  //   selectedDateBR: formatToBrazilDay(selectedDate || new Date())
+  // })
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     year: "numeric",
     month: "2-digit",
@@ -101,13 +101,22 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
   const selected = formatter.format(
     new Date(selectedDate || new Date())
   )
-
+  
   const counterDay = task?.counter?.CounterStep?.find(
     (c: CounterStep) =>
       formatter.format(new Date(c.date)) === selected
   )
-
-  const currentStep = Number(counterDay?.currentStep ?? 0)
+  
+  // console.log(task, "✨")
+  // console.log(counterDay, "🔁")
+  const hasCompletion = task.completions?.some((completion) => {
+    if (!completion.completedDate) return false;
+    
+    // Garante que estamos lidando com um objeto Date
+    const date = new Date(completion.completedDate);
+    return formatter.format(date) === selected;
+  });
+  const currentStep = hasCompletion && task.limitCounter || 0
   const limit = Number(counterDay?.limit ?? task?.counter?.limit ?? 1)
 
   const { mutate, isPending } = useMutation({

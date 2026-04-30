@@ -278,6 +278,8 @@ export async function PUT(
         }
       }
     })
+    //ADICIONAR AQUI A LOGICA DE STEPS
+    
     console.log(existingCompletion, "exist completion ⚠️")
     // 2. Executa o upsert com a lógica de inversão
     const completion = await prisma.taskCompletion.upsert({
@@ -308,7 +310,7 @@ export async function PUT(
           }
         }
       },
-    });
+    })
     console.log(completion ,"completion after updated ⏳");
     // const counter = completion.task.counter;
     // if (!counter) throw new Error("Counter not found")

@@ -118,11 +118,14 @@ export async function PUT(
         data: { currentStep: nextStep },
       });
 
-      // 5️⃣ atualiza Counter valueNumber
-      // await tx.counter.update({
-      //   where: { id: counter.id },
-      //   data: { valueNumber: nextStep },
-      // });
+      await tx.task.update({
+        where: {
+          id: taskId
+        },
+        data: {
+          limitCounter: nextStep
+        }
+      })
 
       // 6️⃣ cria/atualiza TaskMetricCompletions
       await Promise.all(
@@ -157,11 +160,11 @@ export async function PUT(
         completionId: completion.id,
       }
     })
-    console.log({
-      input: date,
-      startOfDayUTC: startOfDayUTC.toISOString(),
-      br: new Date(startOfDayUTC).toLocaleString("pt-BR"),
-    })
+    // console.log({
+    //   input: date,
+    //   startOfDayUTC: startOfDayUTC.toISOString(),
+    //   br: new Date(startOfDayUTC).toLocaleString("pt-BR"),
+    // })
     return NextResponse.json(result)
   } catch (error) {
     if (error instanceof Error) {
