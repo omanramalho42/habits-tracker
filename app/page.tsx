@@ -82,6 +82,10 @@ import type { HabitWithStats } from "@/lib/types"
 import MultiGraphsChart from "@/components/charts/multi-graphs-chart"
 import { fetchUserSettings } from "@/services/settings"
 import { CreateHabitDialog } from "@/components/create-habit-dialog"
+import CreateGroupTaskDialog from "@/components/group-tasks/create-group-task-dialog";
+import axios from "axios";
+import { GroupTaskCard } from "@/components/group-tasks/group-task-card";
+import { ViewGroupTaskDialog } from "@/components/group-tasks/view-group-task-dialog";
 
 const container = {
   hidden: {},
@@ -233,6 +237,15 @@ export default function Home() {
     staleTime: 1000 * 60,
     retry: 1,
   })
+
+  const { data: groupTasks = [] } = useQuery<any[]>({
+    queryKey: ["group-tasks"],
+    queryFn: async () => {
+      const { data } = await axios.get("/api/group-tasks");
+      return data;
+    },
+    staleTime: 1000 * 60,
+  });
 
   const {
     data: routines = [],
@@ -564,36 +577,73 @@ export default function Home() {
               )}
             </TabsContent>
             <TabsContent value="tasks" className="flex flex-col gap-2 overflow-y-visible scroll-container max-h-190">
-              {tasks?.length > 0 ? tasks?.map((task) => {
-                return (
-                  <ActiveTaskCard
-                    key={task.id}
-                    task={task}
-                    selectedDate={selectedDate}
-                  />
-                )
-              }) : (
-                <Card className="flex flex-col gap-1 px-4">
-                  <div className="flex flex-col text-center text-4xl">
-                    🎯
-                    <h2 className="text-center text-xl font-bold mb-3 text-foreground">
-                      Comece sua jornada
-                    </h2>
-                  </div>
-                  <CreateTaskDialog
-                    trigger={
-                      <Button
-                        aria-label="Criar tarefa"
-                        title="Criar tarefa"
-                        size="lg"
-                      >
-                        <Plus className="h-5 w-5 mr-2" />
-                        Criar tarefa
-                      </Button>
-                    }
-                  />
-                </Card>
+              {/* 1. SEÇÃO DE GRUPOS 
+              Sempre aparece se houver grupos, a menos que você queira uma lógica específica de ocultar tudo.
+              */}
+              {groupTasks.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
+                    Meus Grupos
+                  </span>
+                  {groupTasks.map((group) => (
+                    <GroupTaskCard
+                      key={group.id}
+                      group={group}
+                    />
+                  ))}
+                </div>
               )}
+
+              {/* 2. SEÇÃO DE TAREFAS INDIVIDUAIS
+                  Só renderiza se 'showOnlyGroupTasks' for FALSO
+              */}
+              {!userSettings?.showOnlyGroupTasks && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
+                    Tarefas Ativas
+                  </span>
+                  
+                  {tasks.length > 0 ? (
+                    tasks.map((task) => (
+                      <ActiveTaskCard
+                        key={task.id}
+                        task={task}
+                        selectedDate={selectedDate}
+                      />
+                    ))
+                  ) : (
+                    /* Estado vazio apenas para tarefas individuais */
+                    <Card className="flex flex-col gap-2 px-4 py-8 items-center justify-center border-dashed bg-muted/30">
+                      <div className="text-4xl">🎯</div>
+                      <div className="text-center">
+                        <h2 className="text-lg font-bold text-foreground">Comece sua jornada</h2>
+                        <p className="text-sm text-muted-foreground mb-4">Nenhuma tarefa individual encontrada.</p>
+                      </div>
+                      <CreateTaskDialog
+                        trigger={
+                          <Button size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Criar tarefa
+                          </Button>
+                        }
+                      />
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              {/* 3. FEEDBACK CASO TUDO ESTEJA VAZIO (Opcional) */}
+              {groupTasks.length === 0 && tasks.length === 0 && (
+                <p className="text-center text-muted-foreground py-10 text-sm">
+                  Nenhuma tarefa ou grupo para exibir.
+                </p>
+              )}
+
+              {/* 4. AÇÕES FIXAS NO FINAL */}
+              <div className="pt-2 border-t border-dashed">
+                <CreateGroupTaskDialog />
+              </div>
+
             </TabsContent>
           </Tabs>
         </div>

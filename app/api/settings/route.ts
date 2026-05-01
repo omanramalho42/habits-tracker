@@ -104,6 +104,7 @@ export async function PATCH(request: Request) {
         // ✅ MAPEAMENTO NOVO
         showGraphs: preferences?.showGraphs,
         habitLayout: preferences?.habitLayout,
+        showOnlyGroupTasks: preferences?.showOnlyGroupTasks
       },
       create: {
         userId: userDb.id,
@@ -115,6 +116,7 @@ export async function PATCH(request: Request) {
         // ✅ MAPEAMENTO NOVO
         showGraphs: preferences?.showGraphs ?? true,
         habitLayout: preferences?.habitLayout ?? "VERTICAL",
+        showOnlyGroupTasks: preferences?.showOnlyGroupTasks
       },
     })
 
@@ -124,7 +126,7 @@ export async function PATCH(request: Request) {
         email,
         name: name || "Usuário",
         pixKey,
-        pixKeyType,
+        pixKeyType: pixKeyType ?? "",
       })
     }
 

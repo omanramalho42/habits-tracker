@@ -94,6 +94,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
       preferences: {
         showGraphs: userSettings?.showGraphs ?? true,
         habitLayout: userSettings?.habitLayout ?? "VERTICAL",
+        showOnlyGroupTasks: userSettings?.showOnlyGroupTasks
       }
     }
   })
@@ -167,7 +168,7 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
         )}
       </DialogTrigger>
 
-      <DialogContent className='max-w-[90vw]'>
+      <DialogContent className='w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
 
         <DialogHeader>
           <DialogTitle className='text-2xl'>
@@ -551,6 +552,27 @@ const UpdateUserSettingsDialog:React.FC<UpdateUserSettingsDialogProps> = ({
                             </DropdownMenuLabel>
 
                             <DropdownMenuSeparator />
+                            {/* EXIBIR APENAS GRUPOS DE TAREFAS */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex flex-col">
+                                <span className="text-sm">
+                                  Apenas grupos
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  Ocultar tarefas que não estão em grupos
+                                </span>
+                              </div>
+
+                              <Switch
+                                checked={field.value?.showOnlyGroupTasks}
+                                onCheckedChange={(val) =>
+                                  field.onChange({
+                                    ...field.value,
+                                    showOnlyGroupTasks: val,
+                                  })
+                                }
+                              />
+                            </div>
 
                             {/* SHOW GRAPHS */}
                             <div className="flex items-center justify-between">
