@@ -1,5 +1,9 @@
 
 export const AI_CONFIG = {
+  group: {
+    prompt: "Crie uma descrição curta (máximo 2 frases) e motivadora para um conjunto de tarefas.",
+    field: "descrição",
+  },
   routine: {
     prompt: "Crie uma descrição curta (máximo 2 frases) e motivadora para uma rotina.",
     field: "descrição",

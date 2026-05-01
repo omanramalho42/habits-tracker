@@ -33,7 +33,6 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
       <TooltipProvider>
         <div className="flex gap-2">
 
-          {/* IMAGE */}
           {imageUrl && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -47,7 +46,6 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
             </Tooltip>
           )}
 
-          {/* VIDEO */}
           {videoUrl && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -65,7 +63,10 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
 
       {/* MODAL */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl w-full flex items-center justify-center">
+        <DialogContent
+          className="max-w-3xl w-full flex items-center justify-center"
+          onPointerDownCapture={(e) => e.stopPropagation()}
+        >
           <div className="w-full flex items-center justify-center">
             {type === "image" && imageUrl && (
               <Image

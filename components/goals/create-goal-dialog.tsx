@@ -91,7 +91,10 @@ const CreateGoalDialog:React.FC<CreateGoalDialogProps> = ({ trigger }) => {
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: CreateGoalSchemaType) => {
       console.log(values, "values")
-      return await axios.post(`/api/goals`, values)
+      return await axios.post(
+        `/api/goals`,
+        values
+      )
     },
     onSuccess: async (values) => {
       console.log(values, "values")

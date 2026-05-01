@@ -83,6 +83,7 @@ model User {
   posts       Post[]
   counters    Counter[]
   assistents  Assistant[]
+  groupTasks  GroupTask[]
 }
 
 enum THEME {
@@ -96,6 +97,7 @@ enum PixKeyType {
   PHONE
   RANDOM
 }
+
 enum HABIT_LAYOUT {
   VERTICAL
   HORIZONTAL
@@ -113,8 +115,8 @@ model UserSettings {
   smsNotifications     Boolean? @default(false) @map("sms_notifications")
 
   // 👇 NOVAS PREFERÊNCIAS
-  showGraphs Boolean? @default(true) @map("show_graphs")
-
+  showGraphs         Boolean? @default(true) @map("show_graphs")
+  showOnlyGroupTasks Boolean? @default(true) @map("show_group_tasks")
   habitLayout HABIT_LAYOUT? @default(VERTICAL) @map("habit_layout")
 
   name       String?      @db.VarChar(100)
@@ -345,6 +347,20 @@ model Emoji {
   @@map("emoji")
 }
 
+model GroupTask {
+id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  color       String?  @db.VarChar(10)
+
+  // Relacionamento com Task
+  tasks       Task[]   // Prisma cria automaticamente uma tabela _GroupTaskToTask
+
+  @@map("group_task")
+}
+
 model Task {
   id            String      @id @default(uuid())
 
@@ -393,6 +409,7 @@ model Task {
   categories    Categories[]
   checkpoints   CheckPoint[]
   metrics       TaskMetric[]
+  groups        GroupTask[]
 
   @@index([indexPos])
   @@index([userId])

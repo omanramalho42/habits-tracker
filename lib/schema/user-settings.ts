@@ -28,10 +28,11 @@ export const updateUserSettingSchema = z.object({
   avatarUrl: z.any().optional(),
   bannerUrl: z.any().optional(),
   pixKey: z.string().optional(),
-  pixKeyType: z.enum(["CPF", "EMAIL", "PHONE", "RANDOM"]).default("CPF"),
+  pixKeyType: z.enum(["CPF", "EMAIL", "PHONE", "RANDOM"]).default("CPF").optional(),
   preferences: z.object({
     showGraphs: z.boolean(),
     habitLayout: z.enum(["VERTICAL", "HORIZONTAL"]),
+    showOnlyGroupTasks: z.boolean(), // 👈 Adicionado
   }).optional(),
 })
 

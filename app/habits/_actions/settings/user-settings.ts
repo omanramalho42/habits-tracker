@@ -97,6 +97,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
           // ✅ MAPEAMENTO NOVO
           showGraphs: preferences?.showGraphs,
           habitLayout: preferences?.habitLayout,
+          showOnlyGroupTasks: preferences?.showOnlyGroupTasks,
         }
       })
 
@@ -120,6 +121,7 @@ export async function udapteUserSettings(form: UpdateUserSettingSchemaType) {
           // ✅ MAPEAMENTO NOVO
           showGraphs: preferences?.showGraphs,
           habitLayout: preferences?.habitLayout,
+          showOnlyGroupTasks: preferences?.showOnlyGroupTasks,
         }
       })
 
