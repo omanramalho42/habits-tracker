@@ -20,6 +20,7 @@ import { syncCurrentUser } from "@/lib/sync-user"
 import "@/app/globals.css"
 import { SoundProvider } from "@/components/trial-wizzard/sound-provider"
 import Pwa from "@/components/pwa/pwa"
+import { Suspense } from "react"
 
 const jetBrainsMono =
   JetBrains_Mono({ subsets: ["latin"] })
@@ -98,41 +99,40 @@ export default async function RootLayout({
         },
       }}
     >
-      <html
+<html
         suppressHydrationWarning
         lang="pt-BR"
-        className={
-          cn(
-            settings ? settings.theme : "dark",
-            // spaceGrotesk.className,
-            jetBrainsMono.className
-          )
-        }
+        className={cn(
+          settings ? settings.theme : "dark",
+          jetBrainsMono.className
+        )}
       >
         <body className={`antialiased`}>
+          {/* O NuqsAdapter deve estar fora ou envolver o Suspense */}
           <NuqsAdapter>
             <Toaster theme="dark" />
             <QueryClientProvider>
               <ThemeProvider
                 attribute="class"
                 defaultTheme={settings?.theme || "system"}
-                // enableSystem
-                // disableTransitionOnChange
               >
                 <SoundProvider>
-                  <main
-                    className={
-                      cn(
-                        `min-h-screen transition-all bg-background bg-[url('/bg.png')] bg-contain bg-no-repeat bg-top`,
-                        settings?.bannerUrl ? `bg-[url'${settings.bannerUrl}']` : "bg-[url('/bg.png')]"
-                      )
-                    }
-                    style={{
-                      backgroundImage: settings?.bannerUrl ? `url(${settings?.bannerUrl})` : `bg-[url('/bg.png')]`
-                    }}
-                  >
-                    { children }
-                  </main>
+                  {/* 👇 ADICIONE O SUSPENSE AQUI EM VOLTA DO MAIN/CHILDREN */}
+                  <Suspense fallback={null}>
+                    <main
+                      className={cn(
+                        `min-h-screen transition-all bg-background bg-contain bg-no-repeat bg-top`,
+                        settings?.bannerUrl ? "" : "bg-[url('/bg.png')]"
+                      )}
+                      style={{
+                        backgroundImage: settings?.bannerUrl 
+                          ? `url(${settings.bannerUrl})` 
+                          : "url('/bg.png')"
+                      }}
+                    >
+                      { children }
+                    </main>
+                  </Suspense>
                 </SoundProvider>
               </ThemeProvider>
               <Pwa />
