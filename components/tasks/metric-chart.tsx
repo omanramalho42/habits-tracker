@@ -34,6 +34,8 @@ export function MetricChart({ metrics, taskColor, counterLabel, step }: MetricCh
   const totalMeta = chartData.reduce((acc, curr) => acc + curr.meta, 0);
   const percentual = totalMeta > 0 ? Math.round((totalRealizado / totalMeta) * 100) : 0;
 
+  const unitLabel = metrics[0]?.unit || ""
+
   const chartConfig = {
     atual: {
       label: "Realizado",
@@ -109,21 +111,30 @@ export function MetricChart({ metrics, taskColor, counterLabel, step }: MetricCh
         </ResponsiveContainer>
       </ChartContainer>
 
-      {/* FOOTER ESTILO WIREFRAME */}
       <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-end">
         <div>
           <p className="text-[10px] text-muted-foreground mb-1">Volume Total</p>
           <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-white">{totalRealizado}</span>
-            <span className="text-[10px] text-emerald-500 font-medium">+{totalRealizado - totalMeta > 0 ? totalRealizado - totalMeta : 0}</span>
+            <span className="text-xl font-bold text-white">
+              {totalRealizado.toLocaleString('pt-BR')} 
+              <span className="text-xs ml-1 text-muted-foreground font-normal">{unitLabel}</span>
+            </span>
+            {totalRealizado > totalMeta && (
+              <span className="text-[10px] text-emerald-500 font-medium">
+                +{ (totalRealizado - totalMeta).toLocaleString('pt-BR') }
+              </span>
+            )}
           </div>
         </div>
+        
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-1 text-emerald-400 text-sm font-bold">
             <ArrowUpRight className="w-4 h-4" />
             <span>{percentual}%</span>
           </div>
-          <p className="text-[10px] text-muted-foreground italic text-right">Eficiência da série</p>
+          <p className="text-[10px] text-muted-foreground italic text-right font-medium">
+             {step === 0 ? "Eficiência Diária" : `Eficiência do Passo ${step}`}
+          </p>
         </div>
       </div>
     </div>
