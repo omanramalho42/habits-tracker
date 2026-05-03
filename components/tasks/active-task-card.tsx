@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 
-import { cn, formatToBrazilDay } from "@/lib/utils"
+import { cn, formatToBrazilDay, parseLocaleNumber } from "@/lib/utils"
 import {
   Check,
   ChevronDown,
@@ -58,6 +58,7 @@ import { useState } from "react"
 import PutTaskMetrics from "../task-metrics/put-task-metrics"
 import { StreakCelebration } from "../v2/streak-celebration"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
+import { MetricChart } from "./metric-chart"
 
 interface ActiveTaskCardProps {
   task: (Task & {
@@ -423,6 +424,16 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
                             />
                           ))}
                         </div>
+
+                        {/* NOVO COMPONENTE DE GRÁFICO */}
+                        {metricsWithCompletion && metricsWithCompletion.length > 0 && (
+                          <MetricChart 
+                            metrics={metricsWithCompletion} 
+                            taskColor={task?.color || ""} 
+                            counterLabel={task?.counter?.label}
+                            step={step}
+                          />
+                        )}
                       </TabsContent>
                     )
                   })}
@@ -440,10 +451,15 @@ const ActiveTaskCard = ({ task, selectedDate }: ActiveTaskCardProps) => {
 
 // Componente auxiliar para manter o código limpo
 const MetricItem = ({ metric, isCurrentStep }: { metric: any, isCurrentStep: boolean }) => {
-  const value = metric.completion?.value || 0
-  const limit = Number(metric.limit || 1)
-  const percentage = Math.min((Number(value) / limit) * 100, 100)
-  const isLocked = !isCurrentStep
+  // Usando a função de tratamento para garantir que o cálculo funcione
+  const valueNumber = parseLocaleNumber(metric.completion?.value);
+  const limitNumber = parseLocaleNumber(metric.limit);
+  
+  const percentage = limitNumber > 0 
+    ? Math.min((valueNumber / limitNumber) * 100, 100) 
+    : 0;
+
+  const isLocked = !isCurrentStep;
 
   return (
     <div className={cn(
@@ -452,7 +468,8 @@ const MetricItem = ({ metric, isCurrentStep }: { metric: any, isCurrentStep: boo
     )}>
       <div className="flex justify-between items-center">
         <span className="font-medium">{metric.emoji} {metric.field}</span>
-        <span className="text-muted-foreground">{value}/{limit} {metric.unit}</span>
+        {/* Mantemos a exibição original com vírgula para o usuário */}
+        <span className="text-muted-foreground">{metric.completion?.value || 0}/{metric.limit} {metric.unit}</span>
       </div>
       <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
         <div 

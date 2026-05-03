@@ -96,6 +96,20 @@ export function formatToBrazilDay(date: Date | string) {
   return format(zoned, "yyyy-MM-dd", { timeZone: BRAZIL_TZ })
 }
 
+// Função para converter strings como "11.468,83" ou "11468,83" em números válidos
+export const parseLocaleNumber = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "number") return value;
+  
+  // Remove pontos de milhar e substitui a vírgula decimal por ponto
+  const cleanValue = value
+    .replace(/\./g, "") // Remove pontos (caso existam como separador de milhar)
+    .replace(",", "."); // Troca a vírgula pelo ponto decimal
+    
+  const parsed = parseFloat(cleanValue);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
 export function getTodayDay() {
   const now = new Date()
 

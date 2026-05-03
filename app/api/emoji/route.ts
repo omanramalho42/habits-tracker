@@ -23,9 +23,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 🔎 Query params (opcional)
-    const { searchParams } = new URL(request.url);
-    const taskId = searchParams.get("taskId");
+      // 🔎 Query params (opcional)
+      const { searchParams } = new URL(request.url);
+      const taskId = searchParams.get("taskId");
 
     // 📦 Busca no banco
     const emojis = await prisma.emoji.findMany({
